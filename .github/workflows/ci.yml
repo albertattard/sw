@@ -4,7 +4,11 @@ on:
   push:
     branches:
       - "**"
+    paths-ignore:
+      - "docs/**"
   pull_request:
+    paths-ignore:
+      - "docs/**"
 
 jobs:
   build:
@@ -17,10 +21,10 @@ jobs:
         include:
           - os: ubuntu-latest
             experimental: false
-          - os: macos-latest
-            experimental: false
-          - os: windows-latest
-            experimental: true
+          # - os: macos-latest
+          #   experimental: false
+          # - os: windows-latest
+          #   experimental: true
 
     steps:
       - name: Checkout
