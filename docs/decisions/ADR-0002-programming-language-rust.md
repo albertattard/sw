@@ -25,9 +25,9 @@ The main candidates considered were Rust, Go, and Java.
 
 Use Rust as the primary implementation language for Sociable Weaver.
 
-### Alternatives Considered
+## Alternatives Considered
 
-#### Go
+### Go
 
 Pros:
 - Excellent cross-compilation workflow.
@@ -37,7 +37,7 @@ Cons:
 - Lower personal familiarity at this stage.
 - Higher near-term delivery risk due to onboarding cost.
 
-#### Java
+### Java
 
 Pros:
 - Strong personal preference and deep experience.
