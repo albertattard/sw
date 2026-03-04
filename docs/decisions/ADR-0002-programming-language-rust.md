@@ -1,4 +1,4 @@
-# ADR-0001: Use Rust as the Primary Implementation Language
+# ADR-0002: Use Rust as the Primary Implementation Language
 
 - Status: Accepted
 - Date: 2026-03-02
