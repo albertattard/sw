@@ -1,12 +1,12 @@
 ---
 id: TASK-001
 title: Implement SPEC-001 Help Placeholder
-status: in_progress
+status: done
 related_features:
   - SPEC-001
 owner: @aattard
 created: 2026-03-05
-updated: 2026-03-05
+updated: 2026-03-07
 ---
 
 ## Summary
@@ -33,5 +33,5 @@ Implement minimal help/discovery behavior for `sw`.
 
 ## Notes
 
-Implemented in `src/main.rs`. Can be marked `done` once the task board is
-reviewed and confirmed.
+Implemented in `src/main.rs` with `clap`, with integration tests in
+`tests/cli_help.rs`.

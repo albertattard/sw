@@ -4,7 +4,7 @@ title: Help and Discovery Contract
 status: done
 priority: high
 owner: @aattard
-last_updated: 2026-03-04
+last_updated: 2026-03-07
 ---
 
 ## Problem
@@ -42,10 +42,10 @@ Exit codes:
 
 ## Acceptance Criteria
 
-- [ ] `sw --help` prints top-level usage and exits with `0`.
-- [ ] `sw help` prints top-level usage and exits with `0`.
-- [ ] `sw [command] --help` is documented as the command-level help pattern.
-- [ ] Help output includes a short in-progress placeholder line.
+- [x] `sw --help` prints top-level usage and exits with `0`.
+- [x] `sw help` prints top-level usage and exits with `0`.
+- [x] `sw [command] --help` is documented as the command-level help pattern.
+- [x] Help output includes a short in-progress placeholder line.
 
 ## Non-goals
 

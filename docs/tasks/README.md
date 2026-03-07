@@ -13,12 +13,13 @@ File-based task tracker for Sociable Weaver.
 
 ## In Progress
 
-- [ ] [TASK-001: Implement SPEC-001 Help Placeholder](./TASK-001-implement-help-placeholder.md)
+- (none)
 
 ## Done
 
 - [x] Define `SPEC-001` in `docs/spec/` (help and discovery).
 - [x] Define `SPEC-002` in `docs/spec/` (validate runbook input).
+- [x] [TASK-001: Implement SPEC-001 Help Placeholder](./TASK-001-implement-help-placeholder.md)
 
 ## Blocked
 
