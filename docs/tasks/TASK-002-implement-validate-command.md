@@ -1,9 +1,9 @@
 ---
 id: TASK-002
-title: Implement FEAT-002 Validate Command
+title: Implement SPEC-002 Validate Command
 status: pending
 related_features:
-  - FEAT-002
+  - SPEC-002
 owner: @aattard
 created: 2026-03-05
 updated: 2026-03-05
@@ -23,7 +23,7 @@ Implement runbook input validation for `sw validate`.
 ## Assumptions
 
 - Supported output formats in v1: `human` and `json`.
-- Schema details will be defined by FEAT-002 fixtures/examples.
+- Schema details will be defined by SPEC-002 fixtures/examples.
 
 ## Acceptance Criteria
 
@@ -34,4 +34,4 @@ Implement runbook input validation for `sw validate`.
 
 ## Notes
 
-This task should start after FEAT-001 baseline help behavior is confirmed.
+This task should start after SPEC-001 baseline help behavior is confirmed.

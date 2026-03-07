@@ -1,8 +1,8 @@
 ---
 id: SPEC-001
 title: Help and Discovery Contract
-status: Done
-priority: High
+status: done
+priority: high
 owner: @aattard
 last_updated: 2026-03-04
 ---

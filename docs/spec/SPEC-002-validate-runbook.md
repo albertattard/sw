@@ -1,8 +1,8 @@
 ---
 id: SPEC-002
 title: Validate Runbook Input
-status: In Progress
-priority: High
+status: in_progress
+priority: high
 owner: @aattard
 last_updated: 2026-03-04
 ---

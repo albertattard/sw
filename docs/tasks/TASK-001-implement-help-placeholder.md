@@ -1,9 +1,9 @@
 ---
 id: TASK-001
-title: Implement FEAT-001 Help Placeholder
+title: Implement SPEC-001 Help Placeholder
 status: in_progress
 related_features:
-  - FEAT-001
+  - SPEC-001
 owner: @aattard
 created: 2026-03-05
 updated: 2026-03-05

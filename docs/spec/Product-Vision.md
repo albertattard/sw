@@ -50,7 +50,7 @@ In practice:
 ```
 example specification
         ↓
-   sw verify
+CLI execution
         ↓
 example executed and validated
         ↓
@@ -71,7 +71,7 @@ The documentation always reflects steps that actually ran successfully.
 **With `sw`**
 
 1. Define the example as an executable specification
-2. Run `sw verify` locally or in CI
+2. Execute the specification locally or in CI
 3. The CLI executes and validates the workflow
 4. Documentation is generated from verified results
 
