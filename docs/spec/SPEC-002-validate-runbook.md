@@ -17,13 +17,13 @@ to confirm that a runbook file is valid input.
 The CLI provides a validation command:
 
 ```bash
-sw validate --file <sw-runbook.json> --output json
+sw validate --input-file <sw-runbook.json> --output-format json
 ```
 
-If no file is provided, the command uses `./sw-runbook.json` by default:
+If no input file is provided, the command uses `./sw-runbook.json` by default:
 
 ```bash
-sw validate --output json
+sw validate --output-format json
 ```
 
 The command validates runbook structure and required fields without changing
@@ -32,13 +32,13 @@ files.
 ## Inputs/Outputs
 
 Input:
-- Optional named file parameter: `--file <runbook.json>`.
-- Optional output mode (`json` or `human`).
+- Optional named input file parameter: `--input-file <runbook.json>`.
+- Optional output format (`json` or `human`) via `--output-format`.
 
 Default input behavior:
-- If `--file` is provided, use that path. When no file path is provided, use
-  `sw-runbook.json` in the current directory.
-- If `--output` is not provided, default to `human`.
+- If `--input-file` is provided, use that path. When no file path is provided,
+  use `sw-runbook.json` in the current directory.
+- If `--output-format` is not provided, default to `human`.
 
 Supported output formats:
 - `human` (default): readable console text for interactive use.
@@ -49,7 +49,7 @@ Reserved for future consideration (not part of this feature):
 - `ndjson`
 - `sarif`
 
-Output (`--output json`):
+Output (`--output-format json`):
 - Machine-readable JSON result including:
   - `schema_version`
   - `valid` (boolean)
@@ -63,17 +63,21 @@ Exit codes:
 
 ## Acceptance Criteria
 
-- [ ] Given a valid runbook file, `sw validate --file <file> --output json`
+- [ ] Given a valid runbook file,
+      `sw validate --input-file <file> --output-format json`
       returns `valid: true`, an empty `errors` array, and exit code `0`.
-- [ ] Given an invalid runbook file, `sw validate --file <file> --output json`
+- [ ] Given an invalid runbook file,
+      `sw validate --input-file <file> --output-format json`
       returns `valid: false`, at least one structured error, and exit code `2`.
 - [ ] Given a missing input file, command returns exit code `1` with a clear
       error message.
 - [ ] Given no input file argument and a valid `./sw-runbook.json`,
-      `sw validate --output json` validates that file and returns exit code `0`.
+      `sw validate --output-format json` validates that file and returns exit
+      code `0`.
 - [ ] Given no input file argument and no `./sw-runbook.json` present, command
       returns exit code `1` with a clear missing-file error.
-- [ ] Given no `--output` option, command uses `human` output by default.
+- [ ] Given no `--output-format` option, command uses `human` output by
+      default.
 - [ ] Validation performs no write operations (read-only behavior).
 
 ## Non-goals

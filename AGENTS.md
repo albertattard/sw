@@ -33,6 +33,8 @@ tying the test suite to a specific project.
 - Keep `src/main.rs` thin. Use it as the entrypoint and command dispatcher, not as the place for business logic.
 - Add new CLI subcommands under `src/commands/`.
 - Keep runbook parsing, modelling, and validation outside `main.rs`.
+- Prefer self-describing long CLI option names such as `--input-file`, `--output-format`, and `--output-file`.
+- Avoid short or ambiguous option names such as `--file` and `--output` unless there is a clear reason to add an alias.
 - Add or update automated tests for every user-visible CLI feature.
 - Prefer integration-style CLI tests for command behavior, exit codes, and output contracts.
 - Treat machine-readable CLI output as a stable contract for users and agents. Avoid unnecessary breaking changes.

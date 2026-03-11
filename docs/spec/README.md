@@ -7,3 +7,4 @@ acceptance criteria.
 
 - [SPEC-001: Help and Discovery Contract](./SPEC-001-help-and-discovery.md)
 - [SPEC-002: Validate Runbook Input](./SPEC-002-validate-runbook.md)
+- [SPEC-003: Run Runbook to Markdown](./SPEC-003-run-runbook-to-markdown.md)

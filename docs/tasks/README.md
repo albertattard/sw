@@ -19,6 +19,7 @@ File-based task tracker for Sociable Weaver.
 
 - [x] Define `SPEC-001` in `docs/spec/` (help and discovery).
 - [x] Define `SPEC-002` in `docs/spec/` (validate runbook input).
+- [x] Define `SPEC-003` in `docs/spec/` (run runbook to markdown).
 - [x] [TASK-001: Implement SPEC-001 Help Placeholder](./TASK-001-implement-help-placeholder.md)
 
 ## Blocked

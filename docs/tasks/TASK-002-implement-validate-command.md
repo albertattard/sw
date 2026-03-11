@@ -15,7 +15,7 @@ Implement runbook input validation for `sw validate`.
 
 ## Scope
 
-- `sw validate --file <runbook.json> --output <human|json>`
+- `sw validate --input-file <runbook.json> --output-format <human|json>`
 - Default file behavior: use `./sw-runbook.json` when `--file` is omitted
 - Read-only validation only (no writes)
 - Exit code contract (`0`, `1`, `2`)
