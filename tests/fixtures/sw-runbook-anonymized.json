@@ -1,0 +1,78 @@
+{
+  "entries": [
+    {
+      "type": "Heading",
+      "level": "H1",
+      "title": "Audio - Example AI Provider API"
+    },
+    {
+      "type": "Markdown",
+      "contents": [
+        "This example demonstrates how to use",
+        "[an AI integration framework](https://example.com/framework) to synthesise speech from text",
+        "and to transcribe speech back into text using",
+        "[a hosted AI API](https://example.com/provider/docs).",
+        "",
+        "This example connects to a hosted AI service. An API",
+        "key from your selected provider is required."
+      ]
+    },
+    {
+      "type": "Markdown",
+      "contents": [
+        "---"
+      ]
+    },
+    {
+      "type": "Heading",
+      "level": "H2",
+      "title": "Prerequisites"
+    },
+    {
+      "type": "Markdown",
+      "contents": [
+        "- [Java runtime](https://example.com/java)",
+        "- [Provider API key](https://example.com/provider/keys)"
+      ]
+    },
+    {
+      "type": "Heading",
+      "level": "H2",
+      "title": "Run the example"
+    },
+    {
+      "type": "Markdown",
+      "contents": [
+        "1. Configure credentials",
+        "",
+        "   Store the provider API key in a local configuration file.",
+        "",
+        "   ```yaml",
+        "   provider:",
+        "     api-key: example-secret",
+        "   ```"
+      ]
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "./build-tool clean verify"
+      ],
+      "indent": 3
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "java \\",
+        "  -jar './target/example-app-1.0.0.jar'"
+      ],
+      "output": {
+        "caption": [
+          "The program generates an audio file from text,",
+          "then transcribes that file back into text."
+        ]
+      },
+      "indent": 3
+    }
+  ]
+}
