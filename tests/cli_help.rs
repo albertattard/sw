@@ -8,16 +8,6 @@ fn run(args: &[&str]) -> std::process::Output {
 }
 
 #[test]
-fn no_args_prints_help() {
-    let output = run(&[]);
-
-    assert!(output.status.success());
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(stdout.contains("Usage:"));
-    assert!(stdout.contains("Still weaving the nest. Features are hatching soon."));
-}
-
-#[test]
 fn help_flag_prints_help() {
     let output = run(&["--help"]);
 
@@ -35,6 +25,27 @@ fn help_subcommand_prints_help() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("Usage:"));
     assert!(stdout.contains("help"));
+}
+
+#[test]
+fn run_help_prints_help() {
+    let output = run(&["run", "--help"]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("--input-file"));
+    assert!(stdout.contains("--output-format"));
+    assert!(stdout.contains("--output-file"));
+}
+
+#[test]
+fn validate_help_prints_help() {
+    let output = run(&["validate", "--help"]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("--input-file"));
+    assert!(stdout.contains("--output-format"));
 }
 
 #[test]

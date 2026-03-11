@@ -1,12 +1,12 @@
 ---
 id: TASK-002
 title: Implement SPEC-002 Validate Command
-status: pending
+status: done
 related_features:
   - SPEC-002
 owner: @aattard
 created: 2026-03-05
-updated: 2026-03-05
+updated: 2026-03-11
 ---
 
 ## Summary
@@ -16,7 +16,7 @@ Implement runbook input validation for `sw validate`.
 ## Scope
 
 - `sw validate --input-file <runbook.json> --output-format <human|json>`
-- Default file behavior: use `./sw-runbook.json` when `--file` is omitted
+- Default file behavior: use `./sw-runbook.json` when `--input-file` is omitted
 - Read-only validation only (no writes)
 - Exit code contract (`0`, `1`, `2`)
 
@@ -27,11 +27,12 @@ Implement runbook input validation for `sw validate`.
 
 ## Acceptance Criteria
 
-- [ ] Valid runbook returns success (`0`).
-- [ ] Invalid runbook returns validation failure (`2`) with structured errors.
-- [ ] Missing file returns operational error (`1`).
-- [ ] No file argument uses `./sw-runbook.json`.
+- [x] Valid runbook returns success (`0`).
+- [x] Invalid runbook returns validation failure (`2`) with structured errors.
+- [x] Missing file returns operational error (`1`).
+- [x] No file argument uses `./sw-runbook.json`.
 
 ## Notes
 
-This task should start after SPEC-001 baseline help behavior is confirmed.
+Implemented with integration coverage for valid, invalid, and missing-file
+scenarios.

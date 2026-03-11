@@ -16,6 +16,8 @@ pub struct Cli {
 
 #[derive(Debug, Subcommand)]
 pub enum Commands {
+    /// Render a runbook to output.
+    Run(RunArgs),
     /// Show top-level help.
     Help,
     /// Validate a runbook file.
@@ -23,14 +25,34 @@ pub enum Commands {
 }
 
 #[derive(Debug, clap::Args)]
-pub struct ValidateArgs {
-    /// Path to the runbook file.
+pub struct RunArgs {
+    /// Path to the input runbook file.
     #[arg(long)]
-    pub file: Option<PathBuf>,
+    pub input_file: Option<PathBuf>,
+
+    /// Output format.
+    #[arg(long, value_enum, default_value_t = RunOutputFormat::Markdown)]
+    pub output_format: RunOutputFormat,
+
+    /// Path to the generated output file.
+    #[arg(long)]
+    pub output_file: Option<PathBuf>,
+}
+
+#[derive(Debug, clap::Args)]
+pub struct ValidateArgs {
+    /// Path to the input runbook file.
+    #[arg(long)]
+    pub input_file: Option<PathBuf>,
 
     /// Output format.
     #[arg(long, value_enum, default_value_t = OutputFormat::Human)]
-    pub output: OutputFormat,
+    pub output_format: OutputFormat,
+}
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq, ValueEnum)]
+pub enum RunOutputFormat {
+    Markdown,
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, ValueEnum)]

@@ -11,9 +11,9 @@ fn run(args: &[&str]) -> std::process::Output {
 fn valid_runbook_returns_success_json() {
     let output = run(&[
         "validate",
-        "--file",
+        "--input-file",
         "tests/fixtures/sw-runbook-anonymized.json",
-        "--output",
+        "--output-format",
         "json",
     ]);
 
@@ -27,9 +27,9 @@ fn valid_runbook_returns_success_json() {
 fn invalid_runbook_returns_validation_failure() {
     let output = run(&[
         "validate",
-        "--file",
+        "--input-file",
         "tests/fixtures/sw-runbook-missing-field.json",
-        "--output",
+        "--output-format",
         "json",
     ]);
 
@@ -43,9 +43,9 @@ fn invalid_runbook_returns_validation_failure() {
 fn invalid_json_returns_operational_error() {
     let output = run(&[
         "validate",
-        "--file",
+        "--input-file",
         "tests/fixtures/sw-runbook-invalid-json.json",
-        "--output",
+        "--output-format",
         "json",
     ]);
 
@@ -59,9 +59,9 @@ fn invalid_json_returns_operational_error() {
 fn missing_file_returns_operational_error() {
     let output = run(&[
         "validate",
-        "--file",
+        "--input-file",
         "tests/fixtures/does-not-exist.json",
-        "--output",
+        "--output-format",
         "json",
     ]);
 

@@ -6,13 +6,13 @@ use std::process::ExitCode;
 
 pub fn run(args: ValidateArgs) -> ExitCode {
     let path = args
-        .file
+        .input_file
         .unwrap_or_else(|| PathBuf::from("sw-runbook.json"));
 
     let runbook = match runbook::read(&path) {
         Ok(runbook) => runbook,
         Err(message) => {
-            if args.output == OutputFormat::Json {
+            if args.output_format == OutputFormat::Json {
                 println!(
                     "{}",
                     json!({
@@ -31,7 +31,7 @@ pub fn run(args: ValidateArgs) -> ExitCode {
 
     let result = runbook::validate(&runbook);
 
-    let print_result = match args.output {
+    let print_result = match args.output_format {
         OutputFormat::Human => {
             runbook::print_human(&result, &path);
             Ok(())
