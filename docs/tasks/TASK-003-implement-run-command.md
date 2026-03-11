@@ -1,7 +1,7 @@
 ---
 id: TASK-003
 title: Implement SPEC-003 Run Command
-status: done
+status: in_progress
 related_features:
   - SPEC-003
 owner: @aattard
@@ -11,7 +11,7 @@ updated: 2026-03-11
 
 ## Summary
 
-Implement runbook rendering for `sw run`.
+Implement runbook execution and rendering for `sw run`.
 
 ## Scope
 
@@ -20,8 +20,10 @@ Implement runbook rendering for `sw run`.
 - `sw run --output-format markdown`
 - `sw run --output-file <path>`
 - Render supported runbook entries to Markdown in order
+- Execute command entries in order
+- Fail when a command exits with an error
+- Include command output only when requested by the `output` property
 - Write generated output to `./readme.md` by default
-- Do not execute commands from the runbook
 
 ## Assumptions
 
@@ -35,8 +37,11 @@ Implement runbook rendering for `sw run`.
 - [x] Invalid runbook input exits with `2` and does not write a partial file.
 - [x] Missing input file exits with `1`.
 - [x] `--output-file` writes to the provided path.
+- [ ] Command entries are executed in order.
+- [ ] Command failures exit with `2` and do not write a partial output file.
+- [ ] Command output is included only when the `output` property is present.
 
 ## Notes
 
-Implemented with integration coverage for default-command behavior, output file
-generation, invalid runbook handling, and missing-file errors.
+Rendering is implemented. Command execution and conditional output capture are
+the remaining work needed to satisfy the updated SPEC-003 contract.
