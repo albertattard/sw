@@ -265,6 +265,71 @@ fn invalid_output_rewrite_datetime_shift_pattern_requires_custom_format() {
 }
 
 #[test]
+fn invalid_output_rewrite_datetime_shift_duplicate_id_same_block_returns_validation_failure() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-invalid-output-rewrite-datetime-shift-duplicate-id-same-block.json",
+        "--output-format",
+        "json",
+    ]);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": false"));
+    assert!(stdout.contains("\"path\": \"entries[0].output.rewrite[1].id\""));
+}
+
+#[test]
+fn invalid_output_rewrite_datetime_shift_duplicate_id_different_commands_returns_validation_failure()
+ {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-invalid-output-rewrite-datetime-shift-duplicate-id-different-commands.json",
+        "--output-format",
+        "json",
+    ]);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": false"));
+    assert!(stdout.contains("\"path\": \"entries[1].output.rewrite[0].id\""));
+}
+
+#[test]
+fn invalid_output_rewrite_datetime_shift_use_before_anchor_returns_validation_failure() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-invalid-output-rewrite-datetime-shift-use-before-anchor.json",
+        "--output-format",
+        "json",
+    ]);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": false"));
+    assert!(stdout.contains("\"path\": \"entries[0].output.rewrite[0].use\""));
+}
+
+#[test]
+fn invalid_output_rewrite_datetime_shift_use_cross_block_returns_validation_failure() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-invalid-output-rewrite-datetime-shift-use-cross-block.json",
+        "--output-format",
+        "json",
+    ]);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": false"));
+    assert!(stdout.contains("\"path\": \"entries[1].output.rewrite[0].use\""));
+}
+
+#[test]
 fn invalid_display_file_returns_validation_failure() {
     let output = run(&[
         "validate",

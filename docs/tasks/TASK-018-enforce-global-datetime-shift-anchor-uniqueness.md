@@ -1,7 +1,7 @@
 ---
 id: TASK-018
 title: Enforce Global Datetime Shift Anchor Uniqueness
-status: pending
+status: done
 related_features:
   - SPEC-003
 owner: @aattard
@@ -31,15 +31,15 @@ block.
 
 ## Acceptance Criteria
 
-- [ ] Given duplicate `datetime_shift.id` values in different commands,
+- [x] Given duplicate `datetime_shift.id` values in different commands,
       validation rejects the runbook.
-- [ ] Given duplicate `datetime_shift.id` values in the same output block,
+- [x] Given duplicate `datetime_shift.id` values in the same output block,
       validation rejects the runbook.
-- [ ] Given a `use` rule that references an anchor established earlier in the
+- [x] Given a `use` rule that references an anchor established earlier in the
       same output block, validation accepts it.
-- [ ] Given a `use` rule that references an anchor from a different output
+- [x] Given a `use` rule that references an anchor from a different output
       block, validation rejects the runbook.
-- [ ] Given a `use` rule that appears before its anchor in the same output
+- [x] Given a `use` rule that appears before its anchor in the same output
       block, validation rejects the runbook.
 
 ## Notes

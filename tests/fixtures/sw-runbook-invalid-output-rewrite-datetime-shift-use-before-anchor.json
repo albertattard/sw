@@ -1,0 +1,24 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "echo 'hello'"
+      ],
+      "output": {
+        "rewrite": [
+          {
+            "type": "datetime_shift",
+            "use": "timeline",
+            "format": "rfc1123"
+          },
+          {
+            "type": "datetime_shift",
+            "id": "timeline",
+            "format": "rfc3339"
+          }
+        ]
+      }
+    }
+  ]
+}

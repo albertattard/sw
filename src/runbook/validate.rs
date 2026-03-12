@@ -1,5 +1,6 @@
 use super::{ValidationIssue, ValidationResult};
 use serde_json::{Map, Value};
+use std::collections::HashSet;
 use std::time::Duration;
 
 fn push_error(
@@ -63,7 +64,12 @@ fn validate_string_array(value: &Value, path: &str, errors: &mut Vec<ValidationI
     }
 }
 
-fn validate_output(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>) {
+fn validate_output_with_context(
+    value: &Value,
+    path: &str,
+    errors: &mut Vec<ValidationIssue>,
+    global_datetime_anchor_ids: &mut HashSet<String>,
+) {
     let Some(object) = as_object(value, path, errors) else {
         return;
     };
@@ -116,11 +122,21 @@ fn validate_output(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>)
     }
 
     if let Some(rewrite) = object.get("rewrite") {
-        validate_rewrite_rules(rewrite, &format!("{path}.rewrite"), errors);
+        validate_rewrite_rules(
+            rewrite,
+            &format!("{path}.rewrite"),
+            errors,
+            global_datetime_anchor_ids,
+        );
     }
 }
 
-fn validate_rewrite_rules(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>) {
+fn validate_rewrite_rules(
+    value: &Value,
+    path: &str,
+    errors: &mut Vec<ValidationIssue>,
+    global_datetime_anchor_ids: &mut HashSet<String>,
+) {
     let Some(rules) = as_array(value, path, errors) else {
         return;
     };
@@ -129,12 +145,25 @@ fn validate_rewrite_rules(value: &Value, path: &str, errors: &mut Vec<Validation
         push_error(errors, path.to_string(), "must not be empty");
     }
 
+    let mut local_datetime_anchor_ids = HashSet::new();
     for (index, rule) in rules.iter().enumerate() {
-        validate_rewrite_rule(rule, &format!("{path}[{index}]"), errors);
+        validate_rewrite_rule(
+            rule,
+            &format!("{path}[{index}]"),
+            errors,
+            global_datetime_anchor_ids,
+            &mut local_datetime_anchor_ids,
+        );
     }
 }
 
-fn validate_rewrite_rule(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>) {
+fn validate_rewrite_rule(
+    value: &Value,
+    path: &str,
+    errors: &mut Vec<ValidationIssue>,
+    global_datetime_anchor_ids: &mut HashSet<String>,
+    local_datetime_anchor_ids: &mut HashSet<String>,
+) {
     let Some(object) = as_object(value, path, errors) else {
         return;
     };
@@ -250,16 +279,38 @@ fn validate_rewrite_rule(value: &Value, path: &str, errors: &mut Vec<ValidationI
                 None => {}
             }
 
-            if let Some(id) = object.get("id")
-                && !id.is_string()
-            {
-                push_error(errors, format!("{path}.id"), "must be a string");
+            if let Some(id) = object.get("id") {
+                match id.as_str() {
+                    Some(id) => {
+                        if !global_datetime_anchor_ids.insert(id.to_string()) {
+                            push_error(
+                                errors,
+                                format!("{path}.id"),
+                                format!("duplicate datetime_shift id `{id}`"),
+                            );
+                        }
+
+                        local_datetime_anchor_ids.insert(id.to_string());
+                    }
+                    None => push_error(errors, format!("{path}.id"), "must be a string"),
+                }
             }
 
-            if let Some(use_id) = object.get("use")
-                && !use_id.is_string()
-            {
-                push_error(errors, format!("{path}.use"), "must be a string");
+            if let Some(use_id) = object.get("use") {
+                match use_id.as_str() {
+                    Some(use_id) => {
+                        if !local_datetime_anchor_ids.contains(use_id) {
+                            push_error(
+                                errors,
+                                format!("{path}.use"),
+                                format!(
+                                    "must reference an anchor established earlier in the same output block: `{use_id}`"
+                                ),
+                            );
+                        }
+                    }
+                    None => push_error(errors, format!("{path}.use"), "must be a string"),
+                }
             }
 
             if let Some(custom_format) = object.get("custom_format")
@@ -361,7 +412,12 @@ fn validate_assert_check(value: &Value, path: &str, errors: &mut Vec<ValidationI
     }
 }
 
-fn validate_entry(value: &Value, index: usize, errors: &mut Vec<ValidationIssue>) {
+fn validate_entry(
+    value: &Value,
+    index: usize,
+    errors: &mut Vec<ValidationIssue>,
+    global_datetime_anchor_ids: &mut HashSet<String>,
+) {
     let path = format!("entries[{index}]");
     let Some(object) = as_object(value, &path, errors) else {
         return;
@@ -403,7 +459,12 @@ fn validate_entry(value: &Value, index: usize, errors: &mut Vec<ValidationIssue>
             }
 
             if let Some(output) = object.get("output") {
-                validate_output(output, &format!("{path}.output"), errors);
+                validate_output_with_context(
+                    output,
+                    &format!("{path}.output"),
+                    errors,
+                    global_datetime_anchor_ids,
+                );
             }
 
             if let Some(assertion) = object.get("assert") {
@@ -460,6 +521,7 @@ fn parse_timeout(timeout: &str) -> Result<Duration, ()> {
 pub fn validate(runbook: &Value) -> ValidationResult {
     let mut errors = Vec::new();
     let warnings = Vec::new();
+    let mut global_datetime_anchor_ids = HashSet::new();
 
     let Some(object) = as_object(runbook, "$", &mut errors) else {
         return ValidationResult {
@@ -488,7 +550,7 @@ pub fn validate(runbook: &Value) -> ValidationResult {
                 }
 
                 for (index, entry) in items.iter().enumerate() {
-                    validate_entry(entry, index, &mut errors);
+                    validate_entry(entry, index, &mut errors, &mut global_datetime_anchor_ids);
                 }
             }
         }
