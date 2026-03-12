@@ -224,7 +224,7 @@ fn append_output(entry: &Value, stdout: &str, section: &mut String) -> Result<()
     }
 
     section.push_str("\n\n");
-    section.push_str(&format!("```{}\n", output_content_type(output)?));
+    section.push_str(output_fence_open(output)?);
     section.push_str(&rendered_stdout);
     if !rendered_stdout.ends_with('\n') && !rendered_stdout.is_empty() {
         section.push('\n');
@@ -257,11 +257,11 @@ fn render_caption(caption: &Value) -> Result<String, RenderError> {
     }
 }
 
-fn output_content_type(output: &Value) -> Result<&'static str, RenderError> {
+fn output_fence_open(output: &Value) -> Result<&'static str, RenderError> {
     match output.get("content_type").and_then(Value::as_str) {
-        Some("text") | None => Ok("text"),
-        Some("json") => Ok("json"),
-        Some("xml") => Ok("xml"),
+        Some("text") | None => Ok("```\n"),
+        Some("json") => Ok("```json\n"),
+        Some("xml") => Ok("```xml\n"),
         Some(other) => Err(RenderError::Operational(format!(
             "Unsupported output content type `{other}`"
         ))),

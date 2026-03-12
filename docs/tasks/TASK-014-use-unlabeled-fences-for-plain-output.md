@@ -1,7 +1,7 @@
 ---
 id: TASK-014
 title: Use Unlabeled Fences For Plain Output
-status: pending
+status: done
 related_features:
   - SPEC-003
 owner: @aattard
@@ -27,13 +27,13 @@ using the explicit `text` language tag.
 
 ## Acceptance Criteria
 
-- [ ] Given a `Command` entry with `output` and no `content_type`, the
+- [x] Given a `Command` entry with `output` and no `content_type`, the
       generated Markdown uses an unlabeled fenced block for captured output.
-- [ ] Given a `Command` entry with `output.content_type: text`, the generated
+- [x] Given a `Command` entry with `output.content_type: text`, the generated
       Markdown uses an unlabeled fenced block for captured output.
-- [ ] Given a `Command` entry with `output.content_type: json`, the generated
+- [x] Given a `Command` entry with `output.content_type: json`, the generated
       Markdown continues to use a `json` fenced block.
-- [ ] Given a `Command` entry with `output.content_type: xml`, the generated
+- [x] Given a `Command` entry with `output.content_type: xml`, the generated
       Markdown continues to use an `xml` fenced block.
 
 ## Notes
