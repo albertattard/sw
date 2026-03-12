@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "echo 'hello'"
+      ],
+      "output": {
+        "trim_trailing_whitespace": "false"
+      }
+    }
+  ]
+}

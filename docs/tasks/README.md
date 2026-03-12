@@ -20,7 +20,7 @@ File-based task tracker for Sociable Weaver.
 
 ## Pending
 
-- [ ] [TASK-013: Trim Command Output Trailing Whitespace](./TASK-013-trim-command-output-trailing-whitespace.md)
+- (none)
 
 ## In Progress
 
@@ -43,6 +43,7 @@ File-based task tracker for Sociable Weaver.
 - [x] [TASK-010: Support DisplayFile Entries](./TASK-010-support-display-file-entries.md)
 - [x] [TASK-011: Add Generated File Marker](./TASK-011-add-generated-file-marker.md)
 - [x] [TASK-012: Apply Command Indentation](./TASK-012-apply-command-indentation.md)
+- [x] [TASK-013: Trim Command Output Trailing Whitespace](./TASK-013-trim-command-output-trailing-whitespace.md)
 
 ## Blocked
 

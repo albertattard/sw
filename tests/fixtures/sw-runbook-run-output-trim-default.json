@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf '  left  \\n   \\nright   \\n'"
+      ],
+      "output": {
+        "caption": "Trimmed output"
+      }
+    }
+  ]
+}

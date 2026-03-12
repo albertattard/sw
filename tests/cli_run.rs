@@ -130,8 +130,40 @@ fn command_indent_applies_to_shell_caption_and_output() {
     let readme = fs::read_to_string(dir.join("readme.md")).expect("missing readme output");
     assert!(readme.contains("2. Build the application"));
     assert!(readme.contains("   ```shell\n   printf 'build ok\\n'\n   ```"));
-    assert!(readme.contains("\n   Build output\n"));
+    assert!(readme.contains("\n\n   Build output\n\n"));
     assert!(readme.contains("   ```text\n   build ok\n   ```"));
+}
+
+#[test]
+fn output_trailing_whitespace_is_trimmed_by_default() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-output-trim-default.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("readme.md")).expect("missing readme output");
+    assert!(readme.contains("```text\n  left\n\nright\n```"));
+}
+
+#[test]
+fn output_trailing_whitespace_can_be_preserved() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-output-trim-disabled.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("readme.md")).expect("missing readme output");
+    assert!(readme.contains("```text\n  left  \n   \nright   \n```"));
 }
 
 #[test]

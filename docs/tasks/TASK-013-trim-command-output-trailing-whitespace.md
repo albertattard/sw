@@ -1,7 +1,7 @@
 ---
 id: TASK-013
 title: Trim Command Output Trailing Whitespace
-status: pending
+status: done
 related_features:
   - SPEC-003
 owner: @aattard
@@ -31,12 +31,12 @@ runbooks to preserve exact output when needed.
 
 ## Acceptance Criteria
 
-- [ ] Given a `Command` entry with `output` and no
+- [x] Given a `Command` entry with `output` and no
       `trim_trailing_whitespace`, trailing whitespace is removed from the end
       of each rendered output line.
-- [ ] Given a `Command` entry with `output.trim_trailing_whitespace: false`,
+- [x] Given a `Command` entry with `output.trim_trailing_whitespace: false`,
       trailing whitespace is preserved in rendered output.
-- [ ] Leading whitespace remains unchanged in both modes.
+- [x] Leading whitespace remains unchanged in both modes.
 
 ## Notes
 

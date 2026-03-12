@@ -215,6 +215,7 @@ fn append_output(entry: &Value, stdout: &str, section: &mut String) -> Result<()
     let Some(output) = entry.get("output") else {
         return Ok(());
     };
+    let rendered_stdout = normalize_rendered_output(output, stdout)?;
 
     if let Some(caption) = output.get("caption") {
         let caption_text = render_caption(caption)?;
@@ -224,8 +225,8 @@ fn append_output(entry: &Value, stdout: &str, section: &mut String) -> Result<()
 
     section.push_str("\n\n");
     section.push_str(&format!("```{}\n", output_content_type(output)?));
-    section.push_str(stdout);
-    if !stdout.ends_with('\n') && !stdout.is_empty() {
+    section.push_str(&rendered_stdout);
+    if !rendered_stdout.ends_with('\n') && !rendered_stdout.is_empty() {
         section.push('\n');
     }
     section.push_str("```");
@@ -267,6 +268,43 @@ fn output_content_type(output: &Value) -> Result<&'static str, RenderError> {
     }
 }
 
+fn normalize_rendered_output(output: &Value, stdout: &str) -> Result<String, RenderError> {
+    if !trim_trailing_whitespace(output)? {
+        return Ok(stdout.to_string());
+    }
+
+    Ok(stdout
+        .split_inclusive('\n')
+        .map(trim_segment_trailing_whitespace)
+        .collect())
+}
+
+fn trim_trailing_whitespace(output: &Value) -> Result<bool, RenderError> {
+    match output.get("trim_trailing_whitespace") {
+        Some(Value::Bool(value)) => Ok(*value),
+        Some(_) => Err(RenderError::Operational(
+            "Command output trim_trailing_whitespace must be a boolean".to_string(),
+        )),
+        None => Ok(true),
+    }
+}
+
+fn trim_segment_trailing_whitespace(segment: &str) -> String {
+    let has_newline = segment.ends_with('\n');
+    let body = if has_newline {
+        &segment[..segment.len() - 1]
+    } else {
+        segment
+    };
+    let trimmed = body.trim_end_matches(char::is_whitespace);
+
+    if has_newline {
+        format!("{trimmed}\n")
+    } else {
+        trimmed.to_string()
+    }
+}
+
 fn display_file_content_type(path: &Path) -> &'static str {
     match path.extension().and_then(|extension| extension.to_str()) {
         Some("java") => "java",
@@ -298,7 +336,13 @@ fn apply_indent(entry: &Value, section: String) -> Result<String, RenderError> {
     let prefix = " ".repeat(indent_width);
     Ok(section
         .lines()
-        .map(|line| format!("{prefix}{line}"))
+        .map(|line| {
+            if line.is_empty() {
+                String::new()
+            } else {
+                format!("{prefix}{line}")
+            }
+        })
         .collect::<Vec<_>>()
         .join("\n"))
 }

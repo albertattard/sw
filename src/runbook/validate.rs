@@ -69,7 +69,7 @@ fn validate_output(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>)
     };
 
     for key in object.keys() {
-        if key != "caption" && key != "content_type" {
+        if key != "caption" && key != "content_type" && key != "trim_trailing_whitespace" {
             push_error(
                 errors,
                 format!("{path}.{key}"),
@@ -97,6 +97,16 @@ fn validate_output(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>)
             errors,
             format!("{path}.content_type"),
             "must be one of `text`, `json`, or `xml`",
+        ),
+        None => {}
+    }
+
+    match object.get("trim_trailing_whitespace") {
+        Some(Value::Bool(_)) => {}
+        Some(_) => push_error(
+            errors,
+            format!("{path}.trim_trailing_whitespace"),
+            "must be a boolean",
         ),
         None => {}
     }

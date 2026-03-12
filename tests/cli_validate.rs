@@ -152,6 +152,22 @@ fn invalid_output_content_type_returns_validation_failure() {
 }
 
 #[test]
+fn invalid_output_trim_trailing_whitespace_returns_validation_failure() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-invalid-output-trim-whitespace.json",
+        "--output-format",
+        "json",
+    ]);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": false"));
+    assert!(stdout.contains("\"path\": \"entries[0].output.trim_trailing_whitespace\""));
+}
+
+#[test]
 fn invalid_display_file_returns_validation_failure() {
     let output = run(&[
         "validate",
