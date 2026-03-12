@@ -26,7 +26,7 @@ pub fn run(args: RunArgs) -> ExitCode {
     }
 
     let markdown = match args.output_format {
-        RunOutputFormat::Markdown => match runbook::render_markdown(&runbook) {
+        RunOutputFormat::Markdown => match runbook::render_markdown(&runbook, &input_path) {
             Ok(markdown) => markdown,
             Err(runbook::RenderError::Operational(message)) => {
                 eprintln!("{message}");

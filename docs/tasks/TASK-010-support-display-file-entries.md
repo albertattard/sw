@@ -1,7 +1,7 @@
 ---
 id: TASK-010
 title: Support DisplayFile Entries
-status: pending
+status: done
 related_features:
   - SPEC-003
 owner: @aattard
@@ -33,15 +33,15 @@ into generated Markdown.
 
 ## Acceptance Criteria
 
-- [ ] Given a valid `DisplayFile` entry, the referenced file contents are
+- [x] Given a valid `DisplayFile` entry, the referenced file contents are
       copied into the generated Markdown.
-- [ ] Given a `DisplayFile` entry that references a `.java` file, the
+- [x] Given a `DisplayFile` entry that references a `.java` file, the
       generated Markdown uses a `java` fenced block.
-- [ ] Given a `DisplayFile` entry with an unrecognized extension, the
+- [x] Given a `DisplayFile` entry with an unrecognized extension, the
       generated Markdown uses a `text` fenced block.
-- [ ] Given a `DisplayFile` entry with a missing file, the run exits with `1`
+- [x] Given a `DisplayFile` entry with a missing file, the run exits with `1`
       and reports a clear error.
-- [ ] Given a `DisplayFile` entry without `path`, validation fails.
+- [x] Given a `DisplayFile` entry without `path`, validation fails.
 
 ## Notes
 

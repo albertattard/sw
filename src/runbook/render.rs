@@ -3,8 +3,10 @@ use super::execute::{
     cleanup_block, ensure_assertions, execute_command, run_cleanup_blocks, timeout_label,
 };
 use serde_json::Value;
+use std::fs;
+use std::path::Path;
 
-pub(crate) fn render_markdown(runbook: &Value) -> Result<String, RenderError> {
+pub(crate) fn render_markdown(runbook: &Value, runbook_path: &Path) -> Result<String, RenderError> {
     let entries = runbook
         .get("entries")
         .and_then(Value::as_array)
@@ -24,6 +26,7 @@ pub(crate) fn render_markdown(runbook: &Value) -> Result<String, RenderError> {
         let rendered = match entry_type {
             "Heading" => render_heading(entry)?,
             "Markdown" => render_markdown_entry(entry)?,
+            "DisplayFile" => render_display_file(entry, runbook_path)?,
             "Command" => {
                 if let Some(cleanup) = cleanup_block(entry)? {
                     cleanups.push(cleanup);
@@ -94,6 +97,26 @@ pub(crate) fn render_markdown(runbook: &Value) -> Result<String, RenderError> {
             None => Ok(output),
         },
     }
+}
+
+fn render_display_file(entry: &Value, runbook_path: &Path) -> Result<String, RenderError> {
+    let relative_path = entry
+        .get("path")
+        .and_then(Value::as_str)
+        .ok_or_else(|| RenderError::Operational("DisplayFile entry is missing path".to_string()))?;
+    let base_dir = runbook_path.parent().unwrap_or_else(|| Path::new("."));
+    let display_path = base_dir.join(relative_path);
+    let contents = fs::read_to_string(&display_path).map_err(|err| {
+        RenderError::Operational(format!("Failed to read {}: {err}", display_path.display()))
+    })?;
+
+    let mut section = format!("```{}\n", display_file_content_type(&display_path));
+    section.push_str(&contents);
+    if !contents.ends_with('\n') && !contents.is_empty() {
+        section.push('\n');
+    }
+    section.push_str("```");
+    Ok(section)
 }
 
 fn render_heading(entry: &Value) -> Result<String, RenderError> {
@@ -234,6 +257,13 @@ fn output_content_type(output: &Value) -> Result<&'static str, RenderError> {
         Some(other) => Err(RenderError::Operational(format!(
             "Unsupported output content type `{other}`"
         ))),
+    }
+}
+
+fn display_file_content_type(path: &Path) -> &'static str {
+    match path.extension().and_then(|extension| extension.to_str()) {
+        Some("java") => "java",
+        _ => "text",
     }
 }
 

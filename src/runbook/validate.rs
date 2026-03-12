@@ -205,6 +205,9 @@ fn validate_entry(value: &Value, index: usize, errors: &mut Vec<ValidationIssue>
             Some(contents) => validate_string_array(contents, &format!("{path}.contents"), errors),
             None => push_error(errors, format!("{path}.contents"), "is required"),
         },
+        "DisplayFile" => {
+            require_string(object, "path", &path, errors);
+        }
         "Command" => {
             match object.get("commands") {
                 Some(commands) => {

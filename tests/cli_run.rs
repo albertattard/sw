@@ -393,3 +393,56 @@ fn xml_output_content_type_uses_xml_fenced_block() {
     let readme = fs::read_to_string(dir.join("readme.md")).expect("missing readme output");
     assert!(readme.contains("```xml\n<name>Albert Attard</name>\n```"));
 }
+
+#[test]
+fn display_file_java_uses_java_fenced_block() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-run-display-file.json", "sw-runbook.json");
+    fs::write(
+        dir.join("Example.java"),
+        "public class Example {\n    public static void main(String[] args) {}\n}\n",
+    )
+    .expect("failed to write Example.java");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("readme.md")).expect("missing readme output");
+    assert!(readme.contains("# Display file"));
+    assert!(readme.contains("```java\npublic class Example {"));
+}
+
+#[test]
+fn display_file_unknown_extension_falls_back_to_text() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-display-file-unknown-extension.json",
+        "sw-runbook.json",
+    );
+    fs::write(dir.join("notes.custom"), "some notes\n").expect("failed to write notes.custom");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("readme.md")).expect("missing readme output");
+    assert!(readme.contains("```text\nsome notes\n```"));
+}
+
+#[test]
+fn display_file_missing_file_returns_operational_error() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-display-file-missing.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert_eq!(output.status.code(), Some(1));
+    assert!(!dir.join("readme.md").exists());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("Failed to read"));
+    assert!(stderr.contains("missing.java"));
+}

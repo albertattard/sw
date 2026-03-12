@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "type": "Heading",
+      "level": "H1",
+      "title": "Display file"
+    },
+    {
+      "type": "DisplayFile",
+      "path": "./Example.java"
+    }
+  ]
+}
