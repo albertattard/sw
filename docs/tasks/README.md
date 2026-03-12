@@ -31,10 +31,12 @@ File-based task tracker for Sociable Weaver.
 - [TASK-025: Support Rewrite Generated Capture Pairs](./TASK-025-support-rewrite-generated-capture-pairs.md)
 - [TASK-026: Change Default Output File To README Uppercase](./TASK-026-change-default-output-file-to-readme-uppercase.md)
 - [TASK-027: Support Prerequisites Entry Type](./TASK-027-support-prerequisites-entry-type.md)
+- [TASK-028: Implement Init Command](./TASK-028-implement-init-command.md)
 
 ## Pending
 
 - [ ] [TASK-021: Support Deferred Markdown Interpolation](./TASK-021-support-deferred-markdown-interpolation.md)
+- [ ] [TASK-028: Implement Init Command](./TASK-028-implement-init-command.md)
 
 ## In Progress
 
