@@ -222,25 +222,25 @@ fn validate_capture(
     }
 }
 
-fn validate_command_references(
-    commands: &Value,
+fn validate_capture_references(
+    strings: &Value,
     path: &str,
     errors: &mut Vec<ValidationIssue>,
     available_capture_names: &HashSet<String>,
 ) {
-    let Some(commands) = as_array(commands, path, errors) else {
+    let Some(strings) = as_array(strings, path, errors) else {
         return;
     };
 
     let reference_pattern =
         Regex::new(CAPTURE_REFERENCE_PATTERN).expect("valid capture reference regex");
 
-    for (index, command) in commands.iter().enumerate() {
-        let Some(command) = command.as_str() else {
+    for (index, value) in strings.iter().enumerate() {
+        let Some(value) = value.as_str() else {
             continue;
         };
 
-        for captures in reference_pattern.captures_iter(command) {
+        for captures in reference_pattern.captures_iter(value) {
             let Some(name) = captures.get(2) else {
                 continue;
             };
@@ -561,7 +561,15 @@ fn validate_entry(
             require_string(object, "title", &path, errors);
         }
         "Markdown" => match object.get("contents") {
-            Some(contents) => validate_string_array(contents, &format!("{path}.contents"), errors),
+            Some(contents) => {
+                validate_string_array(contents, &format!("{path}.contents"), errors);
+                validate_capture_references(
+                    contents,
+                    &format!("{path}.contents"),
+                    errors,
+                    available_capture_names,
+                );
+            }
             None => push_error(errors, format!("{path}.contents"), "is required"),
         },
         "DisplayFile" => {
@@ -571,7 +579,7 @@ fn validate_entry(
             match object.get("commands") {
                 Some(commands) => {
                     validate_string_array(commands, &format!("{path}.commands"), errors);
-                    validate_command_references(
+                    validate_capture_references(
                         commands,
                         &format!("{path}.commands"),
                         errors,

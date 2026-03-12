@@ -375,3 +375,19 @@ fn invalid_capture_forward_reference_returns_validation_failure() {
     assert!(stdout.contains("\"valid\": false"));
     assert!(stdout.contains("\"path\": \"entries[0].commands[0]\""));
 }
+
+#[test]
+fn invalid_markdown_forward_reference_returns_validation_failure() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-invalid-markdown-forward-reference.json",
+        "--output-format",
+        "json",
+    ]);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": false"));
+    assert!(stdout.contains("\"path\": \"entries[0].contents[0]\""));
+}

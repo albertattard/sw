@@ -1,7 +1,7 @@
 ---
 id: TASK-022
 title: Support Markdown Interpolation For Earlier Captures
-status: pending
+status: done
 related_features:
   - SPEC-003
 owner: @aattard
@@ -30,15 +30,15 @@ earlier in the runbook.
 
 ## Acceptance Criteria
 
-- [ ] Given a `Markdown` entry that uses `@{name}` after that variable is
+- [x] Given a `Markdown` entry that uses `@{name}` after that variable is
       captured earlier in the runbook, the rendered Markdown includes the
       captured value.
-- [ ] Given a `Markdown` entry that uses `@{name}` before that variable is
+- [x] Given a `Markdown` entry that uses `@{name}` before that variable is
       captured, the run fails or validation rejects the runbook according to
       the final implementation choice.
-- [ ] Given `@@{name}` in a `Markdown` entry, the literal `@{name}` is
+- [x] Given `@@{name}` in a `Markdown` entry, the literal `@{name}` is
       preserved.
-- [ ] Deferred Markdown interpolation for variables captured later remains out
+- [x] Deferred Markdown interpolation for variables captured later remains out
       of scope for this task.
 
 ## Notes

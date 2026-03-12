@@ -46,7 +46,7 @@ pub(crate) fn render_markdown(runbook: &Value, runbook_path: &Path) -> Result<St
 
         let rendered = match entry_type {
             "Heading" => render_heading(entry)?,
-            "Markdown" => render_markdown_entry(entry)?,
+            "Markdown" => render_markdown_entry(entry, &state.captured_values)?,
             "DisplayFile" => render_display_file(entry, runbook_path)?,
             "Command" => {
                 if let Some(cleanup) = cleanup_block(entry)? {
@@ -171,7 +171,10 @@ fn render_heading(entry: &Value) -> Result<String, RenderError> {
     Ok(format!("{marker} {title}"))
 }
 
-fn render_markdown_entry(entry: &Value) -> Result<String, RenderError> {
+fn render_markdown_entry(
+    entry: &Value,
+    captured_values: &HashMap<String, String>,
+) -> Result<String, RenderError> {
     let contents = entry
         .get("contents")
         .and_then(Value::as_array)
@@ -192,7 +195,7 @@ fn render_markdown_entry(entry: &Value) -> Result<String, RenderError> {
         );
     }
 
-    Ok(lines.join("\n"))
+    interpolate_command_lines(&lines, captured_values).map(|lines| lines.join("\n"))
 }
 
 fn render_command(entry: &Value, state: &mut RenderState) -> Result<String, RenderError> {
