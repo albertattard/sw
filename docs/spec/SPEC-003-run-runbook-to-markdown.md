@@ -63,6 +63,26 @@ Initial rendering rules for Markdown output:
 - `Command` entries are executed in order.
 - All lines within a single `Command` entry execute together in the same shell
   context.
+- A `Command` entry may declare `cleanup`.
+- `cleanup` is a list of command lines, matching the shape of `commands`.
+- All lines within a single `cleanup` block execute together in the same shell
+  context.
+- `cleanup` is used after execution in order to release resources started by
+  the main command.
+- `cleanup` is optional.
+- Cleanup commands are executed after the run finishes and also when the run
+  stops early because of failure.
+- Cleanup commands execute in reverse order of the commands that registered
+  them.
+- If commands `A`, `B`, and `C` each register cleanup, then cleanup runs in the
+  order `C`, `B`, `A`.
+- If a cleanup block contains multiple command lines, those lines are attempted
+  in the order declared.
+- If one cleanup line fails, the remaining lines in that cleanup block still run.
+- If one cleanup block fails, the remaining registered cleanup blocks still run
+  in reverse order.
+- Cleanup failures are reported after cleanup execution completes.
+- A run with one or more cleanup failures is considered failed.
 - A `Command` entry may declare a `timeout`.
 - If `timeout` is omitted, the default timeout is `2 minutes`.
 - `timeout` is expressed in human-readable form as a number followed by a unit.
@@ -114,6 +134,22 @@ Exit codes:
 - [ ] Given a `Command` entry with multiple command lines, those lines execute
       together in the same shell context so values set on one line can be used
       on a later line.
+- [ ] Given commands that declare `cleanup`, cleanup commands execute in reverse
+      order after the run completes.
+- [ ] Given a `cleanup` block with multiple command lines, those lines execute
+      in the declared order and in the same shell context.
+- [ ] Given a command failure, previously registered cleanup commands still
+      execute in reverse order before the run exits.
+- [ ] Given a command timeout, previously registered cleanup commands still
+      execute in reverse order before the run exits.
+- [ ] Given a command without `cleanup`, no cleanup command is registered for
+      that entry.
+- [ ] Given a failed cleanup line, the remaining lines in that cleanup block
+      still execute.
+- [ ] Given a failed cleanup block, remaining registered cleanup blocks still
+      execute in reverse order.
+- [ ] Given one or more cleanup failures, the run is reported as failed after
+      cleanup completes.
 - [ ] Given a command without a declared timeout, the default timeout of
       `2 minutes` is used.
 - [ ] Given a command with a declared timeout such as `30 seconds`,
@@ -172,6 +208,13 @@ Exit codes:
 - Command entry with multi-line commands.
 - Variable assignment on one command line used by a later line in the same
   entry.
+- Multiple commands register cleanup and require reverse-order execution.
+- A cleanup command is present for some commands and omitted for others.
+- A cleanup block contains multiple command lines.
+- A cleanup line fails but later lines in the same cleanup block still need to run.
+- One cleanup block fails but later registered cleanup blocks still need to run.
+- A command fails after earlier commands registered cleanup.
+- A command times out after earlier commands registered cleanup.
 - Command omits `timeout` and uses the default timeout.
 - Command declares timeout with supported human-readable units.
 - Command declares timeout with an unsupported unit.
@@ -202,4 +245,8 @@ extensible: `assert.exit_code` handles process-level expectations, while
 `assert.checks` starts with `source: stdout` and the `contains` operator, while
 leaving room for future operators such as regular-expression or equality
 checks, and future sources such as files. Command execution must also enforce a
-bounded runtime so runaway processes do not remain after a failed run.
+bounded runtime so runaway processes do not remain after a failed run. Cleanup
+behavior should remain deterministic so resources started by earlier commands
+are reliably released even when the run stops early. Cleanup should be best
+effort rather than fail-fast: all registered cleanup blocks and all cleanup
+lines should be attempted before the run reports cleanup failures.
