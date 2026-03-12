@@ -206,9 +206,10 @@ in the runbook.
 - A rule that uses `use` must not declare `base`.
 - A rule that uses `use` follows the timeline established by the referenced
   anchor, even when the matched datetime format differs.
-- A rule that uses `use` may reference only an anchor established earlier in
-  the same command output block.
-- `datetime_shift` applies independently within each command output block.
+- A rule that uses `use` may reference an anchor established earlier anywhere
+  in the runbook.
+- Forward references are invalid: a rule may not use an anchor before that
+  anchor is established earlier in the runbook.
 - Rewrite rules affect rendered output only and do not change command
   execution or assertions.
 - If a `Command` entry does not contain an `output` property, command output is
@@ -354,8 +355,10 @@ in the runbook.
 - [ ] Given duplicate `datetime_shift.id` values anywhere in the runbook,
       validation rejects the runbook.
 - [ ] Given a `datetime_shift` rewrite rule that uses `use`, the referenced
-      anchor must have been established earlier in the same command output
-      block.
+      anchor must have been established earlier in the runbook.
+- [ ] Given a `datetime_shift` rewrite rule in a later command output block
+      that uses an anchor established earlier in the runbook, the rule is
+      valid and follows that shared timeline.
 - [ ] Given a `datetime_shift` rewrite rule with `pattern` and
       `custom_format`, matched datetimes are rewritten while preserving that
       custom textual format.
@@ -394,10 +397,10 @@ in the runbook.
 - A `datetime_shift` rule establishes a shared anchor with `id`.
 - Multiple `datetime_shift` rules reuse the same shared anchor with `use`.
 - The same `datetime_shift.id` is declared more than once in the runbook.
-- A `datetime_shift` rule uses an anchor declared in a different command
-  output block.
-- A `datetime_shift` rule uses an anchor before it is established in the same
-  command output block.
+- A `datetime_shift` rule uses an anchor declared in an earlier command output
+  block.
+- A `datetime_shift` rule uses an anchor before it is established earlier in
+  the runbook.
 - A `datetime_shift` rule uses `pattern` together with `custom_format`.
 - A `datetime_shift` rule declares both `id` and `use`.
 - A `datetime_shift` rule declares both `format` and `custom_format`.
