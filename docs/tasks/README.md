@@ -38,7 +38,6 @@ File-based task tracker for Sociable Weaver.
 
 - [ ] [TASK-021: Support Deferred Markdown Interpolation](./TASK-021-support-deferred-markdown-interpolation.md)
 - [ ] [TASK-028: Implement Init Command](./TASK-028-implement-init-command.md)
-- [ ] [TASK-029: Support Keep Between Rewrite Rule](./TASK-029-support-keep-between-rewrite-rule.md)
 
 ## In Progress
 
@@ -75,6 +74,7 @@ File-based task tracker for Sociable Weaver.
 - [x] [TASK-025: Support Rewrite Generated Capture Pairs](./TASK-025-support-rewrite-generated-capture-pairs.md)
 - [x] [TASK-026: Change Default Output File To README Uppercase](./TASK-026-change-default-output-file-to-readme-uppercase.md)
 - [x] [TASK-027: Support Prerequisites Entry Type](./TASK-027-support-prerequisites-entry-type.md)
+- [x] [TASK-029: Support Keep Between Rewrite Rule](./TASK-029-support-keep-between-rewrite-rule.md)
 
 ## Blocked
 

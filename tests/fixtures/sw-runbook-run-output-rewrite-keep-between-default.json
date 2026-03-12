@@ -1,0 +1,20 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf '%s\\n' '[INFO] before' '[INFO] --- exec:3.6.3:exec (default-cli) @ demo ---' 'Using Java 25.0.2' '[INFO] ------------------------------------------------------------------------' '[INFO] after'"
+      ],
+      "output": {
+        "caption": "Kept output",
+        "rewrite": [
+          {
+            "type": "keep_between",
+            "start": "[INFO] --- exec:3.6.3:exec (default-cli) @ demo ---",
+            "end": "[INFO] ------------------------------------------------------------------------"
+          }
+        ]
+      }
+    }
+  ]
+}

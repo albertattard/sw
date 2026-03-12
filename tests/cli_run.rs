@@ -689,6 +689,58 @@ fn command_capture_raw_stage_supports_later_command_interpolation_and_escape() {
 }
 
 #[test]
+fn output_rewrite_keep_between_uses_default_exclusive_boundaries() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-output-rewrite-keep-between-default.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("Kept output"));
+    assert!(readme.contains("```\nUsing Java 25.0.2\n```"));
+    assert!(!readme.contains("```\n[INFO] before\nUsing Java 25.0.2\n[INFO] after\n```"));
+}
+
+#[test]
+fn output_rewrite_keep_between_applies_explicit_offsets() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-output-rewrite-keep-between-offsets.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains(
+        "```\nbefore context\n[INFO] --- exec:3.6.3:exec (default-cli) @ demo ---\nUsing Java 25.0.2\nBuild successful\n[INFO] ------------------------------------------------------------------------\nafter context\n```"
+    ));
+}
+
+#[test]
+fn output_rewrite_keep_between_leaves_output_unchanged_when_boundary_is_missing() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-output-rewrite-keep-between-missing.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```\n[INFO] before\nUsing Java 25.0.2\n[INFO] after\n```"));
+}
+
+#[test]
 fn command_capture_rewritten_stage_uses_rewritten_stdout() {
     let dir = prepare_workspace();
     write_runbook(

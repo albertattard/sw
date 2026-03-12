@@ -1,7 +1,7 @@
 ---
 id: TASK-029
 title: Support Keep Between Rewrite Rule
-status: pending
+status: done
 related_features:
   - SPEC-003
 owner: @aattard
@@ -31,13 +31,13 @@ replacements.
 
 ## Acceptance Criteria
 
-- [ ] Given a `keep_between` rewrite rule, only the lines between the matched
+- [x] Given a `keep_between` rewrite rule, only the lines between the matched
       `start` and `end` boundaries are kept.
-- [ ] Given a `keep_between` rewrite rule without explicit offsets,
+- [x] Given a `keep_between` rewrite rule without explicit offsets,
       `start_offset: 1` and `end_offset: -1` are used.
-- [ ] Given a `keep_between` rewrite rule with explicit offsets, the resulting
+- [x] Given a `keep_between` rewrite rule with explicit offsets, the resulting
       output slice reflects those line-based offsets.
-- [ ] Given a `keep_between` rewrite rule whose `start` or `end` boundary is
+- [x] Given a `keep_between` rewrite rule whose `start` or `end` boundary is
       not found, the rule leaves the output unchanged.
 
 ## Notes

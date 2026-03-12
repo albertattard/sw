@@ -664,6 +664,7 @@ fn apply_rewrite_rule(
 
     match rule_type {
         "replace" => apply_replace_rule(rule, rendered, captured_values),
+        "keep_between" => apply_keep_between_rule(rule, rendered),
         "datetime_shift" => apply_datetime_shift_rule(rule, rendered, datetime_anchors),
         other => Err(RenderError::Operational(format!(
             "Unsupported output rewrite type `{other}`"
@@ -786,6 +787,78 @@ fn apply_datetime_shift_rule(
         rendered: result,
         generated_capture: generated_rewrite_capture_from_pairs(rule, capture_matches)?,
     })
+}
+
+fn apply_keep_between_rule(rule: &Value, rendered: &str) -> Result<RewriteRuleResult, RenderError> {
+    let start = rule.get("start").and_then(Value::as_str).ok_or_else(|| {
+        RenderError::Operational("Command output keep_between start must be a string".to_string())
+    })?;
+    let end = rule.get("end").and_then(Value::as_str).ok_or_else(|| {
+        RenderError::Operational("Command output keep_between end must be a string".to_string())
+    })?;
+    let start_offset = parse_keep_between_offset(rule.get("start_offset"), 1, "start_offset")?;
+    let end_offset = parse_keep_between_offset(rule.get("end_offset"), -1, "end_offset")?;
+
+    let lines: Vec<&str> = rendered.split('\n').collect();
+    let Some(start_index) = lines.iter().position(|line| *line == start) else {
+        return Ok(RewriteRuleResult {
+            rendered: rendered.to_string(),
+            generated_capture: None,
+        });
+    };
+    let Some(relative_end_index) = lines[start_index..].iter().position(|line| *line == end) else {
+        return Ok(RewriteRuleResult {
+            rendered: rendered.to_string(),
+            generated_capture: None,
+        });
+    };
+    let end_index = start_index + relative_end_index;
+
+    let start_line = offset_index(start_index, start_offset, lines.len());
+    let end_line = offset_index(end_index, end_offset, lines.len());
+
+    let Some((start_line, end_line)) = start_line.zip(end_line) else {
+        return Ok(RewriteRuleResult {
+            rendered: String::new(),
+            generated_capture: None,
+        });
+    };
+
+    if start_line > end_line || start_line >= lines.len() || end_line >= lines.len() {
+        return Ok(RewriteRuleResult {
+            rendered: String::new(),
+            generated_capture: None,
+        });
+    }
+
+    Ok(RewriteRuleResult {
+        rendered: lines[start_line..=end_line].join("\n"),
+        generated_capture: None,
+    })
+}
+
+fn parse_keep_between_offset(
+    value: Option<&Value>,
+    default: i64,
+    key: &str,
+) -> Result<i64, RenderError> {
+    match value {
+        None => Ok(default),
+        Some(value) => value.as_i64().ok_or_else(|| {
+            RenderError::Operational(format!(
+                "Command output keep_between {key} must be an integer"
+            ))
+        }),
+    }
+}
+
+fn offset_index(index: usize, offset: i64, len: usize) -> Option<usize> {
+    let shifted = index as i64 + offset;
+    if shifted < 0 || shifted >= len as i64 {
+        None
+    } else {
+        usize::try_from(shifted).ok()
+    }
 }
 
 fn generated_rewrite_capture_for_replace(

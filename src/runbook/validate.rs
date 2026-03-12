@@ -383,6 +383,39 @@ fn validate_rewrite_rule(
                 );
             }
         }
+        "keep_between" => {
+            for key in object.keys() {
+                if key != "type"
+                    && key != "start"
+                    && key != "end"
+                    && key != "start_offset"
+                    && key != "end_offset"
+                {
+                    push_error(
+                        errors,
+                        format!("{path}.{key}"),
+                        "is not a supported keep_between rewrite property",
+                    );
+                }
+            }
+
+            require_string(object, "start", path, errors);
+            require_string(object, "end", path, errors);
+
+            if let Some(start_offset) = object.get("start_offset")
+                && !start_offset.is_i64()
+                && !start_offset.is_u64()
+            {
+                push_error(errors, format!("{path}.start_offset"), "must be an integer");
+            }
+
+            if let Some(end_offset) = object.get("end_offset")
+                && !end_offset.is_i64()
+                && !end_offset.is_u64()
+            {
+                push_error(errors, format!("{path}.end_offset"), "must be an integer");
+            }
+        }
         "datetime_shift" => {
             for key in object.keys() {
                 if key != "type"
@@ -521,7 +554,7 @@ fn validate_rewrite_rule(
         _ => push_error(
             errors,
             format!("{path}.type"),
-            "must be `replace` or `datetime_shift`",
+            "must be `replace`, `datetime_shift`, or `keep_between`",
         ),
     }
 }
