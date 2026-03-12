@@ -196,6 +196,12 @@ in the runbook.
   `datetime_shift`.
 - A `replace` rewrite rule performs a pattern-based replacement on the captured
   command output.
+- A `replace` rewrite rule may interpolate captured variables inside its
+  `replacement` text using `@{name}` syntax.
+- `@@{name}` inside a `replace` rule `replacement` preserves the literal
+  `@{name}` text.
+- A `replace` rule `replacement` that references `@{name}` must use a variable
+  captured earlier in the runbook.
 - A `datetime_shift` rewrite rule shifts matched timestamps so the first match
   becomes the configured base timestamp and later matches preserve their
   relative distance from that first match.
@@ -377,6 +383,13 @@ in the runbook.
       in the declared order before output is rendered.
 - [ ] Given a `replace` rewrite rule, matching text is replaced in rendered
       output.
+- [ ] Given a `replace` rewrite rule `replacement` that uses `@{name}` after
+      that variable is captured earlier in the runbook, the replacement text
+      includes the captured value.
+- [ ] Given a `replace` rewrite rule `replacement` that uses `@{name}` before
+      that variable is captured, validation rejects the runbook.
+- [ ] Given `@@{name}` in a `replace` rewrite rule `replacement`, the literal
+      `@{name}` is preserved without interpolation.
 - [ ] Given a `datetime_shift` rewrite rule, the first matched timestamp is
       rewritten to the configured base timestamp.
 - [ ] Given multiple timestamps matched by the same `datetime_shift` rule,
@@ -457,6 +470,10 @@ in the runbook.
 - A command references a captured variable before it is defined.
 - Command or Markdown content contains literal `@{name}` that must not be
   interpolated.
+- A `replace` rewrite rule `replacement` references a captured variable before
+  it is defined.
+- A `replace` rewrite rule `replacement` contains literal `@{name}` that must
+  not be interpolated.
 - A capture rule matches no value.
 - A capture rule matches more than one value when exactly one value is
   required.
