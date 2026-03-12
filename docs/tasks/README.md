@@ -14,10 +14,11 @@ File-based task tracker for Sociable Weaver.
 - [TASK-008: Support Command Cleanup](./TASK-008-support-command-cleanup.md)
 - [TASK-009: Support Output Content Types](./TASK-009-support-output-content-types.md)
 - [TASK-010: Support DisplayFile Entries](./TASK-010-support-display-file-entries.md)
+- [TASK-011: Add Generated File Marker](./TASK-011-add-generated-file-marker.md)
 
 ## Pending
 
-- (none)
+- [ ] [TASK-011: Add Generated File Marker](./TASK-011-add-generated-file-marker.md)
 
 ## In Progress
 
