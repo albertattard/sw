@@ -1,7 +1,7 @@
 ---
 id: TASK-019
 title: Support Cross-Command Datetime Anchor Reuse
-status: pending
+status: done
 related_features:
   - SPEC-003
 owner: @aattard
@@ -32,13 +32,13 @@ runbook, so multiple command outputs can share one synthetic timeline.
 
 ## Acceptance Criteria
 
-- [ ] Given a later command output block that uses an anchor established
+- [x] Given a later command output block that uses an anchor established
       earlier in the runbook, the runbook validates successfully.
-- [ ] Given cross-command reuse of one anchor across different supported
+- [x] Given cross-command reuse of one anchor across different supported
       datetime formats, rewritten datetimes follow one shared timeline.
-- [ ] Given a `use` rule before its anchor is established in the runbook,
+- [x] Given a `use` rule before its anchor is established in the runbook,
       validation rejects the runbook.
-- [ ] Given duplicate `datetime_shift.id` values anywhere in the runbook,
+- [x] Given duplicate `datetime_shift.id` values anywhere in the runbook,
       validation still rejects the runbook.
 
 ## Notes

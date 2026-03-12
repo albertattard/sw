@@ -3,7 +3,7 @@
     {
       "type": "Command",
       "commands": [
-        "echo 'first'"
+        "printf '2026-03-12T13:53:47.000+01:00 INFO Main\\n'"
       ],
       "output": {
         "rewrite": [
@@ -18,7 +18,7 @@
     {
       "type": "Command",
       "commands": [
-        "echo 'second'"
+        "printf 'Thu, 12 Mar 2026 12:53:49 GMT INFO Http\\naudio_20260312_135350\\n'"
       ],
       "output": {
         "rewrite": [
@@ -26,6 +26,12 @@
             "type": "datetime_shift",
             "use": "timeline",
             "format": "rfc1123"
+          },
+          {
+            "type": "datetime_shift",
+            "use": "timeline",
+            "pattern": "audio_\\d{8}_\\d{6}",
+            "custom_format": "audio_%Y%m%d_%H%M%S"
           }
         ]
       }

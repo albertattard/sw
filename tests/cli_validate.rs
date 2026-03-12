@@ -314,19 +314,18 @@ fn invalid_output_rewrite_datetime_shift_use_before_anchor_returns_validation_fa
 }
 
 #[test]
-fn invalid_output_rewrite_datetime_shift_use_cross_block_returns_validation_failure() {
+fn valid_output_rewrite_datetime_shift_use_cross_command_returns_success() {
     let output = run(&[
         "validate",
         "--input-file",
-        "tests/fixtures/sw-runbook-invalid-output-rewrite-datetime-shift-use-cross-block.json",
+        "tests/fixtures/sw-runbook-valid-output-rewrite-datetime-shift-use-cross-command.json",
         "--output-format",
         "json",
     ]);
 
-    assert_eq!(output.status.code(), Some(2));
+    assert_eq!(output.status.code(), Some(0));
     let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(stdout.contains("\"valid\": false"));
-    assert!(stdout.contains("\"path\": \"entries[1].output.rewrite[0].use\""));
+    assert!(stdout.contains("\"valid\": true"));
 }
 
 #[test]

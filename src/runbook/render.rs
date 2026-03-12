@@ -26,6 +26,7 @@ pub(crate) fn render_markdown(runbook: &Value, runbook_path: &Path) -> Result<St
     let mut sections = Vec::new();
     let mut cleanups: Vec<Vec<String>> = Vec::new();
     let mut failure: Option<RenderError> = None;
+    let mut datetime_anchors = HashMap::new();
 
     for entry in entries {
         let entry_type = entry.get("type").and_then(Value::as_str).ok_or_else(|| {
@@ -41,7 +42,7 @@ pub(crate) fn render_markdown(runbook: &Value, runbook_path: &Path) -> Result<St
                     cleanups.push(cleanup);
                 }
 
-                match render_command(entry) {
+                match render_command(entry, &mut datetime_anchors) {
                     Ok(section) => section,
                     Err(RenderError::Timeout {
                         message,
@@ -183,7 +184,10 @@ fn render_markdown_entry(entry: &Value) -> Result<String, RenderError> {
     Ok(lines.join("\n"))
 }
 
-fn render_command(entry: &Value) -> Result<String, RenderError> {
+fn render_command(
+    entry: &Value,
+    datetime_anchors: &mut HashMap<String, DatetimeShiftAnchor>,
+) -> Result<String, RenderError> {
     let commands = entry
         .get("commands")
         .and_then(Value::as_array)
@@ -205,7 +209,7 @@ fn render_command(entry: &Value) -> Result<String, RenderError> {
     let execution = execute_command(entry, &command_text)?;
 
     if execution.timed_out {
-        append_output(entry, &execution.stdout, &mut section)?;
+        append_output(entry, &execution.stdout, &mut section, datetime_anchors)?;
         return Err(RenderError::Timeout {
             message: format!("Command timed out after {}", timeout_label(entry)),
             partial_markdown: apply_indent(entry, section)?,
@@ -213,15 +217,20 @@ fn render_command(entry: &Value) -> Result<String, RenderError> {
     }
 
     ensure_assertions(entry, &execution)?;
-    append_output(entry, &execution.stdout, &mut section)?;
+    append_output(entry, &execution.stdout, &mut section, datetime_anchors)?;
     apply_indent(entry, section)
 }
 
-fn append_output(entry: &Value, stdout: &str, section: &mut String) -> Result<(), RenderError> {
+fn append_output(
+    entry: &Value,
+    stdout: &str,
+    section: &mut String,
+    datetime_anchors: &mut HashMap<String, DatetimeShiftAnchor>,
+) -> Result<(), RenderError> {
     let Some(output) = entry.get("output") else {
         return Ok(());
     };
-    let rendered_stdout = normalize_rendered_output(output, stdout)?;
+    let rendered_stdout = normalize_rendered_output(output, stdout, datetime_anchors)?;
 
     if let Some(caption) = output.get("caption") {
         let caption_text = render_caption(caption)?;
@@ -274,8 +283,12 @@ fn output_fence_open(output: &Value) -> Result<&'static str, RenderError> {
     }
 }
 
-fn normalize_rendered_output(output: &Value, stdout: &str) -> Result<String, RenderError> {
-    let rewritten = apply_rewrite_rules(output, stdout)?;
+fn normalize_rendered_output(
+    output: &Value,
+    stdout: &str,
+    datetime_anchors: &mut HashMap<String, DatetimeShiftAnchor>,
+) -> Result<String, RenderError> {
+    let rewritten = apply_rewrite_rules(output, stdout, datetime_anchors)?;
 
     if !trim_trailing_whitespace(output)? {
         return Ok(rewritten);
@@ -287,18 +300,20 @@ fn normalize_rendered_output(output: &Value, stdout: &str) -> Result<String, Ren
         .collect())
 }
 
-fn apply_rewrite_rules(output: &Value, stdout: &str) -> Result<String, RenderError> {
+fn apply_rewrite_rules(
+    output: &Value,
+    stdout: &str,
+    datetime_anchors: &mut HashMap<String, DatetimeShiftAnchor>,
+) -> Result<String, RenderError> {
     let Some(rules) = output.get("rewrite") else {
         return Ok(stdout.to_string());
     };
     let rules = rules.as_array().ok_or_else(|| {
         RenderError::Operational("Command output rewrite must be an array".to_string())
     })?;
-
     let mut rendered = stdout.to_string();
-    let mut datetime_anchors = HashMap::new();
     for rule in rules {
-        rendered = apply_rewrite_rule(rule, &rendered, &mut datetime_anchors)?;
+        rendered = apply_rewrite_rule(rule, &rendered, datetime_anchors)?;
     }
     Ok(rendered)
 }

@@ -144,15 +144,12 @@ fn validate_rewrite_rules(
     if rules.is_empty() {
         push_error(errors, path.to_string(), "must not be empty");
     }
-
-    let mut local_datetime_anchor_ids = HashSet::new();
     for (index, rule) in rules.iter().enumerate() {
         validate_rewrite_rule(
             rule,
             &format!("{path}[{index}]"),
             errors,
             global_datetime_anchor_ids,
-            &mut local_datetime_anchor_ids,
         );
     }
 }
@@ -162,7 +159,6 @@ fn validate_rewrite_rule(
     path: &str,
     errors: &mut Vec<ValidationIssue>,
     global_datetime_anchor_ids: &mut HashSet<String>,
-    local_datetime_anchor_ids: &mut HashSet<String>,
 ) {
     let Some(object) = as_object(value, path, errors) else {
         return;
@@ -289,8 +285,6 @@ fn validate_rewrite_rule(
                                 format!("duplicate datetime_shift id `{id}`"),
                             );
                         }
-
-                        local_datetime_anchor_ids.insert(id.to_string());
                     }
                     None => push_error(errors, format!("{path}.id"), "must be a string"),
                 }
@@ -299,12 +293,12 @@ fn validate_rewrite_rule(
             if let Some(use_id) = object.get("use") {
                 match use_id.as_str() {
                     Some(use_id) => {
-                        if !local_datetime_anchor_ids.contains(use_id) {
+                        if !global_datetime_anchor_ids.contains(use_id) {
                             push_error(
                                 errors,
                                 format!("{path}.use"),
                                 format!(
-                                    "must reference an anchor established earlier in the same output block: `{use_id}`"
+                                    "must reference an anchor established earlier in the runbook: `{use_id}`"
                                 ),
                             );
                         }
