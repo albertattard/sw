@@ -20,10 +20,11 @@ File-based task tracker for Sociable Weaver.
 - [TASK-014: Use Unlabeled Fences For Plain Output](./TASK-014-use-unlabeled-fences-for-plain-output.md)
 - [TASK-015: Support Output Rewrite Rules](./TASK-015-support-output-rewrite-rules.md)
 - [TASK-016: Extend Datetime Shift Formats And Default Base](./TASK-016-extend-datetime-shift-formats-and-default-base.md)
+- [TASK-017: Support Shared Datetime Shift Anchors And Custom Formats](./TASK-017-support-shared-datetime-shift-anchors-and-custom-formats.md)
 
 ## Pending
 
-- (none)
+- [ ] [TASK-017: Support Shared Datetime Shift Anchors And Custom Formats](./TASK-017-support-shared-datetime-shift-anchors-and-custom-formats.md)
 
 ## In Progress
 

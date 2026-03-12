@@ -182,15 +182,29 @@ in the runbook.
 - A `datetime_shift` rewrite rule shifts matched timestamps so the first match
   becomes the configured base timestamp and later matches preserve their
   relative distance from that first match.
+- A `datetime_shift` rule may establish a shared shift anchor with `id`.
+- A `datetime_shift` rule may reuse a previously established shift anchor with
+  `use`.
+- `id` and `use` are mutually exclusive.
 - A `datetime_shift` rule may use a built-in `format` or a custom `pattern`.
 - `format` and `pattern` are mutually exclusive.
 - In this increment, built-in `format` values are `rfc3339` and `rfc1123`.
 - If `format` is used, the original matched format is preserved in the
   rewritten output.
-- If `pattern` is used, a matching custom date format definition is required in
-  a later increment before semantic shifting can be supported for that pattern.
+- If `pattern` is used for semantic datetime shifting, `custom_format` is
+  required.
+- `format` and `custom_format` are mutually exclusive.
+- If `pattern` and `custom_format` are used together, the matched output is
+  parsed and rewritten using that custom format while preserving the same
+  textual style.
 - If `base` is omitted, `datetime_shift` uses the default base timestamp
   `2077-04-27T12:34:56.789+01:00`.
+- If `id` is used, the rule establishes the shift delta for that named anchor.
+- If `use` is used, the rule reuses the shift delta from the named anchor
+  instead of establishing a new one.
+- A rule that uses `use` must not declare `base`.
+- A rule that uses `use` follows the timeline established by the referenced
+  anchor, even when the matched datetime format differs.
 - `datetime_shift` applies independently within each command output block.
 - Rewrite rules affect rendered output only and do not change command
   execution or assertions.
@@ -329,6 +343,16 @@ in the runbook.
       timestamps are rewritten and kept in RFC 3339 form.
 - [ ] Given a `datetime_shift` rewrite rule with `format: rfc1123`, matched
       timestamps are rewritten and kept in RFC 1123 form.
+- [ ] Given a `datetime_shift` rewrite rule with `id`, later datetime rules may
+      reuse that established shift with `use`.
+- [ ] Given multiple `datetime_shift` rewrite rules that share one anchor,
+      matched datetimes in different supported formats preserve the same shared
+      timeline shift.
+- [ ] Given a `datetime_shift` rewrite rule with `pattern` and
+      `custom_format`, matched datetimes are rewritten while preserving that
+      custom textual format.
+- [ ] Given a `datetime_shift` rewrite rule that uses `use`, the rule does not
+      declare its own `base`.
 - [ ] Given a `Command` entry without an `output` property, the generated
       Markdown does not include the captured command output.
 
@@ -359,6 +383,12 @@ in the runbook.
 - A `datetime_shift` rule omits `base` and relies on the default base timestamp.
 - A `datetime_shift` rule uses a built-in format such as `rfc3339` or `rfc1123`.
 - A `datetime_shift` rule uses `pattern` instead of `format`.
+- A `datetime_shift` rule establishes a shared anchor with `id`.
+- Multiple `datetime_shift` rules reuse the same shared anchor with `use`.
+- A `datetime_shift` rule uses `pattern` together with `custom_format`.
+- A `datetime_shift` rule declares both `id` and `use`.
+- A `datetime_shift` rule declares both `format` and `custom_format`.
+- A `datetime_shift` rule declares `use` together with `base`.
 - Variable assignment on one command line used by a later line in the same
   entry.
 - Multiple commands register cleanup and require reverse-order execution.
