@@ -182,6 +182,15 @@ in the runbook.
 - A `datetime_shift` rewrite rule shifts matched timestamps so the first match
   becomes the configured base timestamp and later matches preserve their
   relative distance from that first match.
+- A `datetime_shift` rule may use a built-in `format` or a custom `pattern`.
+- `format` and `pattern` are mutually exclusive.
+- In this increment, built-in `format` values are `rfc3339` and `rfc1123`.
+- If `format` is used, the original matched format is preserved in the
+  rewritten output.
+- If `pattern` is used, a matching custom date format definition is required in
+  a later increment before semantic shifting can be supported for that pattern.
+- If `base` is omitted, `datetime_shift` uses the default base timestamp
+  `2077-04-27T12:34:56.789+01:00`.
 - `datetime_shift` applies independently within each command output block.
 - Rewrite rules affect rendered output only and do not change command
   execution or assertions.
@@ -314,6 +323,12 @@ in the runbook.
 - [ ] Given multiple timestamps matched by the same `datetime_shift` rule,
       later timestamps preserve their relative distance from the first matched
       timestamp.
+- [ ] Given a `datetime_shift` rewrite rule without `base`, the default base
+      timestamp `2077-04-27T12:34:56.789+01:00` is used.
+- [ ] Given a `datetime_shift` rewrite rule with `format: rfc3339`, matched
+      timestamps are rewritten and kept in RFC 3339 form.
+- [ ] Given a `datetime_shift` rewrite rule with `format: rfc1123`, matched
+      timestamps are rewritten and kept in RFC 1123 form.
 - [ ] Given a `Command` entry without an `output` property, the generated
       Markdown does not include the captured command output.
 
@@ -341,6 +356,9 @@ in the runbook.
   that should be rewritten before publication.
 - Multiple rewrite rules are declared for the same output block.
 - A `datetime_shift` rule matches timestamps across multiple lines.
+- A `datetime_shift` rule omits `base` and relies on the default base timestamp.
+- A `datetime_shift` rule uses a built-in format such as `rfc3339` or `rfc1123`.
+- A `datetime_shift` rule uses `pattern` instead of `format`.
 - Variable assignment on one command line used by a later line in the same
   entry.
 - Multiple commands register cleanup and require reverse-order execution.
