@@ -98,6 +98,26 @@ in the runbook.
 - If the `DisplayFile` extension is not recognized, the generated Markdown
   uses a `text` fenced block.
 
+### Prerequisites Entries
+
+- `Prerequisites` entries render prerequisite documentation and verify the
+  runtime environment before the rest of the runbook proceeds.
+- A `Prerequisites` entry contains a `checks` array.
+- Each prerequisite check declares a short `name`.
+- Each prerequisite check declares `contents` as an array of Markdown lines.
+- `contents` is rendered into the generated Markdown in the declared order.
+- Each prerequisite check declares `commands` as an array of command lines.
+- All lines within a single prerequisite check execute together in the same
+  shell context.
+- Each prerequisite check may declare `assert` using the same structure as
+  `Command` assertions.
+- Each prerequisite check may declare `help` as a human-readable remediation
+  message.
+- Prerequisite checks execute before normal runbook command entries.
+- If any prerequisite check fails, the run stops before executing the main
+  workflow.
+- A failed prerequisite check is reported as a run failure with exit code `2`.
+
 ### Command Entries
 
 - `Command` entries render their `commands` as fenced shell code blocks.
@@ -293,6 +313,20 @@ in the runbook.
 - [ ] Given a `DisplayFile` entry whose extension is not recognized, the
       generated Markdown uses a `text` fenced block.
 
+### Prerequisites Entries
+
+- [ ] Given a runbook with `Prerequisites` entries, the generated Markdown
+      includes the declared prerequisite `contents` in order.
+- [ ] Given a prerequisite check with multiple command lines, those lines
+      execute together in the same shell context.
+- [ ] Given prerequisite checks, they execute before normal runbook commands.
+- [ ] Given a failing prerequisite check, the run exits with `2` before
+      executing the main workflow.
+- [ ] Given a failing prerequisite check with `help`, the failure output
+      includes that remediation message.
+- [ ] Given passing prerequisite checks, the run continues to the main
+      workflow.
+
 ### Command Execution
 
 - [ ] Given a runbook with `Command` entries, the commands are executed in the
@@ -460,6 +494,13 @@ in the runbook.
 
 - Empty runbook.
 - Unsupported entry type.
+- `Prerequisites` entry with an empty `checks` array.
+- A prerequisite check omits `name`.
+- A prerequisite check omits `contents`.
+- A prerequisite check omits `commands`.
+- A prerequisite check fails its assertion before any normal command runs.
+- A prerequisite check includes a `help` message that should be surfaced on
+  failure.
 - `DisplayFile` path points to a missing file.
 - `DisplayFile` path points to an unreadable file.
 - `DisplayFile` uses a recognized extension such as `.java`.

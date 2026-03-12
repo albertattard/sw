@@ -30,10 +30,12 @@ File-based task tracker for Sociable Weaver.
 - [TASK-024: Support Captured Variables In Rewrite Patterns](./TASK-024-support-captured-variables-in-rewrite-patterns.md)
 - [TASK-025: Support Rewrite Generated Capture Pairs](./TASK-025-support-rewrite-generated-capture-pairs.md)
 - [TASK-026: Change Default Output File To README Uppercase](./TASK-026-change-default-output-file-to-readme-uppercase.md)
+- [TASK-027: Support Prerequisites Entry Type](./TASK-027-support-prerequisites-entry-type.md)
 
 ## Pending
 
 - [ ] [TASK-021: Support Deferred Markdown Interpolation](./TASK-021-support-deferred-markdown-interpolation.md)
+- [ ] [TASK-027: Support Prerequisites Entry Type](./TASK-027-support-prerequisites-entry-type.md)
 
 ## In Progress
 
