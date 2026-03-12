@@ -18,10 +18,11 @@ File-based task tracker for Sociable Weaver.
 - [TASK-012: Apply Command Indentation](./TASK-012-apply-command-indentation.md)
 - [TASK-013: Trim Command Output Trailing Whitespace](./TASK-013-trim-command-output-trailing-whitespace.md)
 - [TASK-014: Use Unlabeled Fences For Plain Output](./TASK-014-use-unlabeled-fences-for-plain-output.md)
+- [TASK-015: Support Output Rewrite Rules](./TASK-015-support-output-rewrite-rules.md)
 
 ## Pending
 
-- (none)
+- [ ] [TASK-015: Support Output Rewrite Rules](./TASK-015-support-output-rewrite-rules.md)
 
 ## In Progress
 

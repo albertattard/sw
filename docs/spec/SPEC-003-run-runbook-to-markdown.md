@@ -156,6 +156,7 @@ in the runbook.
   command output.
 - `output` may declare `content_type`.
 - `output` may declare `trim_trailing_whitespace`.
+- `output` may declare `rewrite`.
 - If `output.content_type` is omitted, captured command output is rendered as
   plain output in an unlabeled fenced block.
 - If `output.content_type` is `text`, captured command output is rendered in an
@@ -170,6 +171,20 @@ in the runbook.
   leading whitespace.
 - If `output.trim_trailing_whitespace` is set to `false`, captured output is
   rendered without that trailing-whitespace normalization.
+- If `output.rewrite` is present, the captured command output is transformed by
+  the declared rewrite rules before rendering.
+- `output.rewrite` is an ordered array of rewrite rules.
+- Rewrite rules are applied in the declared order.
+- In this increment, supported rewrite rule types are `replace` and
+  `datetime_shift`.
+- A `replace` rewrite rule performs a pattern-based replacement on the captured
+  command output.
+- A `datetime_shift` rewrite rule shifts matched timestamps so the first match
+  becomes the configured base timestamp and later matches preserve their
+  relative distance from that first match.
+- `datetime_shift` applies independently within each command output block.
+- Rewrite rules affect rendered output only and do not change command
+  execution or assertions.
 - If a `Command` entry does not contain an `output` property, command output is
   not written to the generated document.
 
@@ -290,6 +305,15 @@ in the runbook.
       of each rendered output line.
 - [ ] Given a `Command` entry with `output.trim_trailing_whitespace: false`,
       trailing whitespace is preserved in rendered output.
+- [ ] Given a `Command` entry with `output.rewrite`, rewrite rules are applied
+      in the declared order before output is rendered.
+- [ ] Given a `replace` rewrite rule, matching text is replaced in rendered
+      output.
+- [ ] Given a `datetime_shift` rewrite rule, the first matched timestamp is
+      rewritten to the configured base timestamp.
+- [ ] Given multiple timestamps matched by the same `datetime_shift` rule,
+      later timestamps preserve their relative distance from the first matched
+      timestamp.
 - [ ] Given a `Command` entry without an `output` property, the generated
       Markdown does not include the captured command output.
 
@@ -313,6 +337,10 @@ in the runbook.
 - Command entry uses `indent` to remain inside a Markdown list item.
 - Command output lines contain trailing spaces that should be trimmed by default.
 - Command output needs exact trailing whitespace preserved.
+- Command output includes paths, dates, or other environment-specific values
+  that should be rewritten before publication.
+- Multiple rewrite rules are declared for the same output block.
+- A `datetime_shift` rule matches timestamps across multiple lines.
 - Variable assignment on one command line used by a later line in the same
   entry.
 - Multiple commands register cleanup and require reverse-order execution.
