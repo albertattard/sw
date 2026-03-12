@@ -157,7 +157,9 @@ in the runbook.
 - `output` may declare `content_type`.
 - `output` may declare `trim_trailing_whitespace`.
 - If `output.content_type` is omitted, captured command output is rendered as
-  `text`.
+  plain output in an unlabeled fenced block.
+- If `output.content_type` is `text`, captured command output is rendered in an
+  unlabeled fenced block.
 - If `output.content_type` is present, the generated Markdown fenced block uses
   the declared content type.
 - In this increment, supported `output.content_type` values are `text`, `json`,
@@ -280,7 +282,9 @@ in the runbook.
 - [ ] Given a `Command` entry with `output.content_type: xml`, the generated
       Markdown uses an `xml` fenced block for captured output.
 - [ ] Given a `Command` entry with `output` but no `content_type`, the
-      generated Markdown uses a `text` fenced block for captured output.
+      generated Markdown uses an unlabeled fenced block for captured output.
+- [ ] Given a `Command` entry with `output.content_type: text`, the generated
+      Markdown uses an unlabeled fenced block for captured output.
 - [ ] Given a `Command` entry with `output` and no
       `trim_trailing_whitespace`, trailing whitespace is removed from the end
       of each rendered output line.
