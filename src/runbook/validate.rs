@@ -69,7 +69,11 @@ fn validate_output(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>)
     };
 
     for key in object.keys() {
-        if key != "caption" && key != "content_type" && key != "trim_trailing_whitespace" {
+        if key != "caption"
+            && key != "content_type"
+            && key != "trim_trailing_whitespace"
+            && key != "rewrite"
+        {
             push_error(
                 errors,
                 format!("{path}.{key}"),
@@ -109,6 +113,75 @@ fn validate_output(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>)
             "must be a boolean",
         ),
         None => {}
+    }
+
+    match object.get("rewrite") {
+        Some(rewrite) => validate_rewrite_rules(rewrite, &format!("{path}.rewrite"), errors),
+        None => {}
+    }
+}
+
+fn validate_rewrite_rules(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>) {
+    let Some(rules) = as_array(value, path, errors) else {
+        return;
+    };
+
+    if rules.is_empty() {
+        push_error(errors, path.to_string(), "must not be empty");
+    }
+
+    for (index, rule) in rules.iter().enumerate() {
+        validate_rewrite_rule(rule, &format!("{path}[{index}]"), errors);
+    }
+}
+
+fn validate_rewrite_rule(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>) {
+    let Some(object) = as_object(value, path, errors) else {
+        return;
+    };
+
+    let rule_type = match object.get("type").and_then(Value::as_str) {
+        Some(rule_type) => rule_type,
+        None => {
+            push_error(errors, format!("{path}.type"), "must be a string");
+            return;
+        }
+    };
+
+    match rule_type {
+        "replace" => {
+            for key in object.keys() {
+                if key != "type" && key != "pattern" && key != "replacement" {
+                    push_error(
+                        errors,
+                        format!("{path}.{key}"),
+                        "is not a supported replace rewrite property",
+                    );
+                }
+            }
+
+            require_string(object, "pattern", path, errors);
+            require_string(object, "replacement", path, errors);
+        }
+        "datetime_shift" => {
+            for key in object.keys() {
+                if key != "type" && key != "pattern" && key != "base" {
+                    push_error(
+                        errors,
+                        format!("{path}.{key}"),
+                        "is not a supported datetime_shift rewrite property",
+                    );
+                }
+            }
+
+            require_string(object, "pattern", path, errors);
+            require_string(object, "base", path, errors);
+        }
+        _ => push_error(
+            errors,
+            format!("{path}.type"),
+            "must be `replace` or `datetime_shift`",
+        ),
     }
 }
 

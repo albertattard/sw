@@ -1,0 +1,25 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'user=albert path=/Users/albert/project\\n'"
+      ],
+      "output": {
+        "caption": "Rewritten output",
+        "rewrite": [
+          {
+            "type": "replace",
+            "pattern": "albert",
+            "replacement": "demo-user"
+          },
+          {
+            "type": "replace",
+            "pattern": "/Users/demo-user/project",
+            "replacement": "/path/to/project"
+          }
+        ]
+      }
+    }
+  ]
+}

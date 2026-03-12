@@ -1,0 +1,18 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "echo 'hello'"
+      ],
+      "output": {
+        "rewrite": [
+          {
+            "type": "replace",
+            "pattern": "hello"
+          }
+        ]
+      }
+    }
+  ]
+}

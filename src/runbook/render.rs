@@ -2,6 +2,8 @@ use super::RenderError;
 use super::execute::{
     cleanup_block, ensure_assertions, execute_command, run_cleanup_blocks, timeout_label,
 };
+use chrono::{DateTime, Duration, FixedOffset};
+use regex::Regex;
 use serde_json::Value;
 use std::fs;
 use std::path::Path;
@@ -269,14 +271,114 @@ fn output_fence_open(output: &Value) -> Result<&'static str, RenderError> {
 }
 
 fn normalize_rendered_output(output: &Value, stdout: &str) -> Result<String, RenderError> {
+    let rewritten = apply_rewrite_rules(output, stdout)?;
+
     if !trim_trailing_whitespace(output)? {
-        return Ok(stdout.to_string());
+        return Ok(rewritten);
     }
 
-    Ok(stdout
+    Ok(rewritten
         .split_inclusive('\n')
         .map(trim_segment_trailing_whitespace)
         .collect())
+}
+
+fn apply_rewrite_rules(output: &Value, stdout: &str) -> Result<String, RenderError> {
+    let Some(rules) = output.get("rewrite") else {
+        return Ok(stdout.to_string());
+    };
+    let rules = rules.as_array().ok_or_else(|| {
+        RenderError::Operational("Command output rewrite must be an array".to_string())
+    })?;
+
+    let mut rendered = stdout.to_string();
+    for rule in rules {
+        rendered = apply_rewrite_rule(rule, &rendered)?;
+    }
+    Ok(rendered)
+}
+
+fn apply_rewrite_rule(rule: &Value, rendered: &str) -> Result<String, RenderError> {
+    let rule_type = rule.get("type").and_then(Value::as_str).ok_or_else(|| {
+        RenderError::Operational("Command output rewrite type must be a string".to_string())
+    })?;
+
+    match rule_type {
+        "replace" => apply_replace_rule(rule, rendered),
+        "datetime_shift" => apply_datetime_shift_rule(rule, rendered),
+        other => Err(RenderError::Operational(format!(
+            "Unsupported output rewrite type `{other}`"
+        ))),
+    }
+}
+
+fn apply_replace_rule(rule: &Value, rendered: &str) -> Result<String, RenderError> {
+    let pattern = rule.get("pattern").and_then(Value::as_str).ok_or_else(|| {
+        RenderError::Operational("Command output rewrite pattern must be a string".to_string())
+    })?;
+    let replacement = rule
+        .get("replacement")
+        .and_then(Value::as_str)
+        .ok_or_else(|| {
+            RenderError::Operational(
+                "Command output rewrite replacement must be a string".to_string(),
+            )
+        })?;
+    let regex = Regex::new(pattern).map_err(|err| {
+        RenderError::Operational(format!("Invalid output rewrite pattern `{pattern}`: {err}"))
+    })?;
+
+    Ok(regex.replace_all(rendered, replacement).into_owned())
+}
+
+fn apply_datetime_shift_rule(rule: &Value, rendered: &str) -> Result<String, RenderError> {
+    let pattern = rule.get("pattern").and_then(Value::as_str).ok_or_else(|| {
+        RenderError::Operational("Command output rewrite pattern must be a string".to_string())
+    })?;
+    let base = rule.get("base").and_then(Value::as_str).ok_or_else(|| {
+        RenderError::Operational("Command output rewrite base must be a string".to_string())
+    })?;
+    let regex = Regex::new(pattern).map_err(|err| {
+        RenderError::Operational(format!("Invalid output rewrite pattern `{pattern}`: {err}"))
+    })?;
+    let base_timestamp = DateTime::parse_from_rfc3339(base).map_err(|err| {
+        RenderError::Operational(format!("Invalid datetime_shift base `{base}`: {err}"))
+    })?;
+
+    let mut first_original: Option<DateTime<FixedOffset>> = None;
+    let mut result = String::with_capacity(rendered.len());
+    let mut last_end = 0;
+
+    for matched in regex.find_iter(rendered) {
+        result.push_str(&rendered[last_end..matched.start()]);
+        let original = DateTime::parse_from_rfc3339(matched.as_str()).map_err(|err| {
+            RenderError::Operational(format!(
+                "Matched datetime `{}` is not valid RFC 3339: {err}",
+                matched.as_str()
+            ))
+        })?;
+        let shifted = match first_original {
+            Some(first) => {
+                let delta = original - first;
+                base_timestamp
+                    + Duration::seconds(delta.num_seconds())
+                    + Duration::nanoseconds(
+                        (delta - Duration::seconds(delta.num_seconds()))
+                            .num_nanoseconds()
+                            .unwrap_or(0),
+                    )
+            }
+            None => {
+                first_original = Some(original);
+                base_timestamp
+            }
+        };
+        result.push_str(&shifted.to_rfc3339_opts(chrono::SecondsFormat::Millis, true));
+        last_end = matched.end();
+    }
+
+    result.push_str(&rendered[last_end..]);
+    Ok(result)
 }
 
 fn trim_trailing_whitespace(output: &Value) -> Result<bool, RenderError> {

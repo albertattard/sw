@@ -22,7 +22,7 @@ File-based task tracker for Sociable Weaver.
 
 ## Pending
 
-- [ ] [TASK-015: Support Output Rewrite Rules](./TASK-015-support-output-rewrite-rules.md)
+- (none)
 
 ## In Progress
 
@@ -47,6 +47,7 @@ File-based task tracker for Sociable Weaver.
 - [x] [TASK-012: Apply Command Indentation](./TASK-012-apply-command-indentation.md)
 - [x] [TASK-013: Trim Command Output Trailing Whitespace](./TASK-013-trim-command-output-trailing-whitespace.md)
 - [x] [TASK-014: Use Unlabeled Fences For Plain Output](./TASK-014-use-unlabeled-fences-for-plain-output.md)
+- [x] [TASK-015: Support Output Rewrite Rules](./TASK-015-support-output-rewrite-rules.md)
 
 ## Blocked
 

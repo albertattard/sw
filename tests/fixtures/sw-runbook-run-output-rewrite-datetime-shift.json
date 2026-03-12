@@ -1,0 +1,20 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf '2026-03-12T13:53:47.667+01:00 INFO Starting\\n2026-03-12T13:53:49.667+01:00 INFO Ready\\n'"
+      ],
+      "output": {
+        "caption": "Shifted logs",
+        "rewrite": [
+          {
+            "type": "datetime_shift",
+            "pattern": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}[+-]\\d{2}:\\d{2}",
+            "base": "2077-04-27T12:34:56.789+01:00"
+          }
+        ]
+      }
+    }
+  ]
+}

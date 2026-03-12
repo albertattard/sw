@@ -1,7 +1,7 @@
 ---
 id: TASK-015
 title: Support Output Rewrite Rules
-status: pending
+status: done
 related_features:
   - SPEC-003
 owner: @aattard
@@ -31,13 +31,13 @@ or anonymised before it is written to Markdown.
 
 ## Acceptance Criteria
 
-- [ ] Given a `Command` entry with `output.rewrite`, rewrite rules are applied
+- [x] Given a `Command` entry with `output.rewrite`, rewrite rules are applied
       in the declared order before output is rendered.
-- [ ] Given a `replace` rewrite rule, matching text is replaced in rendered
+- [x] Given a `replace` rewrite rule, matching text is replaced in rendered
       output.
-- [ ] Given a `datetime_shift` rewrite rule, the first matched timestamp is
+- [x] Given a `datetime_shift` rewrite rule, the first matched timestamp is
       rewritten to the configured base timestamp.
-- [ ] Given multiple timestamps matched by the same `datetime_shift` rule,
+- [x] Given multiple timestamps matched by the same `datetime_shift` rule,
       later timestamps preserve their relative distance from the first matched
       timestamp.
 
