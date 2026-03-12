@@ -63,7 +63,11 @@ Initial rendering rules for Markdown output:
 - `Command` entries are executed in order.
 - All lines within a single `Command` entry execute together in the same shell
   context.
-- A `Command` entry must complete successfully for the command to continue.
+- A `Command` entry without an `assert` section must exit with code `0` for the
+  run to continue.
+- A `Command` entry may include an `assert` section.
+- If `assert.exit_code` is present, the command result is checked against that
+  expected exit code instead of the default success requirement.
 - If a `Command` entry contains an `output` property, render captured command
   output after the command block.
 - If `output.caption` is present, render that caption before the captured
@@ -94,9 +98,15 @@ Exit codes:
 - [ ] Given a `Command` entry with multiple command lines, those lines execute
       together in the same shell context so values set on one line can be used
       on a later line.
-- [ ] Given a command that exits successfully, the run continues.
-- [ ] Given a command that exits with an error, the command exits with `2` and
-      does not write a partial output file.
+- [ ] Given a command without an `assert` section that exits successfully, the
+      run continues.
+- [ ] Given a command without an `assert` section that exits with an error, the
+      command exits with `2` and does not write a partial output file.
+- [ ] Given a command with `assert.exit_code`, the command is considered
+      successful only when the actual exit code matches the asserted value.
+- [ ] Given a command with `assert.exit_code` that does not match the actual
+      exit code, the command exits with `2` and does not write a partial output
+      file.
 - [ ] Given a runbook with `Heading` entries, the generated Markdown contains
       the expected heading markers for the configured levels.
 - [ ] Given a runbook with `Markdown` entries, the generated Markdown preserves
@@ -131,7 +141,9 @@ Exit codes:
 - Command entry with multi-line commands.
 - Variable assignment on one command line used by a later line in the same
   entry.
-- Command exits with non-zero status.
+- Command exits with non-zero status and no assertion is present.
+- Command exits with a non-zero status that is explicitly asserted.
+- Command exits with `0` when a non-zero exit code was asserted.
 - Command writes to stderr but exits successfully.
 - Command caption supplied as a string or array of strings.
 - Command output is large.
@@ -142,4 +154,7 @@ This feature establishes the first rendering contract for runbooks. Parsing and
 validation should remain shared with `sw validate` so `run` and `validate`
 enforce the same input contract. Command execution should be deterministic from
 the CLI perspective: execution order, failure handling, and output capture
-rules should be explicit and stable.
+rules should be explicit and stable. The first assertion capability in this
+contract is `assert.exit_code`; additional assertion types can be layered on
+later without changing the default behavior for commands that do not declare
+assertions.

@@ -1,12 +1,12 @@
 ---
 id: TASK-003
 title: Implement SPEC-003 Run Command
-status: done
+status: in_progress
 related_features:
   - SPEC-003
 owner: @aattard
 created: 2026-03-11
-updated: 2026-03-11
+updated: 2026-03-12
 ---
 
 ## Summary
@@ -21,8 +21,9 @@ Implement runbook execution and rendering for `sw run`.
 - `sw run --output-file <path>`
 - Render supported runbook entries to Markdown in order
 - Execute command entries in order
-- Fail when a command exits with an error
+- Fail when a command result does not satisfy the default or asserted exit code
 - Include command output only when requested by the `output` property
+- Support `assert.exit_code` for command result validation
 - Write generated output to `./readme.md` by default
 
 ## Assumptions
@@ -40,8 +41,10 @@ Implement runbook execution and rendering for `sw run`.
 - [x] Command entries are executed in order.
 - [x] Command failures exit with `2` and do not write a partial output file.
 - [x] Command output is included only when the `output` property is present.
+- [ ] `assert.exit_code` overrides the default success expectation for a command.
 
 ## Notes
 
 Implemented with integration coverage for command execution order, failure
-handling, conditional output capture, and default-command behavior.
+handling, conditional output capture, and default-command behavior. Exit-code
+assertions are the next increment for this task.
