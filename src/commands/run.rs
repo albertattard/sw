@@ -9,7 +9,7 @@ pub fn run(args: RunArgs) -> ExitCode {
         .unwrap_or_else(|| PathBuf::from("sw-runbook.json"));
     let output_path = args
         .output_file
-        .unwrap_or_else(|| PathBuf::from("readme.md"));
+        .unwrap_or_else(|| PathBuf::from("README.md"));
 
     let runbook = match runbook::read(&input_path) {
         Ok(runbook) => runbook,

@@ -35,7 +35,7 @@ Initial version behavior:
 - Render the runbook entries in order.
 - Execute command entries in order.
 - Produce Markdown output.
-- Write the generated document to `./readme.md` by default.
+- Write the generated document to `./README.md` by default.
 
 This command generates documentation output and executes the commands declared
 in the runbook.
@@ -51,7 +51,7 @@ in the runbook.
 - If `--input-file` is provided, use that path. Otherwise use
   `./sw-runbook.json`.
 - If `--output-format` is not provided, default to `markdown`.
-- If `--output-file` is not provided, default to `./readme.md`.
+- If `--output-file` is not provided, default to `./README.md`.
 
 ## Outputs
 
@@ -256,7 +256,7 @@ in the runbook.
 
 - [ ] `sw` with no subcommand behaves the same as `sw run`.
 - [ ] Given no input file argument and a valid `./sw-runbook.json`, `sw`
-      renders the file and writes `./readme.md`.
+      renders the file and writes `./README.md`.
 - [ ] Given `sw run --input-file <file>` with a valid runbook, the command
       renders entries in order and exits with `0`.
 - [ ] Given `--output-file <path>`, the command writes the output to the

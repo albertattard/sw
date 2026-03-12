@@ -29,6 +29,7 @@ File-based task tracker for Sociable Weaver.
 - [TASK-023: Support Captured Variables In Rewrite Replacements](./TASK-023-support-captured-variables-in-rewrite-replacements.md)
 - [TASK-024: Support Captured Variables In Rewrite Patterns](./TASK-024-support-captured-variables-in-rewrite-patterns.md)
 - [TASK-025: Support Rewrite Generated Capture Pairs](./TASK-025-support-rewrite-generated-capture-pairs.md)
+- [TASK-026: Change Default Output File To README Uppercase](./TASK-026-change-default-output-file-to-readme-uppercase.md)
 
 ## Pending
 
@@ -67,6 +68,7 @@ File-based task tracker for Sociable Weaver.
 - [x] [TASK-023: Support Captured Variables In Rewrite Replacements](./TASK-023-support-captured-variables-in-rewrite-replacements.md)
 - [x] [TASK-024: Support Captured Variables In Rewrite Patterns](./TASK-024-support-captured-variables-in-rewrite-patterns.md)
 - [x] [TASK-025: Support Rewrite Generated Capture Pairs](./TASK-025-support-rewrite-generated-capture-pairs.md)
+- [x] [TASK-026: Change Default Output File To README Uppercase](./TASK-026-change-default-output-file-to-readme-uppercase.md)
 
 ## Blocked
 
