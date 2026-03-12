@@ -12,10 +12,11 @@ File-based task tracker for Sociable Weaver.
 - [TASK-006: Support Command Timeouts](./TASK-006-support-command-timeouts.md)
 - [TASK-007: Separate Runbook Execution and Rendering Modules](./TASK-007-separate-runbook-execution-and-rendering-modules.md)
 - [TASK-008: Support Command Cleanup](./TASK-008-support-command-cleanup.md)
+- [TASK-009: Support Output Content Types](./TASK-009-support-output-content-types.md)
 
 ## Pending
 
-- (none)
+- [ ] [TASK-009: Support Output Content Types](./TASK-009-support-output-content-types.md)
 
 ## In Progress
 

@@ -108,6 +108,13 @@ Initial rendering rules for Markdown output:
   output after the command block.
 - If `output.caption` is present, render that caption before the captured
   command output.
+- `output` may declare `content_type`.
+- If `output.content_type` is omitted, captured command output is rendered as
+  `text`.
+- If `output.content_type` is present, the generated Markdown fenced block uses
+  the declared content type.
+- In this increment, supported `output.content_type` values are `text`, `json`,
+  and `xml`.
 - If a `Command` entry does not contain an `output` property, command output is
   not written to the generated document.
 - Entries are rendered in the same order as they appear in the runbook.
@@ -184,6 +191,12 @@ Exit codes:
       includes the captured command output.
 - [ ] Given a `Command` entry with `output.caption`, the generated Markdown
       includes the caption before the captured command output.
+- [ ] Given a `Command` entry with `output.content_type: json`, the generated
+      Markdown uses a `json` fenced block for captured output.
+- [ ] Given a `Command` entry with `output.content_type: xml`, the generated
+      Markdown uses an `xml` fenced block for captured output.
+- [ ] Given a `Command` entry with `output` but no `content_type`, the
+      generated Markdown uses a `text` fenced block for captured output.
 - [ ] Given a `Command` entry without an `output` property, the generated
       Markdown does not include the captured command output.
 - [ ] Given an invalid runbook, the command exits with `2` and does not write a
@@ -231,6 +244,9 @@ Exit codes:
   operators are supported.
 - Command writes to stderr but exits successfully.
 - Command caption supplied as a string or array of strings.
+- Output content type omitted and defaults to `text`.
+- Output content type uses a supported rendering value such as `json` or `xml`.
+- Output content type uses an unsupported value.
 - Command output is large.
 
 ## Notes for Reimplementation
@@ -249,4 +265,7 @@ bounded runtime so runaway processes do not remain after a failed run. Cleanup
 behavior should remain deterministic so resources started by earlier commands
 are reliably released even when the run stops early. Cleanup should be best
 effort rather than fail-fast: all registered cleanup blocks and all cleanup
-lines should be attempted before the run reports cleanup failures.
+lines should be attempted before the run reports cleanup failures. Output
+rendering should remain extensible so captured command output can be tagged
+with a content type such as `json` or `xml` without changing the surrounding
+output contract.
