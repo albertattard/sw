@@ -1,0 +1,28 @@
+{
+  "entries": [
+    {
+      "type": "Heading",
+      "level": "H1",
+      "title": "Failing runbook"
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'before failure\\n' > failure-sequence.txt"
+      ]
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "false"
+      ],
+      "output": {}
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'after failure\\n' >> failure-sequence.txt"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "entries": [
+    {
+      "type": "Heading",
+      "level": "H1",
+      "title": "Multi-line command"
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "NAME='Albert Attard'",
+        "echo ${NAME}"
+      ],
+      "output": {
+        "caption": "Name output"
+      }
+    }
+  ]
+}

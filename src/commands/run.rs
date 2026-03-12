@@ -28,9 +28,13 @@ pub fn run(args: RunArgs) -> ExitCode {
     let markdown = match args.output_format {
         RunOutputFormat::Markdown => match runbook::render_markdown(&runbook) {
             Ok(markdown) => markdown,
-            Err(message) => {
+            Err(runbook::RenderError::Operational(message)) => {
                 eprintln!("{message}");
                 return ExitCode::from(1);
+            }
+            Err(runbook::RenderError::CommandFailed(message)) => {
+                eprintln!("{message}");
+                return ExitCode::from(2);
             }
         },
     };

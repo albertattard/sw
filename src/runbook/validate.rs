@@ -87,7 +87,7 @@ fn validate_output(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>)
             format!("{path}.caption"),
             "must be a string or array of strings",
         ),
-        None => push_error(errors, format!("{path}.caption"), "is required"),
+        None => {}
     }
 }
 

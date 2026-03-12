@@ -4,6 +4,7 @@ use serde::Serialize;
 use serde_json::Value;
 use std::fs;
 use std::path::Path;
+use std::process::Command;
 
 pub use validate::validate;
 
@@ -19,6 +20,11 @@ pub struct ValidationResult {
     pub valid: bool,
     pub errors: Vec<ValidationIssue>,
     pub warnings: Vec<ValidationIssue>,
+}
+
+pub enum RenderError {
+    Operational(String),
+    CommandFailed(String),
 }
 
 pub fn read(path: &Path) -> Result<Value, String> {
@@ -48,25 +54,30 @@ pub fn print_json(result: &ValidationResult) -> Result<(), String> {
     Ok(())
 }
 
-pub fn render_markdown(runbook: &Value) -> Result<String, String> {
+pub fn render_markdown(runbook: &Value) -> Result<String, RenderError> {
     let entries = runbook
         .get("entries")
         .and_then(Value::as_array)
-        .ok_or_else(|| "Runbook is missing an entries array".to_string())?;
+        .ok_or_else(|| {
+            RenderError::Operational("Runbook is missing an entries array".to_string())
+        })?;
 
     let mut sections = Vec::new();
 
     for entry in entries {
-        let entry_type = entry
-            .get("type")
-            .and_then(Value::as_str)
-            .ok_or_else(|| "Runbook entry is missing a type".to_string())?;
+        let entry_type = entry.get("type").and_then(Value::as_str).ok_or_else(|| {
+            RenderError::Operational("Runbook entry is missing a type".to_string())
+        })?;
 
         sections.push(match entry_type {
             "Heading" => render_heading(entry)?,
             "Markdown" => render_markdown_entry(entry)?,
             "Command" => render_command(entry)?,
-            other => return Err(format!("Unsupported entry type `{other}`")),
+            other => {
+                return Err(RenderError::Operational(format!(
+                    "Unsupported entry type `{other}`"
+                )));
+            }
         });
     }
 
@@ -77,15 +88,15 @@ pub fn render_markdown(runbook: &Value) -> Result<String, String> {
     Ok(output)
 }
 
-fn render_heading(entry: &Value) -> Result<String, String> {
+fn render_heading(entry: &Value) -> Result<String, RenderError> {
     let level = entry
         .get("level")
         .and_then(Value::as_str)
-        .ok_or_else(|| "Heading entry is missing level".to_string())?;
+        .ok_or_else(|| RenderError::Operational("Heading entry is missing level".to_string()))?;
     let title = entry
         .get("title")
         .and_then(Value::as_str)
-        .ok_or_else(|| "Heading entry is missing title".to_string())?;
+        .ok_or_else(|| RenderError::Operational("Heading entry is missing title".to_string()))?;
 
     let marker = match level {
         "H1" => "#",
@@ -94,23 +105,33 @@ fn render_heading(entry: &Value) -> Result<String, String> {
         "H4" => "####",
         "H5" => "#####",
         "H6" => "######",
-        other => return Err(format!("Unsupported heading level `{other}`")),
+        other => {
+            return Err(RenderError::Operational(format!(
+                "Unsupported heading level `{other}`"
+            )));
+        }
     };
 
     Ok(format!("{marker} {title}"))
 }
 
-fn render_markdown_entry(entry: &Value) -> Result<String, String> {
+fn render_markdown_entry(entry: &Value) -> Result<String, RenderError> {
     let contents = entry
         .get("contents")
         .and_then(Value::as_array)
-        .ok_or_else(|| "Markdown entry is missing contents".to_string())?;
+        .ok_or_else(|| {
+            RenderError::Operational("Markdown entry is missing contents".to_string())
+        })?;
 
     let mut lines = Vec::new();
     for item in contents {
         lines.push(
             item.as_str()
-                .ok_or_else(|| "Markdown contents must contain only strings".to_string())?
+                .ok_or_else(|| {
+                    RenderError::Operational(
+                        "Markdown contents must contain only strings".to_string(),
+                    )
+                })?
                 .to_string(),
         );
     }
@@ -118,52 +139,92 @@ fn render_markdown_entry(entry: &Value) -> Result<String, String> {
     Ok(lines.join("\n"))
 }
 
-fn render_command(entry: &Value) -> Result<String, String> {
+fn render_command(entry: &Value) -> Result<String, RenderError> {
     let commands = entry
         .get("commands")
         .and_then(Value::as_array)
-        .ok_or_else(|| "Command entry is missing commands".to_string())?;
+        .ok_or_else(|| RenderError::Operational("Command entry is missing commands".to_string()))?;
 
     let mut command_lines = Vec::new();
     for item in commands {
         command_lines.push(
             item.as_str()
-                .ok_or_else(|| "Command list must contain only strings".to_string())?
+                .ok_or_else(|| {
+                    RenderError::Operational("Command list must contain only strings".to_string())
+                })?
                 .to_string(),
         );
     }
 
-    let mut section = format!("```shell\n{}\n```", command_lines.join("\n"));
+    let command_text = command_lines.join("\n");
+    let mut section = format!("```shell\n{command_text}\n```");
+    let execution = execute_command(&command_text)?;
 
     if let Some(output) = entry.get("output") {
-        let caption = output
-            .get("caption")
-            .ok_or_else(|| "Command output section is missing caption".to_string())?;
-        let caption_text = match caption {
-            Value::String(text) => text.to_string(),
-            Value::Array(items) => {
-                let mut lines = Vec::new();
-                for item in items {
-                    lines.push(
-                        item.as_str()
-                            .ok_or_else(|| {
-                                "Command output caption must contain only strings".to_string()
-                            })?
-                            .to_string(),
-                    );
+        if let Some(caption) = output.get("caption") {
+            let caption_text = match caption {
+                Value::String(text) => text.to_string(),
+                Value::Array(items) => {
+                    let mut lines = Vec::new();
+                    for item in items {
+                        lines.push(
+                            item.as_str()
+                                .ok_or_else(|| {
+                                    RenderError::Operational(
+                                        "Command output caption must contain only strings"
+                                            .to_string(),
+                                    )
+                                })?
+                                .to_string(),
+                        );
+                    }
+                    lines.join("\n")
                 }
-                lines.join("\n")
-            }
-            _ => {
-                return Err(
-                    "Command output caption must be a string or array of strings".to_string(),
-                );
-            }
+                _ => {
+                    return Err(RenderError::Operational(
+                        "Command output caption must be a string or array of strings".to_string(),
+                    ));
+                }
+            };
+
+            section.push_str("\n\n");
+            section.push_str(&caption_text);
         };
 
         section.push_str("\n\n");
-        section.push_str(&caption_text);
+        section.push_str("```text\n");
+        section.push_str(&execution.stdout);
+        if !execution.stdout.ends_with('\n') {
+            section.push('\n');
+        }
+        section.push_str("```");
     }
 
     Ok(section)
+}
+
+struct CommandExecution {
+    stdout: String,
+}
+
+fn execute_command(command: &str) -> Result<CommandExecution, RenderError> {
+    let output = Command::new("sh")
+        .arg("-lc")
+        .arg(command)
+        .output()
+        .map_err(|err| RenderError::Operational(format!("Failed to execute command: {err}")))?;
+
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
+        let detail = if stderr.is_empty() {
+            format!("Command failed with status {}", output.status)
+        } else {
+            format!("Command failed with status {}: {stderr}", output.status)
+        };
+        return Err(RenderError::CommandFailed(detail));
+    }
+
+    Ok(CommandExecution {
+        stdout: String::from_utf8_lossy(&output.stdout).to_string(),
+    })
 }

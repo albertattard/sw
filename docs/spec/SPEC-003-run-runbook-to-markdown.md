@@ -61,6 +61,8 @@ Initial rendering rules for Markdown output:
 - `Markdown` entries copy their `contents` into the output in order.
 - `Command` entries render their `commands` as fenced shell code blocks.
 - `Command` entries are executed in order.
+- All lines within a single `Command` entry execute together in the same shell
+  context.
 - A `Command` entry must complete successfully for the command to continue.
 - If a `Command` entry contains an `output` property, render captured command
   output after the command block.
@@ -89,6 +91,9 @@ Exit codes:
       renders entries in order and exits with `0`.
 - [ ] Given a runbook with `Command` entries, the commands are executed in the
       same order as they appear in the runbook.
+- [ ] Given a `Command` entry with multiple command lines, those lines execute
+      together in the same shell context so values set on one line can be used
+      on a later line.
 - [ ] Given a command that exits successfully, the run continues.
 - [ ] Given a command that exits with an error, the command exits with `2` and
       does not write a partial output file.
@@ -124,6 +129,8 @@ Exit codes:
 - Output path points to an unwritable location.
 - Existing output file already present.
 - Command entry with multi-line commands.
+- Variable assignment on one command line used by a later line in the same
+  entry.
 - Command exits with non-zero status.
 - Command writes to stderr but exits successfully.
 - Command caption supplied as a string or array of strings.
