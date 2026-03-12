@@ -27,10 +27,12 @@ File-based task tracker for Sociable Weaver.
 - [TASK-021: Support Deferred Markdown Interpolation](./TASK-021-support-deferred-markdown-interpolation.md)
 - [TASK-022: Support Markdown Interpolation For Earlier Captures](./TASK-022-support-markdown-interpolation-for-earlier-captures.md)
 - [TASK-023: Support Captured Variables In Rewrite Replacements](./TASK-023-support-captured-variables-in-rewrite-replacements.md)
+- [TASK-024: Support Captured Variables In Rewrite Patterns](./TASK-024-support-captured-variables-in-rewrite-patterns.md)
 
 ## Pending
 
 - [ ] [TASK-021: Support Deferred Markdown Interpolation](./TASK-021-support-deferred-markdown-interpolation.md)
+- [ ] [TASK-024: Support Captured Variables In Rewrite Patterns](./TASK-024-support-captured-variables-in-rewrite-patterns.md)
 
 ## In Progress
 

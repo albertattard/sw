@@ -197,6 +197,12 @@ in the runbook.
 - A `replace` rewrite rule performs a pattern-based replacement on the captured
   command output.
 - A `replace` rewrite rule may interpolate captured variables inside its
+  `pattern` text using `@{name}` syntax.
+- `@@{name}` inside a `replace` rule `pattern` preserves the literal
+  `@{name}` text.
+- A `replace` rule `pattern` that references `@{name}` must use a variable
+  captured earlier in the runbook.
+- A `replace` rewrite rule may interpolate captured variables inside its
   `replacement` text using `@{name}` syntax.
 - `@@{name}` inside a `replace` rule `replacement` preserves the literal
   `@{name}` text.
@@ -383,6 +389,13 @@ in the runbook.
       in the declared order before output is rendered.
 - [ ] Given a `replace` rewrite rule, matching text is replaced in rendered
       output.
+- [ ] Given a `replace` rewrite rule `pattern` that uses `@{name}` after that
+      variable is captured earlier in the runbook, the pattern text includes
+      the captured value before matching.
+- [ ] Given a `replace` rewrite rule `pattern` that uses `@{name}` before that
+      variable is captured, validation rejects the runbook.
+- [ ] Given `@@{name}` in a `replace` rewrite rule `pattern`, the literal
+      `@{name}` is preserved without interpolation.
 - [ ] Given a `replace` rewrite rule `replacement` that uses `@{name}` after
       that variable is captured earlier in the runbook, the replacement text
       includes the captured value.
@@ -472,8 +485,12 @@ in the runbook.
   interpolated.
 - A `replace` rewrite rule `replacement` references a captured variable before
   it is defined.
+- A `replace` rewrite rule `pattern` references a captured variable before it
+  is defined.
 - A `replace` rewrite rule `replacement` contains literal `@{name}` that must
   not be interpolated.
+- A `replace` rewrite rule `pattern` contains literal `@{name}` that must not
+  be interpolated.
 - A capture rule matches no value.
 - A capture rule matches more than one value when exactly one value is
   required.
