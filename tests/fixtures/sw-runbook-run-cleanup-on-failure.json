@@ -1,0 +1,19 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'before failure\\n' >> cleanup-on-failure.txt"
+      ],
+      "cleanup": [
+        "printf 'cleanup after failure\\n' >> cleanup-on-failure.txt"
+      ]
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "false"
+      ]
+    }
+  ]
+}

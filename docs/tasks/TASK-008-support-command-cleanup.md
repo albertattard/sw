@@ -1,7 +1,7 @@
 ---
 id: TASK-008
 title: Support Command Cleanup
-status: pending
+status: done
 related_features:
   - SPEC-003
 owner: @aattard
@@ -31,17 +31,18 @@ Support per-command cleanup in `sw run`.
 
 ## Acceptance Criteria
 
-- [ ] Given commands with `cleanup`, cleanup runs in reverse order after a successful run.
-- [ ] Given a `cleanup` block with multiple command lines, those lines run in order.
-- [ ] Given a run failure, previously registered cleanup commands still run in reverse order.
-- [ ] Given a run timeout, previously registered cleanup commands still run in reverse order.
-- [ ] Given commands without `cleanup`, no cleanup command is registered for those entries.
-- [ ] Given a failed cleanup line, remaining cleanup lines and remaining cleanup blocks still run.
-- [ ] Given one or more cleanup failures, the overall run is reported as failed.
-- [ ] Invalid cleanup values are rejected by validation.
+- [x] Given commands with `cleanup`, cleanup runs in reverse order after a successful run.
+- [x] Given a `cleanup` block with multiple command lines, those lines run in order.
+- [x] Given a run failure, previously registered cleanup commands still run in reverse order.
+- [x] Given a run timeout, previously registered cleanup commands still run in reverse order.
+- [x] Given commands without `cleanup`, no cleanup command is registered for those entries.
+- [x] Given a failed cleanup line, remaining cleanup lines and remaining cleanup blocks still run.
+- [x] Given one or more cleanup failures, the overall run is reported as failed.
+- [x] Invalid cleanup values are rejected by validation.
 
 ## Notes
 
 This task introduces deterministic resource release for commands that start
 background services or other temporary dependencies, while ensuring cleanup is
-best effort rather than fail-fast.
+best effort rather than fail-fast. Implemented with validation and integration
+coverage for success, failure, timeout, and cleanup-failure paths.

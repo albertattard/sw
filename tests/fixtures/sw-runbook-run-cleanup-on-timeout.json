@@ -1,0 +1,23 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'before timeout\\n' >> cleanup-on-timeout.txt"
+      ],
+      "cleanup": [
+        "printf 'cleanup after timeout\\n' >> cleanup-on-timeout.txt"
+      ]
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "sleep 2"
+      ],
+      "timeout": "1 second",
+      "output": {
+        "caption": "Timeout output"
+      }
+    }
+  ]
+}

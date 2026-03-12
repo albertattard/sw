@@ -12,6 +12,31 @@ pub(crate) struct CommandExecution {
     pub(crate) timed_out: bool,
 }
 
+pub(crate) fn cleanup_block(entry: &Value) -> Result<Option<Vec<String>>, RenderError> {
+    let Some(cleanup) = entry.get("cleanup") else {
+        return Ok(None);
+    };
+
+    let cleanup_lines = cleanup
+        .as_array()
+        .ok_or_else(|| RenderError::Operational("Command cleanup must be an array".to_string()))?;
+
+    let mut lines = Vec::new();
+    for item in cleanup_lines {
+        lines.push(
+            item.as_str()
+                .ok_or_else(|| {
+                    RenderError::Operational(
+                        "Command cleanup must contain only strings".to_string(),
+                    )
+                })?
+                .to_string(),
+        );
+    }
+
+    Ok(Some(lines))
+}
+
 pub(crate) fn execute_command(
     entry: &Value,
     command: &str,
@@ -108,6 +133,52 @@ pub(crate) fn timeout_label(entry: &Value) -> String {
         .and_then(Value::as_str)
         .unwrap_or("2 minutes")
         .to_string()
+}
+
+pub(crate) fn run_cleanup_blocks(cleanups: &[Vec<String>]) -> Vec<String> {
+    let mut failures = Vec::new();
+
+    for cleanup in cleanups.iter().rev() {
+        if let Err(message) = run_cleanup_block(cleanup) {
+            failures.push(message);
+        }
+    }
+
+    failures
+}
+
+fn run_cleanup_block(cleanup: &[String]) -> Result<(), String> {
+    let script = cleanup_script(cleanup);
+    let output = Command::new("sh")
+        .arg("-lc")
+        .arg(script)
+        .output()
+        .map_err(|err| format!("Failed to execute cleanup: {err}"))?;
+
+    if output.status.success() {
+        return Ok(());
+    }
+
+    let exit_code = output.status.code().unwrap_or(-1);
+    let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
+    if stderr.is_empty() {
+        Err(format!("Cleanup failed with exit code {exit_code}"))
+    } else {
+        Err(format!(
+            "Cleanup failed with exit code {exit_code}: {stderr}"
+        ))
+    }
+}
+
+fn cleanup_script(cleanup: &[String]) -> String {
+    let mut script = String::from("status=0\n");
+    for line in cleanup {
+        script.push_str("{ ");
+        script.push_str(line);
+        script.push_str("; } || status=$?\n");
+    }
+    script.push_str("exit $status\n");
+    script
 }
 
 fn ensure_expected_exit_code(

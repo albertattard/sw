@@ -276,3 +276,84 @@ fn timed_out_command_is_terminated_and_preserves_partial_output() {
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(stderr.contains("Command timed out after 1 second"));
 }
+
+#[test]
+fn cleanup_runs_in_reverse_order_after_successful_run() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-cleanup-success.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    assert_eq!(
+        fs::read_to_string(dir.join("cleanup-order.txt")).expect("missing cleanup order file"),
+        "A main\nB main\nB cleanup\nA cleanup\n"
+    );
+}
+
+#[test]
+fn cleanup_runs_after_command_failure() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-cleanup-on-failure.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert_eq!(output.status.code(), Some(2));
+    assert!(!dir.join("readme.md").exists());
+    assert_eq!(
+        fs::read_to_string(dir.join("cleanup-on-failure.txt"))
+            .expect("missing cleanup-on-failure file"),
+        "before failure\ncleanup after failure\n"
+    );
+}
+
+#[test]
+fn cleanup_runs_after_timeout() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-cleanup-on-timeout.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert_eq!(output.status.code(), Some(2));
+    assert_eq!(
+        fs::read_to_string(dir.join("cleanup-on-timeout.txt"))
+            .expect("missing cleanup-on-timeout file"),
+        "before timeout\ncleanup after timeout\n"
+    );
+}
+
+#[test]
+fn cleanup_failures_do_not_stop_remaining_cleanup_and_fail_the_run() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-cleanup-failure.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert_eq!(output.status.code(), Some(2));
+    let readme = fs::read_to_string(dir.join("readme.md")).expect("missing readme output");
+    assert!(readme.contains("```shell"));
+    assert_eq!(
+        fs::read_to_string(dir.join("cleanup-failure-order.txt"))
+            .expect("missing cleanup failure order file"),
+        "A main\nB main\nB cleanup\nA cleanup 1\nA cleanup 2\n"
+    );
+
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("Cleanup failed"));
+}

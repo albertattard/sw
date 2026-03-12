@@ -27,6 +27,10 @@ pub struct ValidationResult {
 pub enum RenderError {
     Operational(String),
     CommandFailed(String),
+    CleanupFailed {
+        message: String,
+        markdown: String,
+    },
     Timeout {
         message: String,
         partial_markdown: String,

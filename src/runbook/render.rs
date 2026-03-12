@@ -1,5 +1,7 @@
 use super::RenderError;
-use super::execute::{ensure_assertions, execute_command, timeout_label};
+use super::execute::{
+    cleanup_block, ensure_assertions, execute_command, run_cleanup_blocks, timeout_label,
+};
 use serde_json::Value;
 
 pub(crate) fn render_markdown(runbook: &Value) -> Result<String, RenderError> {
@@ -11,6 +13,8 @@ pub(crate) fn render_markdown(runbook: &Value) -> Result<String, RenderError> {
         })?;
 
     let mut sections = Vec::new();
+    let mut cleanups: Vec<Vec<String>> = Vec::new();
+    let mut failure: Option<RenderError> = None;
 
     for entry in entries {
         let entry_type = entry.get("type").and_then(Value::as_str).ok_or_else(|| {
@@ -20,24 +24,30 @@ pub(crate) fn render_markdown(runbook: &Value) -> Result<String, RenderError> {
         let rendered = match entry_type {
             "Heading" => render_heading(entry)?,
             "Markdown" => render_markdown_entry(entry)?,
-            "Command" => match render_command(entry) {
-                Ok(section) => section,
-                Err(RenderError::Timeout {
-                    message,
-                    partial_markdown,
-                }) => {
-                    sections.push(partial_markdown);
-                    let mut output = sections.join("\n\n");
-                    if !output.ends_with('\n') {
-                        output.push('\n');
-                    }
-                    return Err(RenderError::Timeout {
-                        message,
-                        partial_markdown: output,
-                    });
+            "Command" => {
+                if let Some(cleanup) = cleanup_block(entry)? {
+                    cleanups.push(cleanup);
                 }
-                Err(err) => return Err(err),
-            },
+
+                match render_command(entry) {
+                    Ok(section) => section,
+                    Err(RenderError::Timeout {
+                        message,
+                        partial_markdown,
+                    }) => {
+                        sections.push(partial_markdown);
+                        failure = Some(RenderError::Timeout {
+                            message,
+                            partial_markdown: String::new(),
+                        });
+                        break;
+                    }
+                    Err(err) => {
+                        failure = Some(err);
+                        break;
+                    }
+                }
+            }
             other => {
                 return Err(RenderError::Operational(format!(
                     "Unsupported entry type `{other}`"
@@ -52,7 +62,38 @@ pub(crate) fn render_markdown(runbook: &Value) -> Result<String, RenderError> {
     if !output.ends_with('\n') {
         output.push('\n');
     }
-    Ok(output)
+
+    let cleanup_failures = run_cleanup_blocks(&cleanups);
+    let cleanup_message = if cleanup_failures.is_empty() {
+        None
+    } else {
+        Some(format!(
+            "Cleanup failed:\n- {}",
+            cleanup_failures.join("\n- ")
+        ))
+    };
+
+    match failure {
+        Some(RenderError::Timeout { message, .. }) => Err(RenderError::Timeout {
+            message: combine_messages(&message, cleanup_message.as_deref()),
+            partial_markdown: output,
+        }),
+        Some(RenderError::CommandFailed(message)) => Err(RenderError::CommandFailed(
+            combine_messages(&message, cleanup_message.as_deref()),
+        )),
+        Some(RenderError::Operational(message)) => Err(RenderError::Operational(combine_messages(
+            &message,
+            cleanup_message.as_deref(),
+        ))),
+        Some(RenderError::CleanupFailed { .. }) => unreachable!(),
+        None => match cleanup_message {
+            Some(message) => Err(RenderError::CleanupFailed {
+                message,
+                markdown: output,
+            }),
+            None => Ok(output),
+        },
+    }
 }
 
 fn render_heading(entry: &Value) -> Result<String, RenderError> {
@@ -182,5 +223,12 @@ fn render_caption(caption: &Value) -> Result<String, RenderError> {
         _ => Err(RenderError::Operational(
             "Command output caption must be a string or array of strings".to_string(),
         )),
+    }
+}
+
+fn combine_messages(primary: &str, secondary: Option<&str>) -> String {
+    match secondary {
+        Some(secondary) => format!("{primary}\n{secondary}"),
+        None => primary.to_string(),
     }
 }

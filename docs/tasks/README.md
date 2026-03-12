@@ -15,7 +15,7 @@ File-based task tracker for Sociable Weaver.
 
 ## Pending
 
-- [ ] [TASK-008: Support Command Cleanup](./TASK-008-support-command-cleanup.md)
+- (none)
 
 ## In Progress
 
@@ -33,6 +33,7 @@ File-based task tracker for Sociable Weaver.
 - [x] [TASK-005: Support Stdout Contains Assertions](./TASK-005-support-stdout-contains-assertions.md)
 - [x] [TASK-006: Support Command Timeouts](./TASK-006-support-command-timeouts.md)
 - [x] [TASK-007: Separate Runbook Execution and Rendering Modules](./TASK-007-separate-runbook-execution-and-rendering-modules.md)
+- [x] [TASK-008: Support Command Cleanup](./TASK-008-support-command-cleanup.md)
 
 ## Blocked
 

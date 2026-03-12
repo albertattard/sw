@@ -36,6 +36,14 @@ pub fn run(args: RunArgs) -> ExitCode {
                 eprintln!("{message}");
                 return ExitCode::from(2);
             }
+            Err(runbook::RenderError::CleanupFailed { message, markdown }) => {
+                if let Err(write_error) = std::fs::write(&output_path, &markdown) {
+                    eprintln!("Failed to write {}: {write_error}", output_path.display());
+                    return ExitCode::from(1);
+                }
+                eprintln!("{message}");
+                return ExitCode::from(2);
+            }
             Err(runbook::RenderError::Timeout {
                 message,
                 partial_markdown,

@@ -1,0 +1,24 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'A main\\n' >> cleanup-failure-order.txt"
+      ],
+      "cleanup": [
+        "printf 'A cleanup 1\\n' >> cleanup-failure-order.txt",
+        "false",
+        "printf 'A cleanup 2\\n' >> cleanup-failure-order.txt"
+      ]
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'B main\\n' >> cleanup-failure-order.txt"
+      ],
+      "cleanup": [
+        "printf 'B cleanup\\n' >> cleanup-failure-order.txt"
+      ]
+    }
+  ]
+}

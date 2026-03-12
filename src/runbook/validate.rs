@@ -220,6 +220,10 @@ fn validate_entry(value: &Value, index: usize, errors: &mut Vec<ValidationIssue>
             if let Some(timeout) = object.get("timeout") {
                 validate_timeout(timeout, &format!("{path}.timeout"), errors);
             }
+
+            if let Some(cleanup) = object.get("cleanup") {
+                validate_string_array(cleanup, &format!("{path}.cleanup"), errors);
+            }
         }
         _ => push_error(
             errors,
