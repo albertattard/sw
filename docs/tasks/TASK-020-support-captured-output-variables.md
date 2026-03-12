@@ -1,7 +1,7 @@
 ---
 id: TASK-020
 title: Support Captured Output Variables
-status: pending
+status: done
 related_features:
   - SPEC-003
 owner: @aattard
@@ -31,17 +31,17 @@ later commands.
 
 ## Acceptance Criteria
 
-- [ ] Given a command with `capture`, the named value is stored for later use.
-- [ ] Given `stage: raw`, capture runs before output rewrite rules.
-- [ ] Given `stage: rewritten`, capture runs after output rewrite rules.
-- [ ] Given a later command with `@{name}`, the captured value is interpolated
+- [x] Given a command with `capture`, the named value is stored for later use.
+- [x] Given `stage: raw`, capture runs before output rewrite rules.
+- [x] Given `stage: rewritten`, capture runs after output rewrite rules.
+- [x] Given a later command with `@{name}`, the captured value is interpolated
       before execution.
-- [ ] Given duplicate capture names anywhere in the runbook, validation rejects
+- [x] Given duplicate capture names anywhere in the runbook, validation rejects
       the runbook.
-- [ ] Given a variable reference before the variable is captured, validation
+- [x] Given a variable reference before the variable is captured, validation
       rejects the runbook.
-- [ ] Given a capture rule that matches zero or multiple values, the run fails.
-- [ ] Given `@@{name}`, the literal `@{name}` is preserved without
+- [x] Given a capture rule that matches zero or multiple values, the run fails.
+- [x] Given `@@{name}`, the literal `@{name}` is preserved without
       interpolation.
 
 ## Notes

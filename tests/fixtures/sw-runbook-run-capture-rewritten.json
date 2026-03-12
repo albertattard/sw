@@ -1,0 +1,33 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf '/Users/demo/private/audio_20260312_135350.mp3\\n'"
+      ],
+      "output": {
+        "rewrite": [
+          {
+            "type": "replace",
+            "pattern": "/Users/demo/private/audio_\\d{8}_\\d{6}\\.mp3",
+            "replacement": "./target/audio/demo.mp3"
+          }
+        ]
+      },
+      "capture": [
+        {
+          "name": "audio_path",
+          "source": "stdout",
+          "stage": "rewritten",
+          "pattern": "(\\./target/audio/demo\\.mp3)"
+        }
+      ]
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "printf '%s\\n' '@{audio_path}' > captured-rewritten.txt"
+      ]
+    }
+  ]
+}

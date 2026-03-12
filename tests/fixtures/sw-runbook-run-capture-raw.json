@@ -1,0 +1,25 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'PATH=/tmp/sw-demo-raw/file.txt\\n'"
+      ],
+      "capture": [
+        {
+          "name": "generated_path",
+          "source": "stdout",
+          "stage": "raw",
+          "pattern": "PATH=(.+)"
+        }
+      ]
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "printf '%s\\n' '@{generated_path}' > captured-raw.txt",
+        "printf '%s\\n' '@@{generated_path}' > captured-literal.txt"
+      ]
+    }
+  ]
+}

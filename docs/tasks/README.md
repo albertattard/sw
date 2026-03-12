@@ -28,7 +28,6 @@ File-based task tracker for Sociable Weaver.
 
 ## Pending
 
-- [ ] [TASK-020: Support Captured Output Variables](./TASK-020-support-captured-output-variables.md)
 - [ ] [TASK-021: Support Deferred Markdown Interpolation](./TASK-021-support-deferred-markdown-interpolation.md)
 
 ## In Progress
@@ -59,6 +58,7 @@ File-based task tracker for Sociable Weaver.
 - [x] [TASK-017: Support Shared Datetime Shift Anchors And Custom Formats](./TASK-017-support-shared-datetime-shift-anchors-and-custom-formats.md)
 - [x] [TASK-018: Enforce Global Datetime Shift Anchor Uniqueness](./TASK-018-enforce-global-datetime-shift-anchor-uniqueness.md)
 - [x] [TASK-019: Support Cross-Command Datetime Anchor Reuse](./TASK-019-support-cross-command-datetime-anchor-reuse.md)
+- [x] [TASK-020: Support Captured Output Variables](./TASK-020-support-captured-output-variables.md)
 
 ## Blocked
 

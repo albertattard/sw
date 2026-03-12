@@ -1,0 +1,32 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "echo 'first'"
+      ],
+      "capture": [
+        {
+          "name": "shared_value",
+          "source": "stdout",
+          "stage": "raw",
+          "pattern": "first"
+        }
+      ]
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "echo 'second'"
+      ],
+      "capture": [
+        {
+          "name": "shared_value",
+          "source": "stdout",
+          "stage": "raw",
+          "pattern": "second"
+        }
+      ]
+    }
+  ]
+}

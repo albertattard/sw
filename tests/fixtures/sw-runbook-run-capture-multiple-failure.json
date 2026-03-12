@@ -1,0 +1,18 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'token-1\\ntoken-2\\n'"
+      ],
+      "capture": [
+        {
+          "name": "token",
+          "source": "stdout",
+          "stage": "raw",
+          "pattern": "token-\\d+"
+        }
+      ]
+    }
+  ]
+}

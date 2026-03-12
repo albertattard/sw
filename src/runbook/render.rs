@@ -14,6 +14,14 @@ const GENERATED_MARKER: &str =
 const DEFAULT_DATETIME_SHIFT_BASE: &str = "2077-04-27T12:34:56.789+01:00";
 const RFC3339_PATTERN: &str = r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}[+-]\d{2}:\d{2}";
 const RFC1123_PATTERN: &str = r"[A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4} \d{2}:\d{2}:\d{2} GMT";
+const CAPTURE_NAME_PATTERN: &str = r"^[A-Za-z_][A-Za-z0-9_]*$";
+const CAPTURE_INTERPOLATION_PATTERN: &str =
+    r"@@\{([A-Za-z_][A-Za-z0-9_]*)\}|@\{([A-Za-z_][A-Za-z0-9_]*)\}";
+
+struct RenderState {
+    datetime_anchors: HashMap<String, DatetimeShiftAnchor>,
+    captured_values: HashMap<String, String>,
+}
 
 pub(crate) fn render_markdown(runbook: &Value, runbook_path: &Path) -> Result<String, RenderError> {
     let entries = runbook
@@ -26,7 +34,10 @@ pub(crate) fn render_markdown(runbook: &Value, runbook_path: &Path) -> Result<St
     let mut sections = Vec::new();
     let mut cleanups: Vec<Vec<String>> = Vec::new();
     let mut failure: Option<RenderError> = None;
-    let mut datetime_anchors = HashMap::new();
+    let mut state = RenderState {
+        datetime_anchors: HashMap::new(),
+        captured_values: HashMap::new(),
+    };
 
     for entry in entries {
         let entry_type = entry.get("type").and_then(Value::as_str).ok_or_else(|| {
@@ -42,7 +53,7 @@ pub(crate) fn render_markdown(runbook: &Value, runbook_path: &Path) -> Result<St
                     cleanups.push(cleanup);
                 }
 
-                match render_command(entry, &mut datetime_anchors) {
+                match render_command(entry, &mut state) {
                     Ok(section) => section,
                     Err(RenderError::Timeout {
                         message,
@@ -184,10 +195,7 @@ fn render_markdown_entry(entry: &Value) -> Result<String, RenderError> {
     Ok(lines.join("\n"))
 }
 
-fn render_command(
-    entry: &Value,
-    datetime_anchors: &mut HashMap<String, DatetimeShiftAnchor>,
-) -> Result<String, RenderError> {
+fn render_command(entry: &Value, state: &mut RenderState) -> Result<String, RenderError> {
     let commands = entry
         .get("commands")
         .and_then(Value::as_array)
@@ -204,12 +212,14 @@ fn render_command(
         );
     }
 
-    let command_text = command_lines.join("\n");
+    let resolved_command_lines = interpolate_command_lines(&command_lines, &state.captured_values)?;
+    let command_text = resolved_command_lines.join("\n");
     let mut section = format!("```shell\n{command_text}\n```");
     let execution = execute_command(entry, &command_text)?;
+    let rewritten_stdout = rewritten_stdout_for_capture(entry, &execution.stdout, state)?;
 
     if execution.timed_out {
-        append_output(entry, &execution.stdout, &mut section, datetime_anchors)?;
+        append_output(entry, &rewritten_stdout, &mut section)?;
         return Err(RenderError::Timeout {
             message: format!("Command timed out after {}", timeout_label(entry)),
             partial_markdown: apply_indent(entry, section)?,
@@ -217,20 +227,20 @@ fn render_command(
     }
 
     ensure_assertions(entry, &execution)?;
-    append_output(entry, &execution.stdout, &mut section, datetime_anchors)?;
+    extract_captured_values(
+        entry,
+        &execution.stdout,
+        &rewritten_stdout,
+        &mut state.captured_values,
+    )?;
+    append_output(entry, &rewritten_stdout, &mut section)?;
     apply_indent(entry, section)
 }
 
-fn append_output(
-    entry: &Value,
-    stdout: &str,
-    section: &mut String,
-    datetime_anchors: &mut HashMap<String, DatetimeShiftAnchor>,
-) -> Result<(), RenderError> {
+fn append_output(entry: &Value, stdout: &str, section: &mut String) -> Result<(), RenderError> {
     let Some(output) = entry.get("output") else {
         return Ok(());
     };
-    let rendered_stdout = normalize_rendered_output(output, stdout, datetime_anchors)?;
 
     if let Some(caption) = output.get("caption") {
         let caption_text = render_caption(caption)?;
@@ -240,8 +250,8 @@ fn append_output(
 
     section.push_str("\n\n");
     section.push_str(output_fence_open(output)?);
-    section.push_str(&rendered_stdout);
-    if !rendered_stdout.ends_with('\n') && !rendered_stdout.is_empty() {
+    section.push_str(stdout);
+    if !stdout.ends_with('\n') && !stdout.is_empty() {
         section.push('\n');
     }
     section.push_str("```");
@@ -300,6 +310,18 @@ fn normalize_rendered_output(
         .collect())
 }
 
+fn rewritten_stdout_for_capture(
+    entry: &Value,
+    stdout: &str,
+    state: &mut RenderState,
+) -> Result<String, RenderError> {
+    let Some(output) = entry.get("output") else {
+        return Ok(stdout.to_string());
+    };
+
+    normalize_rendered_output(output, stdout, &mut state.datetime_anchors)
+}
+
 fn apply_rewrite_rules(
     output: &Value,
     stdout: &str,
@@ -316,6 +338,135 @@ fn apply_rewrite_rules(
         rendered = apply_rewrite_rule(rule, &rendered, datetime_anchors)?;
     }
     Ok(rendered)
+}
+
+fn extract_captured_values(
+    entry: &Value,
+    raw_stdout: &str,
+    rewritten_stdout: &str,
+    captured_values: &mut HashMap<String, String>,
+) -> Result<(), RenderError> {
+    let Some(capture) = entry.get("capture") else {
+        return Ok(());
+    };
+    let captures = capture
+        .as_array()
+        .ok_or_else(|| RenderError::Operational("Command capture must be an array".to_string()))?;
+
+    let name_pattern = Regex::new(CAPTURE_NAME_PATTERN).expect("valid capture name regex");
+
+    for rule in captures {
+        let name = rule.get("name").and_then(Value::as_str).ok_or_else(|| {
+            RenderError::Operational("Command capture name must be a string".to_string())
+        })?;
+        if !name_pattern.is_match(name) {
+            return Err(RenderError::Operational(format!(
+                "Command capture name `{name}` is invalid"
+            )));
+        }
+
+        let source = rule.get("source").and_then(Value::as_str).ok_or_else(|| {
+            RenderError::Operational("Command capture source must be a string".to_string())
+        })?;
+        if source != "stdout" {
+            return Err(RenderError::Operational(format!(
+                "Unsupported command capture source `{source}`"
+            )));
+        }
+
+        let stage = rule.get("stage").and_then(Value::as_str).ok_or_else(|| {
+            RenderError::Operational("Command capture stage must be a string".to_string())
+        })?;
+        let candidate = match stage {
+            "raw" => raw_stdout,
+            "rewritten" => rewritten_stdout,
+            other => {
+                return Err(RenderError::Operational(format!(
+                    "Unsupported command capture stage `{other}`"
+                )));
+            }
+        };
+
+        let pattern = rule.get("pattern").and_then(Value::as_str).ok_or_else(|| {
+            RenderError::Operational("Command capture pattern must be a string".to_string())
+        })?;
+        let regex = Regex::new(pattern).map_err(|err| {
+            RenderError::Operational(format!(
+                "Invalid command capture pattern `{pattern}`: {err}"
+            ))
+        })?;
+
+        let matches: Vec<String> = regex
+            .captures_iter(candidate)
+            .map(|captures| {
+                captures
+                    .get(1)
+                    .or_else(|| captures.get(0))
+                    .map(|value| value.as_str().to_string())
+                    .unwrap_or_default()
+            })
+            .collect();
+
+        match matches.len() {
+            1 => {
+                captured_values.insert(name.to_string(), matches[0].clone());
+            }
+            0 => {
+                return Err(RenderError::CommandFailed(format!(
+                    "Command capture `{name}` matched no value"
+                )));
+            }
+            count => {
+                return Err(RenderError::CommandFailed(format!(
+                    "Command capture `{name}` matched {count} values; expected exactly one"
+                )));
+            }
+        }
+    }
+
+    Ok(())
+}
+
+fn interpolate_command_lines(
+    command_lines: &[String],
+    captured_values: &HashMap<String, String>,
+) -> Result<Vec<String>, RenderError> {
+    command_lines
+        .iter()
+        .map(|line| interpolate_captured_variables(line, captured_values))
+        .collect()
+}
+
+fn interpolate_captured_variables(
+    input: &str,
+    captured_values: &HashMap<String, String>,
+) -> Result<String, RenderError> {
+    let regex =
+        Regex::new(CAPTURE_INTERPOLATION_PATTERN).expect("valid capture interpolation regex");
+    let mut output = String::with_capacity(input.len());
+    let mut last_end = 0;
+
+    for captures in regex.captures_iter(input) {
+        let matched = captures.get(0).expect("full regex match");
+        output.push_str(&input[last_end..matched.start()]);
+
+        if let Some(escaped_name) = captures.get(1) {
+            output.push_str(&format!("@{{{}}}", escaped_name.as_str()));
+        } else if let Some(name) = captures.get(2) {
+            let value = captured_values.get(name.as_str()).ok_or_else(|| {
+                RenderError::CommandFailed(format!(
+                    "Command references unknown captured variable `@{{{}}}`",
+                    name.as_str()
+                ))
+            })?;
+            output.push_str(value);
+        }
+
+        last_end = matched.end();
+    }
+
+    output.push_str(&input[last_end..]);
+    Ok(output)
 }
 
 fn apply_rewrite_rule(

@@ -566,6 +566,63 @@ fn output_rewrite_datetime_shift_can_reuse_one_anchor_across_commands() {
 }
 
 #[test]
+fn command_capture_raw_stage_supports_later_command_interpolation_and_escape() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-run-capture-raw.json", "sw-runbook.json");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    assert_eq!(
+        fs::read_to_string(dir.join("captured-raw.txt")).expect("missing captured-raw.txt"),
+        "/tmp/sw-demo-raw/file.txt\n"
+    );
+    assert_eq!(
+        fs::read_to_string(dir.join("captured-literal.txt")).expect("missing captured-literal.txt"),
+        "@{generated_path}\n"
+    );
+    let readme = fs::read_to_string(dir.join("readme.md")).expect("missing readme output");
+    assert!(readme.contains("printf '%s\\n' '/tmp/sw-demo-raw/file.txt' > captured-raw.txt"));
+    assert!(readme.contains("printf '%s\\n' '@{generated_path}' > captured-literal.txt"));
+}
+
+#[test]
+fn command_capture_rewritten_stage_uses_rewritten_stdout() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-capture-rewritten.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    assert_eq!(
+        fs::read_to_string(dir.join("captured-rewritten.txt"))
+            .expect("missing captured-rewritten.txt"),
+        "./target/audio/demo.mp3\n"
+    );
+}
+
+#[test]
+fn command_capture_fails_when_pattern_matches_multiple_values() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-capture-multiple-failure.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert_eq!(output.status.code(), Some(2));
+    assert!(!dir.join("readme.md").exists());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("Command capture `token` matched 2 values"));
+}
+
+#[test]
 fn xml_output_content_type_uses_xml_fenced_block() {
     let dir = prepare_workspace();
     write_runbook(&dir, "sw-runbook-run-output-xml.json", "sw-runbook.json");

@@ -1,7 +1,12 @@
 use super::{ValidationIssue, ValidationResult};
+use regex::Regex;
 use serde_json::{Map, Value};
 use std::collections::HashSet;
 use std::time::Duration;
+
+const CAPTURE_NAME_PATTERN: &str = r"^[A-Za-z_][A-Za-z0-9_]*$";
+const CAPTURE_REFERENCE_PATTERN: &str =
+    r"@@\{([A-Za-z_][A-Za-z0-9_]*)\}|@\{([A-Za-z_][A-Za-z0-9_]*)\}";
 
 fn push_error(
     errors: &mut Vec<ValidationIssue>,
@@ -128,6 +133,129 @@ fn validate_output_with_context(
             errors,
             global_datetime_anchor_ids,
         );
+    }
+}
+
+fn validate_capture(
+    value: &Value,
+    path: &str,
+    errors: &mut Vec<ValidationIssue>,
+    global_capture_names: &mut HashSet<String>,
+) {
+    let Some(captures) = as_array(value, path, errors) else {
+        return;
+    };
+
+    if captures.is_empty() {
+        push_error(errors, path.to_string(), "must not be empty");
+    }
+
+    let name_pattern = Regex::new(CAPTURE_NAME_PATTERN).expect("valid capture name regex");
+
+    for (index, capture) in captures.iter().enumerate() {
+        let capture_path = format!("{path}[{index}]");
+        let Some(object) = as_object(capture, &capture_path, errors) else {
+            continue;
+        };
+
+        for key in object.keys() {
+            if key != "name" && key != "source" && key != "stage" && key != "pattern" {
+                push_error(
+                    errors,
+                    format!("{capture_path}.{key}"),
+                    "is not a supported capture property",
+                );
+            }
+        }
+
+        match object.get("name").and_then(Value::as_str) {
+            Some(name) => {
+                if !name_pattern.is_match(name) {
+                    push_error(
+                        errors,
+                        format!("{capture_path}.name"),
+                        "must be a valid identifier",
+                    );
+                } else if !global_capture_names.insert(name.to_string()) {
+                    push_error(
+                        errors,
+                        format!("{capture_path}.name"),
+                        format!("duplicate capture name `{name}`"),
+                    );
+                }
+            }
+            None => push_error(errors, format!("{capture_path}.name"), "must be a string"),
+        }
+
+        match object.get("source").and_then(Value::as_str) {
+            Some("stdout") => {}
+            Some(_) => push_error(errors, format!("{capture_path}.source"), "must be `stdout`"),
+            None => push_error(errors, format!("{capture_path}.source"), "must be a string"),
+        }
+
+        match object.get("stage").and_then(Value::as_str) {
+            Some("raw" | "rewritten") => {}
+            Some(_) => push_error(
+                errors,
+                format!("{capture_path}.stage"),
+                "must be `raw` or `rewritten`",
+            ),
+            None => push_error(errors, format!("{capture_path}.stage"), "must be a string"),
+        }
+
+        match object.get("pattern").and_then(Value::as_str) {
+            Some(pattern) => {
+                if let Err(err) = Regex::new(pattern) {
+                    push_error(
+                        errors,
+                        format!("{capture_path}.pattern"),
+                        format!("must be a valid regex: {err}"),
+                    );
+                }
+            }
+            None => push_error(
+                errors,
+                format!("{capture_path}.pattern"),
+                "must be a string",
+            ),
+        }
+    }
+}
+
+fn validate_command_references(
+    commands: &Value,
+    path: &str,
+    errors: &mut Vec<ValidationIssue>,
+    available_capture_names: &HashSet<String>,
+) {
+    let Some(commands) = as_array(commands, path, errors) else {
+        return;
+    };
+
+    let reference_pattern =
+        Regex::new(CAPTURE_REFERENCE_PATTERN).expect("valid capture reference regex");
+
+    for (index, command) in commands.iter().enumerate() {
+        let Some(command) = command.as_str() else {
+            continue;
+        };
+
+        for captures in reference_pattern.captures_iter(command) {
+            let Some(name) = captures.get(2) else {
+                continue;
+            };
+
+            if !available_capture_names.contains(name.as_str()) {
+                push_error(
+                    errors,
+                    format!("{path}[{index}]"),
+                    format!(
+                        "references capture variable before it is defined: `@{{{}}}`",
+                        name.as_str()
+                    ),
+                );
+            }
+        }
     }
 }
 
@@ -411,6 +539,8 @@ fn validate_entry(
     index: usize,
     errors: &mut Vec<ValidationIssue>,
     global_datetime_anchor_ids: &mut HashSet<String>,
+    global_capture_names: &mut HashSet<String>,
+    available_capture_names: &mut HashSet<String>,
 ) {
     let path = format!("entries[{index}]");
     let Some(object) = as_object(value, &path, errors) else {
@@ -440,7 +570,13 @@ fn validate_entry(
         "Command" => {
             match object.get("commands") {
                 Some(commands) => {
-                    validate_string_array(commands, &format!("{path}.commands"), errors)
+                    validate_string_array(commands, &format!("{path}.commands"), errors);
+                    validate_command_references(
+                        commands,
+                        &format!("{path}.commands"),
+                        errors,
+                        available_capture_names,
+                    );
                 }
                 None => push_error(errors, format!("{path}.commands"), "is required"),
             }
@@ -471,6 +607,23 @@ fn validate_entry(
 
             if let Some(cleanup) = object.get("cleanup") {
                 validate_string_array(cleanup, &format!("{path}.cleanup"), errors);
+            }
+
+            if let Some(capture) = object.get("capture") {
+                validate_capture(
+                    capture,
+                    &format!("{path}.capture"),
+                    errors,
+                    global_capture_names,
+                );
+
+                if let Some(captures) = capture.as_array() {
+                    for capture in captures {
+                        if let Some(name) = capture.get("name").and_then(Value::as_str) {
+                            available_capture_names.insert(name.to_string());
+                        }
+                    }
+                }
             }
         }
         _ => push_error(
@@ -516,6 +669,8 @@ pub fn validate(runbook: &Value) -> ValidationResult {
     let mut errors = Vec::new();
     let warnings = Vec::new();
     let mut global_datetime_anchor_ids = HashSet::new();
+    let mut global_capture_names = HashSet::new();
+    let mut available_capture_names = HashSet::new();
 
     let Some(object) = as_object(runbook, "$", &mut errors) else {
         return ValidationResult {
@@ -544,7 +699,14 @@ pub fn validate(runbook: &Value) -> ValidationResult {
                 }
 
                 for (index, entry) in items.iter().enumerate() {
-                    validate_entry(entry, index, &mut errors, &mut global_datetime_anchor_ids);
+                    validate_entry(
+                        entry,
+                        index,
+                        &mut errors,
+                        &mut global_datetime_anchor_ids,
+                        &mut global_capture_names,
+                        &mut available_capture_names,
+                    );
                 }
             }
         }
