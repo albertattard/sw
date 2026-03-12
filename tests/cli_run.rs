@@ -120,6 +120,51 @@ fn multiline_command_lines_share_the_same_shell_context() {
 }
 
 #[test]
+fn prerequisites_render_and_execute_before_main_workflow() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-prerequisites-success.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("## Prerequisites"));
+    assert!(readme.contains("- Environment marker file"));
+    assert!(readme.contains("Must be available before the main workflow runs."));
+    assert_eq!(
+        fs::read_to_string(dir.join("prereq-order.txt")).expect("missing prereq-order.txt"),
+        "prereq\nmain\n"
+    );
+}
+
+#[test]
+fn failing_prerequisite_stops_before_main_workflow_and_reports_help() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-prerequisites-failure.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert_eq!(output.status.code(), Some(2));
+    assert!(!dir.join("README.md").exists());
+    assert_eq!(
+        fs::read_to_string(dir.join("prereq-failure-order.txt"))
+            .expect("missing prereq-failure-order.txt"),
+        "prereq\n"
+    );
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("Prerequisite failed: Docker daemon"));
+    assert!(stderr.contains("Start Docker Desktop before running this example."));
+}
+
+#[test]
 fn command_indent_applies_to_shell_caption_and_output() {
     let dir = prepare_workspace();
     write_runbook(&dir, "sw-runbook-run-indent.json", "sw-runbook.json");

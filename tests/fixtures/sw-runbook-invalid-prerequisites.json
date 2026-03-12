@@ -1,0 +1,15 @@
+{
+  "entries": [
+    {
+      "type": "Prerequisites",
+      "checks": [
+        {
+          "name": "Oracle Java 25",
+          "contents": [
+            "- Oracle Java 25"
+          ]
+        }
+      ]
+    }
+  ]
+}

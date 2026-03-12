@@ -1,7 +1,7 @@
 ---
 id: TASK-027
 title: Support Prerequisites Entry Type
-status: pending
+status: done
 related_features:
   - SPEC-003
 owner: @aattard
@@ -32,16 +32,16 @@ and verifies environment requirements before the main workflow runs.
 
 ## Acceptance Criteria
 
-- [ ] Given a runbook with `Prerequisites` entries, the generated Markdown
+- [x] Given a runbook with `Prerequisites` entries, the generated Markdown
       includes the declared prerequisite `contents` in order.
-- [ ] Given prerequisite checks, they execute before normal runbook commands.
-- [ ] Given a prerequisite check with multiple command lines, those lines
+- [x] Given prerequisite checks, they execute before normal runbook commands.
+- [x] Given a prerequisite check with multiple command lines, those lines
       execute together in the same shell context.
-- [ ] Given a failing prerequisite check, the run exits with `2` before
+- [x] Given a failing prerequisite check, the run exits with `2` before
       executing the main workflow.
-- [ ] Given a failing prerequisite check with `help`, the failure output
+- [x] Given a failing prerequisite check with `help`, the failure output
       includes that remediation message.
-- [ ] Given passing prerequisite checks, the run continues to the main
+- [x] Given passing prerequisite checks, the run continues to the main
       workflow.
 
 ## Notes

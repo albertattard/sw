@@ -685,6 +685,10 @@ fn validate_entry(
         "DisplayFile" => {
             require_string(object, "path", &path, errors);
         }
+        "Prerequisites" => match object.get("checks") {
+            Some(checks) => validate_prerequisite_checks(checks, &format!("{path}.checks"), errors),
+            None => push_error(errors, format!("{path}.checks"), "is required"),
+        },
         "Command" => {
             match object.get("commands") {
                 Some(commands) => {
@@ -752,6 +756,62 @@ fn validate_entry(
             format!("{path}.type"),
             format!("unsupported entry type `{entry_type}`"),
         ),
+    }
+}
+
+fn validate_prerequisite_checks(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>) {
+    let Some(checks) = as_array(value, path, errors) else {
+        return;
+    };
+
+    if checks.is_empty() {
+        push_error(errors, path.to_string(), "must not be empty");
+    }
+
+    for (index, check) in checks.iter().enumerate() {
+        let check_path = format!("{path}[{index}]");
+        let Some(object) = as_object(check, &check_path, errors) else {
+            continue;
+        };
+
+        for key in object.keys() {
+            if key != "name"
+                && key != "contents"
+                && key != "commands"
+                && key != "assert"
+                && key != "help"
+            {
+                push_error(
+                    errors,
+                    format!("{check_path}.{key}"),
+                    "is not a supported prerequisite property",
+                );
+            }
+        }
+
+        require_string(object, "name", &check_path, errors);
+        match object.get("contents") {
+            Some(contents) => {
+                validate_string_array(contents, &format!("{check_path}.contents"), errors)
+            }
+            None => push_error(errors, format!("{check_path}.contents"), "is required"),
+        }
+        match object.get("commands") {
+            Some(commands) => {
+                validate_string_array(commands, &format!("{check_path}.commands"), errors)
+            }
+            None => push_error(errors, format!("{check_path}.commands"), "is required"),
+        }
+
+        if let Some(assertion) = object.get("assert") {
+            validate_assert(assertion, &format!("{check_path}.assert"), errors);
+        }
+
+        if let Some(help) = object.get("help")
+            && !help.is_string()
+        {
+            push_error(errors, format!("{check_path}.help"), "must be a string");
+        }
     }
 }
 

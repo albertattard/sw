@@ -51,6 +51,8 @@ pub(crate) fn render_markdown(runbook: &Value, runbook_path: &Path) -> Result<St
         captured_values: HashMap::new(),
     };
 
+    run_prerequisite_checks(entries)?;
+
     for entry in entries {
         let entry_type = entry.get("type").and_then(Value::as_str).ok_or_else(|| {
             RenderError::Operational("Runbook entry is missing a type".to_string())
@@ -60,6 +62,7 @@ pub(crate) fn render_markdown(runbook: &Value, runbook_path: &Path) -> Result<St
             "Heading" => render_heading(entry)?,
             "Markdown" => render_markdown_entry(entry, &state.captured_values)?,
             "DisplayFile" => render_display_file(entry, runbook_path)?,
+            "Prerequisites" => render_prerequisites_entry(entry)?,
             "Command" => {
                 if let Some(cleanup) = cleanup_block(entry)? {
                     cleanups.push(cleanup);
@@ -300,6 +303,114 @@ fn render_caption(caption: &Value) -> Result<String, RenderError> {
             "Command output caption must be a string or array of strings".to_string(),
         )),
     }
+}
+
+fn render_prerequisites_entry(entry: &Value) -> Result<String, RenderError> {
+    let checks = entry
+        .get("checks")
+        .and_then(Value::as_array)
+        .ok_or_else(|| {
+            RenderError::Operational("Prerequisites entry is missing checks".to_string())
+        })?;
+
+    let mut sections = Vec::new();
+    for check in checks {
+        let contents = check
+            .get("contents")
+            .and_then(Value::as_array)
+            .ok_or_else(|| {
+                RenderError::Operational("Prerequisite contents must be an array".to_string())
+            })?;
+        let mut lines = Vec::new();
+        for item in contents {
+            lines.push(
+                item.as_str()
+                    .ok_or_else(|| {
+                        RenderError::Operational(
+                            "Prerequisite contents must contain only strings".to_string(),
+                        )
+                    })?
+                    .to_string(),
+            );
+        }
+        sections.push(lines.join("\n"));
+    }
+
+    Ok(sections.join("\n\n"))
+}
+
+fn run_prerequisite_checks(entries: &[Value]) -> Result<(), RenderError> {
+    for entry in entries {
+        let Some("Prerequisites") = entry.get("type").and_then(Value::as_str) else {
+            continue;
+        };
+
+        let checks = entry
+            .get("checks")
+            .and_then(Value::as_array)
+            .ok_or_else(|| {
+                RenderError::Operational("Prerequisites entry is missing checks".to_string())
+            })?;
+
+        for check in checks {
+            run_prerequisite_check(check)?;
+        }
+    }
+
+    Ok(())
+}
+
+fn run_prerequisite_check(check: &Value) -> Result<(), RenderError> {
+    let name = check.get("name").and_then(Value::as_str).ok_or_else(|| {
+        RenderError::Operational("Prerequisite name must be a string".to_string())
+    })?;
+    let commands = check
+        .get("commands")
+        .and_then(Value::as_array)
+        .ok_or_else(|| {
+            RenderError::Operational("Prerequisite commands must be an array".to_string())
+        })?;
+
+    let mut lines = Vec::new();
+    for item in commands {
+        lines.push(
+            item.as_str()
+                .ok_or_else(|| {
+                    RenderError::Operational(
+                        "Prerequisite commands must contain only strings".to_string(),
+                    )
+                })?
+                .to_string(),
+        );
+    }
+
+    let script = lines.join("\n");
+    let execution = execute_command(check, &script)?;
+    if execution.timed_out {
+        return Err(prerequisite_failure(
+            name,
+            check.get("help").and_then(Value::as_str),
+            &format!("timed out after {}", timeout_label(check)),
+        ));
+    }
+
+    ensure_assertions(check, &execution).map_err(|err| match err {
+        RenderError::CommandFailed(message) => {
+            prerequisite_failure(name, check.get("help").and_then(Value::as_str), &message)
+        }
+        other => other,
+    })?;
+
+    Ok(())
+}
+
+fn prerequisite_failure(name: &str, help: Option<&str>, detail: &str) -> RenderError {
+    let mut message = format!("Prerequisite failed: {name}: {detail}");
+    if let Some(help) = help {
+        message.push('\n');
+        message.push_str(help);
+    }
+    RenderError::CommandFailed(message)
 }
 
 fn output_fence_open(output: &Value) -> Result<&'static str, RenderError> {
