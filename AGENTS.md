@@ -2,6 +2,8 @@
 
 ## Trigger phrases
 - `commit changes`
+  - Run the formatting check
+  - Run the lint checks
   - Run the automated tests
   - Build the release binary
   - Stage all staged and unstaged changes with `git add .`
@@ -11,8 +13,8 @@
 ## Git workflow
 - Only create a commit when the user explicitly asks.
 - Only push when the user explicitly asks.
-- Before `commit changes`, run the automated tests and build the release binary.
-- If tests or the release build fail, stop and report the failure instead of committing.
+- Before `commit changes`, run `cargo fmt --check`, `cargo clippy --all-targets --all-features -- -D warnings`, `cargo test`, and `cargo build --release`.
+- If formatting, linting, tests, or the release build fail, stop and report the failure instead of committing.
 - Write commit messages in this format:
   - Subject line: imperative verb + outcome
   - Example: `Add validate subcommand`

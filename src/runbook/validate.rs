@@ -115,9 +115,8 @@ fn validate_output(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>)
         None => {}
     }
 
-    match object.get("rewrite") {
-        Some(rewrite) => validate_rewrite_rules(rewrite, &format!("{path}.rewrite"), errors),
-        None => {}
+    if let Some(rewrite) = object.get("rewrite") {
+        validate_rewrite_rules(rewrite, &format!("{path}.rewrite"), errors);
     }
 }
 
@@ -206,9 +205,8 @@ fn validate_assert(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>)
         None => {}
     }
 
-    match object.get("checks") {
-        Some(checks) => validate_assert_checks(checks, &format!("{path}.checks"), errors),
-        None => {}
+    if let Some(checks) = object.get("checks") {
+        validate_assert_checks(checks, &format!("{path}.checks"), errors);
     }
 
     if object.get("exit_code").is_none() && object.get("checks").is_none() {
@@ -299,10 +297,11 @@ fn validate_entry(value: &Value, index: usize, errors: &mut Vec<ValidationIssue>
                 None => push_error(errors, format!("{path}.commands"), "is required"),
             }
 
-            if let Some(indent) = object.get("indent") {
-                if !indent.is_i64() && !indent.is_u64() {
-                    push_error(errors, format!("{path}.indent"), "must be an integer");
-                }
+            if let Some(indent) = object.get("indent")
+                && !indent.is_i64()
+                && !indent.is_u64()
+            {
+                push_error(errors, format!("{path}.indent"), "must be an integer");
             }
 
             if let Some(output) = object.get("output") {

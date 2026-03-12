@@ -15,6 +15,27 @@ Code is an implementation of those specs.
 2. Implement code that satisfies the spec.
 3. Mark specification status only after acceptance criteria pass.
 
+## Quality Checks
+
+Use these commands from the repository root:
+
+```bash
+cargo fmt --check
+cargo clippy --all-targets --all-features -- -D warnings
+cargo test
+cargo build --release
+```
+
+Recommended order:
+
+1. `cargo fmt --check`
+2. `cargo clippy --all-targets --all-features -- -D warnings`
+3. `cargo test`
+4. `cargo build --release`
+
+This is also the verification sequence used before the `commit changes`
+workflow creates and pushes a commit.
+
 ## Documentation Structure
 
 ```text

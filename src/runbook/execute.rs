@@ -190,17 +190,15 @@ fn ensure_expected_exit_code(
         return Ok(());
     }
 
+    let suffix = if execution.stderr.trim().is_empty() {
+        String::new()
+    } else {
+        format!(": {}", execution.stderr.trim())
+    };
+
     Err(RenderError::CommandFailed(format!(
-        "{}{}",
-        format!(
-            "Command failed assertion: expected exit code {expected}, got {}",
-            execution.exit_code
-        ),
-        if execution.stderr.trim().is_empty() {
-            String::new()
-        } else {
-            format!(": {}", execution.stderr.trim())
-        }
+        "Command failed assertion: expected exit code {expected}, got {}{suffix}",
+        execution.exit_code
     )))
 }
 
@@ -320,7 +318,7 @@ fn terminate_child(child: &mut std::process::Child) -> Result<(), RenderError> {
                 RenderError::Operational(format!("Failed to terminate timed out command: {err}"))
             })?;
         }
-        return Ok(());
+        Ok(())
     }
 
     #[cfg(not(unix))]
