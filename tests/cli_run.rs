@@ -495,6 +495,22 @@ fn output_rewrite_replace_rules_can_interpolate_earlier_captures() {
 }
 
 #[test]
+fn output_rewrite_patterns_can_interpolate_earlier_captures() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-output-rewrite-pattern-capture.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("readme.md")).expect("missing readme output");
+    assert!(readme.contains("```\naudio file> @{audio_path_raw}: demo.mp3\n```"));
+}
+
+#[test]
 fn output_rewrite_datetime_shift_preserves_relative_timing() {
     let dir = prepare_workspace();
     write_runbook(

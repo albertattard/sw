@@ -335,6 +335,17 @@ fn validate_rewrite_rule(
 
             require_string(object, "pattern", path, errors);
             require_string(object, "replacement", path, errors);
+            if let Some(pattern) = object.get("pattern").and_then(Value::as_str) {
+                let reference_pattern =
+                    Regex::new(CAPTURE_REFERENCE_PATTERN).expect("valid capture reference regex");
+                validate_capture_references_in_string(
+                    pattern,
+                    &format!("{path}.pattern"),
+                    errors,
+                    available_capture_names,
+                    &reference_pattern,
+                );
+            }
             if let Some(replacement) = object.get("replacement").and_then(Value::as_str) {
                 let reference_pattern =
                     Regex::new(CAPTURE_REFERENCE_PATTERN).expect("valid capture reference regex");

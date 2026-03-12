@@ -1,7 +1,7 @@
 ---
 id: TASK-024
 title: Support Captured Variables In Rewrite Patterns
-status: pending
+status: done
 related_features:
   - SPEC-003
 owner: @aattard
@@ -32,14 +32,14 @@ earlier in the runbook.
 
 ## Acceptance Criteria
 
-- [ ] Given a `replace` rewrite rule `pattern` that uses `@{name}` after that
+- [x] Given a `replace` rewrite rule `pattern` that uses `@{name}` after that
       variable is captured earlier in the runbook, the pattern text includes
       the captured value before matching.
-- [ ] Given a `replace` rewrite rule `pattern` that uses `@{name}` before that
+- [x] Given a `replace` rewrite rule `pattern` that uses `@{name}` before that
       variable is captured, validation rejects the runbook.
-- [ ] Given `@@{name}` in a `replace` rewrite rule `pattern`, the literal
+- [x] Given `@@{name}` in a `replace` rewrite rule `pattern`, the literal
       `@{name}` is preserved without interpolation.
-- [ ] `datetime_shift` `pattern` values remain literal in this task.
+- [x] `datetime_shift` `pattern` values remain literal in this task.
 
 ## Notes
 

@@ -514,6 +514,11 @@ fn apply_replace_rule(
     let pattern = rule.get("pattern").and_then(Value::as_str).ok_or_else(|| {
         RenderError::Operational("Command output rewrite pattern must be a string".to_string())
     })?;
+    let pattern = interpolate_captured_variables_with_context(
+        pattern,
+        captured_values,
+        "Command output rewrite pattern",
+    )?;
     let replacement = rule
         .get("replacement")
         .and_then(Value::as_str)
@@ -527,7 +532,7 @@ fn apply_replace_rule(
         captured_values,
         "Command output rewrite replacement",
     )?;
-    let regex = Regex::new(pattern).map_err(|err| {
+    let regex = Regex::new(pattern.as_str()).map_err(|err| {
         RenderError::Operational(format!("Invalid output rewrite pattern `{pattern}`: {err}"))
     })?;
 

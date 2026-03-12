@@ -1,0 +1,38 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'PATH=target/audio/audio_20260312_142351.mp3\\n'"
+      ],
+      "capture": [
+        {
+          "name": "audio_path_raw",
+          "source": "stdout",
+          "stage": "raw",
+          "pattern": "PATH=(.+)"
+        }
+      ]
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'audio file> target/audio/audio_20260312_142351.mp3\\n'"
+      ],
+      "output": {
+        "rewrite": [
+          {
+            "type": "replace",
+            "pattern": "@{audio_path_raw}",
+            "replacement": "target/audio/demo.mp3"
+          },
+          {
+            "type": "replace",
+            "pattern": "target/audio/",
+            "replacement": "@@{audio_path_raw}: "
+          }
+        ]
+      }
+    }
+  ]
+}
