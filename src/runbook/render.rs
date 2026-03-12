@@ -202,13 +202,13 @@ fn render_command(entry: &Value) -> Result<String, RenderError> {
         append_output(entry, &execution.stdout, &mut section)?;
         return Err(RenderError::Timeout {
             message: format!("Command timed out after {}", timeout_label(entry)),
-            partial_markdown: section,
+            partial_markdown: apply_indent(entry, section)?,
         });
     }
 
     ensure_assertions(entry, &execution)?;
     append_output(entry, &execution.stdout, &mut section)?;
-    Ok(section)
+    apply_indent(entry, section)
 }
 
 fn append_output(entry: &Value, stdout: &str, section: &mut String) -> Result<(), RenderError> {
@@ -272,6 +272,35 @@ fn display_file_content_type(path: &Path) -> &'static str {
         Some("java") => "java",
         _ => "text",
     }
+}
+
+fn apply_indent(entry: &Value, section: String) -> Result<String, RenderError> {
+    let Some(indent) = entry.get("indent") else {
+        return Ok(section);
+    };
+
+    let indent_width = match (indent.as_u64(), indent.as_i64()) {
+        (Some(width), _) => usize::try_from(width)
+            .map_err(|_| RenderError::Operational("Command indent is too large".to_string()))?,
+        (None, Some(width)) if width >= 0 => usize::try_from(width)
+            .map_err(|_| RenderError::Operational("Command indent is too large".to_string()))?,
+        _ => {
+            return Err(RenderError::Operational(
+                "Command indent must be a non-negative integer".to_string(),
+            ));
+        }
+    };
+
+    if indent_width == 0 {
+        return Ok(section);
+    }
+
+    let prefix = " ".repeat(indent_width);
+    Ok(section
+        .lines()
+        .map(|line| format!("{prefix}{line}"))
+        .collect::<Vec<_>>()
+        .join("\n"))
 }
 
 fn combine_messages(primary: &str, secondary: Option<&str>) -> String {

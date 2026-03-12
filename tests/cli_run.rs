@@ -120,6 +120,21 @@ fn multiline_command_lines_share_the_same_shell_context() {
 }
 
 #[test]
+fn command_indent_applies_to_shell_caption_and_output() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-run-indent.json", "sw-runbook.json");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("readme.md")).expect("missing readme output");
+    assert!(readme.contains("2. Build the application"));
+    assert!(readme.contains("   ```shell\n   printf 'build ok\\n'\n   ```"));
+    assert!(readme.contains("\n   Build output\n"));
+    assert!(readme.contains("   ```text\n   build ok\n   ```"));
+}
+
+#[test]
 fn invalid_runbook_returns_validation_failure_without_output_file() {
     let dir = prepare_workspace();
     write_runbook(&dir, "sw-runbook-missing-field.json", "sw-runbook.json");

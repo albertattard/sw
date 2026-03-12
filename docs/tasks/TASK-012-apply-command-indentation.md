@@ -1,7 +1,7 @@
 ---
 id: TASK-012
 title: Apply Command Indentation
-status: pending
+status: done
 related_features:
   - SPEC-003
 owner: @aattard
@@ -30,11 +30,11 @@ correctly nested inside surrounding Markdown structures such as list items.
 
 ## Acceptance Criteria
 
-- [ ] Given a `Command` entry with `indent`, each rendered line in that command
+- [x] Given a `Command` entry with `indent`, each rendered line in that command
       section is prefixed with the configured number of spaces.
-- [ ] Given a `Command` entry with `indent` and rendered output, the shell
+- [x] Given a `Command` entry with `indent` and rendered output, the shell
       block, caption, and output block all use the same indentation.
-- [ ] Given a `Command` entry without `indent`, rendering remains unchanged.
+- [x] Given a `Command` entry without `indent`, rendering remains unchanged.
 
 ## Notes
 

@@ -19,7 +19,7 @@ File-based task tracker for Sociable Weaver.
 
 ## Pending
 
-- [ ] [TASK-012: Apply Command Indentation](./TASK-012-apply-command-indentation.md)
+- (none)
 
 ## In Progress
 
@@ -41,6 +41,7 @@ File-based task tracker for Sociable Weaver.
 - [x] [TASK-009: Support Output Content Types](./TASK-009-support-output-content-types.md)
 - [x] [TASK-010: Support DisplayFile Entries](./TASK-010-support-display-file-entries.md)
 - [x] [TASK-011: Add Generated File Marker](./TASK-011-add-generated-file-marker.md)
+- [x] [TASK-012: Apply Command Indentation](./TASK-012-apply-command-indentation.md)
 
 ## Blocked
 

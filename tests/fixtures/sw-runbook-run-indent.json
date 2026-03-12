@@ -1,0 +1,22 @@
+{
+  "entries": [
+    {
+      "type": "Markdown",
+      "contents": [
+        "2. Build the application",
+        "",
+        "   This step assumes that a valid OpenAI API Key is available."
+      ]
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'build ok\\n'"
+      ],
+      "output": {
+        "caption": "Build output"
+      },
+      "indent": 3
+    }
+  ]
+}
