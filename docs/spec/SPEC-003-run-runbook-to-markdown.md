@@ -150,6 +150,23 @@ in the runbook.
 - In this increment, the only supported content operator is `contains`.
 - A `stdout` `contains` check passes when the command stdout includes the
   expected text.
+- A `Command` entry may include a `capture` section.
+- `capture` is an array of named extraction rules.
+- Each capture rule declares a variable `name`.
+- Captured variable names must be unique across the whole runbook.
+- In this increment, the only supported capture `source` is `stdout`.
+- Each capture rule declares a `stage` of either `raw` or `rewritten`.
+- `raw` captures from the original command stdout before output rewrites are
+  applied.
+- `rewritten` captures from stdout after `output.rewrite` has been applied.
+- Each capture rule declares a regex `pattern`.
+- A capture rule succeeds when its pattern matches exactly one value to store.
+- Captured variables may be interpolated into later command lines using
+  `@{name}` syntax.
+- `@@{name}` escapes that syntax and leaves a literal `@{name}` in the command
+  or Markdown content.
+- A command that references `@{name}` must use a variable captured earlier in
+  the runbook.
 - If a `Command` entry contains an `output` property, render captured command
   output after the command block.
 - If `output.caption` is present, render that caption before the captured
@@ -242,6 +259,8 @@ in the runbook.
 
 - [ ] Given a runbook with `Markdown` entries, the generated Markdown preserves
       the entry content in order.
+- [ ] Markdown interpolation based on variables captured later in the runbook
+      is defined in a later increment and is not part of this task slice.
 
 ### DisplayFile Entries
 
@@ -313,6 +332,24 @@ in the runbook.
 - [ ] Given multiple assertion checks, all checks must pass for the command to
       be considered successful.
 
+### Command Capture
+
+- [ ] Given a `Command` entry with `capture`, matching values are stored under
+      the declared variable names.
+- [ ] Given `stage: raw`, capture uses stdout before rewrite rules are applied.
+- [ ] Given `stage: rewritten`, capture uses stdout after rewrite rules are
+      applied.
+- [ ] Given a later command that uses `@{name}`, the captured value is
+      interpolated into the command before execution.
+- [ ] Given a command that references `@{name}` before that variable is
+      captured earlier in the runbook, validation rejects the runbook.
+- [ ] Given duplicate capture variable names anywhere in the runbook,
+      validation rejects the runbook.
+- [ ] Given a capture rule whose pattern does not resolve to exactly one value,
+      the run fails.
+- [ ] Given `@@{name}` in command or Markdown content, the literal `@{name}`
+      is preserved without interpolation.
+
 ### Command Output Rendering
 
 - [ ] Given a `Command` entry with an `output` property, the generated Markdown
@@ -372,6 +409,8 @@ in the runbook.
 - Supporting non-Markdown output formats in v1.
 - Mutating the input runbook.
 - Providing sandboxing or isolation beyond the local process environment.
+- Allowing `Markdown` entries to interpolate values that are captured later in
+  the runbook within the same implementation slice as command capture.
 
 ## Edge Cases
 
@@ -405,6 +444,15 @@ in the runbook.
 - A `datetime_shift` rule declares both `id` and `use`.
 - A `datetime_shift` rule declares both `format` and `custom_format`.
 - A `datetime_shift` rule declares `use` together with `base`.
+- A capture rule uses `stage: raw`.
+- A capture rule uses `stage: rewritten` together with `output.rewrite`.
+- Multiple commands capture variables with the same name.
+- A command references a captured variable before it is defined.
+- Command or Markdown content contains literal `@{name}` that must not be
+  interpolated.
+- A capture rule matches no value.
+- A capture rule matches more than one value when exactly one value is
+  required.
 - Variable assignment on one command line used by a later line in the same
   entry.
 - Multiple commands register cleanup and require reverse-order execution.
