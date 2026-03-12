@@ -74,6 +74,7 @@ fn validate_output_with_context(
     path: &str,
     errors: &mut Vec<ValidationIssue>,
     global_datetime_anchor_ids: &mut HashSet<String>,
+    available_capture_names: &HashSet<String>,
 ) {
     let Some(object) = as_object(value, path, errors) else {
         return;
@@ -132,6 +133,7 @@ fn validate_output_with_context(
             &format!("{path}.rewrite"),
             errors,
             global_datetime_anchor_ids,
+            available_capture_names,
         );
     }
 }
@@ -240,21 +242,37 @@ fn validate_capture_references(
             continue;
         };
 
-        for captures in reference_pattern.captures_iter(value) {
-            let Some(name) = captures.get(2) else {
-                continue;
-            };
+        validate_capture_references_in_string(
+            value,
+            &format!("{path}[{index}]"),
+            errors,
+            available_capture_names,
+            &reference_pattern,
+        );
+    }
+}
 
-            if !available_capture_names.contains(name.as_str()) {
-                push_error(
-                    errors,
-                    format!("{path}[{index}]"),
-                    format!(
-                        "references capture variable before it is defined: `@{{{}}}`",
-                        name.as_str()
-                    ),
-                );
-            }
+fn validate_capture_references_in_string(
+    value: &str,
+    path: &str,
+    errors: &mut Vec<ValidationIssue>,
+    available_capture_names: &HashSet<String>,
+    reference_pattern: &Regex,
+) {
+    for captures in reference_pattern.captures_iter(value) {
+        let Some(name) = captures.get(2) else {
+            continue;
+        };
+
+        if !available_capture_names.contains(name.as_str()) {
+            push_error(
+                errors,
+                path.to_string(),
+                format!(
+                    "references capture variable before it is defined: `@{{{}}}`",
+                    name.as_str()
+                ),
+            );
         }
     }
 }
@@ -264,6 +282,7 @@ fn validate_rewrite_rules(
     path: &str,
     errors: &mut Vec<ValidationIssue>,
     global_datetime_anchor_ids: &mut HashSet<String>,
+    available_capture_names: &HashSet<String>,
 ) {
     let Some(rules) = as_array(value, path, errors) else {
         return;
@@ -278,6 +297,7 @@ fn validate_rewrite_rules(
             &format!("{path}[{index}]"),
             errors,
             global_datetime_anchor_ids,
+            available_capture_names,
         );
     }
 }
@@ -287,6 +307,7 @@ fn validate_rewrite_rule(
     path: &str,
     errors: &mut Vec<ValidationIssue>,
     global_datetime_anchor_ids: &mut HashSet<String>,
+    available_capture_names: &HashSet<String>,
 ) {
     let Some(object) = as_object(value, path, errors) else {
         return;
@@ -314,6 +335,17 @@ fn validate_rewrite_rule(
 
             require_string(object, "pattern", path, errors);
             require_string(object, "replacement", path, errors);
+            if let Some(replacement) = object.get("replacement").and_then(Value::as_str) {
+                let reference_pattern =
+                    Regex::new(CAPTURE_REFERENCE_PATTERN).expect("valid capture reference regex");
+                validate_capture_references_in_string(
+                    replacement,
+                    &format!("{path}.replacement"),
+                    errors,
+                    available_capture_names,
+                    &reference_pattern,
+                );
+            }
         }
         "datetime_shift" => {
             for key in object.keys() {
@@ -602,6 +634,7 @@ fn validate_entry(
                     &format!("{path}.output"),
                     errors,
                     global_datetime_anchor_ids,
+                    available_capture_names,
                 );
             }
 

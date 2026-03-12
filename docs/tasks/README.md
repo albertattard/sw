@@ -31,7 +31,6 @@ File-based task tracker for Sociable Weaver.
 ## Pending
 
 - [ ] [TASK-021: Support Deferred Markdown Interpolation](./TASK-021-support-deferred-markdown-interpolation.md)
-- [ ] [TASK-023: Support Captured Variables In Rewrite Replacements](./TASK-023-support-captured-variables-in-rewrite-replacements.md)
 
 ## In Progress
 
@@ -63,6 +62,7 @@ File-based task tracker for Sociable Weaver.
 - [x] [TASK-019: Support Cross-Command Datetime Anchor Reuse](./TASK-019-support-cross-command-datetime-anchor-reuse.md)
 - [x] [TASK-020: Support Captured Output Variables](./TASK-020-support-captured-output-variables.md)
 - [x] [TASK-022: Support Markdown Interpolation For Earlier Captures](./TASK-022-support-markdown-interpolation-for-earlier-captures.md)
+- [x] [TASK-023: Support Captured Variables In Rewrite Replacements](./TASK-023-support-captured-variables-in-rewrite-replacements.md)
 
 ## Blocked
 

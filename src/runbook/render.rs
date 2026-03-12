@@ -300,8 +300,9 @@ fn normalize_rendered_output(
     output: &Value,
     stdout: &str,
     datetime_anchors: &mut HashMap<String, DatetimeShiftAnchor>,
+    captured_values: &HashMap<String, String>,
 ) -> Result<String, RenderError> {
-    let rewritten = apply_rewrite_rules(output, stdout, datetime_anchors)?;
+    let rewritten = apply_rewrite_rules(output, stdout, datetime_anchors, captured_values)?;
 
     if !trim_trailing_whitespace(output)? {
         return Ok(rewritten);
@@ -322,13 +323,19 @@ fn rewritten_stdout_for_capture(
         return Ok(stdout.to_string());
     };
 
-    normalize_rendered_output(output, stdout, &mut state.datetime_anchors)
+    normalize_rendered_output(
+        output,
+        stdout,
+        &mut state.datetime_anchors,
+        &state.captured_values,
+    )
 }
 
 fn apply_rewrite_rules(
     output: &Value,
     stdout: &str,
     datetime_anchors: &mut HashMap<String, DatetimeShiftAnchor>,
+    captured_values: &HashMap<String, String>,
 ) -> Result<String, RenderError> {
     let Some(rules) = output.get("rewrite") else {
         return Ok(stdout.to_string());
@@ -338,7 +345,7 @@ fn apply_rewrite_rules(
     })?;
     let mut rendered = stdout.to_string();
     for rule in rules {
-        rendered = apply_rewrite_rule(rule, &rendered, datetime_anchors)?;
+        rendered = apply_rewrite_rule(rule, &rendered, datetime_anchors, captured_values)?;
     }
     Ok(rendered)
 }
@@ -444,6 +451,14 @@ fn interpolate_captured_variables(
     input: &str,
     captured_values: &HashMap<String, String>,
 ) -> Result<String, RenderError> {
+    interpolate_captured_variables_with_context(input, captured_values, "Command")
+}
+
+fn interpolate_captured_variables_with_context(
+    input: &str,
+    captured_values: &HashMap<String, String>,
+    context: &str,
+) -> Result<String, RenderError> {
     let regex =
         Regex::new(CAPTURE_INTERPOLATION_PATTERN).expect("valid capture interpolation regex");
     let mut output = String::with_capacity(input.len());
@@ -458,8 +473,8 @@ fn interpolate_captured_variables(
         } else if let Some(name) = captures.get(2) {
             let value = captured_values.get(name.as_str()).ok_or_else(|| {
                 RenderError::CommandFailed(format!(
-                    "Command references unknown captured variable `@{{{}}}`",
-                    name.as_str()
+                    "{context} references unknown captured variable `@{{{}}}`",
+                    name.as_str(),
                 ))
             })?;
             output.push_str(value);
@@ -476,13 +491,14 @@ fn apply_rewrite_rule(
     rule: &Value,
     rendered: &str,
     datetime_anchors: &mut HashMap<String, DatetimeShiftAnchor>,
+    captured_values: &HashMap<String, String>,
 ) -> Result<String, RenderError> {
     let rule_type = rule.get("type").and_then(Value::as_str).ok_or_else(|| {
         RenderError::Operational("Command output rewrite type must be a string".to_string())
     })?;
 
     match rule_type {
-        "replace" => apply_replace_rule(rule, rendered),
+        "replace" => apply_replace_rule(rule, rendered, captured_values),
         "datetime_shift" => apply_datetime_shift_rule(rule, rendered, datetime_anchors),
         other => Err(RenderError::Operational(format!(
             "Unsupported output rewrite type `{other}`"
@@ -490,7 +506,11 @@ fn apply_rewrite_rule(
     }
 }
 
-fn apply_replace_rule(rule: &Value, rendered: &str) -> Result<String, RenderError> {
+fn apply_replace_rule(
+    rule: &Value,
+    rendered: &str,
+    captured_values: &HashMap<String, String>,
+) -> Result<String, RenderError> {
     let pattern = rule.get("pattern").and_then(Value::as_str).ok_or_else(|| {
         RenderError::Operational("Command output rewrite pattern must be a string".to_string())
     })?;
@@ -502,11 +522,18 @@ fn apply_replace_rule(rule: &Value, rendered: &str) -> Result<String, RenderErro
                 "Command output rewrite replacement must be a string".to_string(),
             )
         })?;
+    let replacement = interpolate_captured_variables_with_context(
+        replacement,
+        captured_values,
+        "Command output rewrite replacement",
+    )?;
     let regex = Regex::new(pattern).map_err(|err| {
         RenderError::Operational(format!("Invalid output rewrite pattern `{pattern}`: {err}"))
     })?;
 
-    Ok(regex.replace_all(rendered, replacement).into_owned())
+    Ok(regex
+        .replace_all(rendered, replacement.as_str())
+        .into_owned())
 }
 
 fn apply_datetime_shift_rule(
