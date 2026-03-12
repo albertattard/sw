@@ -1,0 +1,18 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "echo 'hello'"
+      ],
+      "output": {
+        "rewrite": [
+          {
+            "type": "datetime_shift",
+            "pattern": "audio_\\d{8}_\\d{6}"
+          }
+        ]
+      }
+    }
+  ]
+}

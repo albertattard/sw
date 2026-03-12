@@ -530,6 +530,24 @@ fn output_rewrite_datetime_shift_supports_rfc1123() {
 }
 
 #[test]
+fn output_rewrite_datetime_shift_can_share_one_anchor_across_formats() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-output-rewrite-datetime-shift-shared-anchor.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("readme.md")).expect("missing readme output");
+    assert!(readme.contains("2077-04-27T12:34:56.789+01:00 INFO Main"));
+    assert!(readme.contains("Tue, 27 Apr 2077 12:34:58 GMT INFO Http"));
+    assert!(readme.contains("audio_20770427_123459"));
+}
+
+#[test]
 fn xml_output_content_type_uses_xml_fenced_block() {
     let dir = prepare_workspace();
     write_runbook(&dir, "sw-runbook-run-output-xml.json", "sw-runbook.json");

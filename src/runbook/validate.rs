@@ -164,7 +164,14 @@ fn validate_rewrite_rule(value: &Value, path: &str, errors: &mut Vec<ValidationI
         }
         "datetime_shift" => {
             for key in object.keys() {
-                if key != "type" && key != "pattern" && key != "base" && key != "format" {
+                if key != "type"
+                    && key != "pattern"
+                    && key != "base"
+                    && key != "format"
+                    && key != "id"
+                    && key != "use"
+                    && key != "custom_format"
+                {
                     push_error(
                         errors,
                         format!("{path}.{key}"),
@@ -175,12 +182,55 @@ fn validate_rewrite_rule(value: &Value, path: &str, errors: &mut Vec<ValidationI
 
             let has_pattern = object.get("pattern").is_some();
             let has_format = object.get("format").is_some();
+            let has_custom_format = object.get("custom_format").is_some();
+            let has_id = object.get("id").is_some();
+            let has_use = object.get("use").is_some();
 
             if has_pattern == has_format {
                 push_error(
                     errors,
                     path.to_string(),
                     "must include exactly one of `pattern` or `format`",
+                );
+            }
+
+            if has_format && has_custom_format {
+                push_error(
+                    errors,
+                    path.to_string(),
+                    "must not include both `format` and `custom_format`",
+                );
+            }
+
+            if has_pattern && !has_custom_format {
+                push_error(
+                    errors,
+                    path.to_string(),
+                    "must include `custom_format` when `pattern` is used",
+                );
+            }
+
+            if has_custom_format && !has_pattern {
+                push_error(
+                    errors,
+                    path.to_string(),
+                    "`custom_format` requires `pattern`",
+                );
+            }
+
+            if has_id && has_use {
+                push_error(
+                    errors,
+                    path.to_string(),
+                    "must not include both `id` and `use`",
+                );
+            }
+
+            if has_use && object.get("base").is_some() {
+                push_error(
+                    errors,
+                    path.to_string(),
+                    "must not include `base` when `use` is declared",
                 );
             }
 
@@ -198,6 +248,24 @@ fn validate_rewrite_rule(value: &Value, path: &str, errors: &mut Vec<ValidationI
                     "must be `rfc3339` or `rfc1123`",
                 ),
                 None => {}
+            }
+
+            if let Some(id) = object.get("id")
+                && !id.is_string()
+            {
+                push_error(errors, format!("{path}.id"), "must be a string");
+            }
+
+            if let Some(use_id) = object.get("use")
+                && !use_id.is_string()
+            {
+                push_error(errors, format!("{path}.use"), "must be a string");
+            }
+
+            if let Some(custom_format) = object.get("custom_format")
+                && !custom_format.is_string()
+            {
+                push_error(errors, format!("{path}.custom_format"), "must be a string");
             }
 
             if let Some(base) = object.get("base")

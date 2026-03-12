@@ -1,0 +1,31 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf '2026-03-12T13:53:47.000+01:00 INFO Main\\nThu, 12 Mar 2026 12:53:49 GMT INFO Http\\naudio_20260312_135350\\n'"
+      ],
+      "output": {
+        "caption": "Shared datetime shift",
+        "rewrite": [
+          {
+            "type": "datetime_shift",
+            "id": "timeline",
+            "format": "rfc3339"
+          },
+          {
+            "type": "datetime_shift",
+            "use": "timeline",
+            "format": "rfc1123"
+          },
+          {
+            "type": "datetime_shift",
+            "use": "timeline",
+            "pattern": "audio_\\d{8}_\\d{6}",
+            "custom_format": "audio_%Y%m%d_%H%M%S"
+          }
+        ]
+      }
+    }
+  ]
+}

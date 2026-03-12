@@ -2,9 +2,10 @@ use super::RenderError;
 use super::execute::{
     cleanup_block, ensure_assertions, execute_command, run_cleanup_blocks, timeout_label,
 };
-use chrono::{DateTime, Duration, FixedOffset};
+use chrono::{DateTime, Duration, FixedOffset, NaiveDateTime, TimeZone};
 use regex::Regex;
 use serde_json::Value;
+use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
@@ -295,20 +296,25 @@ fn apply_rewrite_rules(output: &Value, stdout: &str) -> Result<String, RenderErr
     })?;
 
     let mut rendered = stdout.to_string();
+    let mut datetime_anchors = HashMap::new();
     for rule in rules {
-        rendered = apply_rewrite_rule(rule, &rendered)?;
+        rendered = apply_rewrite_rule(rule, &rendered, &mut datetime_anchors)?;
     }
     Ok(rendered)
 }
 
-fn apply_rewrite_rule(rule: &Value, rendered: &str) -> Result<String, RenderError> {
+fn apply_rewrite_rule(
+    rule: &Value,
+    rendered: &str,
+    datetime_anchors: &mut HashMap<String, DatetimeShiftAnchor>,
+) -> Result<String, RenderError> {
     let rule_type = rule.get("type").and_then(Value::as_str).ok_or_else(|| {
         RenderError::Operational("Command output rewrite type must be a string".to_string())
     })?;
 
     match rule_type {
         "replace" => apply_replace_rule(rule, rendered),
-        "datetime_shift" => apply_datetime_shift_rule(rule, rendered),
+        "datetime_shift" => apply_datetime_shift_rule(rule, rendered, datetime_anchors),
         other => Err(RenderError::Operational(format!(
             "Unsupported output rewrite type `{other}`"
         ))),
@@ -334,7 +340,11 @@ fn apply_replace_rule(rule: &Value, rendered: &str) -> Result<String, RenderErro
     Ok(regex.replace_all(rendered, replacement).into_owned())
 }
 
-fn apply_datetime_shift_rule(rule: &Value, rendered: &str) -> Result<String, RenderError> {
+fn apply_datetime_shift_rule(
+    rule: &Value,
+    rendered: &str,
+    datetime_anchors: &mut HashMap<String, DatetimeShiftAnchor>,
+) -> Result<String, RenderError> {
     let config = datetime_shift_config(rule)?;
     let regex = Regex::new(config.pattern).map_err(|err| {
         RenderError::Operational(format!(
@@ -348,6 +358,14 @@ fn apply_datetime_shift_rule(rule: &Value, rendered: &str) -> Result<String, Ren
             config.base
         ))
     })?;
+    let shared_anchor = match config.use_anchor {
+        Some(anchor_id) => Some(datetime_anchors.get(anchor_id).ok_or_else(|| {
+            RenderError::Operational(format!(
+                "Command output datetime_shift uses unknown anchor `{anchor_id}`"
+            ))
+        })?),
+        None => None,
+    };
 
     let mut first_original: Option<DateTime<FixedOffset>> = None;
     let mut result = String::with_capacity(rendered.len());
@@ -355,35 +373,42 @@ fn apply_datetime_shift_rule(rule: &Value, rendered: &str) -> Result<String, Ren
 
     for matched in regex.find_iter(rendered) {
         result.push_str(&rendered[last_end..matched.start()]);
-        let original = parse_shift_datetime(matched.as_str(), config.format)?;
-        let shifted = match first_original {
-            Some(first) => {
-                let delta = original - first;
-                base_timestamp
-                    + Duration::seconds(delta.num_seconds())
-                    + Duration::nanoseconds(
-                        (delta - Duration::seconds(delta.num_seconds()))
-                            .num_nanoseconds()
-                            .unwrap_or(0),
-                    )
-            }
-            None => {
-                first_original = Some(original);
-                base_timestamp
-            }
+        let original = parse_shift_datetime(matched.as_str(), config.matcher, base_timestamp)?;
+        let shifted = match shared_anchor {
+            Some(anchor) => anchor.shift(original),
+            None => match first_original {
+                Some(first) => shift_from_anchor(base_timestamp, first, original),
+                None => {
+                    first_original = Some(original);
+                    base_timestamp
+                }
+            },
         };
-        result.push_str(&format_shift_datetime(shifted, config.format));
+        result.push_str(&format_shift_datetime(shifted, config.matcher));
         last_end = matched.end();
     }
 
     result.push_str(&rendered[last_end..]);
+
+    if let (Some(anchor_id), Some(first_original)) = (config.anchor_id, first_original) {
+        datetime_anchors.insert(
+            anchor_id.to_string(),
+            DatetimeShiftAnchor {
+                first_original,
+                base_timestamp,
+            },
+        );
+    }
+
     Ok(result)
 }
 
 struct DatetimeShiftConfig<'a> {
     pattern: &'a str,
     base: &'a str,
-    format: DatetimeShiftFormat,
+    matcher: DatetimeShiftMatcher<'a>,
+    anchor_id: Option<&'a str>,
+    use_anchor: Option<&'a str>,
 }
 
 #[derive(Clone, Copy)]
@@ -392,67 +417,173 @@ enum DatetimeShiftFormat {
     Rfc1123,
 }
 
+#[derive(Clone, Copy)]
+enum DatetimeShiftMatcher<'a> {
+    BuiltIn(DatetimeShiftFormat),
+    Custom(&'a str),
+}
+
+struct DatetimeShiftAnchor {
+    first_original: DateTime<FixedOffset>,
+    base_timestamp: DateTime<FixedOffset>,
+}
+
+impl DatetimeShiftAnchor {
+    fn shift(&self, original: DateTime<FixedOffset>) -> DateTime<FixedOffset> {
+        shift_from_anchor(self.base_timestamp, self.first_original, original)
+    }
+}
+
 fn datetime_shift_config(rule: &Value) -> Result<DatetimeShiftConfig<'_>, RenderError> {
     let format = rule.get("format").and_then(Value::as_str);
     let pattern = rule.get("pattern").and_then(Value::as_str);
+    let custom_format = rule.get("custom_format").and_then(Value::as_str);
     let base = rule
         .get("base")
         .and_then(Value::as_str)
         .unwrap_or(DEFAULT_DATETIME_SHIFT_BASE);
+    let anchor_id = rule.get("id").and_then(Value::as_str);
+    let use_anchor = rule.get("use").and_then(Value::as_str);
 
-    match (format, pattern) {
-        (Some(_), Some(_)) => Err(RenderError::Operational(
+    if format.is_some() && pattern.is_some() {
+        return Err(RenderError::Operational(
             "Command output datetime_shift must not include both format and pattern".to_string(),
-        )),
-        (Some("rfc3339"), None) => Ok(DatetimeShiftConfig {
-            pattern: RFC3339_PATTERN,
-            base,
-            format: DatetimeShiftFormat::Rfc3339,
-        }),
-        (Some("rfc1123"), None) => Ok(DatetimeShiftConfig {
-            pattern: RFC1123_PATTERN,
-            base,
-            format: DatetimeShiftFormat::Rfc1123,
-        }),
-        (Some(other), None) => Err(RenderError::Operational(format!(
-            "Unsupported datetime_shift format `{other}`"
-        ))),
-        (None, Some(pattern)) => Ok(DatetimeShiftConfig {
-            pattern,
-            base,
-            format: DatetimeShiftFormat::Rfc3339,
-        }),
-        (None, None) => Err(RenderError::Operational(
-            "Command output datetime_shift must include either format or pattern".to_string(),
-        )),
+        ));
     }
+
+    if format.is_some() && custom_format.is_some() {
+        return Err(RenderError::Operational(
+            "Command output datetime_shift must not include both format and custom_format"
+                .to_string(),
+        ));
+    }
+
+    if anchor_id.is_some() && use_anchor.is_some() {
+        return Err(RenderError::Operational(
+            "Command output datetime_shift must not include both id and use".to_string(),
+        ));
+    }
+
+    if use_anchor.is_some() && rule.get("base").is_some() {
+        return Err(RenderError::Operational(
+            "Command output datetime_shift that uses an anchor must not include base".to_string(),
+        ));
+    }
+
+    let (pattern, matcher) = match (format, pattern, custom_format) {
+        (Some("rfc3339"), None, None) => (
+            RFC3339_PATTERN,
+            DatetimeShiftMatcher::BuiltIn(DatetimeShiftFormat::Rfc3339),
+        ),
+        (Some("rfc1123"), None, None) => (
+            RFC1123_PATTERN,
+            DatetimeShiftMatcher::BuiltIn(DatetimeShiftFormat::Rfc1123),
+        ),
+        (Some(other), None, None) => {
+            return Err(RenderError::Operational(format!(
+                "Unsupported datetime_shift format `{other}`"
+            )));
+        }
+        (None, Some(pattern), Some(custom_format)) => {
+            (pattern, DatetimeShiftMatcher::Custom(custom_format))
+        }
+        (None, Some(_), None) => {
+            return Err(RenderError::Operational(
+                "Command output datetime_shift with pattern must include custom_format".to_string(),
+            ));
+        }
+        (None, None, Some(_)) => {
+            return Err(RenderError::Operational(
+                "Command output datetime_shift custom_format requires pattern".to_string(),
+            ));
+        }
+        (None, None, None) => {
+            return Err(RenderError::Operational(
+                "Command output datetime_shift must include either format or pattern".to_string(),
+            ));
+        }
+        _ => unreachable!(),
+    };
+
+    Ok(DatetimeShiftConfig {
+        pattern,
+        base,
+        matcher,
+        anchor_id,
+        use_anchor,
+    })
 }
 
 fn parse_shift_datetime(
     value: &str,
-    format: DatetimeShiftFormat,
+    matcher: DatetimeShiftMatcher<'_>,
+    base_timestamp: DateTime<FixedOffset>,
 ) -> Result<DateTime<FixedOffset>, RenderError> {
-    match format {
-        DatetimeShiftFormat::Rfc3339 => DateTime::parse_from_rfc3339(value).map_err(|err| {
-            RenderError::Operational(format!(
-                "Matched datetime `{value}` is not valid RFC 3339: {err}"
-            ))
-        }),
-        DatetimeShiftFormat::Rfc1123 => DateTime::parse_from_rfc2822(value).map_err(|err| {
-            RenderError::Operational(format!(
-                "Matched datetime `{value}` is not valid RFC 1123: {err}"
-            ))
-        }),
+    match matcher {
+        DatetimeShiftMatcher::BuiltIn(DatetimeShiftFormat::Rfc3339) => {
+            DateTime::parse_from_rfc3339(value).map_err(|err| {
+                RenderError::Operational(format!(
+                    "Matched datetime `{value}` is not valid RFC 3339: {err}"
+                ))
+            })
+        }
+        DatetimeShiftMatcher::BuiltIn(DatetimeShiftFormat::Rfc1123) => {
+            DateTime::parse_from_rfc2822(value).map_err(|err| {
+                RenderError::Operational(format!(
+                    "Matched datetime `{value}` is not valid RFC 1123: {err}"
+                ))
+            })
+        }
+        DatetimeShiftMatcher::Custom(custom_format) => {
+            let naive = NaiveDateTime::parse_from_str(value, custom_format).map_err(|err| {
+                RenderError::Operational(format!(
+                    "Matched datetime `{value}` does not match custom_format `{custom_format}`: {err}"
+                ))
+            })?;
+            base_timestamp
+                .offset()
+                .from_local_datetime(&naive)
+                .single()
+                .ok_or_else(|| {
+                    RenderError::Operational(format!(
+                        "Matched datetime `{value}` could not be interpreted with offset {}",
+                        base_timestamp.offset()
+                    ))
+                })
+        }
     }
 }
 
-fn format_shift_datetime(datetime: DateTime<FixedOffset>, format: DatetimeShiftFormat) -> String {
-    match format {
-        DatetimeShiftFormat::Rfc3339 => {
+fn format_shift_datetime(
+    datetime: DateTime<FixedOffset>,
+    matcher: DatetimeShiftMatcher<'_>,
+) -> String {
+    match matcher {
+        DatetimeShiftMatcher::BuiltIn(DatetimeShiftFormat::Rfc3339) => {
             datetime.to_rfc3339_opts(chrono::SecondsFormat::Millis, true)
         }
-        DatetimeShiftFormat::Rfc1123 => datetime.format("%a, %d %b %Y %H:%M:%S GMT").to_string(),
+        DatetimeShiftMatcher::BuiltIn(DatetimeShiftFormat::Rfc1123) => {
+            datetime.format("%a, %d %b %Y %H:%M:%S GMT").to_string()
+        }
+        DatetimeShiftMatcher::Custom(custom_format) => {
+            datetime.naive_local().format(custom_format).to_string()
+        }
     }
+}
+
+fn shift_from_anchor(
+    base_timestamp: DateTime<FixedOffset>,
+    anchor_original: DateTime<FixedOffset>,
+    original: DateTime<FixedOffset>,
+) -> DateTime<FixedOffset> {
+    let delta = original - anchor_original;
+    base_timestamp
+        + Duration::seconds(delta.num_seconds())
+        + Duration::nanoseconds(
+            (delta - Duration::seconds(delta.num_seconds()))
+                .num_nanoseconds()
+                .unwrap_or(0),
+        )
 }
 
 fn trim_trailing_whitespace(output: &Value) -> Result<bool, RenderError> {

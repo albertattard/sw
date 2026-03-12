@@ -1,7 +1,7 @@
 ---
 id: TASK-017
 title: Support Shared Datetime Shift Anchors And Custom Formats
-status: pending
+status: done
 related_features:
   - SPEC-003
 owner: @aattard
@@ -32,16 +32,16 @@ can share one anchor and custom date layouts can be shifted semantically.
 
 ## Acceptance Criteria
 
-- [ ] Given a `datetime_shift` rule with `id`, later datetime rules in the same
+- [x] Given a `datetime_shift` rule with `id`, later datetime rules in the same
       output block may reuse that anchor with `use`.
-- [ ] Given one shared anchor and multiple datetime rules with different
+- [x] Given one shared anchor and multiple datetime rules with different
       supported formats, all rewritten datetimes follow the same shift delta.
-- [ ] Given a `datetime_shift` rule with `pattern` and `custom_format`,
+- [x] Given a `datetime_shift` rule with `pattern` and `custom_format`,
       matching custom datetimes are shifted semantically and rendered back in
       that same custom format.
-- [ ] Given a rule that uses `use`, specifying `base` is rejected.
-- [ ] Given a rule that specifies both `id` and `use`, validation rejects it.
-- [ ] Given a rule that specifies both `format` and `custom_format`,
+- [x] Given a rule that uses `use`, specifying `base` is rejected.
+- [x] Given a rule that specifies both `id` and `use`, validation rejects it.
+- [x] Given a rule that specifies both `format` and `custom_format`,
       validation rejects it.
 
 ## Notes
