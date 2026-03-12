@@ -2,6 +2,8 @@
 
 ## Trigger phrases
 - `commit changes`
+  - Run the automated tests
+  - Build the release binary
   - Stage all staged and unstaged changes with `git add .`
   - Create a commit using the commit message format in this file
   - Push the commit to `origin` on the current branch
@@ -9,6 +11,8 @@
 ## Git workflow
 - Only create a commit when the user explicitly asks.
 - Only push when the user explicitly asks.
+- Before `commit changes`, run the automated tests and build the release binary.
+- If tests or the release build fail, stop and report the failure instead of committing.
 - Write commit messages in this format:
   - Subject line: imperative verb + outcome
   - Example: `Add validate subcommand`
