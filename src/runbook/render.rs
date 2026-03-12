@@ -23,6 +23,18 @@ struct RenderState {
     captured_values: HashMap<String, String>,
 }
 
+struct RewriteCapturePair {
+    original_name: String,
+    original_value: String,
+    rewritten_name: String,
+    rewritten_value: String,
+}
+
+struct RewriteResult {
+    rendered: String,
+    generated_captures: Vec<RewriteCapturePair>,
+}
+
 pub(crate) fn render_markdown(runbook: &Value, runbook_path: &Path) -> Result<String, RenderError> {
     let entries = runbook
         .get("entries")
@@ -219,7 +231,8 @@ fn render_command(entry: &Value, state: &mut RenderState) -> Result<String, Rend
     let command_text = resolved_command_lines.join("\n");
     let mut section = format!("```shell\n{command_text}\n```");
     let execution = execute_command(entry, &command_text)?;
-    let rewritten_stdout = rewritten_stdout_for_capture(entry, &execution.stdout, state)?;
+    let rewrite_result = rewritten_stdout_for_capture(entry, &execution.stdout, state)?;
+    let rewritten_stdout = rewrite_result.rendered;
 
     if execution.timed_out {
         append_output(entry, &rewritten_stdout, &mut section)?;
@@ -236,6 +249,10 @@ fn render_command(entry: &Value, state: &mut RenderState) -> Result<String, Rend
         &rewritten_stdout,
         &mut state.captured_values,
     )?;
+    store_generated_rewrite_captures(
+        &rewrite_result.generated_captures,
+        &mut state.captured_values,
+    );
     append_output(entry, &rewritten_stdout, &mut section)?;
     apply_indent(entry, section)
 }
@@ -301,26 +318,36 @@ fn normalize_rendered_output(
     stdout: &str,
     datetime_anchors: &mut HashMap<String, DatetimeShiftAnchor>,
     captured_values: &HashMap<String, String>,
-) -> Result<String, RenderError> {
-    let rewritten = apply_rewrite_rules(output, stdout, datetime_anchors, captured_values)?;
+) -> Result<RewriteResult, RenderError> {
+    let rewrite_result = apply_rewrite_rules(output, stdout, datetime_anchors, captured_values)?;
+    let rewritten = rewrite_result.rendered;
 
     if !trim_trailing_whitespace(output)? {
-        return Ok(rewritten);
+        return Ok(RewriteResult {
+            rendered: rewritten,
+            generated_captures: rewrite_result.generated_captures,
+        });
     }
 
-    Ok(rewritten
-        .split_inclusive('\n')
-        .map(trim_segment_trailing_whitespace)
-        .collect())
+    Ok(RewriteResult {
+        rendered: rewritten
+            .split_inclusive('\n')
+            .map(trim_segment_trailing_whitespace)
+            .collect(),
+        generated_captures: rewrite_result.generated_captures,
+    })
 }
 
 fn rewritten_stdout_for_capture(
     entry: &Value,
     stdout: &str,
     state: &mut RenderState,
-) -> Result<String, RenderError> {
+) -> Result<RewriteResult, RenderError> {
     let Some(output) = entry.get("output") else {
-        return Ok(stdout.to_string());
+        return Ok(RewriteResult {
+            rendered: stdout.to_string(),
+            generated_captures: Vec::new(),
+        });
     };
 
     normalize_rendered_output(
@@ -336,18 +363,45 @@ fn apply_rewrite_rules(
     stdout: &str,
     datetime_anchors: &mut HashMap<String, DatetimeShiftAnchor>,
     captured_values: &HashMap<String, String>,
-) -> Result<String, RenderError> {
+) -> Result<RewriteResult, RenderError> {
     let Some(rules) = output.get("rewrite") else {
-        return Ok(stdout.to_string());
+        return Ok(RewriteResult {
+            rendered: stdout.to_string(),
+            generated_captures: Vec::new(),
+        });
     };
     let rules = rules.as_array().ok_or_else(|| {
         RenderError::Operational("Command output rewrite must be an array".to_string())
     })?;
     let mut rendered = stdout.to_string();
+    let mut generated_captures = Vec::new();
     for rule in rules {
-        rendered = apply_rewrite_rule(rule, &rendered, datetime_anchors, captured_values)?;
+        let result = apply_rewrite_rule(rule, &rendered, datetime_anchors, captured_values)?;
+        rendered = result.rendered;
+        if let Some(capture) = result.generated_capture {
+            generated_captures.push(capture);
+        }
     }
-    Ok(rendered)
+    Ok(RewriteResult {
+        rendered,
+        generated_captures,
+    })
+}
+
+fn store_generated_rewrite_captures(
+    generated_captures: &[RewriteCapturePair],
+    captured_values: &mut HashMap<String, String>,
+) {
+    for capture in generated_captures {
+        captured_values.insert(
+            capture.original_name.clone(),
+            capture.original_value.clone(),
+        );
+        captured_values.insert(
+            capture.rewritten_name.clone(),
+            capture.rewritten_value.clone(),
+        );
+    }
 }
 
 fn extract_captured_values(
@@ -492,7 +546,7 @@ fn apply_rewrite_rule(
     rendered: &str,
     datetime_anchors: &mut HashMap<String, DatetimeShiftAnchor>,
     captured_values: &HashMap<String, String>,
-) -> Result<String, RenderError> {
+) -> Result<RewriteRuleResult, RenderError> {
     let rule_type = rule.get("type").and_then(Value::as_str).ok_or_else(|| {
         RenderError::Operational("Command output rewrite type must be a string".to_string())
     })?;
@@ -506,11 +560,16 @@ fn apply_rewrite_rule(
     }
 }
 
+struct RewriteRuleResult {
+    rendered: String,
+    generated_capture: Option<RewriteCapturePair>,
+}
+
 fn apply_replace_rule(
     rule: &Value,
     rendered: &str,
     captured_values: &HashMap<String, String>,
-) -> Result<String, RenderError> {
+) -> Result<RewriteRuleResult, RenderError> {
     let pattern = rule.get("pattern").and_then(Value::as_str).ok_or_else(|| {
         RenderError::Operational("Command output rewrite pattern must be a string".to_string())
     })?;
@@ -535,17 +594,22 @@ fn apply_replace_rule(
     let regex = Regex::new(pattern.as_str()).map_err(|err| {
         RenderError::Operational(format!("Invalid output rewrite pattern `{pattern}`: {err}"))
     })?;
+    let generated_capture =
+        generated_rewrite_capture_for_replace(rule, rendered, &regex, replacement.as_str())?;
 
-    Ok(regex
-        .replace_all(rendered, replacement.as_str())
-        .into_owned())
+    Ok(RewriteRuleResult {
+        rendered: regex
+            .replace_all(rendered, replacement.as_str())
+            .into_owned(),
+        generated_capture,
+    })
 }
 
 fn apply_datetime_shift_rule(
     rule: &Value,
     rendered: &str,
     datetime_anchors: &mut HashMap<String, DatetimeShiftAnchor>,
-) -> Result<String, RenderError> {
+) -> Result<RewriteRuleResult, RenderError> {
     let config = datetime_shift_config(rule)?;
     let regex = Regex::new(config.pattern).map_err(|err| {
         RenderError::Operational(format!(
@@ -571,10 +635,12 @@ fn apply_datetime_shift_rule(
     let mut first_original: Option<DateTime<FixedOffset>> = None;
     let mut result = String::with_capacity(rendered.len());
     let mut last_end = 0;
+    let mut capture_matches: Vec<(String, String)> = Vec::new();
 
     for matched in regex.find_iter(rendered) {
         result.push_str(&rendered[last_end..matched.start()]);
-        let original = parse_shift_datetime(matched.as_str(), config.matcher, base_timestamp)?;
+        let matched_text = matched.as_str().to_string();
+        let original = parse_shift_datetime(&matched_text, config.matcher, base_timestamp)?;
         let shifted = match shared_anchor {
             Some(anchor) => anchor.shift(original),
             None => match first_original {
@@ -585,7 +651,11 @@ fn apply_datetime_shift_rule(
                 }
             },
         };
-        result.push_str(&format_shift_datetime(shifted, config.matcher));
+        let rewritten_value = format_shift_datetime(shifted, config.matcher);
+        if rule.get("capture_as").is_some() {
+            capture_matches.push((matched_text, rewritten_value.clone()));
+        }
+        result.push_str(&rewritten_value);
         last_end = matched.end();
     }
 
@@ -601,7 +671,68 @@ fn apply_datetime_shift_rule(
         );
     }
 
-    Ok(result)
+    Ok(RewriteRuleResult {
+        rendered: result,
+        generated_capture: generated_rewrite_capture_from_pairs(rule, capture_matches)?,
+    })
+}
+
+fn generated_rewrite_capture_for_replace(
+    rule: &Value,
+    rendered: &str,
+    regex: &Regex,
+    replacement: &str,
+) -> Result<Option<RewriteCapturePair>, RenderError> {
+    let Some(capture_as) = rule.get("capture_as").and_then(Value::as_str) else {
+        return Ok(None);
+    };
+
+    let matches: Vec<String> = regex
+        .find_iter(rendered)
+        .map(|matched| matched.as_str().to_string())
+        .collect();
+    if matches.len() != 1 {
+        return Err(RenderError::CommandFailed(format!(
+            "Rewrite capture_as `{capture_as}` matched {} values; expected exactly one",
+            matches.len()
+        )));
+    }
+
+    let original_value = matches[0].clone();
+    let rewritten_value = regex
+        .replace(original_value.as_str(), replacement)
+        .into_owned();
+
+    Ok(Some(RewriteCapturePair {
+        original_name: format!("{capture_as}_original"),
+        original_value,
+        rewritten_name: format!("{capture_as}_rewritten"),
+        rewritten_value,
+    }))
+}
+
+fn generated_rewrite_capture_from_pairs(
+    rule: &Value,
+    pairs: Vec<(String, String)>,
+) -> Result<Option<RewriteCapturePair>, RenderError> {
+    let Some(capture_as) = rule.get("capture_as").and_then(Value::as_str) else {
+        return Ok(None);
+    };
+
+    if pairs.len() != 1 {
+        return Err(RenderError::CommandFailed(format!(
+            "Rewrite capture_as `{capture_as}` matched {} values; expected exactly one",
+            pairs.len()
+        )));
+    }
+
+    let (original_value, rewritten_value) = pairs.into_iter().next().expect("single pair");
+    Ok(Some(RewriteCapturePair {
+        original_name: format!("{capture_as}_original"),
+        original_value,
+        rewritten_name: format!("{capture_as}_rewritten"),
+        rewritten_value,
+    }))
 }
 
 struct DatetimeShiftConfig<'a> {

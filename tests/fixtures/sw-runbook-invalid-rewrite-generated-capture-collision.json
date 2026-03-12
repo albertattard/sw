@@ -1,0 +1,34 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'audio file> target/audio/audio_20260312_142351.mp3\\n'"
+      ],
+      "output": {
+        "rewrite": [
+          {
+            "type": "datetime_shift",
+            "pattern": "audio_\\d{8}_\\d{6}",
+            "custom_format": "audio_%Y%m%d_%H%M%S",
+            "capture_as": "audio_path_1"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'second\\n'"
+      ],
+      "capture": [
+        {
+          "name": "audio_path_1_original",
+          "source": "stdout",
+          "stage": "raw",
+          "pattern": "(second)"
+        }
+      ]
+    }
+  ]
+}

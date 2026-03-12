@@ -511,6 +511,31 @@ fn output_rewrite_patterns_can_interpolate_earlier_captures() {
 }
 
 #[test]
+fn rewrite_capture_as_generates_original_and_rewritten_variables() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-rewrite-generated-capture-pair.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    assert_eq!(
+        fs::read_to_string(dir.join("original-name.txt")).expect("missing original-name.txt"),
+        "audio_20260312_142351\n"
+    );
+    assert_eq!(
+        fs::read_to_string(dir.join("rewritten-name.txt")).expect("missing rewritten-name.txt"),
+        "audio_20770427_123456\n"
+    );
+    let readme = fs::read_to_string(dir.join("readme.md")).expect("missing readme output");
+    assert!(readme.contains("Original: `audio_20260312_142351`"));
+    assert!(readme.contains("Rewritten: `audio_20770427_123456`"));
+}
+
+#[test]
 fn output_rewrite_datetime_shift_preserves_relative_timing() {
     let dir = prepare_workspace();
     write_runbook(

@@ -74,6 +74,7 @@ fn validate_output_with_context(
     path: &str,
     errors: &mut Vec<ValidationIssue>,
     global_datetime_anchor_ids: &mut HashSet<String>,
+    global_capture_names: &mut HashSet<String>,
     available_capture_names: &HashSet<String>,
 ) {
     let Some(object) = as_object(value, path, errors) else {
@@ -133,6 +134,7 @@ fn validate_output_with_context(
             &format!("{path}.rewrite"),
             errors,
             global_datetime_anchor_ids,
+            global_capture_names,
             available_capture_names,
         );
     }
@@ -252,6 +254,24 @@ fn validate_capture_references(
     }
 }
 
+fn register_rewrite_generated_capture_names(
+    output: &Value,
+    available_capture_names: &mut HashSet<String>,
+) {
+    let Some(rules) = output.get("rewrite").and_then(Value::as_array) else {
+        return;
+    };
+
+    for rule in rules {
+        let Some(capture_as) = rule.get("capture_as").and_then(Value::as_str) else {
+            continue;
+        };
+
+        available_capture_names.insert(format!("{capture_as}_original"));
+        available_capture_names.insert(format!("{capture_as}_rewritten"));
+    }
+}
+
 fn validate_capture_references_in_string(
     value: &str,
     path: &str,
@@ -282,6 +302,7 @@ fn validate_rewrite_rules(
     path: &str,
     errors: &mut Vec<ValidationIssue>,
     global_datetime_anchor_ids: &mut HashSet<String>,
+    global_capture_names: &mut HashSet<String>,
     available_capture_names: &HashSet<String>,
 ) {
     let Some(rules) = as_array(value, path, errors) else {
@@ -297,6 +318,7 @@ fn validate_rewrite_rules(
             &format!("{path}[{index}]"),
             errors,
             global_datetime_anchor_ids,
+            global_capture_names,
             available_capture_names,
         );
     }
@@ -307,6 +329,7 @@ fn validate_rewrite_rule(
     path: &str,
     errors: &mut Vec<ValidationIssue>,
     global_datetime_anchor_ids: &mut HashSet<String>,
+    global_capture_names: &mut HashSet<String>,
     available_capture_names: &HashSet<String>,
 ) {
     let Some(object) = as_object(value, path, errors) else {
@@ -324,7 +347,8 @@ fn validate_rewrite_rule(
     match rule_type {
         "replace" => {
             for key in object.keys() {
-                if key != "type" && key != "pattern" && key != "replacement" {
+                if key != "type" && key != "pattern" && key != "replacement" && key != "capture_as"
+                {
                     push_error(
                         errors,
                         format!("{path}.{key}"),
@@ -335,6 +359,7 @@ fn validate_rewrite_rule(
 
             require_string(object, "pattern", path, errors);
             require_string(object, "replacement", path, errors);
+            validate_rewrite_capture_as(object, path, errors, global_capture_names);
             if let Some(pattern) = object.get("pattern").and_then(Value::as_str) {
                 let reference_pattern =
                     Regex::new(CAPTURE_REFERENCE_PATTERN).expect("valid capture reference regex");
@@ -367,6 +392,7 @@ fn validate_rewrite_rule(
                     && key != "id"
                     && key != "use"
                     && key != "custom_format"
+                    && key != "capture_as"
                 {
                     push_error(
                         errors,
@@ -489,12 +515,53 @@ fn validate_rewrite_rule(
             {
                 push_error(errors, format!("{path}.base"), "must be a string");
             }
+
+            validate_rewrite_capture_as(object, path, errors, global_capture_names);
         }
         _ => push_error(
             errors,
             format!("{path}.type"),
             "must be `replace` or `datetime_shift`",
         ),
+    }
+}
+
+fn validate_rewrite_capture_as(
+    object: &Map<String, Value>,
+    path: &str,
+    errors: &mut Vec<ValidationIssue>,
+    global_capture_names: &mut HashSet<String>,
+) {
+    let Some(capture_as) = object.get("capture_as") else {
+        return;
+    };
+
+    let name_pattern = Regex::new(CAPTURE_NAME_PATTERN).expect("valid capture name regex");
+    let Some(capture_as) = capture_as.as_str() else {
+        push_error(errors, format!("{path}.capture_as"), "must be a string");
+        return;
+    };
+
+    if !name_pattern.is_match(capture_as) {
+        push_error(
+            errors,
+            format!("{path}.capture_as"),
+            "must be a valid identifier",
+        );
+        return;
+    }
+
+    for generated_name in [
+        format!("{capture_as}_original"),
+        format!("{capture_as}_rewritten"),
+    ] {
+        if !global_capture_names.insert(generated_name.clone()) {
+            push_error(
+                errors,
+                format!("{path}.capture_as"),
+                format!("duplicate capture name `{generated_name}`"),
+            );
+        }
     }
 }
 
@@ -645,8 +712,10 @@ fn validate_entry(
                     &format!("{path}.output"),
                     errors,
                     global_datetime_anchor_ids,
+                    global_capture_names,
                     available_capture_names,
                 );
+                register_rewrite_generated_capture_names(output, available_capture_names);
             }
 
             if let Some(assertion) = object.get("assert") {

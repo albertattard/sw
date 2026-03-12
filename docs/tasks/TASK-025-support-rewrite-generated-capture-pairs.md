@@ -1,7 +1,7 @@
 ---
 id: TASK-025
 title: Support Rewrite Generated Capture Pairs
-status: pending
+status: done
 related_features:
   - SPEC-003
 owner: @aattard
@@ -31,14 +31,14 @@ rewritten values without requiring separate top-level capture definitions.
 
 ## Acceptance Criteria
 
-- [ ] Given a rewrite rule with `capture_as`, the matched pre-rewrite value is
+- [x] Given a rewrite rule with `capture_as`, the matched pre-rewrite value is
       stored as `@{<capture_as>_original}`.
-- [ ] Given a rewrite rule with `capture_as`, the rewritten value is stored as
+- [x] Given a rewrite rule with `capture_as`, the rewritten value is stored as
       `@{<capture_as>_rewritten}`.
-- [ ] Given a later command or Markdown entry that uses those generated
+- [x] Given a later command or Markdown entry that uses those generated
       variables, the interpolated values match the captured original and
       rewritten forms.
-- [ ] Given a rewrite rule with `capture_as` whose generated names collide with
+- [x] Given a rewrite rule with `capture_as` whose generated names collide with
       an existing explicit or generated capture name, validation rejects the
       runbook.
 

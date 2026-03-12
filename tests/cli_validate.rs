@@ -409,6 +409,22 @@ fn invalid_output_rewrite_pattern_forward_reference_returns_validation_failure()
 }
 
 #[test]
+fn invalid_rewrite_generated_capture_collision_returns_validation_failure() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-invalid-rewrite-generated-capture-collision.json",
+        "--output-format",
+        "json",
+    ]);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": false"));
+    assert!(stdout.contains("\"path\": \"entries[1].capture[0].name\""));
+}
+
+#[test]
 fn invalid_markdown_forward_reference_returns_validation_failure() {
     let output = run(&[
         "validate",
