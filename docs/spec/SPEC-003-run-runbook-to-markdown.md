@@ -212,8 +212,8 @@ in the runbook.
   the declared rewrite rules before rendering.
 - `output.rewrite` is an ordered array of rewrite rules.
 - Rewrite rules are applied in the declared order.
-- In this increment, supported rewrite rule types are `replace` and
-  `datetime_shift`.
+- In this increment, supported rewrite rule types are `replace`,
+  `datetime_shift`, and `keep_between`.
 - A `replace` rewrite rule performs a pattern-based replacement on the captured
   command output.
 - A rewrite rule may declare `capture_as` to expose both the matched original
@@ -234,6 +234,17 @@ in the runbook.
   `@{name}` text.
 - A `replace` rule `replacement` that references `@{name}` must use a variable
   captured earlier in the runbook.
+- A `keep_between` rewrite rule keeps only the lines between a matched `start`
+  line and a matched `end` line.
+- In this increment, `start` and `end` are matched as literal strings, not
+  regular expressions.
+- `keep_between` uses line-based offsets.
+- `start_offset` defaults to `1`.
+- `end_offset` defaults to `-1`.
+- `start_offset: 1` means start on the line after the matched `start` line.
+- `end_offset: -1` means stop on the line before the matched `end` line.
+- If a `keep_between` boundary is not found, the rule leaves the output
+  unchanged.
 - A `datetime_shift` rewrite rule shifts matched timestamps so the first match
   becomes the configured base timestamp and later matches preserve their
   relative distance from that first match.
@@ -451,6 +462,14 @@ in the runbook.
       that variable is captured, validation rejects the runbook.
 - [ ] Given `@@{name}` in a `replace` rewrite rule `replacement`, the literal
       `@{name}` is preserved without interpolation.
+- [ ] Given a `keep_between` rewrite rule, only the lines between the matched
+      `start` and `end` boundaries are kept.
+- [ ] Given a `keep_between` rewrite rule without explicit offsets,
+      `start_offset: 1` and `end_offset: -1` are used.
+- [ ] Given a `keep_between` rewrite rule with explicit offsets, the resulting
+      output slice reflects those line-based offsets.
+- [ ] Given a `keep_between` rewrite rule whose `start` or `end` boundary is
+      not found, the rule leaves the output unchanged.
 - [ ] Given a `datetime_shift` rewrite rule, the first matched timestamp is
       rewritten to the configured base timestamp.
 - [ ] Given multiple timestamps matched by the same `datetime_shift` rule,
@@ -532,6 +551,10 @@ in the runbook.
 - A `datetime_shift` rule declares both `id` and `use`.
 - A `datetime_shift` rule declares both `format` and `custom_format`.
 - A `datetime_shift` rule declares `use` together with `base`.
+- A `keep_between` rule uses the default exclusive boundaries.
+- A `keep_between` rule uses explicit positive or negative offsets.
+- A `keep_between` rule does not find its `start` boundary.
+- A `keep_between` rule does not find its `end` boundary.
 - A capture rule uses `stage: raw`.
 - A capture rule uses `stage: rewritten` together with `output.rewrite`.
 - Multiple commands capture variables with the same name.
