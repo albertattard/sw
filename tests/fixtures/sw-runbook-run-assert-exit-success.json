@@ -1,0 +1,28 @@
+{
+  "entries": [
+    {
+      "type": "Heading",
+      "level": "H1",
+      "title": "Asserted non-zero exit"
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "false"
+      ],
+      "assert": {
+        "exit_code": 1
+      }
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'after assert\\n' > assert-sequence.txt",
+        "printf 'expected output\\n'"
+      ],
+      "output": {
+        "caption": "Assertion passed"
+      }
+    }
+  ]
+}

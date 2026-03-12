@@ -159,6 +159,7 @@ fn render_command(entry: &Value) -> Result<String, RenderError> {
     let command_text = command_lines.join("\n");
     let mut section = format!("```shell\n{command_text}\n```");
     let execution = execute_command(&command_text)?;
+    ensure_expected_exit_code(entry, &execution)?;
 
     if let Some(output) = entry.get("output") {
         if let Some(caption) = output.get("caption") {
@@ -204,6 +205,7 @@ fn render_command(entry: &Value) -> Result<String, RenderError> {
 }
 
 struct CommandExecution {
+    exit_code: i32,
     stdout: String,
 }
 
@@ -214,17 +216,44 @@ fn execute_command(command: &str) -> Result<CommandExecution, RenderError> {
         .output()
         .map_err(|err| RenderError::Operational(format!("Failed to execute command: {err}")))?;
 
-    if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
-        let detail = if stderr.is_empty() {
-            format!("Command failed with status {}", output.status)
-        } else {
-            format!("Command failed with status {}: {stderr}", output.status)
-        };
-        return Err(RenderError::CommandFailed(detail));
-    }
+    let exit_code = output.status.code().unwrap_or(-1);
 
     Ok(CommandExecution {
+        exit_code,
         stdout: String::from_utf8_lossy(&output.stdout).to_string(),
     })
+}
+
+fn expected_exit_code(entry: &Value) -> Result<i32, RenderError> {
+    let Some(assertion) = entry.get("assert") else {
+        return Ok(0);
+    };
+
+    let exit_code = assertion
+        .get("exit_code")
+        .and_then(Value::as_i64)
+        .ok_or_else(|| {
+            RenderError::Operational("Command assert.exit_code must be an integer".to_string())
+        })?;
+
+    i32::try_from(exit_code).map_err(|_| {
+        RenderError::Operational(
+            "Command assert.exit_code is outside the supported range".to_string(),
+        )
+    })
+}
+
+fn ensure_expected_exit_code(
+    entry: &Value,
+    execution: &CommandExecution,
+) -> Result<(), RenderError> {
+    let expected = expected_exit_code(entry)?;
+    if execution.exit_code == expected {
+        return Ok(());
+    }
+
+    Err(RenderError::CommandFailed(format!(
+        "Command failed assertion: expected exit code {expected}, got {}",
+        execution.exit_code
+    )))
 }

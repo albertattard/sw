@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "echo 'hello'"
+      ],
+      "assert": {
+        "exit_code": "0"
+      }
+    }
+  ]
+}

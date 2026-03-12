@@ -1,0 +1,30 @@
+{
+  "entries": [
+    {
+      "type": "Heading",
+      "level": "H1",
+      "title": "Asserted exit mismatch"
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'before mismatch\\n' > assert-mismatch.txt"
+      ]
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "false"
+      ],
+      "assert": {
+        "exit_code": 0
+      }
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'after mismatch\\n' >> assert-mismatch.txt"
+      ]
+    }
+  ]
+}

@@ -139,5 +139,49 @@ fn command_failure_returns_exit_code_two_without_output_file() {
     );
 
     let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(stderr.contains("Command failed with status"));
+    assert!(stderr.contains("expected exit code 0, got 1"));
+}
+
+#[test]
+fn asserted_exit_code_allows_non_zero_command_and_run_continues() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-assert-exit-success.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    assert_eq!(
+        fs::read_to_string(dir.join("assert-sequence.txt")).expect("missing follow-up effect"),
+        "after assert\n"
+    );
+
+    let readme = fs::read_to_string(dir.join("readme.md")).expect("missing readme output");
+    assert!(readme.contains("Assertion passed"));
+    assert!(readme.contains("```text\nexpected output\n```"));
+}
+
+#[test]
+fn asserted_exit_code_mismatch_fails_without_partial_output() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-assert-exit-failure.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert_eq!(output.status.code(), Some(2));
+    assert!(!dir.join("readme.md").exists());
+    assert_eq!(
+        fs::read_to_string(dir.join("assert-mismatch.txt")).expect("missing side effect"),
+        "before mismatch\n"
+    );
+
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("expected exit code 0, got 1"));
 }

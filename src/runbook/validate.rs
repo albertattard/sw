@@ -91,6 +91,28 @@ fn validate_output(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>)
     }
 }
 
+fn validate_assert(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>) {
+    let Some(object) = as_object(value, path, errors) else {
+        return;
+    };
+
+    for key in object.keys() {
+        if key != "exit_code" {
+            push_error(
+                errors,
+                format!("{path}.{key}"),
+                "is not a supported assert property",
+            );
+        }
+    }
+
+    match object.get("exit_code") {
+        Some(exit_code) if exit_code.is_i64() || exit_code.is_u64() => {}
+        Some(_) => push_error(errors, format!("{path}.exit_code"), "must be an integer"),
+        None => push_error(errors, format!("{path}.exit_code"), "is required"),
+    }
+}
+
 fn validate_entry(value: &Value, index: usize, errors: &mut Vec<ValidationIssue>) {
     let path = format!("entries[{index}]");
     let Some(object) = as_object(value, &path, errors) else {
@@ -130,6 +152,10 @@ fn validate_entry(value: &Value, index: usize, errors: &mut Vec<ValidationIssue>
 
             if let Some(output) = object.get("output") {
                 validate_output(output, &format!("{path}.output"), errors);
+            }
+
+            if let Some(assertion) = object.get("assert") {
+                validate_assert(assertion, &format!("{path}.assert"), errors);
             }
         }
         _ => push_error(
