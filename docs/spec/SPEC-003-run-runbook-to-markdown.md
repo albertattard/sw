@@ -4,7 +4,7 @@ title: Run Runbook to Markdown
 status: in_progress
 priority: high
 owner: @aattard
-last_updated: 2026-03-11
+last_updated: 2026-03-12
 ---
 
 ## Problem
@@ -40,25 +40,64 @@ Initial version behavior:
 This command generates documentation output and executes the commands declared
 in the runbook.
 
-## Inputs/Outputs
+## Inputs
 
-Input:
 - Optional named input file parameter: `--input-file <runbook.json>`.
 - Optional output format parameter: `--output-format markdown`.
 - Optional output file parameter: `--output-file <path>`.
 
-Default input behavior:
+### CLI Defaults
+
 - If `--input-file` is provided, use that path. Otherwise use
   `./sw-runbook.json`.
 - If `--output-format` is not provided, default to `markdown`.
 - If `--output-file` is not provided, default to `./readme.md`.
 
-Supported output formats in v1:
+## Outputs
+
+- Generated Markdown file written to the target path.
+- Human-readable status on stdout.
+
+### Exit Codes
+
+- `0`: runbook executed and rendered successfully.
+- `1`: operational error (missing file, unreadable file, invalid JSON, write
+  failure, internal error).
+- `2`: invalid runbook input or command execution failure.
+
+### Supported Output Formats
+
 - `markdown`
 
-Initial rendering rules for Markdown output:
+## Rendering Rules
+
+### Common Rules
+
+- Entries are rendered in the same order as they appear in the runbook.
+
+### Heading Entries
+
 - `Heading` entries render as Markdown headings based on their `level`.
+
+### Markdown Entries
+
 - `Markdown` entries copy their `contents` into the output in order.
+
+### DisplayFile Entries
+
+- `DisplayFile` entries copy the contents of the referenced file into the
+  generated Markdown as a fenced code block.
+- `DisplayFile.path` is resolved relative to the runbook location.
+- `DisplayFile` rendering does not execute the referenced file.
+- `DisplayFile` fenced blocks use a detected content type when the file
+  extension is recognized.
+- In this increment, recognized `DisplayFile` extensions include `.java`,
+  which renders as `java`.
+- If the `DisplayFile` extension is not recognized, the generated Markdown
+  uses a `text` fenced block.
+
+### Command Entries
+
 - `Command` entries render their `commands` as fenced shell code blocks.
 - `Command` entries are executed in order.
 - All lines within a single `Command` entry execute together in the same shell
@@ -117,30 +156,54 @@ Initial rendering rules for Markdown output:
   and `xml`.
 - If a `Command` entry does not contain an `output` property, command output is
   not written to the generated document.
-- Entries are rendered in the same order as they appear in the runbook.
-
-Output:
-- Generated Markdown file written to the target path.
-- Human-readable status on stdout.
-
-Exit codes:
-- `0`: runbook executed and rendered successfully.
-- `1`: operational error (missing file, unreadable file, invalid JSON, write
-  failure, internal error).
-- `2`: invalid runbook input or command execution failure.
 
 ## Acceptance Criteria
+
+### Command Invocation And Files
 
 - [ ] `sw` with no subcommand behaves the same as `sw run`.
 - [ ] Given no input file argument and a valid `./sw-runbook.json`, `sw`
       renders the file and writes `./readme.md`.
 - [ ] Given `sw run --input-file <file>` with a valid runbook, the command
       renders entries in order and exits with `0`.
+- [ ] Given `--output-file <path>`, the command writes the output to the
+      provided path.
+- [ ] Given an invalid runbook, the command exits with `2` and does not write a
+      partial output file.
+- [ ] Given a missing input file, the command exits with `1` and reports a
+      clear error.
+
+### Heading Entries
+
+- [ ] Given a runbook with `Heading` entries, the generated Markdown contains
+      the expected heading markers for the configured levels.
+
+### Markdown Entries
+
+- [ ] Given a runbook with `Markdown` entries, the generated Markdown preserves
+      the entry content in order.
+
+### DisplayFile Entries
+
+- [ ] Given a runbook with `DisplayFile` entries, the generated Markdown
+      includes the referenced file contents in a fenced block.
+- [ ] Given a `DisplayFile` entry that references a `.java` file, the
+      generated Markdown uses a `java` fenced block.
+- [ ] Given a `DisplayFile` entry whose extension is not recognized, the
+      generated Markdown uses a `text` fenced block.
+
+### Command Execution
+
 - [ ] Given a runbook with `Command` entries, the commands are executed in the
       same order as they appear in the runbook.
 - [ ] Given a `Command` entry with multiple command lines, those lines execute
       together in the same shell context so values set on one line can be used
       on a later line.
+- [ ] Given a runbook with `Command` entries, the generated Markdown includes
+      fenced command blocks.
+
+### Command Cleanup
+
 - [ ] Given commands that declare `cleanup`, cleanup commands execute in reverse
       order after the run completes.
 - [ ] Given a `cleanup` block with multiple command lines, those lines execute
@@ -157,6 +220,9 @@ Exit codes:
       execute in reverse order.
 - [ ] Given one or more cleanup failures, the run is reported as failed after
       cleanup completes.
+
+### Command Timeouts
+
 - [ ] Given a command without a declared timeout, the default timeout of
       `2 minutes` is used.
 - [ ] Given a command with a declared timeout such as `30 seconds`,
@@ -165,6 +231,9 @@ Exit codes:
 - [ ] Given a command that exceeds its timeout, the command process is
       terminated, the run exits with `2`, and any captured output produced
       before termination is preserved to aid debugging.
+
+### Command Assertions
+
 - [ ] Given a command without an `assert` section that exits successfully, the
       run continues.
 - [ ] Given a command without an `assert` section that exits with an error, the
@@ -181,12 +250,9 @@ Exit codes:
       exits with `2` and does not write a partial output file.
 - [ ] Given multiple assertion checks, all checks must pass for the command to
       be considered successful.
-- [ ] Given a runbook with `Heading` entries, the generated Markdown contains
-      the expected heading markers for the configured levels.
-- [ ] Given a runbook with `Markdown` entries, the generated Markdown preserves
-      the entry content in order.
-- [ ] Given a runbook with `Command` entries, the generated Markdown includes
-      fenced command blocks.
+
+### Command Output Rendering
+
 - [ ] Given a `Command` entry with an `output` property, the generated Markdown
       includes the captured command output.
 - [ ] Given a `Command` entry with `output.caption`, the generated Markdown
@@ -199,12 +265,6 @@ Exit codes:
       generated Markdown uses a `text` fenced block for captured output.
 - [ ] Given a `Command` entry without an `output` property, the generated
       Markdown does not include the captured command output.
-- [ ] Given an invalid runbook, the command exits with `2` and does not write a
-      partial output file.
-- [ ] Given a missing input file, the command exits with `1` and reports a
-      clear error.
-- [ ] Given `--output-file <path>`, the command writes the output to the
-      provided path.
 
 ## Non-goals
 
@@ -216,6 +276,10 @@ Exit codes:
 
 - Empty runbook.
 - Unsupported entry type.
+- `DisplayFile` path points to a missing file.
+- `DisplayFile` path points to an unreadable file.
+- `DisplayFile` uses a recognized extension such as `.java`.
+- `DisplayFile` uses an unrecognized extension and falls back to `text`.
 - Output path points to an unwritable location.
 - Existing output file already present.
 - Command entry with multi-line commands.
