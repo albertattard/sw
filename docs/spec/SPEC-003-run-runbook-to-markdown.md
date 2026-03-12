@@ -155,12 +155,19 @@ in the runbook.
 - If `output.caption` is present, render that caption before the captured
   command output.
 - `output` may declare `content_type`.
+- `output` may declare `trim_trailing_whitespace`.
 - If `output.content_type` is omitted, captured command output is rendered as
   `text`.
 - If `output.content_type` is present, the generated Markdown fenced block uses
   the declared content type.
 - In this increment, supported `output.content_type` values are `text`, `json`,
   and `xml`.
+- If `output.trim_trailing_whitespace` is omitted, trailing whitespace is
+  removed from the end of each rendered output line.
+- `output.trim_trailing_whitespace` affects only trailing whitespace, not
+  leading whitespace.
+- If `output.trim_trailing_whitespace` is set to `false`, captured output is
+  rendered without that trailing-whitespace normalization.
 - If a `Command` entry does not contain an `output` property, command output is
   not written to the generated document.
 
@@ -274,6 +281,11 @@ in the runbook.
       Markdown uses an `xml` fenced block for captured output.
 - [ ] Given a `Command` entry with `output` but no `content_type`, the
       generated Markdown uses a `text` fenced block for captured output.
+- [ ] Given a `Command` entry with `output` and no
+      `trim_trailing_whitespace`, trailing whitespace is removed from the end
+      of each rendered output line.
+- [ ] Given a `Command` entry with `output.trim_trailing_whitespace: false`,
+      trailing whitespace is preserved in rendered output.
 - [ ] Given a `Command` entry without an `output` property, the generated
       Markdown does not include the captured command output.
 
@@ -295,6 +307,8 @@ in the runbook.
 - Existing output file already present.
 - Command entry with multi-line commands.
 - Command entry uses `indent` to remain inside a Markdown list item.
+- Command output lines contain trailing spaces that should be trimmed by default.
+- Command output needs exact trailing whitespace preserved.
 - Variable assignment on one command line used by a later line in the same
   entry.
 - Multiple commands register cleanup and require reverse-order execution.

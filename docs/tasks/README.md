@@ -16,10 +16,11 @@ File-based task tracker for Sociable Weaver.
 - [TASK-010: Support DisplayFile Entries](./TASK-010-support-display-file-entries.md)
 - [TASK-011: Add Generated File Marker](./TASK-011-add-generated-file-marker.md)
 - [TASK-012: Apply Command Indentation](./TASK-012-apply-command-indentation.md)
+- [TASK-013: Trim Command Output Trailing Whitespace](./TASK-013-trim-command-output-trailing-whitespace.md)
 
 ## Pending
 
-- (none)
+- [ ] [TASK-013: Trim Command Output Trailing Whitespace](./TASK-013-trim-command-output-trailing-whitespace.md)
 
 ## In Progress
 
