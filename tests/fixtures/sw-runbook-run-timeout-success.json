@@ -1,0 +1,19 @@
+{
+  "entries": [
+    {
+      "type": "Heading",
+      "level": "H1",
+      "title": "Timeout success"
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'completed quickly\\n'"
+      ],
+      "timeout": "1 second",
+      "output": {
+        "caption": "Timeout success output"
+      }
+    }
+  ]
+}

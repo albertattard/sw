@@ -102,3 +102,19 @@ fn invalid_assert_checks_shape_returns_validation_failure() {
     assert!(stdout.contains("\"path\": \"entries[0].assert.checks[0].source\""));
     assert!(stdout.contains("\"path\": \"entries[0].assert.checks[0].contains\""));
 }
+
+#[test]
+fn invalid_timeout_returns_validation_failure() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-invalid-timeout.json",
+        "--output-format",
+        "json",
+    ]);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": false"));
+    assert!(stdout.contains("\"path\": \"entries[0].timeout\""));
+}

@@ -237,3 +237,42 @@ fn stdout_contains_assertion_failure_stops_the_run_without_partial_output() {
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(stderr.contains("stdout did not contain `expected output`"));
 }
+
+#[test]
+fn command_with_timeout_completing_in_time_succeeds() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-timeout-success.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("readme.md")).expect("missing readme output");
+    assert!(readme.contains("Timeout success output"));
+    assert!(readme.contains("```text\ncompleted quickly\n```"));
+}
+
+#[test]
+fn timed_out_command_is_terminated_and_preserves_partial_output() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-timeout-failure.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert_eq!(output.status.code(), Some(2));
+    assert!(!dir.join("timeout-after.txt").exists());
+    let readme = fs::read_to_string(dir.join("readme.md")).expect("missing readme output");
+    assert!(readme.contains("# Timeout failure"));
+    assert!(readme.contains("Timed out output"));
+    assert!(readme.contains("```text\nbefore timeout\n```"));
+
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("Command timed out after 1 second"));
+}

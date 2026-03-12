@@ -13,7 +13,7 @@ File-based task tracker for Sociable Weaver.
 
 ## Pending
 
-- [ ] [TASK-006: Support Command Timeouts](./TASK-006-support-command-timeouts.md)
+- (none)
 
 ## In Progress
 
@@ -29,6 +29,7 @@ File-based task tracker for Sociable Weaver.
 - [x] [TASK-003: Implement SPEC-003 Run Command](./TASK-003-implement-run-command.md)
 - [x] [TASK-004: Support Command Exit Assertions](./TASK-004-support-command-exit-assertions.md)
 - [x] [TASK-005: Support Stdout Contains Assertions](./TASK-005-support-stdout-contains-assertions.md)
+- [x] [TASK-006: Support Command Timeouts](./TASK-006-support-command-timeouts.md)
 
 ## Blocked
 

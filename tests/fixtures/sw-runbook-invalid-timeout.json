@@ -1,0 +1,11 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "echo 'hello'"
+      ],
+      "timeout": "10 hours"
+    }
+  ]
+}

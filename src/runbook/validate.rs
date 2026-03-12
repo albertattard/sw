@@ -1,5 +1,6 @@
 use super::{ValidationIssue, ValidationResult};
 use serde_json::{Map, Value};
+use std::time::Duration;
 
 fn push_error(
     errors: &mut Vec<ValidationIssue>,
@@ -215,6 +216,10 @@ fn validate_entry(value: &Value, index: usize, errors: &mut Vec<ValidationIssue>
             if let Some(assertion) = object.get("assert") {
                 validate_assert(assertion, &format!("{path}.assert"), errors);
             }
+
+            if let Some(timeout) = object.get("timeout") {
+                validate_timeout(timeout, &format!("{path}.timeout"), errors);
+            }
         }
         _ => push_error(
             errors,
@@ -222,6 +227,37 @@ fn validate_entry(value: &Value, index: usize, errors: &mut Vec<ValidationIssue>
             format!("unsupported entry type `{entry_type}`"),
         ),
     }
+}
+
+fn validate_timeout(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>) {
+    let Some(timeout) = value.as_str() else {
+        push_error(errors, path.to_string(), "must be a string");
+        return;
+    };
+
+    if parse_timeout(timeout).is_err() {
+        push_error(
+            errors,
+            path.to_string(),
+            "must be a human-readable duration like `30 seconds` or `2 minutes`",
+        );
+    }
+}
+
+fn parse_timeout(timeout: &str) -> Result<Duration, ()> {
+    let parts: Vec<_> = timeout.split_whitespace().collect();
+    if parts.len() != 2 {
+        return Err(());
+    }
+
+    let value: u64 = parts[0].parse().map_err(|_| ())?;
+    let seconds = match parts[1].to_ascii_lowercase().as_str() {
+        "second" | "seconds" | "sec" | "secs" | "s" => value,
+        "minute" | "minutes" | "min" | "mins" | "m" => value.checked_mul(60).ok_or(())?,
+        _ => return Err(()),
+    };
+
+    Ok(Duration::from_secs(seconds))
 }
 
 pub fn validate(runbook: &Value) -> ValidationResult {
