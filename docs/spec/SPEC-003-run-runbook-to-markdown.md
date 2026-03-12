@@ -259,6 +259,10 @@ in the runbook.
 
 - [ ] Given a runbook with `Markdown` entries, the generated Markdown preserves
       the entry content in order.
+- [ ] Markdown entries may interpolate `@{name}` only when that variable was
+      captured earlier in the runbook in the same incremental slice as
+      immediate interpolation support.
+- [ ] `@@{name}` in Markdown content preserves the literal `@{name}`.
 - [ ] Markdown interpolation based on variables captured later in the runbook
       is defined in a later increment and is not part of this task slice.
 
@@ -428,6 +432,9 @@ in the runbook.
 - Command output needs exact trailing whitespace preserved.
 - Command output includes paths, dates, or other environment-specific values
   that should be rewritten before publication.
+- A Markdown entry interpolates a variable captured earlier in the runbook.
+- A Markdown entry references a variable before it is captured.
+- Markdown content includes literal `@{name}` that must not be interpolated.
 - Multiple rewrite rules are declared for the same output block.
 - A `datetime_shift` rule matches timestamps across multiple lines.
 - A `datetime_shift` rule omits `base` and relies on the default base timestamp.
