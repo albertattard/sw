@@ -101,6 +101,11 @@ in the runbook.
 ### Command Entries
 
 - `Command` entries render their `commands` as fenced shell code blocks.
+- A `Command` entry may declare `indent`.
+- If `indent` is present, the rendered command section is prefixed with that
+  number of leading spaces on each rendered line.
+- The `indent` value applies to the command block, any output caption, and any
+  rendered command output block.
 - `Command` entries are executed in order.
 - All lines within a single `Command` entry execute together in the same shell
   context.
@@ -205,6 +210,8 @@ in the runbook.
       on a later line.
 - [ ] Given a runbook with `Command` entries, the generated Markdown includes
       fenced command blocks.
+- [ ] Given a `Command` entry with `indent`, each rendered line in that
+      command section is prefixed with the configured number of spaces.
 
 ### Command Cleanup
 
@@ -287,6 +294,7 @@ in the runbook.
 - Output path points to an unwritable location.
 - Existing output file already present.
 - Command entry with multi-line commands.
+- Command entry uses `indent` to remain inside a Markdown list item.
 - Variable assignment on one command line used by a later line in the same
   entry.
 - Multiple commands register cleanup and require reverse-order execution.
