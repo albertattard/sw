@@ -68,6 +68,15 @@ Initial rendering rules for Markdown output:
 - A `Command` entry may include an `assert` section.
 - If `assert.exit_code` is present, the command result is checked against that
   expected exit code instead of the default success requirement.
+- If `assert.checks` is present, each declared check must pass for the command
+  to be considered successful.
+- `assert.checks` is an array of assertion checks.
+- Each assertion check declares a `source` so the contract can support
+  different targets such as command output and files.
+- In this increment, the only supported `source` is `stdout`.
+- In this increment, the only supported content operator is `contains`.
+- A `stdout` `contains` check passes when the command stdout includes the
+  expected text.
 - If a `Command` entry contains an `output` property, render captured command
   output after the command block.
 - If `output.caption` is present, render that caption before the captured
@@ -107,6 +116,13 @@ Exit codes:
 - [ ] Given a command with `assert.exit_code` that does not match the actual
       exit code, the command exits with `2` and does not write a partial output
       file.
+- [ ] Given a command with `assert.checks` using `source: stdout` and
+      `contains`, the command is considered successful only when stdout
+      contains the expected text.
+- [ ] Given a command with a `stdout` `contains` check that fails, the run
+      exits with `2` and does not write a partial output file.
+- [ ] Given multiple assertion checks, all checks must pass for the command to
+      be considered successful.
 - [ ] Given a runbook with `Heading` entries, the generated Markdown contains
       the expected heading markers for the configured levels.
 - [ ] Given a runbook with `Markdown` entries, the generated Markdown preserves
@@ -144,6 +160,13 @@ Exit codes:
 - Command exits with non-zero status and no assertion is present.
 - Command exits with a non-zero status that is explicitly asserted.
 - Command exits with `0` when a non-zero exit code was asserted.
+- Command exits with the expected exit code but stdout does not satisfy the
+  declared `contains` check.
+- Multiple stdout checks declared for a single command.
+- Assertion check uses a source other than `stdout` before additional sources
+  are supported.
+- Assertion check uses an operator other than `contains` before additional
+  operators are supported.
 - Command writes to stderr but exits successfully.
 - Command caption supplied as a string or array of strings.
 - Command output is large.
@@ -154,7 +177,9 @@ This feature establishes the first rendering contract for runbooks. Parsing and
 validation should remain shared with `sw validate` so `run` and `validate`
 enforce the same input contract. Command execution should be deterministic from
 the CLI perspective: execution order, failure handling, and output capture
-rules should be explicit and stable. The first assertion capability in this
-contract is `assert.exit_code`; additional assertion types can be layered on
-later without changing the default behavior for commands that do not declare
-assertions.
+rules should be explicit and stable. Assertion structure should remain
+extensible: `assert.exit_code` handles process-level expectations, while
+`assert.checks` supports source-specific content checks. In this increment,
+`assert.checks` starts with `source: stdout` and the `contains` operator, while
+leaving room for future operators such as regular-expression or equality
+checks, and future sources such as files.

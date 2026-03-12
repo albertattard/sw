@@ -8,10 +8,11 @@ File-based task tracker for Sociable Weaver.
 - [TASK-002: Implement SPEC-002 Validate Command](./TASK-002-implement-validate-command.md)
 - [TASK-003: Implement SPEC-003 Run Command](./TASK-003-implement-run-command.md)
 - [TASK-004: Support Command Exit Assertions](./TASK-004-support-command-exit-assertions.md)
+- [TASK-005: Support Stdout Contains Assertions](./TASK-005-support-stdout-contains-assertions.md)
 
 ## Pending
 
-- (none)
+- [ ] [TASK-005: Support Stdout Contains Assertions](./TASK-005-support-stdout-contains-assertions.md)
 
 ## In Progress
 
