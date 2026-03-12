@@ -30,6 +30,12 @@ tying the test suite to a specific project.
 ```
 
 ## Engineering rules
+- Follow spec-driven delivery for user-visible features.
+- For a new feature or behavior change: define or update the spec first, then create or update the task, then implement the change.
+- Treat the spec as the source of truth for user-visible behavior.
+- If implementation and spec differ, treat the implementation as wrong until the spec is intentionally updated.
+- Do not change user-visible behavior without updating the relevant spec and task.
+- Keep task status aligned with the actual implementation state.
 - Keep `src/main.rs` thin. Use it as the entrypoint and command dispatcher, not as the place for business logic.
 - Add new CLI subcommands under `src/commands/`.
 - Keep runbook parsing, modelling, and validation outside `main.rs`.
