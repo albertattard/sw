@@ -35,6 +35,9 @@ tying the test suite to a specific project.
 - Treat the spec as the source of truth for user-visible behavior.
 - If implementation and spec differ, treat the implementation as wrong until the spec is intentionally updated.
 - Do not change user-visible behavior without updating the relevant spec and task.
+- Treat specs as living documents and tasks as bounded delivery slices.
+- When a spec grows, prefer creating a new task for the new increment instead of reopening an already completed task.
+- Keep completed tasks as historical records unless they were tracked incorrectly.
 - Keep task status aligned with the actual implementation state.
 - Keep `src/main.rs` thin. Use it as the entrypoint and command dispatcher, not as the place for business logic.
 - Add new CLI subcommands under `src/commands/`.

@@ -7,14 +7,15 @@ File-based task tracker for Sociable Weaver.
 - [TASK-001: Implement SPEC-001 Help Placeholder](./TASK-001-implement-help-placeholder.md)
 - [TASK-002: Implement SPEC-002 Validate Command](./TASK-002-implement-validate-command.md)
 - [TASK-003: Implement SPEC-003 Run Command](./TASK-003-implement-run-command.md)
+- [TASK-004: Support Command Exit Assertions](./TASK-004-support-command-exit-assertions.md)
 
 ## Pending
 
-- (none)
+- [ ] [TASK-004: Support Command Exit Assertions](./TASK-004-support-command-exit-assertions.md)
 
 ## In Progress
 
-- [ ] [TASK-003: Implement SPEC-003 Run Command](./TASK-003-implement-run-command.md)
+- (none)
 
 ## Done
 
@@ -23,6 +24,7 @@ File-based task tracker for Sociable Weaver.
 - [x] Define `SPEC-003` in `docs/spec/` (run runbook to markdown).
 - [x] [TASK-001: Implement SPEC-001 Help Placeholder](./TASK-001-implement-help-placeholder.md)
 - [x] [TASK-002: Implement SPEC-002 Validate Command](./TASK-002-implement-validate-command.md)
+- [x] [TASK-003: Implement SPEC-003 Run Command](./TASK-003-implement-run-command.md)
 
 ## Blocked
 
