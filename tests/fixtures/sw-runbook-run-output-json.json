@@ -1,0 +1,14 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf '{\"name\":\"Albert Attard\"}\\n'"
+      ],
+      "output": {
+        "caption": "JSON output",
+        "content_type": "json"
+      }
+    }
+  ]
+}

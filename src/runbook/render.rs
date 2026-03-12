@@ -193,7 +193,7 @@ fn append_output(entry: &Value, stdout: &str, section: &mut String) -> Result<()
     }
 
     section.push_str("\n\n");
-    section.push_str("```text\n");
+    section.push_str(&format!("```{}\n", output_content_type(output)?));
     section.push_str(stdout);
     if !stdout.ends_with('\n') && !stdout.is_empty() {
         section.push('\n');
@@ -223,6 +223,17 @@ fn render_caption(caption: &Value) -> Result<String, RenderError> {
         _ => Err(RenderError::Operational(
             "Command output caption must be a string or array of strings".to_string(),
         )),
+    }
+}
+
+fn output_content_type(output: &Value) -> Result<&'static str, RenderError> {
+    match output.get("content_type").and_then(Value::as_str) {
+        Some("text") | None => Ok("text"),
+        Some("json") => Ok("json"),
+        Some("xml") => Ok("xml"),
+        Some(other) => Err(RenderError::Operational(format!(
+            "Unsupported output content type `{other}`"
+        ))),
     }
 }
 

@@ -69,7 +69,7 @@ fn validate_output(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>)
     };
 
     for key in object.keys() {
-        if key != "caption" {
+        if key != "caption" && key != "content_type" {
             push_error(
                 errors,
                 format!("{path}.{key}"),
@@ -87,6 +87,16 @@ fn validate_output(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>)
             errors,
             format!("{path}.caption"),
             "must be a string or array of strings",
+        ),
+        None => {}
+    }
+
+    match object.get("content_type").and_then(Value::as_str) {
+        Some("text" | "json" | "xml") => {}
+        Some(_) => push_error(
+            errors,
+            format!("{path}.content_type"),
+            "must be one of `text`, `json`, or `xml`",
         ),
         None => {}
     }

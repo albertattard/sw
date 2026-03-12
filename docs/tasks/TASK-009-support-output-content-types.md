@@ -1,7 +1,7 @@
 ---
 id: TASK-009
 title: Support Output Content Types
-status: pending
+status: done
 related_features:
   - SPEC-003
 owner: @aattard
@@ -28,10 +28,10 @@ Support `output.content_type` for rendered command output in `sw run`.
 
 ## Acceptance Criteria
 
-- [ ] Given `output.content_type: json`, captured output is rendered in a `json` fenced block.
-- [ ] Given `output.content_type: xml`, captured output is rendered in an `xml` fenced block.
-- [ ] Given `output` without `content_type`, captured output is rendered in a `text` fenced block.
-- [ ] Unsupported `output.content_type` values are rejected by validation.
+- [x] Given `output.content_type: json`, captured output is rendered in a `json` fenced block.
+- [x] Given `output.content_type: xml`, captured output is rendered in an `xml` fenced block.
+- [x] Given `output` without `content_type`, captured output is rendered in a `text` fenced block.
+- [x] Unsupported `output.content_type` values are rejected by validation.
 
 ## Notes
 

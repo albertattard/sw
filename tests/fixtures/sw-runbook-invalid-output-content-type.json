@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "echo 'hello'"
+      ],
+      "output": {
+        "content_type": "yaml"
+      }
+    }
+  ]
+}

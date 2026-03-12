@@ -357,3 +357,39 @@ fn cleanup_failures_do_not_stop_remaining_cleanup_and_fail_the_run() {
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(stderr.contains("Cleanup failed"));
 }
+
+#[test]
+fn json_output_content_type_uses_json_fenced_block() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-run-output-json.json", "sw-runbook.json");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("readme.md")).expect("missing readme output");
+    assert!(readme.contains("```json\n{\"name\":\"Albert Attard\"}\n```"));
+}
+
+#[test]
+fn output_without_content_type_uses_text_fenced_block() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-run-success.json", "sw-runbook.json");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("readme.md")).expect("missing readme output");
+    assert!(readme.contains("```text\nHello there\n```"));
+}
+
+#[test]
+fn xml_output_content_type_uses_xml_fenced_block() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-run-output-xml.json", "sw-runbook.json");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("readme.md")).expect("missing readme output");
+    assert!(readme.contains("```xml\n<name>Albert Attard</name>\n```"));
+}
