@@ -196,6 +196,12 @@ in the runbook.
   `datetime_shift`.
 - A `replace` rewrite rule performs a pattern-based replacement on the captured
   command output.
+- A rewrite rule may declare `capture_as` to expose both the matched original
+  value and the rewritten value as generated captured variables.
+- When `capture_as` is present, the rewrite rule creates
+  `@{<capture_as>_original}` and `@{<capture_as>_rewritten}`.
+- `capture_as` generated variable names participate in the same runbook-wide
+  uniqueness rules as explicit `capture` names.
 - A `replace` rewrite rule may interpolate captured variables inside its
   `pattern` text using `@{name}` syntax.
 - `@@{name}` inside a `replace` rule `pattern` preserves the literal
@@ -389,6 +395,14 @@ in the runbook.
       in the declared order before output is rendered.
 - [ ] Given a `replace` rewrite rule, matching text is replaced in rendered
       output.
+- [ ] Given a rewrite rule with `capture_as`, the matched pre-rewrite value is
+      stored as `@{<capture_as>_original}`.
+- [ ] Given a rewrite rule with `capture_as`, the rewritten value is stored as
+      `@{<capture_as>_rewritten}`.
+- [ ] Given a rewrite rule with `capture_as`, later commands and Markdown may
+      reference those generated variables using the normal capture syntax.
+- [ ] Given a rewrite rule with `capture_as` whose generated names collide with
+      an existing captured variable, validation rejects the runbook.
 - [ ] Given a `replace` rewrite rule `pattern` that uses `@{name}` after that
       variable is captured earlier in the runbook, the pattern text includes
       the captured value before matching.
@@ -483,6 +497,8 @@ in the runbook.
 - A command references a captured variable before it is defined.
 - Command or Markdown content contains literal `@{name}` that must not be
   interpolated.
+- A rewrite rule `capture_as` generated name collides with an existing
+  explicit or generated captured variable name.
 - A `replace` rewrite rule `replacement` references a captured variable before
   it is defined.
 - A `replace` rewrite rule `pattern` references a captured variable before it
