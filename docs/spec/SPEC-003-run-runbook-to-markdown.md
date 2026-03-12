@@ -63,6 +63,13 @@ Initial rendering rules for Markdown output:
 - `Command` entries are executed in order.
 - All lines within a single `Command` entry execute together in the same shell
   context.
+- A `Command` entry may declare a `timeout`.
+- If `timeout` is omitted, the default timeout is `2 minutes`.
+- `timeout` is expressed in human-readable form as a number followed by a unit.
+- In this increment, supported units are `seconds`, `minutes`, and their common
+  singular or abbreviated forms.
+- If a command does not finish within its timeout, the command process is
+  terminated and the run fails.
 - A `Command` entry without an `assert` section must exit with code `0` for the
   run to continue.
 - A `Command` entry may include an `assert` section.
@@ -107,6 +114,14 @@ Exit codes:
 - [ ] Given a `Command` entry with multiple command lines, those lines execute
       together in the same shell context so values set on one line can be used
       on a later line.
+- [ ] Given a command without a declared timeout, the default timeout of
+      `2 minutes` is used.
+- [ ] Given a command with a declared timeout such as `30 seconds`,
+      `1 minute`, or `5 minutes`, that timeout is used for the command.
+- [ ] Given a command that finishes within its timeout, the run continues.
+- [ ] Given a command that exceeds its timeout, the command process is
+      terminated, the run exits with `2`, and any captured output produced
+      before termination is preserved to aid debugging.
 - [ ] Given a command without an `assert` section that exits successfully, the
       run continues.
 - [ ] Given a command without an `assert` section that exits with an error, the
@@ -157,6 +172,10 @@ Exit codes:
 - Command entry with multi-line commands.
 - Variable assignment on one command line used by a later line in the same
   entry.
+- Command omits `timeout` and uses the default timeout.
+- Command declares timeout with supported human-readable units.
+- Command declares timeout with an unsupported unit.
+- Command exceeds the configured timeout and must be terminated.
 - Command exits with non-zero status and no assertion is present.
 - Command exits with a non-zero status that is explicitly asserted.
 - Command exits with `0` when a non-zero exit code was asserted.
@@ -182,4 +201,5 @@ extensible: `assert.exit_code` handles process-level expectations, while
 `assert.checks` supports source-specific content checks. In this increment,
 `assert.checks` starts with `source: stdout` and the `contains` operator, while
 leaving room for future operators such as regular-expression or equality
-checks, and future sources such as files.
+checks, and future sources such as files. Command execution must also enforce a
+bounded runtime so runaway processes do not remain after a failed run.
