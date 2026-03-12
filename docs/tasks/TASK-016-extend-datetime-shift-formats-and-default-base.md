@@ -1,7 +1,7 @@
 ---
 id: TASK-016
 title: Extend Datetime Shift Formats And Default Base
-status: pending
+status: done
 related_features:
   - SPEC-003
 owner: @aattard
@@ -30,13 +30,13 @@ the shared default base timestamp is used when `base` is omitted.
 
 ## Acceptance Criteria
 
-- [ ] Given a `datetime_shift` rule without `base`, the default base timestamp
+- [x] Given a `datetime_shift` rule without `base`, the default base timestamp
       `2077-04-27T12:34:56.789+01:00` is used.
-- [ ] Given `format: rfc3339`, matched timestamps are rewritten and kept in RFC
+- [x] Given `format: rfc3339`, matched timestamps are rewritten and kept in RFC
       3339 form.
-- [ ] Given `format: rfc1123`, matched timestamps are rewritten and kept in RFC
+- [x] Given `format: rfc1123`, matched timestamps are rewritten and kept in RFC
       1123 form.
-- [ ] `format` and `pattern` are treated as mutually exclusive.
+- [x] `format` and `pattern` are treated as mutually exclusive.
 
 ## Notes
 

@@ -164,7 +164,7 @@ fn validate_rewrite_rule(value: &Value, path: &str, errors: &mut Vec<ValidationI
         }
         "datetime_shift" => {
             for key in object.keys() {
-                if key != "type" && key != "pattern" && key != "base" {
+                if key != "type" && key != "pattern" && key != "base" && key != "format" {
                     push_error(
                         errors,
                         format!("{path}.{key}"),
@@ -173,8 +173,38 @@ fn validate_rewrite_rule(value: &Value, path: &str, errors: &mut Vec<ValidationI
                 }
             }
 
-            require_string(object, "pattern", path, errors);
-            require_string(object, "base", path, errors);
+            let has_pattern = object.get("pattern").is_some();
+            let has_format = object.get("format").is_some();
+
+            if has_pattern == has_format {
+                push_error(
+                    errors,
+                    path.to_string(),
+                    "must include exactly one of `pattern` or `format`",
+                );
+            }
+
+            if let Some(pattern) = object.get("pattern")
+                && !pattern.is_string()
+            {
+                push_error(errors, format!("{path}.pattern"), "must be a string");
+            }
+
+            match object.get("format").and_then(Value::as_str) {
+                Some("rfc3339" | "rfc1123") => {}
+                Some(_) => push_error(
+                    errors,
+                    format!("{path}.format"),
+                    "must be `rfc3339` or `rfc1123`",
+                ),
+                None => {}
+            }
+
+            if let Some(base) = object.get("base")
+                && !base.is_string()
+            {
+                push_error(errors, format!("{path}.base"), "must be a string");
+            }
         }
         _ => push_error(
             errors,

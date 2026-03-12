@@ -1,0 +1,19 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "echo 'hello'"
+      ],
+      "output": {
+        "rewrite": [
+          {
+            "type": "datetime_shift",
+            "format": "rfc3339",
+            "pattern": "\\d{4}-\\d{2}-\\d{2}"
+          }
+        ]
+      }
+    }
+  ]
+}

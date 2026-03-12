@@ -496,6 +496,40 @@ fn output_rewrite_datetime_shift_preserves_relative_timing() {
 }
 
 #[test]
+fn output_rewrite_datetime_shift_uses_default_base_when_omitted() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-output-rewrite-datetime-shift-default-base.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("readme.md")).expect("missing readme output");
+    assert!(readme.contains("2077-04-27T12:34:56.789+01:00 INFO Starting"));
+    assert!(readme.contains("2077-04-27T12:34:58.789+01:00 INFO Ready"));
+}
+
+#[test]
+fn output_rewrite_datetime_shift_supports_rfc1123() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-output-rewrite-datetime-shift-rfc1123.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("readme.md")).expect("missing readme output");
+    assert!(readme.contains("Tue, 27 Apr 2077 12:34:56 GMT INFO Starting"));
+    assert!(readme.contains("Tue, 27 Apr 2077 12:34:58 GMT INFO Ready"));
+}
+
+#[test]
 fn xml_output_content_type_uses_xml_fenced_block() {
     let dir = prepare_workspace();
     write_runbook(&dir, "sw-runbook-run-output-xml.json", "sw-runbook.json");

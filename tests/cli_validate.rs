@@ -184,6 +184,22 @@ fn invalid_output_rewrite_returns_validation_failure() {
 }
 
 #[test]
+fn invalid_output_rewrite_datetime_shift_with_format_and_pattern_returns_validation_failure() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-invalid-output-rewrite-datetime-shift-format-pattern.json",
+        "--output-format",
+        "json",
+    ]);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": false"));
+    assert!(stdout.contains("\"path\": \"entries[0].output.rewrite[0]\""));
+}
+
+#[test]
 fn invalid_display_file_returns_validation_failure() {
     let output = run(&[
         "validate",

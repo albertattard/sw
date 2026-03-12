@@ -1,0 +1,19 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'Thu, 12 Mar 2026 13:41:49 GMT INFO Starting\\nThu, 12 Mar 2026 13:41:51 GMT INFO Ready\\n'"
+      ],
+      "output": {
+        "caption": "Shifted HTTP dates",
+        "rewrite": [
+          {
+            "type": "datetime_shift",
+            "format": "rfc1123"
+          }
+        ]
+      }
+    }
+  ]
+}
