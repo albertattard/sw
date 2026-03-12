@@ -1,0 +1,29 @@
+{
+  "entries": [
+    {
+      "type": "Heading",
+      "level": "H1",
+      "title": "Stdout contains failure"
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'actual output\\n'"
+      ],
+      "assert": {
+        "checks": [
+          {
+            "source": "stdout",
+            "contains": "expected output"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'should not run\\n' > contains-failure.txt"
+      ]
+    }
+  ]
+}

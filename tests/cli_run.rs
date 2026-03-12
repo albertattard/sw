@@ -185,3 +185,55 @@ fn asserted_exit_code_mismatch_fails_without_partial_output() {
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(stderr.contains("expected exit code 0, got 1"));
 }
+
+#[test]
+fn stdout_contains_assertion_allows_run_to_continue() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-stdout-contains-success.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("readme.md")).expect("missing readme output");
+    assert!(readme.contains("Captured output"));
+    assert!(readme.contains("```text\nAlbert Attard\nHello there\n```"));
+}
+
+#[test]
+fn multiple_stdout_contains_assertions_must_all_pass() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-stdout-contains-multiple.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("readme.md")).expect("missing readme output");
+    assert!(readme.contains("# Multiple stdout checks"));
+}
+
+#[test]
+fn stdout_contains_assertion_failure_stops_the_run_without_partial_output() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-stdout-contains-failure.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert_eq!(output.status.code(), Some(2));
+    assert!(!dir.join("readme.md").exists());
+    assert!(!dir.join("contains-failure.txt").exists());
+
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("stdout did not contain `expected output`"));
+}

@@ -97,7 +97,7 @@ fn validate_assert(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>)
     };
 
     for key in object.keys() {
-        if key != "exit_code" {
+        if key != "exit_code" && key != "checks" {
             push_error(
                 errors,
                 format!("{path}.{key}"),
@@ -109,7 +109,65 @@ fn validate_assert(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>)
     match object.get("exit_code") {
         Some(exit_code) if exit_code.is_i64() || exit_code.is_u64() => {}
         Some(_) => push_error(errors, format!("{path}.exit_code"), "must be an integer"),
-        None => push_error(errors, format!("{path}.exit_code"), "is required"),
+        None => {}
+    }
+
+    match object.get("checks") {
+        Some(checks) => validate_assert_checks(checks, &format!("{path}.checks"), errors),
+        None => {}
+    }
+
+    if object.get("exit_code").is_none() && object.get("checks").is_none() {
+        push_error(
+            errors,
+            path.to_string(),
+            "must include at least one supported assertion",
+        );
+    }
+}
+
+fn validate_assert_checks(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>) {
+    let Some(checks) = as_array(value, path, errors) else {
+        return;
+    };
+
+    if checks.is_empty() {
+        push_error(errors, path.to_string(), "must not be empty");
+    }
+
+    for (index, check) in checks.iter().enumerate() {
+        validate_assert_check(check, &format!("{path}[{index}]"), errors);
+    }
+}
+
+fn validate_assert_check(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>) {
+    let Some(object) = as_object(value, path, errors) else {
+        return;
+    };
+
+    for key in object.keys() {
+        if key != "source" && key != "contains" {
+            push_error(
+                errors,
+                format!("{path}.{key}"),
+                "is not a supported assertion check property",
+            );
+        }
+    }
+
+    match object.get("source").and_then(Value::as_str) {
+        Some("stdout") => {}
+        Some(_) => push_error(
+            errors,
+            format!("{path}.source"),
+            "must be `stdout` until additional assertion sources are supported",
+        ),
+        None => push_error(errors, format!("{path}.source"), "must be a string"),
+    }
+
+    match object.get("contains").and_then(Value::as_str) {
+        Some(_) => {}
+        None => push_error(errors, format!("{path}.contains"), "must be a string"),
     }
 }
 

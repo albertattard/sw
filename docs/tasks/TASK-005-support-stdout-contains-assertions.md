@@ -1,7 +1,7 @@
 ---
 id: TASK-005
 title: Support Stdout Contains Assertions
-status: pending
+status: done
 related_features:
   - SPEC-003
 owner: @aattard
@@ -30,13 +30,13 @@ Support `assert.checks` for `stdout` `contains` assertions in `sw run`.
 
 ## Acceptance Criteria
 
-- [ ] Given a command with a `stdout` `contains` check and matching stdout, the run continues.
-- [ ] Given a command with a `stdout` `contains` check and non-matching stdout, the run exits with `2`.
-- [ ] Given multiple `stdout` `contains` checks, all checks must pass.
-- [ ] Given a failed `stdout` assertion, no partial output file is written.
-- [ ] Invalid `assert.checks` structure is rejected by validation.
+- [x] Given a command with a `stdout` `contains` check and matching stdout, the run continues.
+- [x] Given a command with a `stdout` `contains` check and non-matching stdout, the run exits with `2`.
+- [x] Given multiple `stdout` `contains` checks, all checks must pass.
+- [x] Given a failed `stdout` assertion, no partial output file is written.
+- [x] Invalid `assert.checks` structure is rejected by validation.
 
 ## Notes
 
-This task is the first content-assertion increment for `SPEC-003` and should
-preserve the existing exit-code assertion behavior.
+Implemented with validation and integration coverage for passing, failing, and
+multi-check stdout `contains` assertions.

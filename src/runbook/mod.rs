@@ -160,6 +160,7 @@ fn render_command(entry: &Value) -> Result<String, RenderError> {
     let mut section = format!("```shell\n{command_text}\n```");
     let execution = execute_command(&command_text)?;
     ensure_expected_exit_code(entry, &execution)?;
+    ensure_assert_checks(entry, &execution)?;
 
     if let Some(output) = entry.get("output") {
         if let Some(caption) = output.get("caption") {
@@ -229,12 +230,13 @@ fn expected_exit_code(entry: &Value) -> Result<i32, RenderError> {
         return Ok(0);
     };
 
-    let exit_code = assertion
-        .get("exit_code")
-        .and_then(Value::as_i64)
-        .ok_or_else(|| {
-            RenderError::Operational("Command assert.exit_code must be an integer".to_string())
-        })?;
+    let Some(exit_code_value) = assertion.get("exit_code") else {
+        return Ok(0);
+    };
+
+    let exit_code = exit_code_value.as_i64().ok_or_else(|| {
+        RenderError::Operational("Command assert.exit_code must be an integer".to_string())
+    })?;
 
     i32::try_from(exit_code).map_err(|_| {
         RenderError::Operational(
@@ -255,5 +257,50 @@ fn ensure_expected_exit_code(
     Err(RenderError::CommandFailed(format!(
         "Command failed assertion: expected exit code {expected}, got {}",
         execution.exit_code
+    )))
+}
+
+fn ensure_assert_checks(entry: &Value, execution: &CommandExecution) -> Result<(), RenderError> {
+    let Some(assertion) = entry.get("assert") else {
+        return Ok(());
+    };
+    let Some(checks) = assertion.get("checks") else {
+        return Ok(());
+    };
+    let checks = checks.as_array().ok_or_else(|| {
+        RenderError::Operational("Command assert.checks must be an array".to_string())
+    })?;
+
+    for check in checks {
+        ensure_assert_check(check, execution)?;
+    }
+
+    Ok(())
+}
+
+fn ensure_assert_check(check: &Value, execution: &CommandExecution) -> Result<(), RenderError> {
+    let source = check.get("source").and_then(Value::as_str).ok_or_else(|| {
+        RenderError::Operational("Assertion check source must be a string".to_string())
+    })?;
+
+    if source != "stdout" {
+        return Err(RenderError::Operational(format!(
+            "Unsupported assertion check source `{source}`"
+        )));
+    }
+
+    let expected = check
+        .get("contains")
+        .and_then(Value::as_str)
+        .ok_or_else(|| {
+            RenderError::Operational("Assertion check contains must be a string".to_string())
+        })?;
+
+    if execution.stdout.contains(expected) {
+        return Ok(());
+    }
+
+    Err(RenderError::CommandFailed(format!(
+        "Command failed assertion: stdout did not contain `{expected}`"
     )))
 }

@@ -1,0 +1,18 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "echo 'hello'"
+      ],
+      "assert": {
+        "checks": [
+          {
+            "source": "stderr",
+            "contains": 123
+          }
+        ]
+      }
+    }
+  ]
+}

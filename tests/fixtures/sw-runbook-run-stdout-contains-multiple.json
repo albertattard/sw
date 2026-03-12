@@ -1,0 +1,27 @@
+{
+  "entries": [
+    {
+      "type": "Heading",
+      "level": "H1",
+      "title": "Multiple stdout checks"
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'Albert Attard\\nHello there\\n'"
+      ],
+      "assert": {
+        "checks": [
+          {
+            "source": "stdout",
+            "contains": "Albert Attard"
+          },
+          {
+            "source": "stdout",
+            "contains": "Hello there"
+          }
+        ]
+      }
+    }
+  ]
+}
