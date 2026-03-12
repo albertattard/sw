@@ -21,10 +21,11 @@ File-based task tracker for Sociable Weaver.
 - [TASK-015: Support Output Rewrite Rules](./TASK-015-support-output-rewrite-rules.md)
 - [TASK-016: Extend Datetime Shift Formats And Default Base](./TASK-016-extend-datetime-shift-formats-and-default-base.md)
 - [TASK-017: Support Shared Datetime Shift Anchors And Custom Formats](./TASK-017-support-shared-datetime-shift-anchors-and-custom-formats.md)
+- [TASK-018: Enforce Global Datetime Shift Anchor Uniqueness](./TASK-018-enforce-global-datetime-shift-anchor-uniqueness.md)
 
 ## Pending
 
-- (none)
+- [ ] [TASK-018: Enforce Global Datetime Shift Anchor Uniqueness](./TASK-018-enforce-global-datetime-shift-anchor-uniqueness.md)
 
 ## In Progress
 

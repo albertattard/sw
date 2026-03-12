@@ -200,11 +200,14 @@ in the runbook.
 - If `base` is omitted, `datetime_shift` uses the default base timestamp
   `2077-04-27T12:34:56.789+01:00`.
 - If `id` is used, the rule establishes the shift delta for that named anchor.
+- `datetime_shift.id` values must be unique across the whole runbook.
 - If `use` is used, the rule reuses the shift delta from the named anchor
   instead of establishing a new one.
 - A rule that uses `use` must not declare `base`.
 - A rule that uses `use` follows the timeline established by the referenced
   anchor, even when the matched datetime format differs.
+- A rule that uses `use` may reference only an anchor established earlier in
+  the same command output block.
 - `datetime_shift` applies independently within each command output block.
 - Rewrite rules affect rendered output only and do not change command
   execution or assertions.
@@ -348,6 +351,11 @@ in the runbook.
 - [ ] Given multiple `datetime_shift` rewrite rules that share one anchor,
       matched datetimes in different supported formats preserve the same shared
       timeline shift.
+- [ ] Given duplicate `datetime_shift.id` values anywhere in the runbook,
+      validation rejects the runbook.
+- [ ] Given a `datetime_shift` rewrite rule that uses `use`, the referenced
+      anchor must have been established earlier in the same command output
+      block.
 - [ ] Given a `datetime_shift` rewrite rule with `pattern` and
       `custom_format`, matched datetimes are rewritten while preserving that
       custom textual format.
@@ -385,6 +393,11 @@ in the runbook.
 - A `datetime_shift` rule uses `pattern` instead of `format`.
 - A `datetime_shift` rule establishes a shared anchor with `id`.
 - Multiple `datetime_shift` rules reuse the same shared anchor with `use`.
+- The same `datetime_shift.id` is declared more than once in the runbook.
+- A `datetime_shift` rule uses an anchor declared in a different command
+  output block.
+- A `datetime_shift` rule uses an anchor before it is established in the same
+  command output block.
 - A `datetime_shift` rule uses `pattern` together with `custom_format`.
 - A `datetime_shift` rule declares both `id` and `use`.
 - A `datetime_shift` rule declares both `format` and `custom_format`.
