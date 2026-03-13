@@ -241,8 +241,12 @@ in the runbook.
 - `keep_between` uses line-based offsets.
 - `start_offset` defaults to `1`.
 - `end_offset` defaults to `-1`.
+- `show_trim_markers` defaults to `true`.
 - `start_offset: 1` means start on the line after the matched `start` line.
 - `end_offset: -1` means stop on the line before the matched `end` line.
+- When `show_trim_markers` is `true`, `keep_between` adds a line containing
+  `...` before and after the kept slice to indicate that output was trimmed.
+- `show_trim_markers: false` suppresses those trim-marker lines.
 - If a `keep_between` boundary is not found, the rule leaves the output
   unchanged.
 - A `datetime_shift` rewrite rule shifts matched timestamps so the first match
@@ -468,6 +472,11 @@ in the runbook.
       `start_offset: 1` and `end_offset: -1` are used.
 - [ ] Given a `keep_between` rewrite rule with explicit offsets, the resulting
       output slice reflects those line-based offsets.
+- [ ] Given a `keep_between` rewrite rule without explicit
+      `show_trim_markers`, trim-marker lines are added before and after the
+      kept slice.
+- [ ] Given a `keep_between` rewrite rule with `show_trim_markers: false`,
+      trim-marker lines are omitted.
 - [ ] Given a `keep_between` rewrite rule whose `start` or `end` boundary is
       not found, the rule leaves the output unchanged.
 - [ ] Given a `datetime_shift` rewrite rule, the first matched timestamp is
@@ -553,6 +562,8 @@ in the runbook.
 - A `datetime_shift` rule declares `use` together with `base`.
 - A `keep_between` rule uses the default exclusive boundaries.
 - A `keep_between` rule uses explicit positive or negative offsets.
+- A `keep_between` rule uses default trim markers.
+- A `keep_between` rule suppresses trim markers.
 - A `keep_between` rule does not find its `start` boundary.
 - A `keep_between` rule does not find its `end` boundary.
 - A capture rule uses `stage: raw`.
