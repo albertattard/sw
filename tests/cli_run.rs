@@ -252,6 +252,9 @@ fn command_failure_returns_exit_code_two_without_output_file() {
     );
 
     let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("Command failed assertion for entry:"));
+    assert!(stderr.contains("\"commands\": ["));
+    assert!(stderr.contains("\"false\""));
     assert!(stderr.contains("expected exit code 0, got 1"));
 }
 
@@ -296,6 +299,9 @@ fn asserted_exit_code_mismatch_fails_without_partial_output() {
     );
 
     let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("Command failed assertion for entry:"));
+    assert!(stderr.contains("\"commands\": ["));
+    assert!(stderr.contains("\"false\""));
     assert!(stderr.contains("expected exit code 0, got 1"));
 }
 
@@ -348,6 +354,9 @@ fn stdout_contains_assertion_failure_stops_the_run_without_partial_output() {
     assert!(!dir.join("contains-failure.txt").exists());
 
     let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("Command failed assertion for entry:"));
+    assert!(stderr.contains("\"commands\": ["));
+    assert!(stderr.contains("\"printf 'actual output\\\\n'\""));
     assert!(stderr.contains("stdout did not contain `expected output`"));
 }
 

@@ -196,9 +196,12 @@ fn ensure_expected_exit_code(
         format!(": {}", execution.stderr.trim())
     };
 
-    Err(RenderError::CommandFailed(format!(
-        "Command failed assertion: expected exit code {expected}, got {}{suffix}",
-        execution.exit_code
+    Err(RenderError::CommandFailed(format_assertion_failure(
+        entry,
+        &format!(
+            "expected exit code {expected}, got {}{suffix}",
+            execution.exit_code
+        ),
     )))
 }
 
@@ -234,13 +237,17 @@ fn ensure_assert_checks(entry: &Value, execution: &CommandExecution) -> Result<(
     })?;
 
     for check in checks {
-        ensure_assert_check(check, execution)?;
+        ensure_assert_check(entry, check, execution)?;
     }
 
     Ok(())
 }
 
-fn ensure_assert_check(check: &Value, execution: &CommandExecution) -> Result<(), RenderError> {
+fn ensure_assert_check(
+    entry: &Value,
+    check: &Value,
+    execution: &CommandExecution,
+) -> Result<(), RenderError> {
     let source = check.get("source").and_then(Value::as_str).ok_or_else(|| {
         RenderError::Operational("Assertion check source must be a string".to_string())
     })?;
@@ -262,9 +269,22 @@ fn ensure_assert_check(check: &Value, execution: &CommandExecution) -> Result<()
         return Ok(());
     }
 
-    Err(RenderError::CommandFailed(format!(
-        "Command failed assertion: stdout did not contain `{expected}`"
+    Err(RenderError::CommandFailed(format_assertion_failure(
+        entry,
+        &format!("stdout did not contain `{expected}`"),
     )))
+}
+
+fn format_assertion_failure(entry: &Value, detail: &str) -> String {
+    format!(
+        "Command failed assertion for entry:\n{}\n{detail}",
+        format_command_entry(entry)
+    )
+}
+
+fn format_command_entry(entry: &Value) -> String {
+    serde_json::to_string_pretty(entry)
+        .unwrap_or_else(|_| "<failed to serialize command entry>".to_string())
 }
 
 fn timeout_for_entry(entry: &Value) -> Result<Duration, RenderError> {
