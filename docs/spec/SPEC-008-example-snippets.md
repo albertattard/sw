@@ -8,87 +8,72 @@
 ## Goal
 
 Provide a simple way for users to request focused JSON examples for supported
-runbook entities and nested features without generating a full starter runbook.
+runbook entry types without generating a full starter runbook.
 
 ## User-facing Behavior
 
 The CLI provides an explicit `example` command:
 
 ```bash
-sw example <topic>
+sw example <entity-type>
 ```
 
-This command prints a JSON snippet to stdout for the requested topic.
+This command prints a JSON snippet to stdout for the requested entity type.
 
-The snippet is intended as a copyable starting point, not as a complete
-runbook file.
+The snippet is intended as a copyable starting point.
 
 ## Inputs
 
-- Required topic argument: `<topic>`
+- Required entity-type argument: `<entity-type>`
 
-In this increment, topics may refer to:
-- a runbook entry type such as `Command`, `DisplayFile`, or `Prerequisite`
-- a nested feature such as `rewrite.keep_between`
-
-The example catalog may grow over time to cover additional rewrite-rule topics
-without changing the `example` command shape.
+In this increment, supported entity types include:
+- `Command`
+- `DisplayFile`
+- `Prerequisite`
 
 ## Outputs
 
 - JSON snippet written to stdout
-- Human-readable error on stderr for unsupported topics
+- Human-readable error on stderr for unsupported entity types
 
 ### Exit Codes
 
 - `0`: example was found and printed successfully
-- `1`: operational error or unknown topic
+- `1`: operational error or unknown entity type
 
 ## Example Contract
 
 - Example output should be valid JSON.
-- Example output should be minimal but realistic.
-- A topic-specific example should focus on the requested entity or feature
-  rather than printing a full sample runbook.
+- Entity-type matching is case-insensitive.
 - Entry-type examples should print a single JSON object representing that
-  entry.
-- Nested-feature examples should print the smallest meaningful JSON fragment
-  that shows where the feature belongs.
+  entry and should include the commonly used nested properties for that entry
+  type so users can remove what they do not need.
 - Example output is documentation-oriented and does not need to be executable
   without further user editing.
 
 ## Acceptance Criteria
 
 - [ ] Given `sw example Command`, the CLI prints a valid JSON example of a
-      `Command` entry.
+      `Command` entry with its commonly used nested properties.
 - [ ] Given `sw example DisplayFile`, the CLI prints a valid JSON example of a
       `DisplayFile` entry.
-- [ ] Given `sw example rewrite.keep_between`, the CLI prints a valid JSON
-      example of that rewrite rule fragment.
-- [ ] Given `sw example rewrite.replace`, the CLI prints a valid JSON example
-      of a `replace` rewrite rule fragment.
-- [ ] Given `sw example rewrite.datetime_shift`, the CLI prints a valid JSON
-      example of a `datetime_shift` rewrite rule fragment.
-- [ ] Given a rewrite example that demonstrates captured-variable usage, the
-      CLI prints a valid JSON example showing how rewrite rules can reference
-      captured values.
-- [ ] Given an unsupported topic, the CLI exits with `1` and reports that the
-      topic is unknown.
-- [ ] The help output documents the `example` command and how to request a
-      topic.
+- [ ] Given `sw example command`, the CLI behaves the same as
+      `sw example Command`.
+- [ ] Given an unsupported entity type, the CLI exits with `1` and reports
+      that the entity type is unknown.
+- [ ] The help output documents the `example` command and how to request an
+      entity type.
 
 ## Non-goals
 
-- Printing every supported example in one command in this increment.
 - Generating a full `sw-runbook.json`; that remains the responsibility of
   `sw init`.
 - Detecting project context to personalize examples.
+- Accepting multiple entity types in one invocation in this increment.
 
 ## Edge Cases
 
-- Topic name differs only by case from a supported topic.
-- Topic refers to a known family but not a supported leaf such as
-  `rewrite.unknown`.
+- Entity type name differs only by case from a supported value.
+- Entry example becomes so minimal that users must immediately drill down into
+  other examples to do anything useful.
 - Example output drifts from the currently supported schema.
-- Rewrite examples drift from the currently supported capture and rewrite
-  syntax.

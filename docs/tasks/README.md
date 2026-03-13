@@ -44,6 +44,7 @@ File-based task tracker for Sociable Weaver.
 - [TASK-038: Include Release Commit History In README](./TASK-038-include-release-commit-history-in-readme.md)
 - [TASK-039: Implement Example Command](./TASK-039-implement-example-command.md)
 - [TASK-040: Expand Rewrite Example Coverage](./TASK-040-expand-rewrite-example-coverage.md)
+- [TASK-041: Make Example Topics Case-Insensitive And Richer](./TASK-041-make-example-topics-case-insensitive-and-richer.md)
 
 ## Pending
 
@@ -97,6 +98,7 @@ File-based task tracker for Sociable Weaver.
 - [x] [TASK-037: Support DisplayFile Line Ranges](./TASK-037-support-display-file-line-ranges.md)
 - [x] [TASK-039: Implement Example Command](./TASK-039-implement-example-command.md)
 - [x] [TASK-040: Expand Rewrite Example Coverage](./TASK-040-expand-rewrite-example-coverage.md)
+- [x] [TASK-041: Make Example Topics Case-Insensitive And Richer](./TASK-041-make-example-topics-case-insensitive-and-richer.md)
 
 ## Blocked
 

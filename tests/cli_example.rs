@@ -13,10 +13,19 @@ fn command_example_prints_valid_json_entry() {
 
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        stdout
+            .trim_start()
+            .starts_with("{\n  \"type\": \"Command\"")
+    );
     let value: serde_json::Value =
         serde_json::from_str(&stdout).expect("example output should be valid json");
     assert_eq!(value["type"], "Command");
     assert!(value["commands"].is_array());
+    assert!(value["assert"].is_object());
+    assert!(value["output"]["rewrite"].is_array());
+    assert!(value["capture"].is_array());
+    assert!(value["cleanup"].is_array());
 }
 
 #[test]
@@ -33,57 +42,28 @@ fn display_file_example_prints_valid_json_entry() {
 }
 
 #[test]
-fn keep_between_example_prints_valid_json_fragment() {
-    let output = run(&["example", "rewrite.keep_between"]);
-
-    assert!(output.status.success());
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    let value: serde_json::Value =
-        serde_json::from_str(&stdout).expect("example output should be valid json");
-    assert_eq!(value["type"], "keep_between");
-    assert_eq!(value["show_trim_markers"], true);
-}
-
-#[test]
-fn replace_example_prints_valid_json_fragment() {
-    let output = run(&["example", "rewrite.replace"]);
-
-    assert!(output.status.success());
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    let value: serde_json::Value =
-        serde_json::from_str(&stdout).expect("example output should be valid json");
-    assert_eq!(value["type"], "replace");
-    assert_eq!(value["replacement"], ".");
-}
-
-#[test]
-fn datetime_shift_example_prints_valid_json_fragment() {
-    let output = run(&["example", "rewrite.datetime_shift"]);
-
-    assert!(output.status.success());
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    let value: serde_json::Value =
-        serde_json::from_str(&stdout).expect("example output should be valid json");
-    assert_eq!(value["type"], "datetime_shift");
-    assert_eq!(value["format"], "rfc3339");
-}
-
-#[test]
-fn capture_oriented_rewrite_example_prints_valid_json_fragment() {
-    let output = run(&["example", "rewrite.capture_replace"]);
-
-    assert!(output.status.success());
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    let value: serde_json::Value =
-        serde_json::from_str(&stdout).expect("example output should be valid json");
-    assert_eq!(value["type"], "replace");
-    assert_eq!(value["pattern"], "@{audio_path_1_original}");
-    assert_eq!(value["replacement"], "@{audio_path_1_rewritten}");
-}
-
-#[test]
 fn unknown_example_topic_returns_operational_error() {
     let output = run(&["example", "unknown.topic"]);
+
+    assert_eq!(output.status.code(), Some(1));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("Unknown example topic"));
+}
+
+#[test]
+fn command_example_topic_is_case_insensitive() {
+    let output = run(&["example", "command"]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let value: serde_json::Value =
+        serde_json::from_str(&stdout).expect("example output should be valid json");
+    assert_eq!(value["type"], "Command");
+}
+
+#[test]
+fn nested_rewrite_topic_returns_operational_error() {
+    let output = run(&["example", "rewrite.replace"]);
 
     assert_eq!(output.status.code(), Some(1));
     let stderr = String::from_utf8_lossy(&output.stderr);
