@@ -1,0 +1,10 @@
+{
+  "entries": [
+    {
+      "type": "DisplayFile",
+      "path": "./Example.java",
+      "start_line": 2,
+      "line_count": 2
+    }
+  ]
+}

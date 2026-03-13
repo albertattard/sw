@@ -1,7 +1,7 @@
 ---
 id: TASK-037
 title: Support DisplayFile Line Ranges
-status: pending
+status: done
 related_features:
   - SPEC-003
 owner: @aattard
@@ -32,14 +32,14 @@ the referenced file instead of always including the whole file.
 
 ## Acceptance Criteria
 
-- [ ] Given a `DisplayFile` entry with `start_line`, rendering begins at that
+- [x] Given a `DisplayFile` entry with `start_line`, rendering begins at that
       line.
-- [ ] Given a `DisplayFile` entry with `start_line` and `line_count`, only the
+- [x] Given a `DisplayFile` entry with `start_line` and `line_count`, only the
       requested number of lines is rendered.
-- [ ] Given a `DisplayFile` entry with `start_line` and no `line_count`,
+- [x] Given a `DisplayFile` entry with `start_line` and no `line_count`,
       rendering continues to the end of the file.
-- [ ] Given `line_count` without `start_line`, validation fails.
-- [ ] Given `start_line` or `line_count` less than `1`, validation fails.
+- [x] Given `line_count` without `start_line`, validation fails.
+- [x] Given `start_line` or `line_count` less than `1`, validation fails.
 
 ## Notes
 

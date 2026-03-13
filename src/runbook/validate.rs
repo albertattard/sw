@@ -59,6 +59,26 @@ fn require_string(
     }
 }
 
+fn validate_positive_integer(
+    object: &Map<String, Value>,
+    key: &str,
+    path: &str,
+    errors: &mut Vec<ValidationIssue>,
+) {
+    let Some(value) = object.get(key) else {
+        return;
+    };
+
+    match value.as_u64() {
+        Some(number) if number > 0 => {}
+        _ => push_error(
+            errors,
+            format!("{path}.{key}"),
+            "must be an integer greater than 0",
+        ),
+    }
+}
+
 fn validate_string_array(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>) {
     if let Some(items) = as_array(value, path, errors) {
         for (index, item) in items.iter().enumerate() {
@@ -727,7 +747,27 @@ fn validate_entry(
             None => push_error(errors, format!("{path}.contents"), "is required"),
         },
         "DisplayFile" => {
+            for key in object.keys() {
+                if key != "type" && key != "path" && key != "start_line" && key != "line_count" {
+                    push_error(
+                        errors,
+                        format!("{path}.{key}"),
+                        "is not a supported DisplayFile property",
+                    );
+                }
+            }
+
             require_string(object, "path", &path, errors);
+            validate_positive_integer(object, "start_line", &path, errors);
+            validate_positive_integer(object, "line_count", &path, errors);
+
+            if object.get("line_count").is_some() && object.get("start_line").is_none() {
+                push_error(
+                    errors,
+                    format!("{path}.line_count"),
+                    "requires `start_line`",
+                );
+            }
         }
         "Prerequisite" => match object.get("checks") {
             Some(checks) => validate_prerequisite_checks(checks, &format!("{path}.checks"), errors),

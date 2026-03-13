@@ -149,6 +149,16 @@ fn render_display_file(entry: &Value, runbook_path: &Path) -> Result<String, Ren
     let contents = fs::read_to_string(&display_path).map_err(|err| {
         RenderError::Operational(format!("Failed to read {}: {err}", display_path.display()))
     })?;
+    let start_line = entry
+        .get("start_line")
+        .and_then(Value::as_u64)
+        .map(|value| value as usize)
+        .unwrap_or(1);
+    let line_count = entry
+        .get("line_count")
+        .and_then(Value::as_u64)
+        .map(|value| value as usize);
+    let contents = slice_display_file_contents(&contents, start_line, line_count, &display_path)?;
 
     let mut section = format!("```{}\n", display_file_content_type(&display_path));
     section.push_str(&contents);
@@ -157,6 +167,36 @@ fn render_display_file(entry: &Value, runbook_path: &Path) -> Result<String, Ren
     }
     section.push_str("```");
     Ok(section)
+}
+
+fn slice_display_file_contents(
+    contents: &str,
+    start_line: usize,
+    line_count: Option<usize>,
+    display_path: &Path,
+) -> Result<String, RenderError> {
+    let lines: Vec<&str> = contents.lines().collect();
+    let start_index = start_line.saturating_sub(1);
+
+    if start_index >= lines.len() && !lines.is_empty() {
+        return Err(RenderError::Operational(format!(
+            "DisplayFile start_line {} is beyond the end of {}",
+            start_line,
+            display_path.display()
+        )));
+    }
+
+    let end_index = match line_count {
+        Some(count) => start_index.saturating_add(count).min(lines.len()),
+        None => lines.len(),
+    };
+
+    let mut sliced = lines[start_index..end_index].join("\n");
+    if !sliced.is_empty() && contents.ends_with('\n') && end_index == lines.len() {
+        sliced.push('\n');
+    }
+
+    Ok(sliced)
 }
 
 fn render_heading(entry: &Value) -> Result<String, RenderError> {

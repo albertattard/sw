@@ -842,6 +842,45 @@ fn display_file_java_uses_java_fenced_block() {
 }
 
 #[test]
+fn display_file_can_render_a_bounded_line_range() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-display-file-line-range.json",
+        "sw-runbook.json",
+    );
+    fs::write(dir.join("Example.java"), "line 1\nline 2\nline 3\nline 4\n")
+        .expect("failed to write Example.java");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```java\nline 2\nline 3\n```"));
+    assert!(!readme.contains("line 1"));
+    assert!(!readme.contains("line 4"));
+}
+
+#[test]
+fn display_file_can_render_from_start_line_to_end_of_file() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-display-file-start-line.json",
+        "sw-runbook.json",
+    );
+    fs::write(dir.join("Example.java"), "line 1\nline 2\nline 3\nline 4\n")
+        .expect("failed to write Example.java");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```java\nline 2\nline 3\nline 4\n```"));
+    assert!(!readme.contains("line 1"));
+}
+
+#[test]
 fn display_file_unknown_extension_falls_back_to_text() {
     let dir = prepare_workspace();
     write_runbook(
@@ -874,4 +913,30 @@ fn display_file_missing_file_returns_operational_error() {
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(stderr.contains("Failed to read"));
     assert!(stderr.contains("missing.java"));
+}
+
+#[test]
+fn display_file_start_line_beyond_end_of_file_returns_operational_error() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-display-file-start-line.json",
+        "sw-runbook.json",
+    );
+    fs::write(dir.join("Example.java"), "line 1\n").expect("failed to write Example.java");
+
+    let runbook_path = dir.join("sw-runbook.json");
+    let contents = fs::read_to_string(&runbook_path).expect("failed to read runbook");
+    fs::write(
+        &runbook_path,
+        contents.replace("\"start_line\": 2", "\"start_line\": 3"),
+    )
+    .expect("failed to rewrite runbook");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert_eq!(output.status.code(), Some(1));
+    assert!(!dir.join("README.md").exists());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("DisplayFile start_line 3 is beyond the end"));
 }
