@@ -53,6 +53,7 @@ File-based task tracker for Sociable Weaver.
 - [ ] [TASK-033: Implement Import Command](./TASK-033-implement-import-command.md)
 - [ ] [TASK-034: Expand Help Command Coverage](./TASK-034-expand-help-command-coverage.md)
 - [ ] [TASK-038: Include Release Commit History In README](./TASK-038-include-release-commit-history-in-readme.md)
+- [ ] [TASK-042: Support Time-Only Datetime Shift](./TASK-042-support-time-only-datetime-shift.md)
 
 ## In Progress
 

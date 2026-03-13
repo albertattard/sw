@@ -268,6 +268,7 @@ in the runbook.
 - A `datetime_shift` rule may use a built-in `format` or a custom `pattern`.
 - `format` and `pattern` are mutually exclusive.
 - In this increment, built-in `format` values are `rfc3339` and `rfc1123`.
+- No built-in time-only `format` names are introduced in this increment.
 - If `format` is used, the original matched format is preserved in the
   rewritten output.
 - If `pattern` is used for semantic datetime shifting, `custom_format` is
@@ -276,6 +277,12 @@ in the runbook.
 - If `pattern` and `custom_format` are used together, the matched output is
   parsed and rewritten using that custom format while preserving the same
   textual style.
+- If `pattern` and `custom_format` describe a time-only value without a date,
+  `datetime_shift` borrows the date and offset from the configured or inherited
+  base timestamp, applies the shared shift, and then renders only the original
+  time-only textual format.
+- Time-only shifting must use `pattern` together with `custom_format`; it does
+  not use any special built-in time-only format name.
 - If `base` is omitted, `datetime_shift` uses the default base timestamp
   `2077-04-27T12:34:56.789+01:00`.
 - If `id` is used, the rule establishes the shift delta for that named anchor.
@@ -520,6 +527,15 @@ in the runbook.
 - [ ] Given a `datetime_shift` rewrite rule with `pattern` and
       `custom_format`, matched datetimes are rewritten while preserving that
       custom textual format.
+- [ ] Given a `datetime_shift` rewrite rule with `pattern` and
+      `custom_format` that describe a time-only value, the value is shifted
+      using the date and offset from the configured or inherited base
+      timestamp and is rendered back in the same time-only textual format.
+- [ ] Given multiple time-only values matched by the same `datetime_shift`
+      rule, later values preserve their relative distance from the first
+      matched time-only value.
+- [ ] Given a time-only `datetime_shift` rule that uses `use`, the rule
+      follows the same shared anchor established by an earlier datetime rule.
 - [ ] Given a `datetime_shift` rewrite rule that uses `use`, the rule does not
       declare its own `base`.
 - [ ] Given a `Command` entry without an `output` property, the generated
@@ -576,6 +592,11 @@ in the runbook.
 - A `datetime_shift` rule uses an anchor before it is established earlier in
   the runbook.
 - A `datetime_shift` rule uses `pattern` together with `custom_format`.
+- A `datetime_shift` rule uses `pattern` and `custom_format` to shift
+  time-only values such as `12:56:13.902`.
+- A time-only `datetime_shift` crosses midnight after shifting and renders the
+  wrapped time value.
+- A time-only `datetime_shift` reuses an earlier shared anchor with `use`.
 - A `datetime_shift` rule declares both `id` and `use`.
 - A `datetime_shift` rule declares both `format` and `custom_format`.
 - A `datetime_shift` rule declares `use` together with `base`.
