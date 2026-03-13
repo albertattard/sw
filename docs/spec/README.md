@@ -13,3 +13,4 @@ acceptance criteria.
 - [SPEC-006: Import README to Runbook](./SPEC-006-import-readme-to-runbook.md)
 - [SPEC-007: Release Distribution Contract](./SPEC-007-release-distribution.md)
 - [SPEC-008: Example Snippets Contract](./SPEC-008-example-snippets.md)
+- [SPEC-009: Explain Feature Contract](./SPEC-009-explain-feature-contract.md)
