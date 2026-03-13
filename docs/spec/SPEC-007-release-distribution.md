@@ -32,8 +32,12 @@ In this increment, the release README includes:
 - target platform
 - version or tag
 - commit SHA
-- latest commit subject line
+- commit summaries since the previous release
 - build profile
+
+The release README should describe the change history between the previous
+release tag and the current release tag so a downloaded artifact can explain
+what changed without requiring the user to inspect the repository history.
 
 ## Download Paths
 
@@ -78,8 +82,8 @@ release binary and release README.
 - [ ] Given a tagged release build, the pipeline publishes release assets to a
       GitHub Release.
 - [ ] The published release includes the binary asset and a release README.
-- [ ] The published release README includes the latest commit subject line as
-      part of the build metadata.
+- [ ] The published release README includes the commit subjects between the
+      previous release tag and the current release tag.
 - [ ] A user can download a specific version from the versioned release path.
 - [ ] A user can navigate to the latest release path and obtain the newest
       published build.
@@ -98,5 +102,5 @@ release binary and release README.
 - A new release supersedes the previous latest release.
 - Different platforms require different asset names.
 - Release README content drifts from what the pipeline actually publishes.
-- The latest commit subject line is missing or does not match the published
-  build metadata.
+- There is no previous release tag to compare against.
+- The commit list between releases is empty or cannot be resolved.
