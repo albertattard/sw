@@ -104,6 +104,24 @@ fn invalid_assert_checks_shape_returns_validation_failure() {
 }
 
 #[test]
+fn invalid_file_assert_checks_shape_returns_validation_failure() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-invalid-assert-file.json",
+        "--output-format",
+        "json",
+    ]);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": false"));
+    assert!(stdout.contains("\"path\": \"entries[0].assert.checks[0]\""));
+    assert!(stdout.contains("\"path\": \"entries[0].assert.checks[0].exists\""));
+    assert!(stdout.contains("\"path\": \"entries[0].assert.checks[0].sha256\""));
+}
+
+#[test]
 fn invalid_timeout_returns_validation_failure() {
     let output = run(&[
         "validate",

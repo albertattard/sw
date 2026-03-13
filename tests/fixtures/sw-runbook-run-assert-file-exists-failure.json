@@ -1,0 +1,19 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'no file\\n'"
+      ],
+      "assert": {
+        "checks": [
+          {
+            "source": "file",
+            "path": "./artifact.txt",
+            "exists": true
+          }
+        ]
+      }
+    }
+  ]
+}

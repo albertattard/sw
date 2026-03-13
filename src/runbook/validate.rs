@@ -682,6 +682,36 @@ fn validate_assert_check(value: &Value, path: &str, errors: &mut Vec<ValidationI
         return;
     };
 
+    match object.get("source").and_then(Value::as_str) {
+        Some("stdout") => validate_stdout_assert_check(object, path, errors),
+        Some("file") => validate_file_assert_check(object, path, errors),
+        Some(_) => {
+            push_error(
+                errors,
+                format!("{path}.source"),
+                "must be `stdout` or `file`",
+            );
+
+            if let Some(contains) = object.get("contains")
+                && !contains.is_string()
+            {
+                push_error(errors, format!("{path}.contains"), "must be a string");
+            }
+            if let Some(path_value) = object.get("path")
+                && !path_value.is_string()
+            {
+                push_error(errors, format!("{path}.path"), "must be a string");
+            }
+        }
+        None => push_error(errors, format!("{path}.source"), "must be a string"),
+    }
+}
+
+fn validate_stdout_assert_check(
+    object: &serde_json::Map<String, Value>,
+    path: &str,
+    errors: &mut Vec<ValidationIssue>,
+) {
     for key in object.keys() {
         if key != "source" && key != "contains" {
             push_error(
@@ -692,19 +722,69 @@ fn validate_assert_check(value: &Value, path: &str, errors: &mut Vec<ValidationI
         }
     }
 
-    match object.get("source").and_then(Value::as_str) {
-        Some("stdout") => {}
-        Some(_) => push_error(
-            errors,
-            format!("{path}.source"),
-            "must be `stdout` until additional assertion sources are supported",
-        ),
-        None => push_error(errors, format!("{path}.source"), "must be a string"),
-    }
-
     match object.get("contains").and_then(Value::as_str) {
         Some(_) => {}
         None => push_error(errors, format!("{path}.contains"), "must be a string"),
+    }
+}
+
+fn validate_file_assert_check(
+    object: &serde_json::Map<String, Value>,
+    path: &str,
+    errors: &mut Vec<ValidationIssue>,
+) {
+    for key in object.keys() {
+        if key != "source" && key != "path" && key != "exists" && key != "sha256" {
+            push_error(
+                errors,
+                format!("{path}.{key}"),
+                "is not a supported assertion check property",
+            );
+        }
+    }
+
+    match object.get("path").and_then(Value::as_str) {
+        Some(_) => {}
+        None => push_error(errors, format!("{path}.path"), "must be a string"),
+    }
+
+    let has_exists = object.get("exists").is_some();
+    let has_sha256 = object.get("sha256").is_some();
+    if has_exists == has_sha256 {
+        push_error(
+            errors,
+            path.to_string(),
+            "must include exactly one file assertion operator",
+        );
+    }
+
+    if let Some(exists) = object.get("exists") {
+        match exists.as_bool() {
+            Some(true) => {}
+            Some(false) => push_error(errors, format!("{path}.exists"), "must be `true`"),
+            None => push_error(errors, format!("{path}.exists"), "must be `true`"),
+        }
+    }
+
+    if let Some(sha256) = object.get("sha256") {
+        match sha256.as_str() {
+            Some(value)
+                if value.len() == 64
+                    && value.chars().all(|character| character.is_ascii_hexdigit())
+                    && value
+                        .chars()
+                        .all(|character| !character.is_ascii_uppercase()) => {}
+            Some(_) => push_error(
+                errors,
+                format!("{path}.sha256"),
+                "must be a 64-character lowercase hexadecimal string",
+            ),
+            None => push_error(
+                errors,
+                format!("{path}.sha256"),
+                "must be a 64-character lowercase hexadecimal string",
+            ),
+        }
     }
 }
 

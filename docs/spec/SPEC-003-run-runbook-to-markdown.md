@@ -182,10 +182,19 @@ in the runbook.
 - `assert.checks` is an array of assertion checks.
 - Each assertion check declares a `source` so the contract can support
   different targets such as command output and files.
-- In this increment, the only supported `source` is `stdout`.
-- In this increment, the only supported content operator is `contains`.
+- In this increment, supported assertion check sources are `stdout` and `file`.
+- A `stdout` check declares `contains`.
 - A `stdout` `contains` check passes when the command stdout includes the
   expected text.
+- A `file` check declares `path`.
+- A `file` assertion path is resolved from the same working directory used to
+  execute the command.
+- A `file` check may declare `exists: true`.
+- A `file` `exists` check passes when the referenced file exists.
+- A `file` check may declare `sha256`.
+- A `file` `sha256` check passes when the referenced file exists and its
+  SHA-256 hash matches the expected lowercase hexadecimal digest.
+- A `file` check must declare exactly one operator: `exists` or `sha256`.
 - A `Command` entry may include a `capture` section.
 - `capture` is an array of named extraction rules.
 - Each capture rule declares a variable `name`.
@@ -439,6 +448,15 @@ in the runbook.
 - [ ] Given a command with a `stdout` `contains` check that fails, the run
       exits with `2`, does not write a partial output file, and reports the
       failing `Command` entry together with the captured stdout and stderr.
+- [ ] Given a command with `assert.checks` using `source: file`, `path`, and
+      `exists: true`, the command is considered successful only when the file
+      exists after command execution.
+- [ ] Given a command with `assert.checks` using `source: file`, `path`, and
+      `sha256`, the command is considered successful only when the file exists
+      and its SHA-256 matches the expected digest.
+- [ ] Given a failing `file` assertion, the run exits with `2`, does not write
+      a partial output file, and reports the failing `Command` entry together
+      with the captured stdout and stderr.
 - [ ] Given multiple assertion checks, all checks must pass for the command to
       be considered successful.
 
@@ -664,10 +682,10 @@ in the runbook.
 - Command exits with the expected exit code but stdout does not satisfy the
   declared `contains` check.
 - Multiple stdout checks declared for a single command.
-- Assertion check uses a source other than `stdout` before additional sources
-  are supported.
-- Assertion check uses an operator other than `contains` before additional
-  operators are supported.
+- File assertion checks use `exists: true`.
+- File assertion checks use `sha256`.
+- File assertion checks reference a missing file.
+- File assertion checks use a non-matching SHA-256 digest.
 - Command writes to stderr but exits successfully.
 - Command caption supplied as a string or array of strings.
 - Output content type omitted and defaults to `text`.
@@ -683,11 +701,12 @@ enforce the same input contract. Command execution should be deterministic from
 the CLI perspective: execution order, failure handling, and output capture
 rules should be explicit and stable. Assertion structure should remain
 extensible: `assert.exit_code` handles process-level expectations, while
-`assert.checks` supports source-specific content checks. In this increment,
-`assert.checks` starts with `source: stdout` and the `contains` operator, while
-leaving room for future operators such as regular-expression or equality
-checks, and future sources such as files. Command execution must also enforce a
-bounded runtime so runaway processes do not remain after a failed run. Cleanup
+`assert.checks` supports source-specific checks. In this increment,
+`assert.checks` supports `source: stdout` with the `contains` operator and
+`source: file` with `exists` and `sha256`, while leaving room for future
+operators such as regular-expression or equality checks. Command execution must
+also enforce a bounded runtime so runaway processes do not remain after a
+failed run. Cleanup
 behavior should remain deterministic so resources started by earlier commands
 are reliably released even when the run stops early. Cleanup should be best
 effort rather than fail-fast: all registered cleanup blocks and all cleanup

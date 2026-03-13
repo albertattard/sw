@@ -1,0 +1,19 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'artifact\\n' > artifact.txt"
+      ],
+      "assert": {
+        "checks": [
+          {
+            "source": "file",
+            "path": "./artifact.txt",
+            "sha256": "5b3513f580c8397212ff2c8f459c199efc0c90e4354a5f3533adf0a3fff3a530"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -387,6 +387,70 @@ fn stdout_contains_assertion_failure_stops_the_run_without_partial_output() {
 }
 
 #[test]
+fn file_exists_assertion_allows_run_to_continue() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-assert-file-exists-success.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    assert!(dir.join("artifact.txt").exists());
+}
+
+#[test]
+fn file_exists_assertion_failure_stops_the_run_without_partial_output() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-assert-file-exists-failure.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert_eq!(output.status.code(), Some(2));
+    assert!(!dir.join("README.md").exists());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("file `./artifact.txt` did not exist"));
+}
+
+#[test]
+fn file_sha256_assertion_allows_run_to_continue() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-assert-file-sha256-success.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    assert!(dir.join("artifact.txt").exists());
+}
+
+#[test]
+fn file_sha256_assertion_failure_stops_the_run_without_partial_output() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-assert-file-sha256-failure.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert_eq!(output.status.code(), Some(2));
+    assert!(!dir.join("README.md").exists());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("file `./artifact.txt` had sha256 `5b3513f580c8397212ff2c8f459c199efc0c90e4354a5f3533adf0a3fff3a530` instead of `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`"));
+}
+
+#[test]
 fn command_with_timeout_completing_in_time_succeeds() {
     let dir = prepare_workspace();
     write_runbook(

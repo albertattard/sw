@@ -1,6 +1,9 @@
 use super::RenderError;
 use serde_json::Value;
+use sha2::{Digest, Sha256};
+use std::fs;
 use std::io::Read;
+use std::path::Path;
 use std::process::{Command, Stdio};
 use std::thread;
 use std::time::{Duration, Instant};
@@ -253,12 +256,20 @@ fn ensure_assert_check(
         RenderError::Operational("Assertion check source must be a string".to_string())
     })?;
 
-    if source != "stdout" {
-        return Err(RenderError::Operational(format!(
+    match source {
+        "stdout" => ensure_stdout_assert_check(entry, check, execution),
+        "file" => ensure_file_assert_check(entry, check, execution),
+        _ => Err(RenderError::Operational(format!(
             "Unsupported assertion check source `{source}`"
-        )));
+        ))),
     }
+}
 
+fn ensure_stdout_assert_check(
+    entry: &Value,
+    check: &Value,
+    execution: &CommandExecution,
+) -> Result<(), RenderError> {
     let expected = check
         .get("contains")
         .and_then(Value::as_str)
@@ -275,6 +286,77 @@ fn ensure_assert_check(
         execution,
         &format!("stdout did not contain `{expected}`"),
     )))
+}
+
+fn ensure_file_assert_check(
+    entry: &Value,
+    check: &Value,
+    execution: &CommandExecution,
+) -> Result<(), RenderError> {
+    let path = check.get("path").and_then(Value::as_str).ok_or_else(|| {
+        RenderError::Operational("Assertion check path must be a string".to_string())
+    })?;
+
+    let assertion_path = Path::new(path);
+
+    if check.get("exists").is_some() {
+        return ensure_file_exists_assertion(entry, execution, assertion_path, path);
+    }
+
+    let expected = check.get("sha256").and_then(Value::as_str).ok_or_else(|| {
+        RenderError::Operational("Assertion check sha256 must be a string".to_string())
+    })?;
+
+    ensure_file_sha256_assertion(entry, execution, assertion_path, path, expected)
+}
+
+fn ensure_file_exists_assertion(
+    entry: &Value,
+    execution: &CommandExecution,
+    path: &Path,
+    display_path: &str,
+) -> Result<(), RenderError> {
+    if path.exists() {
+        return Ok(());
+    }
+
+    Err(RenderError::CommandFailed(format_assertion_failure(
+        entry,
+        execution,
+        &format!("file `{display_path}` did not exist"),
+    )))
+}
+
+fn ensure_file_sha256_assertion(
+    entry: &Value,
+    execution: &CommandExecution,
+    path: &Path,
+    display_path: &str,
+    expected: &str,
+) -> Result<(), RenderError> {
+    let contents = fs::read(path).map_err(|_| {
+        RenderError::CommandFailed(format_assertion_failure(
+            entry,
+            execution,
+            &format!("file `{display_path}` did not exist"),
+        ))
+    })?;
+
+    let actual = sha256_hex(&contents);
+    if actual == expected {
+        return Ok(());
+    }
+
+    Err(RenderError::CommandFailed(format_assertion_failure(
+        entry,
+        execution,
+        &format!("file `{display_path}` had sha256 `{actual}` instead of `{expected}`"),
+    )))
+}
+
+fn sha256_hex(contents: &[u8]) -> String {
+    let digest = Sha256::digest(contents);
+    digest.iter().map(|byte| format!("{byte:02x}")).collect()
 }
 
 fn format_assertion_failure(entry: &Value, execution: &CommandExecution, detail: &str) -> String {

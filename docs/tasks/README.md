@@ -48,6 +48,7 @@ File-based task tracker for Sociable Weaver.
 - [TASK-043: Implement Explain Command](./TASK-043-implement-explain-command.md)
 - [TASK-044: Include Command Output In Assertion Errors](./TASK-044-include-command-output-in-assertion-errors.md)
 - [TASK-045: Support DisplayFile Indent Control](./TASK-045-support-display-file-indent-control.md)
+- [TASK-046: Support File Assertion Checks](./TASK-046-support-file-assertion-checks.md)
 
 ## Pending
 
@@ -106,6 +107,7 @@ File-based task tracker for Sociable Weaver.
 - [x] [TASK-042: Support Time-Only Datetime Shift](./TASK-042-support-time-only-datetime-shift.md)
 - [x] [TASK-044: Include Command Output In Assertion Errors](./TASK-044-include-command-output-in-assertion-errors.md)
 - [x] [TASK-045: Support DisplayFile Indent Control](./TASK-045-support-display-file-indent-control.md)
+- [x] [TASK-046: Support File Assertion Checks](./TASK-046-support-file-assertion-checks.md)
 
 ## Blocked
 

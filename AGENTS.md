@@ -15,7 +15,7 @@
     - `Commit:` with the short commit hash
     - `Branch:` with the branch name
     - `Remote:` with the pushed remote and branch
-    - `Commit message used:` followed by the full commit message as wrapped plain text with a blank line between subject and body, not in a fenced code block
+    - `Commit message used:` followed by the full commit message as wrapped plain text with a blank line between subject and body, in a fenced code block
     - If unrelated local changes were intentionally left uncommitted, list them under `I left unrelated local changes uncommitted:`
 
 ## Git workflow

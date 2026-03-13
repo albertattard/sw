@@ -1,0 +1,20 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'artifact\\n'"
+      ],
+      "assert": {
+        "checks": [
+          {
+            "source": "file",
+            "path": "./artifact.txt",
+            "exists": false,
+            "sha256": "ABC"
+          }
+        ]
+      }
+    }
+  ]
+}
