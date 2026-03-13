@@ -920,6 +920,28 @@ fn output_rewrite_keep_between_can_hide_trim_markers() {
 }
 
 #[test]
+fn output_rewrite_keep_between_can_keep_from_start_to_end() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-output-rewrite-keep-between-start-to-end.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("Kept output from start to end"));
+    assert!(readme.contains(
+        "```\n================================================================================\n=== Performance Results ===\n================================================================================\nUse Compact Object Headers:   false\nHeap Size:                    96M\nFull GC Count:                0\n================================================================================\n```"
+    ));
+    assert!(!readme.contains(
+        "```\n[INFO] before\n================================================================================"
+    ));
+}
+
+#[test]
 fn command_capture_rewritten_stage_uses_rewritten_stdout() {
     let dir = prepare_workspace();
     write_runbook(

@@ -902,9 +902,7 @@ fn apply_keep_between_rule(rule: &Value, rendered: &str) -> Result<RewriteRuleRe
     let start = rule.get("start").and_then(Value::as_str).ok_or_else(|| {
         RenderError::Operational("Command output keep_between start must be a string".to_string())
     })?;
-    let end = rule.get("end").and_then(Value::as_str).ok_or_else(|| {
-        RenderError::Operational("Command output keep_between end must be a string".to_string())
-    })?;
+    let end = rule.get("end").and_then(Value::as_str);
     let start_offset = parse_keep_between_offset(rule.get("start_offset"), 1, "start_offset")?;
     let end_offset = parse_keep_between_offset(rule.get("end_offset"), -1, "end_offset")?;
     let show_trim_markers = parse_keep_between_show_trim_markers(rule.get("show_trim_markers"))?;
@@ -916,16 +914,22 @@ fn apply_keep_between_rule(rule: &Value, rendered: &str) -> Result<RewriteRuleRe
             generated_capture: None,
         });
     };
-    let Some(relative_end_index) = lines[start_index..].iter().position(|line| *line == end) else {
-        return Ok(RewriteRuleResult {
-            rendered: rendered.to_string(),
-            generated_capture: None,
-        });
-    };
-    let end_index = start_index + relative_end_index;
-
     let start_line = offset_index(start_index, start_offset, lines.len());
-    let end_line = offset_index(end_index, end_offset, lines.len());
+    let end_line = match end {
+        Some(end) => {
+            let Some(relative_end_index) =
+                lines[start_index..].iter().position(|line| *line == end)
+            else {
+                return Ok(RewriteRuleResult {
+                    rendered: rendered.to_string(),
+                    generated_capture: None,
+                });
+            };
+            let end_index = start_index + relative_end_index;
+            offset_index(end_index, end_offset, lines.len())
+        }
+        None => lines.len().checked_sub(1),
+    };
 
     let Some((start_line, end_line)) = start_line.zip(end_line) else {
         return Ok(RewriteRuleResult {

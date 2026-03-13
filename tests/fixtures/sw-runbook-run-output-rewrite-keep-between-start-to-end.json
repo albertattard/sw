@@ -1,0 +1,21 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf '%s\\n' '[INFO] before' '================================================================================' '=== Performance Results ===' '================================================================================' 'Use Compact Object Headers:   false' 'Heap Size:                    96M' 'Full GC Count:                0' '================================================================================'"
+      ],
+      "output": {
+        "caption": "Kept output from start to end",
+        "rewrite": [
+          {
+            "type": "keep_between",
+            "start": "=== Performance Results ===",
+            "start_offset": -1,
+            "show_trim_markers": false
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -411,6 +411,21 @@ fn invalid_output_rewrite_keep_between_show_trim_markers_returns_validation_fail
 }
 
 #[test]
+fn valid_output_rewrite_keep_between_start_only_returns_success() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-valid-output-rewrite-keep-between-start-only.json",
+        "--output-format",
+        "json",
+    ]);
+
+    assert_eq!(output.status.code(), Some(0));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": true"));
+}
+
+#[test]
 fn invalid_display_file_returns_validation_failure() {
     let output = run(&[
         "validate",

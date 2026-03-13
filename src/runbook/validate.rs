@@ -421,7 +421,11 @@ fn validate_rewrite_rule(
             }
 
             require_string(object, "start", path, errors);
-            require_string(object, "end", path, errors);
+            if let Some(end) = object.get("end")
+                && !end.is_string()
+            {
+                push_error(errors, format!("{path}.end"), "must be a string");
+            }
 
             if let Some(start_offset) = object.get("start_offset")
                 && !start_offset.is_i64()

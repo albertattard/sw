@@ -1,7 +1,7 @@
 ---
 id: TASK-049
 title: Make Keep Between End Optional
-status: open
+status: done
 related_features:
   - SPEC-003
 owner: @aattard
@@ -32,13 +32,13 @@ boundary to the end of the output without requiring an `end` boundary.
 
 ## Acceptance Criteria
 
-- [ ] Given a `keep_between` rewrite rule with `start` and no `end`, output is
+- [x] Given a `keep_between` rewrite rule with `start` and no `end`, output is
       kept from the adjusted `start` boundary to the end.
-- [ ] Given a `keep_between` rewrite rule with `start_offset` and no `end`,
+- [x] Given a `keep_between` rewrite rule with `start_offset` and no `end`,
       `start_offset` still applies.
-- [ ] Given a `keep_between` rewrite rule with no `end`, `end_offset` is
+- [x] Given a `keep_between` rewrite rule with no `end`, `end_offset` is
       ignored.
-- [ ] Existing bounded `keep_between` behavior remains unchanged.
+- [x] Existing bounded `keep_between` behavior remains unchanged.
 
 ## Notes
 
