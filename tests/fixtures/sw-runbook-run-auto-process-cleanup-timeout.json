@@ -1,0 +1,18 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "timeout": "1 second",
+      "commands": [
+        "sleep 30 &",
+        "PID=$!",
+        "printf '%s\\n' \"$PID\" > auto-cleanup-timeout.pid",
+        "echo 'before timeout'",
+        "sleep 30"
+      ],
+      "output": {
+        "caption": "Timed out output"
+      }
+    }
+  ]
+}

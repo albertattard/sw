@@ -1,0 +1,20 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "sleep 30 &",
+        "PID=$!",
+        "printf '%s\\n' \"$PID\" > auto-cleanup-success.pid",
+        "echo 'started background process'"
+      ]
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "PID=$(cat auto-cleanup-success.pid)",
+        "if kill -0 \"$PID\" 2>/dev/null; then printf 'alive\\n' > auto-cleanup-success-state.txt; else printf 'dead\\n' > auto-cleanup-success-state.txt; fi"
+      ]
+    }
+  ]
+}

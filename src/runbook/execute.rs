@@ -15,6 +15,10 @@ pub(crate) struct CommandExecution {
     pub(crate) timed_out: bool,
 }
 
+fn uses_automatic_process_cleanup(entry: &Value) -> bool {
+    entry.get("cleanup").is_none()
+}
+
 pub(crate) fn cleanup_block(entry: &Value) -> Result<Option<Vec<String>>, RenderError> {
     let Some(cleanup) = entry.get("cleanup") else {
         return Ok(None);
@@ -45,6 +49,7 @@ pub(crate) fn execute_command(
     command: &str,
 ) -> Result<CommandExecution, RenderError> {
     let timeout = timeout_for_entry(entry)?;
+    let auto_cleanup_processes = uses_automatic_process_cleanup(entry);
 
     let mut process = Command::new("sh");
     process.arg("-lc").arg(command);
@@ -83,6 +88,7 @@ pub(crate) fn execute_command(
 
     let start = Instant::now();
     let mut timed_out = false;
+    let process_group_id = child.id();
     let exit_status = loop {
         match child.try_wait() {
             Ok(Some(status)) => break status,
@@ -105,6 +111,10 @@ pub(crate) fn execute_command(
             }
         }
     };
+
+    if auto_cleanup_processes && !timed_out {
+        terminate_process_group(process_group_id)?;
+    }
 
     let stdout = stdout_handle
         .join()
@@ -420,14 +430,7 @@ fn parse_timeout(timeout: &str) -> Result<Duration, String> {
 fn terminate_child(child: &mut std::process::Child) -> Result<(), RenderError> {
     #[cfg(unix)]
     {
-        let status = Command::new("kill")
-            .arg("-9")
-            .arg(format!("-{}", child.id()))
-            .status()
-            .map_err(|err| {
-                RenderError::Operational(format!("Failed to terminate timed out command: {err}"))
-            })?;
-        if !status.success() {
+        if !terminate_process_group(child.id())? {
             child.kill().map_err(|err| {
                 RenderError::Operational(format!("Failed to terminate timed out command: {err}"))
             })?;
@@ -441,4 +444,16 @@ fn terminate_child(child: &mut std::process::Child) -> Result<(), RenderError> {
             RenderError::Operational(format!("Failed to terminate timed out command: {err}"))
         })
     }
+}
+
+#[cfg(unix)]
+fn terminate_process_group(process_group_id: u32) -> Result<bool, RenderError> {
+    let status = Command::new("kill")
+        .arg("-9")
+        .arg(format!("-{process_group_id}"))
+        .status()
+        .map_err(|err| {
+            RenderError::Operational(format!("Failed to terminate command processes: {err}"))
+        })?;
+    Ok(status.success())
 }

@@ -581,6 +581,109 @@ fn cleanup_failures_do_not_stop_remaining_cleanup_and_fail_the_run() {
 }
 
 #[test]
+fn command_without_cleanup_automatically_terminates_started_processes_after_success() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-auto-process-cleanup-success.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    assert_eq!(
+        fs::read_to_string(dir.join("auto-cleanup-success-state.txt"))
+            .expect("missing auto cleanup success state"),
+        "dead\n"
+    );
+}
+
+#[test]
+fn command_without_cleanup_automatically_terminates_started_processes_after_failure() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-auto-process-cleanup-failure.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert_eq!(output.status.code(), Some(2));
+    let pid = fs::read_to_string(dir.join("auto-cleanup-failure.pid"))
+        .expect("missing auto cleanup failure pid")
+        .trim()
+        .to_string();
+    let probe = std::process::Command::new("sh")
+        .arg("-lc")
+        .arg(format!("kill -0 \"{pid}\" 2>/dev/null"))
+        .current_dir(&dir)
+        .status()
+        .expect("failed to probe auto cleanup failure pid");
+    assert!(!probe.success());
+}
+
+#[test]
+fn command_without_cleanup_automatically_terminates_started_processes_after_timeout() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-auto-process-cleanup-timeout.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert_eq!(output.status.code(), Some(2));
+    let pid = fs::read_to_string(dir.join("auto-cleanup-timeout.pid"))
+        .expect("missing auto cleanup timeout pid")
+        .trim()
+        .to_string();
+    let probe = std::process::Command::new("sh")
+        .arg("-lc")
+        .arg(format!("kill -0 \"{pid}\" 2>/dev/null"))
+        .current_dir(&dir)
+        .status()
+        .expect("failed to probe auto cleanup timeout pid");
+    assert!(!probe.success());
+}
+
+#[test]
+fn command_with_cleanup_uses_manual_cleanup_instead_of_automatic_process_cleanup() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-manual-cleanup-overrides-auto.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    assert_eq!(
+        fs::read_to_string(dir.join("manual-cleanup-state.txt"))
+            .expect("missing manual cleanup state"),
+        "alive\n"
+    );
+    assert_eq!(
+        fs::read_to_string(dir.join("manual-cleanup-log.txt")).expect("missing manual cleanup log"),
+        "manual cleanup\n"
+    );
+    let pid = fs::read_to_string(dir.join("manual-cleanup.pid"))
+        .expect("missing manual cleanup pid")
+        .trim()
+        .to_string();
+    let probe = std::process::Command::new("sh")
+        .arg("-lc")
+        .arg(format!("kill -0 \"{pid}\" 2>/dev/null"))
+        .current_dir(&dir)
+        .status()
+        .expect("failed to probe manual cleanup pid");
+    assert!(!probe.success());
+}
+
+#[test]
 fn json_output_content_type_uses_json_fenced_block() {
     let dir = prepare_workspace();
     write_runbook(&dir, "sw-runbook-run-output-json.json", "sw-runbook.json");

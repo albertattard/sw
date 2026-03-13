@@ -1,7 +1,7 @@
 ---
 id: TASK-051
 title: Default To Automatic Command Process Cleanup
-status: open
+status: done
 related_features:
   - SPEC-003
 owner: @aattard
@@ -29,13 +29,13 @@ unless the entry provides an explicit manual cleanup block.
 
 ## Acceptance Criteria
 
-- [ ] Given a command without `cleanup`, remaining processes started by that
+- [x] Given a command without `cleanup`, remaining processes started by that
       command are terminated automatically after the entry finishes.
-- [ ] Given a command without `cleanup`, remaining processes started by that
+- [x] Given a command without `cleanup`, remaining processes started by that
       command are terminated automatically after failure or timeout.
-- [ ] Given a command with `cleanup`, the explicit cleanup block is used
+- [x] Given a command with `cleanup`, the explicit cleanup block is used
       instead of automatic process cleanup for that entry.
-- [ ] Existing cleanup ordering and cleanup-failure behavior remain unchanged
+- [x] Existing cleanup ordering and cleanup-failure behavior remain unchanged
       for commands that provide manual `cleanup`.
 
 ## Notes

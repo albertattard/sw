@@ -1,0 +1,26 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "sleep 30 >/dev/null 2>&1 &",
+        "PID=$!",
+        "printf '%s\\n' \"$PID\" > manual-cleanup.pid",
+        "echo 'started background process'"
+      ],
+      "cleanup": [
+        "PID=$(cat manual-cleanup.pid)",
+        "printf 'manual cleanup\\n' >> manual-cleanup-log.txt",
+        "kill \"$PID\"",
+        "wait \"$PID\" || true"
+      ]
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "PID=$(cat manual-cleanup.pid)",
+        "if kill -0 \"$PID\" 2>/dev/null; then printf 'alive\\n' > manual-cleanup-state.txt; else printf 'dead\\n' > manual-cleanup-state.txt; fi"
+      ]
+    }
+  ]
+}
