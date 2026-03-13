@@ -6,7 +6,7 @@
       "title": "Prerequisites"
     },
     {
-      "type": "Prerequisites",
+      "type": "Prerequisite",
       "checks": [
         {
           "name": "Environment marker",

@@ -52,7 +52,7 @@ It creates a sample runbook in the current directory.
   - `Heading`
   - `Markdown`
   - `DisplayFile`
-  - `Prerequisites`
+  - `Prerequisite`
   - `Command`
 - The sample demonstrates common options and workflow features, including:
   - command output rendering

@@ -1,7 +1,7 @@
 ---
 id: TASK-031
 title: Rename Prerequisites Entry To Singular
-status: pending
+status: done
 related_features:
   - SPEC-003
 owner: @aattard
@@ -28,10 +28,10 @@ matches the singular naming style used by the other entry types.
 
 ## Acceptance Criteria
 
-- [ ] Given a runbook with `type: "Prerequisite"`, validation accepts it.
-- [ ] Given a runbook with `type: "Prerequisite"`, rendering and execution
+- [x] Given a runbook with `type: "Prerequisite"`, validation accepts it.
+- [x] Given a runbook with `type: "Prerequisite"`, rendering and execution
       behave the same as the previous prerequisite entry behavior.
-- [ ] The documented entry type in the spec uses the singular `Prerequisite`
+- [x] The documented entry type in the spec uses the singular `Prerequisite`
       form consistently.
 
 ## Notes

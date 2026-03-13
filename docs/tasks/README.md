@@ -40,7 +40,6 @@ File-based task tracker for Sociable Weaver.
 
 - [ ] [TASK-021: Support Deferred Markdown Interpolation](./TASK-021-support-deferred-markdown-interpolation.md)
 - [ ] [TASK-028: Implement Init Command](./TASK-028-implement-init-command.md)
-- [ ] [TASK-031: Rename Prerequisites Entry To Singular](./TASK-031-rename-prerequisites-entry-to-singular.md)
 
 ## In Progress
 
@@ -79,6 +78,7 @@ File-based task tracker for Sociable Weaver.
 - [x] [TASK-027: Support Prerequisites Entry Type](./TASK-027-support-prerequisites-entry-type.md)
 - [x] [TASK-029: Support Keep Between Rewrite Rule](./TASK-029-support-keep-between-rewrite-rule.md)
 - [x] [TASK-030: Support Keep Between Trim Markers](./TASK-030-support-keep-between-trim-markers.md)
+- [x] [TASK-031: Rename Prerequisites Entry To Singular](./TASK-031-rename-prerequisites-entry-to-singular.md)
 
 ## Blocked
 

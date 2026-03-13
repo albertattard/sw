@@ -1,7 +1,7 @@
 {
   "entries": [
     {
-      "type": "Prerequisites",
+      "type": "Prerequisite",
       "checks": [
         {
           "name": "Docker daemon",

@@ -729,7 +729,7 @@ fn validate_entry(
         "DisplayFile" => {
             require_string(object, "path", &path, errors);
         }
-        "Prerequisites" => match object.get("checks") {
+        "Prerequisite" => match object.get("checks") {
             Some(checks) => validate_prerequisite_checks(checks, &format!("{path}.checks"), errors),
             None => push_error(errors, format!("{path}.checks"), "is required"),
         },

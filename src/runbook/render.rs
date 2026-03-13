@@ -62,7 +62,7 @@ pub(crate) fn render_markdown(runbook: &Value, runbook_path: &Path) -> Result<St
             "Heading" => render_heading(entry)?,
             "Markdown" => render_markdown_entry(entry, &state.captured_values)?,
             "DisplayFile" => render_display_file(entry, runbook_path)?,
-            "Prerequisites" => render_prerequisites_entry(entry)?,
+            "Prerequisite" => render_prerequisite_entry(entry)?,
             "Command" => {
                 if let Some(cleanup) = cleanup_block(entry)? {
                     cleanups.push(cleanup);
@@ -305,12 +305,12 @@ fn render_caption(caption: &Value) -> Result<String, RenderError> {
     }
 }
 
-fn render_prerequisites_entry(entry: &Value) -> Result<String, RenderError> {
+fn render_prerequisite_entry(entry: &Value) -> Result<String, RenderError> {
     let checks = entry
         .get("checks")
         .and_then(Value::as_array)
         .ok_or_else(|| {
-            RenderError::Operational("Prerequisites entry is missing checks".to_string())
+            RenderError::Operational("Prerequisite entry is missing checks".to_string())
         })?;
 
     let mut sections = Vec::new();
@@ -341,7 +341,7 @@ fn render_prerequisites_entry(entry: &Value) -> Result<String, RenderError> {
 
 fn run_prerequisite_checks(entries: &[Value]) -> Result<(), RenderError> {
     for entry in entries {
-        let Some("Prerequisites") = entry.get("type").and_then(Value::as_str) else {
+        let Some("Prerequisite") = entry.get("type").and_then(Value::as_str) else {
             continue;
         };
 
@@ -349,7 +349,7 @@ fn run_prerequisite_checks(entries: &[Value]) -> Result<(), RenderError> {
             .get("checks")
             .and_then(Value::as_array)
             .ok_or_else(|| {
-                RenderError::Operational("Prerequisites entry is missing checks".to_string())
+                RenderError::Operational("Prerequisite entry is missing checks".to_string())
             })?;
 
         for check in checks {
