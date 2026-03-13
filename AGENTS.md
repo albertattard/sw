@@ -9,6 +9,14 @@
   - Stage all staged and unstaged changes with `git add .`
   - Create a commit using the commit message format in this file
   - Push the commit to `origin` on the current branch
+  - Report the result in this format:
+    - A short summary sentence describing what was committed and pushed
+    - `Verification run before commit:` followed by all commands that were executed, listed as bullets in the order they were executed
+    - `Commit:` with the short commit hash
+    - `Branch:` with the branch name
+    - `Remote:` with the pushed remote and branch
+    - `Commit message used:` followed by the full commit message in a fenced text block
+    - If unrelated local changes were intentionally left uncommitted, list them under `I left unrelated local changes uncommitted:`
 
 ## Git workflow
 - Only create a commit when the user explicitly asks.
