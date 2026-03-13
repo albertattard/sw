@@ -1,7 +1,7 @@
 ---
 id: TASK-040
 title: Expand Rewrite Example Coverage
-status: pending
+status: done
 related_features:
   - SPEC-008
 owner: @aattard
@@ -30,12 +30,12 @@ captured variables.
 
 ## Acceptance Criteria
 
-- [ ] Given `sw example rewrite.replace`, the CLI prints a valid JSON fragment.
-- [ ] Given `sw example rewrite.datetime_shift`, the CLI prints a valid JSON
+- [x] Given `sw example rewrite.replace`, the CLI prints a valid JSON fragment.
+- [x] Given `sw example rewrite.datetime_shift`, the CLI prints a valid JSON
       fragment.
-- [ ] Given the capture-oriented rewrite example topic, the CLI prints a valid
+- [x] Given the capture-oriented rewrite example topic, the CLI prints a valid
       JSON fragment that demonstrates captured-variable usage in rewrite rules.
-- [ ] Unknown rewrite-example topics still exit with `1`.
+- [x] Unknown rewrite-example topics still exit with `1`.
 
 ## Notes
 

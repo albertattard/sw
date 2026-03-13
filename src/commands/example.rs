@@ -69,6 +69,21 @@ fn example_for_topic(topic: &str) -> Option<serde_json::Value> {
             "end_offset": -1,
             "show_trim_markers": true
         })),
+        "rewrite.replace" => Some(json!({
+            "type": "replace",
+            "pattern": "/Users/demo/project",
+            "replacement": "."
+        })),
+        "rewrite.datetime_shift" => Some(json!({
+            "type": "datetime_shift",
+            "format": "rfc3339",
+            "id": "main_timeline"
+        })),
+        "rewrite.capture_replace" => Some(json!({
+            "type": "replace",
+            "pattern": "@{audio_path_1_original}",
+            "replacement": "@{audio_path_1_rewritten}"
+        })),
         _ => None,
     }
 }
