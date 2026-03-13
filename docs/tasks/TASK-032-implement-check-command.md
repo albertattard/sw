@@ -1,7 +1,7 @@
 ---
 id: TASK-032
 title: Implement Check Command
-status: pending
+status: done
 related_features:
   - SPEC-005
 owner: @aattard
@@ -31,14 +31,14 @@ main workflow or generating Markdown output.
 
 ## Acceptance Criteria
 
-- [ ] Given a valid runbook whose prerequisite checks all pass, `sw check`
+- [x] Given a valid runbook whose prerequisite checks all pass, `sw check`
       exits with `0`.
-- [ ] Given a failing prerequisite check, `sw check` exits with `2` before any
+- [x] Given a failing prerequisite check, `sw check` exits with `2` before any
       normal command executes.
-- [ ] Given an invalid runbook, `sw check` exits with `1`.
-- [ ] Given a runbook with no `Prerequisite` entries, `sw check` exits with
+- [x] Given an invalid runbook, `sw check` exits with `1`.
+- [x] Given a runbook with no `Prerequisite` entries, `sw check` exits with
       `0`.
-- [ ] `sw check` does not write a README output file.
+- [x] `sw check` does not write a README output file.
 
 ## Notes
 

@@ -339,6 +339,16 @@ fn render_prerequisite_entry(entry: &Value) -> Result<String, RenderError> {
     Ok(sections.join("\n\n"))
 }
 
+pub(crate) fn check_prerequisites(runbook: &Value) -> Result<(), RenderError> {
+    let entries = runbook
+        .get("entries")
+        .and_then(Value::as_array)
+        .ok_or_else(|| {
+            RenderError::Operational("Runbook is missing an entries array".to_string())
+        })?;
+    run_prerequisite_checks(entries)
+}
+
 fn run_prerequisite_checks(entries: &[Value]) -> Result<(), RenderError> {
     for entry in entries {
         let Some("Prerequisite") = entry.get("type").and_then(Value::as_str) else {

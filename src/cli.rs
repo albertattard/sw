@@ -16,6 +16,8 @@ pub struct Cli {
 
 #[derive(Debug, Subcommand)]
 pub enum Commands {
+    /// Check runbook prerequisites.
+    Check(CheckArgs),
     /// Render a runbook to output.
     Run(RunArgs),
     /// Show top-level help.
@@ -37,6 +39,13 @@ pub struct RunArgs {
     /// Path to the generated output file.
     #[arg(long)]
     pub output_file: Option<PathBuf>,
+}
+
+#[derive(Debug, clap::Args)]
+pub struct CheckArgs {
+    /// Path to the input runbook file.
+    #[arg(long)]
+    pub input_file: Option<PathBuf>,
 }
 
 #[derive(Debug, clap::Args)]

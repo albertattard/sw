@@ -24,7 +24,17 @@ fn help_subcommand_prints_help() {
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("Usage:"));
+    assert!(stdout.contains("check"));
     assert!(stdout.contains("help"));
+}
+
+#[test]
+fn check_help_prints_help() {
+    let output = run(&["check", "--help"]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("--input-file"));
 }
 
 #[test]

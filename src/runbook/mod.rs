@@ -7,7 +7,7 @@ use serde_json::Value;
 use std::fs;
 use std::path::Path;
 
-pub(crate) use render::render_markdown;
+pub(crate) use render::{check_prerequisites, render_markdown};
 pub use validate::validate;
 
 #[derive(Debug, Serialize)]
