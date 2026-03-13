@@ -117,7 +117,8 @@ in the runbook.
 
 - `Prerequisite` entries render prerequisite documentation and verify the
   runtime environment before the rest of the runbook proceeds.
-- A `Prerequisite` entry contains a `checks` array.
+- A `Prerequisite` entry is a single runbook entry that can group one or more
+  prerequisite checks in its `checks` array.
 - Each prerequisite check declares a short `name`.
 - Each prerequisite check declares `contents` as an array of Markdown lines.
 - `contents` is rendered into the generated Markdown in the declared order.
@@ -366,6 +367,8 @@ in the runbook.
 
 - [ ] Given a runbook with `Prerequisite` entries, the generated Markdown
       includes the declared prerequisite `contents` in order.
+- [ ] Given a single `Prerequisite` entry with multiple checks, all of those
+      checks are evaluated from that entry's `checks` array.
 - [ ] Given a prerequisite check with multiple command lines, those lines
       execute together in the same shell context.
 - [ ] Given prerequisite checks, they execute before normal runbook commands.
