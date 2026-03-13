@@ -152,8 +152,15 @@ in the runbook.
 - `cleanup` is used after execution in order to release resources started by
   the main command.
 - `cleanup` is optional.
+- If `cleanup` is omitted, the runtime automatically terminates remaining
+  processes started by that command entry after the entry finishes and also
+  when the run stops early because of failure or timeout.
+- Automatic process cleanup applies only to processes started by that command
+  entry, not to unrelated system processes.
 - Cleanup commands are executed after the run finishes and also when the run
   stops early because of failure.
+- If `cleanup` is present, the explicit cleanup block is used instead of
+  automatic process cleanup for that command entry.
 - Cleanup commands execute in reverse order of the commands that registered
   them.
 - If commands `A`, `B`, and `C` each register cleanup, then cleanup runs in the
@@ -408,10 +415,16 @@ in the runbook.
 
 ### Command Cleanup
 
+- [ ] Given a command without `cleanup`, remaining processes started by that
+      command are terminated automatically after the entry finishes.
+- [ ] Given a command without `cleanup`, remaining processes started by that
+      command are terminated automatically after failure or timeout.
 - [ ] Given commands that declare `cleanup`, cleanup commands execute in reverse
       order after the run completes.
 - [ ] Given a `cleanup` block with multiple command lines, those lines execute
       in the declared order and in the same shell context.
+- [ ] Given a command with `cleanup`, the explicit cleanup block is used
+      instead of automatic process cleanup for that entry.
 - [ ] Given a command failure, previously registered cleanup commands still
       execute in reverse order before the run exits.
 - [ ] Given a command timeout, previously registered cleanup commands still
@@ -680,6 +693,9 @@ in the runbook.
   required.
 - Variable assignment on one command line used by a later line in the same
   entry.
+- Command relies on default automatic process cleanup.
+- Command provides manual `cleanup` instead of relying on automatic process
+  cleanup.
 - Multiple commands register cleanup and require reverse-order execution.
 - A cleanup command is present for some commands and omitted for others.
 - A cleanup block contains multiple command lines.
