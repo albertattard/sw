@@ -1,10 +1,10 @@
 ---
 id: SPEC-001
 title: Help and Discovery Contract
-status: done
+status: in_progress
 priority: high
 owner: @aattard
-last_updated: 2026-03-07
+last_updated: 2026-03-13
 ---
 
 ## Problem
@@ -19,22 +19,30 @@ The CLI provides help entry points:
 ```bash
 sw --help
 sw help
+sw help <subcommand>
+sw help --all
 sw [command] --help
 ```
 
-Initial version behavior is intentionally minimal and non-interactive:
+Current help behavior is human-readable and non-interactive:
 - Print usage/help text.
-- Include a clear placeholder message that functionality is still in progress.
+- Support targeted help for a known subcommand via `sw help <subcommand>`.
+- Support aggregated help for all known subcommands via `sw help --all`.
+- Keep the placeholder line while help remains incomplete.
 
 ## Inputs/Outputs
 
 Input:
 - Top-level help flags/command.
+- Optional help target subcommand name.
+- Optional `--all` flag for expanded command coverage.
 - Command-specific help flags (for known commands).
 
 Output:
 - Human-readable help on stdout.
-- Placeholder line indicating work in progress.
+- Placeholder line indicating work in progress while applicable.
+- `sw help <subcommand>` prints the help for that subcommand only.
+- `sw help --all` prints top-level help plus help for each known subcommand.
 
 Exit codes:
 - `0`: help printed successfully.
@@ -44,6 +52,9 @@ Exit codes:
 
 - [x] `sw --help` prints top-level usage and exits with `0`.
 - [x] `sw help` prints top-level usage and exits with `0`.
+- [ ] `sw help <subcommand>` prints help for a known subcommand and exits with `0`.
+- [ ] `sw help <subcommand>` with an unknown subcommand exits with `1` and reports a clear error.
+- [ ] `sw help --all` prints top-level help plus help for each known subcommand and exits with `0`.
 - [x] `sw [command] --help` is documented as the command-level help pattern.
 - [x] Help output includes a short in-progress placeholder line.
 

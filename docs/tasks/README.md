@@ -37,12 +37,14 @@ File-based task tracker for Sociable Weaver.
 - [TASK-031: Rename Prerequisites Entry To Singular](./TASK-031-rename-prerequisites-entry-to-singular.md)
 - [TASK-032: Implement Check Command](./TASK-032-implement-check-command.md)
 - [TASK-033: Implement Import Command](./TASK-033-implement-import-command.md)
+- [TASK-034: Expand Help Command Coverage](./TASK-034-expand-help-command-coverage.md)
 
 ## Pending
 
 - [ ] [TASK-021: Support Deferred Markdown Interpolation](./TASK-021-support-deferred-markdown-interpolation.md)
 - [ ] [TASK-028: Implement Init Command](./TASK-028-implement-init-command.md)
 - [ ] [TASK-033: Implement Import Command](./TASK-033-implement-import-command.md)
+- [ ] [TASK-034: Expand Help Command Coverage](./TASK-034-expand-help-command-coverage.md)
 
 ## In Progress
 
