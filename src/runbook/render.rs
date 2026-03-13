@@ -159,6 +159,7 @@ fn render_display_file(entry: &Value, runbook_path: &Path) -> Result<String, Ren
         .and_then(Value::as_u64)
         .map(|value| value as usize);
     let contents = slice_display_file_contents(&contents, start_line, line_count, &display_path)?;
+    let contents = apply_display_file_indent(entry, contents)?;
 
     let mut section = format!("```{}\n", display_file_content_type(&display_path));
     section.push_str(&contents);
@@ -167,6 +168,60 @@ fn render_display_file(entry: &Value, runbook_path: &Path) -> Result<String, Ren
     }
     section.push_str("```");
     Ok(section)
+}
+
+fn apply_display_file_indent(entry: &Value, contents: String) -> Result<String, RenderError> {
+    let Some(indent) = entry.get("indent") else {
+        return Ok(contents);
+    };
+
+    let indent_width = match (indent.as_i64(), indent.as_u64()) {
+        (Some(width), _) => width,
+        (None, Some(width)) => i64::try_from(width)
+            .map_err(|_| RenderError::Operational("DisplayFile indent is too large".to_string()))?,
+        _ => {
+            return Err(RenderError::Operational(
+                "DisplayFile indent must be an integer".to_string(),
+            ));
+        }
+    };
+
+    if indent_width == 0 || contents.is_empty() {
+        return Ok(contents);
+    }
+
+    let ends_with_newline = contents.ends_with('\n');
+    let mut adjusted = contents
+        .lines()
+        .map(|line| apply_display_file_indent_to_line(line, indent_width))
+        .collect::<Vec<_>>()
+        .join("\n");
+
+    if ends_with_newline {
+        adjusted.push('\n');
+    }
+
+    Ok(adjusted)
+}
+
+fn apply_display_file_indent_to_line(line: &str, indent_width: i64) -> String {
+    if line.is_empty() {
+        return String::new();
+    }
+
+    if indent_width > 0 {
+        return format!("{}{}", " ".repeat(indent_width as usize), line);
+    }
+
+    let spaces_to_remove = indent_width.unsigned_abs() as usize;
+    let removable = line
+        .as_bytes()
+        .iter()
+        .take_while(|byte| **byte == b' ')
+        .take(spaces_to_remove)
+        .count();
+
+    line[removable..].to_string()
 }
 
 fn slice_display_file_contents(

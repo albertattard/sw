@@ -411,6 +411,22 @@ fn invalid_display_file_line_range_values_return_validation_failure() {
 }
 
 #[test]
+fn invalid_display_file_indent_returns_validation_failure() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-invalid-display-file-indent.json",
+        "--output-format",
+        "json",
+    ]);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": false"));
+    assert!(stdout.contains("\"path\": \"entries[0].indent\""));
+}
+
+#[test]
 fn invalid_prerequisites_returns_validation_failure() {
     let output = run(&[
         "validate",

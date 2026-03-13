@@ -748,7 +748,12 @@ fn validate_entry(
         },
         "DisplayFile" => {
             for key in object.keys() {
-                if key != "type" && key != "path" && key != "start_line" && key != "line_count" {
+                if key != "type"
+                    && key != "path"
+                    && key != "start_line"
+                    && key != "line_count"
+                    && key != "indent"
+                {
                     push_error(
                         errors,
                         format!("{path}.{key}"),
@@ -760,6 +765,12 @@ fn validate_entry(
             require_string(object, "path", &path, errors);
             validate_positive_integer(object, "start_line", &path, errors);
             validate_positive_integer(object, "line_count", &path, errors);
+            if let Some(indent) = object.get("indent")
+                && !indent.is_i64()
+                && !indent.is_u64()
+            {
+                push_error(errors, format!("{path}.indent"), "must be an integer");
+            }
 
             if object.get("line_count").is_some() && object.get("start_line").is_none() {
                 push_error(

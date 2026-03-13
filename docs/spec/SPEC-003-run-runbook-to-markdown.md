@@ -92,12 +92,18 @@ in the runbook.
 - `DisplayFile.path` is resolved relative to the runbook location.
 - `DisplayFile` may declare `start_line`.
 - `DisplayFile` may declare `line_count`.
+- `DisplayFile` may declare `indent`.
 - `start_line` is 1-based.
 - If `start_line` is omitted, rendering starts from line 1.
 - If `start_line` is present and `line_count` is omitted, rendering continues
   from `start_line` to the end of the file.
 - If `line_count` is present, only that many lines are rendered starting from
   `start_line`.
+- If `indent` is present and positive, each non-empty rendered file line is
+  prefixed with that many spaces.
+- If `indent` is present and negative, up to that many leading spaces are
+  removed from each non-empty rendered file line.
+- Empty rendered file lines are preserved when `indent` is applied.
 - `line_count` without `start_line` is invalid.
 - `DisplayFile` rendering does not execute the referenced file.
 - `DisplayFile` fenced blocks use a detected content type when the file
@@ -349,6 +355,12 @@ in the runbook.
       requested slice is rendered.
 - [ ] Given a `DisplayFile` entry with `start_line` and no `line_count`,
       rendering continues from that line to the end of the file.
+- [ ] Given a `DisplayFile` entry with a positive `indent`, each non-empty
+      rendered file line is prefixed with that many spaces.
+- [ ] Given a `DisplayFile` entry with a negative `indent`, up to that many
+      leading spaces are removed from each non-empty rendered file line.
+- [ ] Given a `DisplayFile` entry with blank lines and `indent`, blank lines
+      remain blank in the rendered output.
 
 ### Prerequisite Entries
 
@@ -570,6 +582,9 @@ in the runbook.
 - `DisplayFile` uses `line_count` less than `1`.
 - `DisplayFile` uses `line_count` without `start_line`.
 - `DisplayFile` uses `start_line` beyond the end of the file.
+- `DisplayFile` uses positive `indent` to nest a snippet more deeply.
+- `DisplayFile` uses negative `indent` to remove surrounding code indentation
+  from a sliced method body.
 - Output path points to an unwritable location.
 - Existing output file already present.
 - Command entry with multi-line commands.
