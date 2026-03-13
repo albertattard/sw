@@ -11,11 +11,11 @@
   - Push the commit to `origin` on the current branch
   - Report the result in this format:
     - A short summary sentence describing what was committed and pushed
-    - `Verification run before commit:` followed by all commands that were executed, listed as bullets in the order they were executed
+    - `Verification run before commit:` followed by the non-git verification and build commands that were executed, listed as bullets in the order they were executed
     - `Commit:` with the short commit hash
     - `Branch:` with the branch name
     - `Remote:` with the pushed remote and branch
-    - `Commit message used:` followed by the full commit message in a fenced text block
+    - `Commit message used:` followed by the full commit message as wrapped plain text, not in a fenced code block
     - If unrelated local changes were intentionally left uncommitted, list them under `I left unrelated local changes uncommitted:`
 
 ## Git workflow
