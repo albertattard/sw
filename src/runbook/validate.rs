@@ -985,7 +985,19 @@ fn validate_prerequisite_checks(value: &Value, path: &str, errors: &mut Vec<Vali
         if let Some(help) = object.get("help")
             && !help.is_string()
         {
-            push_error(errors, format!("{check_path}.help"), "must be a string");
+            if help.is_array() {
+                push_error(
+                    errors,
+                    format!("{check_path}.help"),
+                    "Prerequisite check help must be a single string, not an array. Remove the surrounding [ ].",
+                );
+            } else {
+                push_error(
+                    errors,
+                    format!("{check_path}.help"),
+                    "Prerequisite check help must be a single string.",
+                );
+            }
         }
     }
 }

@@ -54,30 +54,16 @@ pub fn print_human_with_runbook(result: &ValidationResult, path: &Path, runbook:
     println!("Runbook is invalid: {}", path.display());
     for error in &result.errors {
         println!("- {}: {}", error.path, error.message);
-    }
-
-    let Some(runbook) = runbook else {
-        return;
-    };
-    let Some(entries) = runbook.get("entries").and_then(Value::as_array) else {
-        return;
-    };
-
-    let offending_entries = offending_entry_indices(&result.errors);
-    if offending_entries.is_empty() {
-        return;
-    }
-
-    println!();
-    println!("Offending entries:");
-    for index in offending_entries {
-        let Some(entry) = entries.get(index) else {
+        let Some(runbook) = runbook else {
+            continue;
+        };
+        let Some(context) = validation_context_for_error(runbook, &error.path) else {
             continue;
         };
 
-        println!("- entries[{index}]:");
-        for line in format_validation_entry(entry).lines() {
-            println!("  {line}");
+        println!("  Offending block:");
+        for line in format_validation_entry(context).lines() {
+            println!("    {line}");
         }
     }
 }
@@ -89,27 +75,76 @@ pub fn print_json(result: &ValidationResult) -> Result<(), String> {
     Ok(())
 }
 
-fn offending_entry_indices(errors: &[ValidationIssue]) -> Vec<usize> {
-    let mut indices = Vec::new();
-    for error in errors {
-        let Some(index) = entry_index_from_path(&error.path) else {
-            continue;
-        };
-
-        if !indices.contains(&index) {
-            indices.push(index);
-        }
-    }
-    indices
-}
-
-fn entry_index_from_path(path: &str) -> Option<usize> {
-    let suffix = path.strip_prefix("entries[")?;
-    let index_end = suffix.find(']')?;
-    suffix[..index_end].parse().ok()
-}
-
 fn format_validation_entry(entry: &Value) -> String {
     serde_json::to_string_pretty(entry)
         .unwrap_or_else(|_| "<failed to serialize offending entry>".to_string())
+}
+
+fn validation_context_for_error<'a>(runbook: &'a Value, path: &str) -> Option<&'a Value> {
+    let mut tokens = parse_validation_path(path)?;
+    while !tokens.is_empty() {
+        tokens.pop();
+        let value = resolve_validation_path(runbook, &tokens)?;
+        if value.is_object() {
+            return Some(value);
+        }
+    }
+    None
+}
+
+#[derive(Clone)]
+enum ValidationPathToken {
+    Key(String),
+    Index(usize),
+}
+
+fn parse_validation_path(path: &str) -> Option<Vec<ValidationPathToken>> {
+    let mut tokens = Vec::new();
+    let chars: Vec<char> = path.chars().collect();
+    let mut index = 0;
+
+    while index < chars.len() {
+        if chars[index] == '.' {
+            index += 1;
+            continue;
+        }
+
+        if chars[index] == '[' {
+            index += 1;
+            let start = index;
+            while index < chars.len() && chars[index] != ']' {
+                index += 1;
+            }
+            let value: usize = chars[start..index]
+                .iter()
+                .collect::<String>()
+                .parse()
+                .ok()?;
+            tokens.push(ValidationPathToken::Index(value));
+            index += 1;
+            continue;
+        }
+
+        let start = index;
+        while index < chars.len() && chars[index] != '.' && chars[index] != '[' {
+            index += 1;
+        }
+        let key = chars[start..index].iter().collect::<String>();
+        tokens.push(ValidationPathToken::Key(key));
+    }
+
+    Some(tokens)
+}
+
+fn resolve_validation_path<'a>(
+    mut value: &'a Value,
+    tokens: &[ValidationPathToken],
+) -> Option<&'a Value> {
+    for token in tokens {
+        value = match token {
+            ValidationPathToken::Key(key) => value.get(key)?,
+            ValidationPathToken::Index(index) => value.get(*index)?,
+        };
+    }
+    Some(value)
 }

@@ -50,15 +50,16 @@ fn invalid_runbook_human_output_includes_offending_entry() {
     assert_eq!(output.status.code(), Some(2));
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("Runbook is invalid"));
-    assert!(stdout.contains("entries[0].checks[0].help"));
-    assert!(stdout.contains("Offending entries:"));
-    assert!(stdout.contains("- entries[0]:"));
-    assert!(stdout.contains("\"type\": \"Prerequisite\""));
+    assert!(stdout.contains(
+        "Prerequisite check help must be a single string, not an array. Remove the surrounding [ ]."
+    ));
+    assert!(stdout.contains("Offending block:"));
+    assert!(stdout.contains("\"name\": \"jq\""));
     assert!(stdout.contains("\"help\": ["));
 }
 
 #[test]
-fn invalid_runbook_human_output_prints_each_offending_entry_once() {
+fn invalid_runbook_human_output_prints_a_block_for_each_error() {
     let output = run(&[
         "validate",
         "--input-file",
@@ -67,7 +68,7 @@ fn invalid_runbook_human_output_prints_each_offending_entry_once() {
 
     assert_eq!(output.status.code(), Some(2));
     let stdout = String::from_utf8_lossy(&output.stdout);
-    assert_eq!(stdout.matches("- entries[0]:").count(), 1);
+    assert_eq!(stdout.matches("Offending block:").count(), 2);
 }
 
 #[test]

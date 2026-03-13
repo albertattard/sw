@@ -227,9 +227,11 @@ fn invalid_runbook_returns_validation_failure_without_output_file() {
 
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("Runbook is invalid"));
-    assert!(stdout.contains("Offending entries:"));
-    assert!(stdout.contains("- entries[0]:"));
-    assert!(stdout.contains("\"type\": \"Prerequisite\""));
+    assert!(stdout.contains(
+        "Prerequisite check help must be a single string, not an array. Remove the surrounding [ ]."
+    ));
+    assert!(stdout.contains("Offending block:"));
+    assert!(stdout.contains("\"name\": \"jq\""));
     assert!(stdout.contains("\"help\": ["));
 }
 

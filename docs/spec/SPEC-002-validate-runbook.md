@@ -47,8 +47,8 @@ Supported output formats:
 Output (`--output-format human`):
 - Human-readable validation summary.
 - Validation errors listed with their paths and messages.
-- For validation errors scoped to `entries[N]`, the output also prints the
-  offending runbook entry once per affected entry to aid debugging.
+- For validation errors scoped to runbook entry content, the output also prints
+  a nearby offending block for each error to aid debugging.
 
 Reserved for future consideration (not part of this feature):
 - `yaml`
@@ -85,7 +85,7 @@ Exit codes:
 - [ ] Given no `--output-format` option, command uses `human` output by
       default.
 - [ ] Given a human-readable validation failure for `entries[N]`, the output
-      includes the offending runbook entry once for that entry.
+      includes a nearby offending block for that error.
 - [ ] Validation performs no write operations (read-only behavior).
 
 ## Non-goals

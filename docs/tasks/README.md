@@ -50,6 +50,7 @@ File-based task tracker for Sociable Weaver.
 - [TASK-045: Support DisplayFile Indent Control](./TASK-045-support-display-file-indent-control.md)
 - [TASK-046: Support File Assertion Checks](./TASK-046-support-file-assertion-checks.md)
 - [TASK-047: Include Offending Entry In Human Validation Errors](./TASK-047-include-offending-entry-in-human-validation-errors.md)
+- [TASK-048: Improve Human Validation Guidance](./TASK-048-improve-human-validation-guidance.md)
 
 ## Pending
 
@@ -110,6 +111,7 @@ File-based task tracker for Sociable Weaver.
 - [x] [TASK-045: Support DisplayFile Indent Control](./TASK-045-support-display-file-indent-control.md)
 - [x] [TASK-046: Support File Assertion Checks](./TASK-046-support-file-assertion-checks.md)
 - [x] [TASK-047: Include Offending Entry In Human Validation Errors](./TASK-047-include-offending-entry-in-human-validation-errors.md)
+- [x] [TASK-048: Improve Human Validation Guidance](./TASK-048-improve-human-validation-guidance.md)
 
 ## Blocked
 
