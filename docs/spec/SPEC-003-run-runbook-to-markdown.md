@@ -4,7 +4,7 @@ title: Run Runbook to Markdown
 status: in_progress
 priority: high
 owner: @aattard
-last_updated: 2026-03-12
+last_updated: 2026-03-13
 ---
 
 ## Problem
@@ -90,6 +90,15 @@ in the runbook.
 - `DisplayFile` entries copy the contents of the referenced file into the
   generated Markdown as a fenced code block.
 - `DisplayFile.path` is resolved relative to the runbook location.
+- `DisplayFile` may declare `start_line`.
+- `DisplayFile` may declare `line_count`.
+- `start_line` is 1-based.
+- If `start_line` is omitted, rendering starts from line 1.
+- If `start_line` is present and `line_count` is omitted, rendering continues
+  from `start_line` to the end of the file.
+- If `line_count` is present, only that many lines are rendered starting from
+  `start_line`.
+- `line_count` without `start_line` is invalid.
 - `DisplayFile` rendering does not execute the referenced file.
 - `DisplayFile` fenced blocks use a detected content type when the file
   extension is recognized.
@@ -327,6 +336,12 @@ in the runbook.
       generated Markdown uses a `java` fenced block.
 - [ ] Given a `DisplayFile` entry whose extension is not recognized, the
       generated Markdown uses a `text` fenced block.
+- [ ] Given a `DisplayFile` entry with `start_line`, rendering begins at that
+      1-based line.
+- [ ] Given a `DisplayFile` entry with `start_line` and `line_count`, only the
+      requested slice is rendered.
+- [ ] Given a `DisplayFile` entry with `start_line` and no `line_count`,
+      rendering continues from that line to the end of the file.
 
 ### Prerequisite Entries
 
@@ -533,6 +548,10 @@ in the runbook.
 - `DisplayFile` path points to an unreadable file.
 - `DisplayFile` uses a recognized extension such as `.java`.
 - `DisplayFile` uses an unrecognized extension and falls back to `text`.
+- `DisplayFile` uses `start_line` less than `1`.
+- `DisplayFile` uses `line_count` less than `1`.
+- `DisplayFile` uses `line_count` without `start_line`.
+- `DisplayFile` uses `start_line` beyond the end of the file.
 - Output path points to an unwritable location.
 - Existing output file already present.
 - Command entry with multi-line commands.
