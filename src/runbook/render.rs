@@ -2,7 +2,7 @@ use super::RenderError;
 use super::execute::{
     cleanup_block, ensure_assertions, execute_command, run_cleanup_blocks, timeout_label,
 };
-use chrono::{DateTime, Duration, FixedOffset, NaiveDateTime, TimeZone};
+use chrono::{DateTime, Duration, FixedOffset, NaiveDateTime, NaiveTime, TimeZone};
 use regex::Regex;
 use serde_json::Value;
 use std::collections::HashMap;
@@ -793,6 +793,9 @@ fn apply_datetime_shift_rule(
         })?),
         None => None,
     };
+    let parse_reference_timestamp = shared_anchor
+        .map(|anchor| anchor.base_timestamp)
+        .unwrap_or(base_timestamp);
 
     let mut first_original: Option<DateTime<FixedOffset>> = None;
     let mut result = String::with_capacity(rendered.len());
@@ -802,7 +805,8 @@ fn apply_datetime_shift_rule(
     for matched in regex.find_iter(rendered) {
         result.push_str(&rendered[last_end..matched.start()]);
         let matched_text = matched.as_str().to_string();
-        let original = parse_shift_datetime(&matched_text, config.matcher, base_timestamp)?;
+        let original =
+            parse_shift_datetime(&matched_text, config.matcher, parse_reference_timestamp)?;
         let shifted = match shared_anchor {
             Some(anchor) => anchor.shift(original),
             None => match first_original {
@@ -1122,11 +1126,25 @@ fn parse_shift_datetime(
             })
         }
         DatetimeShiftMatcher::Custom(custom_format) => {
-            let naive = NaiveDateTime::parse_from_str(value, custom_format).map_err(|err| {
+            if let Ok(naive) = NaiveDateTime::parse_from_str(value, custom_format) {
+                return base_timestamp
+                    .offset()
+                    .from_local_datetime(&naive)
+                    .single()
+                    .ok_or_else(|| {
+                        RenderError::Operational(format!(
+                            "Matched datetime `{value}` could not be interpreted with offset {}",
+                            base_timestamp.offset()
+                        ))
+                    });
+            }
+
+            let time = NaiveTime::parse_from_str(value, custom_format).map_err(|err| {
                 RenderError::Operational(format!(
                     "Matched datetime `{value}` does not match custom_format `{custom_format}`: {err}"
                 ))
             })?;
+            let naive = base_timestamp.date_naive().and_time(time);
             base_timestamp
                 .offset()
                 .from_local_datetime(&naive)

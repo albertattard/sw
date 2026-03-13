@@ -1,7 +1,7 @@
 ---
 id: TASK-042
 title: Support Time-Only Datetime Shift
-status: pending
+status: done
 related_features:
   - SPEC-003
 owner: @aattard
@@ -36,13 +36,13 @@ type.
 
 ## Acceptance Criteria
 
-- [ ] Given a time-only `datetime_shift` rule, the first matched time-only
+- [x] Given a time-only `datetime_shift` rule, the first matched time-only
       value is rewritten to the configured or default base time.
-- [ ] Given multiple time-only values matched by the same rule, later values
+- [x] Given multiple time-only values matched by the same rule, later values
       preserve their relative distance from the first matched time-only value.
-- [ ] Given a time-only `datetime_shift` rule that uses `use`, the rule follows
+- [x] Given a time-only `datetime_shift` rule that uses `use`, the rule follows
       the previously established shared anchor.
-- [ ] Given a time-only `datetime_shift` that crosses midnight, the rendered
+- [x] Given a time-only `datetime_shift` that crosses midnight, the rendered
       output wraps to the correct clock time.
 
 ## Notes

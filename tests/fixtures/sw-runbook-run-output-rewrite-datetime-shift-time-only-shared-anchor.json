@@ -1,0 +1,37 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf '2026-03-12T13:53:47.667+01:00 INFO Main\\n'"
+      ],
+      "output": {
+        "caption": "Shared datetime anchor",
+        "rewrite": [
+          {
+            "type": "datetime_shift",
+            "id": "main_timeline",
+            "format": "rfc3339"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'Started at 13:53:49.167\\nFinished at 13:53:50.667\\n'"
+      ],
+      "output": {
+        "caption": "Shared time-only anchor",
+        "rewrite": [
+          {
+            "type": "datetime_shift",
+            "use": "main_timeline",
+            "pattern": "\\b\\d{2}:\\d{2}:\\d{2}\\.\\d{3}\\b",
+            "custom_format": "%H:%M:%S%.3f"
+          }
+        ]
+      }
+    }
+  ]
+}

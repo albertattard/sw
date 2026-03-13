@@ -46,6 +46,12 @@ fn example_for_topic(topic: &str) -> Option<&'static str> {
         "id": "main_timeline"
       },
       {
+        "type": "datetime_shift",
+        "use": "main_timeline",
+        "pattern": "\\b\\d{2}:\\d{2}:\\d{2}\\.\\d{3}\\b",
+        "custom_format": "%H:%M:%S%.3f"
+      },
+      {
         "type": "keep_between",
         "start": "[INFO] --- begin ---",
         "end": "[INFO] --- end ---",

@@ -24,6 +24,13 @@ fn command_example_prints_valid_json_entry() {
     assert!(value["commands"].is_array());
     assert!(value["assert"].is_object());
     assert!(value["output"]["rewrite"].is_array());
+    assert!(
+        value["output"]["rewrite"]
+            .as_array()
+            .expect("rewrite should be an array")
+            .iter()
+            .any(|rule| rule["custom_format"] == "%H:%M:%S%.3f")
+    );
     assert!(value["capture"].is_array());
     assert!(value["cleanup"].is_array());
 }

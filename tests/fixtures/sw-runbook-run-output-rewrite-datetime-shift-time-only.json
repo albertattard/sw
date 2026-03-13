@@ -1,0 +1,21 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'Started at 12:56:13.902\\nFinished at 12:56:15.402\\n'"
+      ],
+      "output": {
+        "caption": "Shifted time-only logs",
+        "rewrite": [
+          {
+            "type": "datetime_shift",
+            "pattern": "\\b\\d{2}:\\d{2}:\\d{2}\\.\\d{3}\\b",
+            "custom_format": "%H:%M:%S%.3f",
+            "base": "2077-04-27T12:34:56.789+01:00"
+          }
+        ]
+      }
+    }
+  ]
+}

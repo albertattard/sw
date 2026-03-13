@@ -668,6 +668,58 @@ fn output_rewrite_datetime_shift_can_reuse_one_anchor_across_commands() {
 }
 
 #[test]
+fn output_rewrite_datetime_shift_supports_time_only_custom_formats() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-output-rewrite-datetime-shift-time-only.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("Started at 12:34:56.789"));
+    assert!(readme.contains("Finished at 12:34:58.289"));
+}
+
+#[test]
+fn output_rewrite_datetime_shift_time_only_can_reuse_shared_anchor() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-output-rewrite-datetime-shift-time-only-shared-anchor.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("2077-04-27T12:34:56.789+01:00 INFO Main"));
+    assert!(readme.contains("Started at 12:34:58.289"));
+    assert!(readme.contains("Finished at 12:34:59.789"));
+}
+
+#[test]
+fn output_rewrite_datetime_shift_time_only_wraps_across_midnight() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-output-rewrite-datetime-shift-time-only-wrap.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("Start 23:59:58.000"));
+    assert!(readme.contains("End 00:00:01.000"));
+}
+
+#[test]
 fn command_capture_raw_stage_supports_later_command_interpolation_and_escape() {
     let dir = prepare_workspace();
     write_runbook(&dir, "sw-runbook-run-capture-raw.json", "sw-runbook.json");

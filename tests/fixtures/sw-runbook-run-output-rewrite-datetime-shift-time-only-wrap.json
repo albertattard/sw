@@ -1,0 +1,21 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'Start 12:56:13.902\\nEnd 12:56:16.902\\n'"
+      ],
+      "output": {
+        "caption": "Wrapped time-only logs",
+        "rewrite": [
+          {
+            "type": "datetime_shift",
+            "pattern": "\\b\\d{2}:\\d{2}:\\d{2}\\.\\d{3}\\b",
+            "custom_format": "%H:%M:%S%.3f",
+            "base": "2077-04-27T23:59:58.000+01:00"
+          }
+        ]
+      }
+    }
+  ]
+}
