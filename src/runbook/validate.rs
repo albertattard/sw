@@ -390,6 +390,7 @@ fn validate_rewrite_rule(
                     && key != "end"
                     && key != "start_offset"
                     && key != "end_offset"
+                    && key != "show_trim_markers"
                 {
                     push_error(
                         errors,
@@ -414,6 +415,16 @@ fn validate_rewrite_rule(
                 && !end_offset.is_u64()
             {
                 push_error(errors, format!("{path}.end_offset"), "must be an integer");
+            }
+
+            if let Some(show_trim_markers) = object.get("show_trim_markers")
+                && !show_trim_markers.is_boolean()
+            {
+                push_error(
+                    errors,
+                    format!("{path}.show_trim_markers"),
+                    "must be a boolean",
+                );
             }
         }
         "datetime_shift" => {

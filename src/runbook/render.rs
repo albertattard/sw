@@ -798,6 +798,7 @@ fn apply_keep_between_rule(rule: &Value, rendered: &str) -> Result<RewriteRuleRe
     })?;
     let start_offset = parse_keep_between_offset(rule.get("start_offset"), 1, "start_offset")?;
     let end_offset = parse_keep_between_offset(rule.get("end_offset"), -1, "end_offset")?;
+    let show_trim_markers = parse_keep_between_show_trim_markers(rule.get("show_trim_markers"))?;
 
     let lines: Vec<&str> = rendered.split('\n').collect();
     let Some(start_index) = lines.iter().position(|line| *line == start) else {
@@ -831,8 +832,17 @@ fn apply_keep_between_rule(rule: &Value, rendered: &str) -> Result<RewriteRuleRe
         });
     }
 
+    let mut kept_lines: Vec<String> = lines[start_line..=end_line]
+        .iter()
+        .map(|line| (*line).to_string())
+        .collect();
+    if show_trim_markers {
+        kept_lines.insert(0, "...".to_string());
+        kept_lines.push("...".to_string());
+    }
+
     Ok(RewriteRuleResult {
-        rendered: lines[start_line..=end_line].join("\n"),
+        rendered: kept_lines.join("\n"),
         generated_capture: None,
     })
 }
@@ -848,6 +858,17 @@ fn parse_keep_between_offset(
             RenderError::Operational(format!(
                 "Command output keep_between {key} must be an integer"
             ))
+        }),
+    }
+}
+
+fn parse_keep_between_show_trim_markers(value: Option<&Value>) -> Result<bool, RenderError> {
+    match value {
+        None => Ok(true),
+        Some(value) => value.as_bool().ok_or_else(|| {
+            RenderError::Operational(
+                "Command output keep_between show_trim_markers must be a boolean".to_string(),
+            )
         }),
     }
 }

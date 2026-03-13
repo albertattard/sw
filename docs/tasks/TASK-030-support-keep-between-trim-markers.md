@@ -1,7 +1,7 @@
 ---
 id: TASK-030
 title: Support Keep Between Trim Markers
-status: pending
+status: done
 related_features:
   - SPEC-003
 owner: @aattard
@@ -30,12 +30,12 @@ with an opt-out for cases where the surrounding omission should remain hidden.
 
 ## Acceptance Criteria
 
-- [ ] Given a `keep_between` rewrite rule without explicit
+- [x] Given a `keep_between` rewrite rule without explicit
       `show_trim_markers`, the rendered kept slice is wrapped in `...` marker
       lines.
-- [ ] Given a `keep_between` rewrite rule with `show_trim_markers: false`,
+- [x] Given a `keep_between` rewrite rule with `show_trim_markers: false`,
       the rendered kept slice is not wrapped in marker lines.
-- [ ] Given a `keep_between` rewrite rule whose `start` or `end` boundary is
+- [x] Given a `keep_between` rewrite rule whose `start` or `end` boundary is
       not found, no trim markers are added and the output remains unchanged.
 
 ## Notes

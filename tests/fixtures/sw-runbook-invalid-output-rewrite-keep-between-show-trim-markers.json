@@ -1,0 +1,20 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "echo 'hello'"
+      ],
+      "output": {
+        "rewrite": [
+          {
+            "type": "keep_between",
+            "start": "[INFO] start",
+            "end": "[INFO] end",
+            "show_trim_markers": "false"
+          }
+        ]
+      }
+    }
+  ]
+}
