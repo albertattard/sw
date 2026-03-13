@@ -1,7 +1,7 @@
 ---
 id: TASK-036
 title: Include Commit Subject In Release README
-status: pending
+status: done
 related_features:
   - SPEC-007
 owner: @aattard
@@ -27,8 +27,8 @@ latest commit subject line as part of the published build metadata.
 
 ## Acceptance Criteria
 
-- [ ] The release README includes the latest commit subject line.
-- [ ] The release pipeline still publishes the binary and release README
+- [x] The release README includes the latest commit subject line.
+- [x] The release pipeline still publishes the binary and release README
       successfully.
 
 ## Notes

@@ -89,6 +89,7 @@ File-based task tracker for Sociable Weaver.
 - [x] [TASK-031: Rename Prerequisites Entry To Singular](./TASK-031-rename-prerequisites-entry-to-singular.md)
 - [x] [TASK-032: Implement Check Command](./TASK-032-implement-check-command.md)
 - [x] [TASK-035: Publish Official Release Assets](./TASK-035-publish-official-release-assets.md)
+- [x] [TASK-036: Include Commit Subject In Release README](./TASK-036-include-commit-subject-in-release-readme.md)
 
 ## Blocked
 

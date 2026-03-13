@@ -55,6 +55,7 @@ jobs:
 
       - name: Prepare release artifact
         run: |
+          COMMIT_SUBJECT="$(git log -1 --pretty=%s)"
           mkdir -p dist
           cp "${{ matrix.binary_path }}" "dist/${{ matrix.binary_name }}"
           cat <<EOF > dist/README.md
@@ -70,6 +71,7 @@ jobs:
 
           - OS: \`${{ matrix.os }}\`
           - Commit: \`${{ github.sha }}\`
+          - Summary: \`${COMMIT_SUBJECT}\`
           - Workflow run: \`${{ github.run_id }}\`
           - Profile: \`release\`
           EOF
@@ -98,6 +100,7 @@ jobs:
 
       - name: Prepare official release assets
         run: |
+          COMMIT_SUBJECT="$(git log -1 --pretty=%s)"
           mkdir -p release
           cp target/release/sw release/sw-linux-x86_64
           cat <<EOF > release/README.md
@@ -113,6 +116,7 @@ jobs:
 
           - Tag: \`${GITHUB_REF_NAME}\`
           - Commit: \`${GITHUB_SHA}\`
+          - Summary: \`${COMMIT_SUBJECT}\`
           - OS: \`ubuntu-latest\`
           - Target: \`linux-x86_64\`
           - Profile: \`release\`
