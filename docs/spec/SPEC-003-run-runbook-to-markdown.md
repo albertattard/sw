@@ -273,7 +273,9 @@ in the runbook.
   to the end of the output after applying `start_offset`.
 - If `end` is omitted, `end_offset` is ignored.
 - When `show_trim_markers` is `true`, `keep_between` adds a line containing
-  `...` before and after the kept slice to indicate that output was trimmed.
+  `...` only on sides where output was actually trimmed.
+- If lines were trimmed before the kept slice, a leading `...` marker is added.
+- If lines were trimmed after the kept slice, a trailing `...` marker is added.
 - `show_trim_markers: false` suppresses those trim-marker lines.
 - If a required `keep_between` boundary is not found, the rule leaves the output
   unchanged.
@@ -538,8 +540,8 @@ in the runbook.
 - [ ] Given a `keep_between` rewrite rule without `end`, `end_offset` is
       ignored.
 - [ ] Given a `keep_between` rewrite rule without explicit
-      `show_trim_markers`, trim-marker lines are added before and after the
-      kept slice.
+      `show_trim_markers`, trim-marker lines are added only on the sides where
+      output was trimmed.
 - [ ] Given a `keep_between` rewrite rule with `show_trim_markers: false`,
       trim-marker lines are omitted.
 - [ ] Given a `keep_between` rewrite rule whose `start` or `end` boundary is
@@ -650,6 +652,10 @@ in the runbook.
 - A `keep_between` rule omits `end` and keeps the remainder of the output.
 - A `keep_between` rule uses explicit positive or negative offsets.
 - A `keep_between` rule uses default trim markers.
+- A `keep_between` rule trims only from the start and shows only a leading
+  trim marker.
+- A `keep_between` rule trims only from the end and shows only a trailing trim
+  marker.
 - A `keep_between` rule suppresses trim markers.
 - A `keep_between` rule does not find its `start` boundary.
 - A `keep_between` rule does not find its `end` boundary.
