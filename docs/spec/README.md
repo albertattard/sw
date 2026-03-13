@@ -10,3 +10,4 @@ acceptance criteria.
 - [SPEC-003: Run Runbook to Markdown](./SPEC-003-run-runbook-to-markdown.md)
 - [SPEC-004: Init Runbook Sample](./SPEC-004-init-runbook-sample.md)
 - [SPEC-005: Check Runbook Prerequisites](./SPEC-005-check-prerequisites.md)
+- [SPEC-006: Import README to Runbook](./SPEC-006-import-readme-to-runbook.md)
