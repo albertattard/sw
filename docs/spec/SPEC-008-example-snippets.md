@@ -31,6 +31,9 @@ In this increment, topics may refer to:
 - a runbook entry type such as `Command`, `DisplayFile`, or `Prerequisite`
 - a nested feature such as `rewrite.keep_between`
 
+The example catalog may grow over time to cover additional rewrite-rule topics
+without changing the `example` command shape.
+
 ## Outputs
 
 - JSON snippet written to stdout
@@ -62,6 +65,13 @@ In this increment, topics may refer to:
       `DisplayFile` entry.
 - [ ] Given `sw example rewrite.keep_between`, the CLI prints a valid JSON
       example of that rewrite rule fragment.
+- [ ] Given `sw example rewrite.replace`, the CLI prints a valid JSON example
+      of a `replace` rewrite rule fragment.
+- [ ] Given `sw example rewrite.datetime_shift`, the CLI prints a valid JSON
+      example of a `datetime_shift` rewrite rule fragment.
+- [ ] Given a rewrite example that demonstrates captured-variable usage, the
+      CLI prints a valid JSON example showing how rewrite rules can reference
+      captured values.
 - [ ] Given an unsupported topic, the CLI exits with `1` and reports that the
       topic is unknown.
 - [ ] The help output documents the `example` command and how to request a
@@ -80,3 +90,5 @@ In this increment, topics may refer to:
 - Topic refers to a known family but not a supported leaf such as
   `rewrite.unknown`.
 - Example output drifts from the currently supported schema.
+- Rewrite examples drift from the currently supported capture and rewrite
+  syntax.

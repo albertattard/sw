@@ -43,6 +43,7 @@ File-based task tracker for Sociable Weaver.
 - [TASK-037: Support DisplayFile Line Ranges](./TASK-037-support-display-file-line-ranges.md)
 - [TASK-038: Include Release Commit History In README](./TASK-038-include-release-commit-history-in-readme.md)
 - [TASK-039: Implement Example Command](./TASK-039-implement-example-command.md)
+- [TASK-040: Expand Rewrite Example Coverage](./TASK-040-expand-rewrite-example-coverage.md)
 
 ## Pending
 
@@ -51,6 +52,7 @@ File-based task tracker for Sociable Weaver.
 - [ ] [TASK-033: Implement Import Command](./TASK-033-implement-import-command.md)
 - [ ] [TASK-034: Expand Help Command Coverage](./TASK-034-expand-help-command-coverage.md)
 - [ ] [TASK-038: Include Release Commit History In README](./TASK-038-include-release-commit-history-in-readme.md)
+- [ ] [TASK-040: Expand Rewrite Example Coverage](./TASK-040-expand-rewrite-example-coverage.md)
 
 ## In Progress
 
