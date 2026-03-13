@@ -39,6 +39,7 @@ File-based task tracker for Sociable Weaver.
 - [TASK-033: Implement Import Command](./TASK-033-implement-import-command.md)
 - [TASK-034: Expand Help Command Coverage](./TASK-034-expand-help-command-coverage.md)
 - [TASK-035: Publish Official Release Assets](./TASK-035-publish-official-release-assets.md)
+- [TASK-036: Include Commit Subject In Release README](./TASK-036-include-commit-subject-in-release-readme.md)
 
 ## Pending
 
@@ -46,7 +47,7 @@ File-based task tracker for Sociable Weaver.
 - [ ] [TASK-028: Implement Init Command](./TASK-028-implement-init-command.md)
 - [ ] [TASK-033: Implement Import Command](./TASK-033-implement-import-command.md)
 - [ ] [TASK-034: Expand Help Command Coverage](./TASK-034-expand-help-command-coverage.md)
-- [ ] [TASK-035: Publish Official Release Assets](./TASK-035-publish-official-release-assets.md)
+- [ ] [TASK-036: Include Commit Subject In Release README](./TASK-036-include-commit-subject-in-release-readme.md)
 
 ## In Progress
 
@@ -87,6 +88,7 @@ File-based task tracker for Sociable Weaver.
 - [x] [TASK-030: Support Keep Between Trim Markers](./TASK-030-support-keep-between-trim-markers.md)
 - [x] [TASK-031: Rename Prerequisites Entry To Singular](./TASK-031-rename-prerequisites-entry-to-singular.md)
 - [x] [TASK-032: Implement Check Command](./TASK-032-implement-check-command.md)
+- [x] [TASK-035: Publish Official Release Assets](./TASK-035-publish-official-release-assets.md)
 
 ## Blocked
 
