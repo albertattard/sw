@@ -46,12 +46,24 @@ tying the test suite to a specific project.
 ## Engineering rules
 - Follow spec-driven delivery for user-visible features.
 - For a new feature or behavior change: define or update the spec first, then create or update the task, then implement the change.
+- Default workflow unless the user says otherwise:
+  - Define or update the spec
+  - Create or update the task
+  - Commit the spec/task slice when the user asks to commit
+  - Implement the code afterward so it aligns with the committed spec
+- Experimental workflow when the user is explicitly trying things out first:
+  - Build the code change first
+  - Let the user try it
+  - Then define or update the spec
+  - Commit the spec/task slice when the user asks to commit
+  - Then finalize or adjust the code so it aligns with the spec
 - Treat the spec as the source of truth for user-visible behavior.
 - If implementation and spec differ, treat the implementation as wrong until the spec is intentionally updated.
 - Do not change user-visible behavior without updating the relevant spec and task.
 - Treat specs as living documents and tasks as bounded delivery slices.
 - When a spec grows, prefer creating a new task for the new increment instead of reopening an already completed task.
 - Keep completed tasks as historical records unless they were tracked incorrectly.
+- Do not mark a task as done or check its acceptance criteria until the implementation and verification for that task have actually been completed.
 - Keep task status aligned with the actual implementation state.
 - Keep `src/main.rs` thin. Use it as the entrypoint and command dispatcher, not as the place for business logic.
 - Add new CLI subcommands under `src/commands/`.
