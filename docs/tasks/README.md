@@ -62,7 +62,6 @@ File-based task tracker for Sociable Weaver.
 - [ ] [TASK-034: Expand Help Command Coverage](./TASK-034-expand-help-command-coverage.md)
 - [ ] [TASK-038: Include Release Commit History In README](./TASK-038-include-release-commit-history-in-readme.md)
 - [ ] [TASK-043: Implement Explain Command](./TASK-043-implement-explain-command.md)
-- [ ] [TASK-050: Show Keep Between Markers Only Where Trimmed](./TASK-050-show-keep-between-markers-only-where-trimmed.md)
 
 ## In Progress
 
@@ -116,6 +115,7 @@ File-based task tracker for Sociable Weaver.
 - [x] [TASK-047: Include Offending Entry In Human Validation Errors](./TASK-047-include-offending-entry-in-human-validation-errors.md)
 - [x] [TASK-048: Improve Human Validation Guidance](./TASK-048-improve-human-validation-guidance.md)
 - [x] [TASK-049: Make Keep Between End Optional](./TASK-049-make-keep-between-end-optional.md)
+- [x] [TASK-050: Show Keep Between Markers Only Where Trimmed](./TASK-050-show-keep-between-markers-only-where-trimmed.md)
 
 ## Blocked
 

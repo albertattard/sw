@@ -881,7 +881,7 @@ fn output_rewrite_keep_between_applies_explicit_offsets() {
     assert!(output.status.success());
     let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
     assert!(readme.contains(
-        "```\n...\nbefore context\n[INFO] --- exec:3.6.3:exec (default-cli) @ demo ---\nUsing Java 25.0.2\nBuild successful\n[INFO] ------------------------------------------------------------------------\nafter context\n...\n```"
+        "```\nbefore context\n[INFO] --- exec:3.6.3:exec (default-cli) @ demo ---\nUsing Java 25.0.2\nBuild successful\n[INFO] ------------------------------------------------------------------------\nafter context\n```"
     ));
 }
 
@@ -920,7 +920,51 @@ fn output_rewrite_keep_between_can_hide_trim_markers() {
 }
 
 #[test]
-fn output_rewrite_keep_between_can_keep_from_start_to_end() {
+fn output_rewrite_keep_between_can_show_only_a_leading_trim_marker() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-output-rewrite-keep-between-start-only-markers.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("Kept output with leading trim marker"));
+    assert!(readme.contains(
+        "```\n...\n================================================================================\n=== Performance Results ===\n================================================================================\nUse Compact Object Headers:   false\nHeap Size:                    96M\nFull GC Count:                0\n================================================================================\n```"
+    ));
+    assert!(!readme.contains(
+        "```\n...\n================================================================================\n=== Performance Results ===\n================================================================================\nUse Compact Object Headers:   false\nHeap Size:                    96M\nFull GC Count:                0\n================================================================================\n...\n```"
+    ));
+}
+
+#[test]
+fn output_rewrite_keep_between_can_show_only_a_trailing_trim_marker() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-output-rewrite-keep-between-end-only.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("Kept output with trailing trim marker"));
+    assert!(readme.contains(
+        "```\n================================================================================\n=== Performance Results ===\n================================================================================\nUse Compact Object Headers:   false\nHeap Size:                    96M\nFull GC Count:                0\n================================================================================\n...\n```"
+    ));
+    assert!(!readme.contains(
+        "```\n...\n================================================================================\n=== Performance Results ===\n================================================================================\nUse Compact Object Headers:   false\nHeap Size:                    96M\nFull GC Count:                0\n================================================================================\n...\n```"
+    ));
+}
+
+#[test]
+fn output_rewrite_keep_between_can_keep_from_start_to_end_without_trim_markers() {
     let dir = prepare_workspace();
     write_runbook(
         &dir,

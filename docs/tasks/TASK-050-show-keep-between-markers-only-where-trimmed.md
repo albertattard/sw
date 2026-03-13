@@ -1,7 +1,7 @@
 ---
 id: TASK-050
 title: Show Keep Between Markers Only Where Trimmed
-status: open
+status: done
 related_features:
   - SPEC-003
 owner: @aattard
@@ -29,13 +29,13 @@ was actually removed.
 
 ## Acceptance Criteria
 
-- [ ] Given a `keep_between` rewrite rule that trims only lines before the kept
+- [x] Given a `keep_between` rewrite rule that trims only lines before the kept
       slice, the output shows only a leading `...` marker.
-- [ ] Given a `keep_between` rewrite rule that trims only lines after the kept
+- [x] Given a `keep_between` rewrite rule that trims only lines after the kept
       slice, the output shows only a trailing `...` marker.
-- [ ] Given a `keep_between` rewrite rule that trims both sides, the output
+- [x] Given a `keep_between` rewrite rule that trims both sides, the output
       shows both trim markers.
-- [ ] Given `show_trim_markers: false`, no trim markers are rendered even when
+- [x] Given `show_trim_markers: false`, no trim markers are rendered even when
       output was trimmed.
 
 ## Notes

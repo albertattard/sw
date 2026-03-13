@@ -907,7 +907,10 @@ fn apply_keep_between_rule(rule: &Value, rendered: &str) -> Result<RewriteRuleRe
     let end_offset = parse_keep_between_offset(rule.get("end_offset"), -1, "end_offset")?;
     let show_trim_markers = parse_keep_between_show_trim_markers(rule.get("show_trim_markers"))?;
 
-    let lines: Vec<&str> = rendered.split('\n').collect();
+    let mut lines: Vec<&str> = rendered.split('\n').collect();
+    if rendered.ends_with('\n') {
+        lines.pop();
+    }
     let Some(start_index) = lines.iter().position(|line| *line == start) else {
         return Ok(RewriteRuleResult {
             rendered: rendered.to_string(),
@@ -950,8 +953,12 @@ fn apply_keep_between_rule(rule: &Value, rendered: &str) -> Result<RewriteRuleRe
         .map(|line| (*line).to_string())
         .collect();
     if show_trim_markers {
-        kept_lines.insert(0, "...".to_string());
-        kept_lines.push("...".to_string());
+        if start_line > 0 {
+            kept_lines.insert(0, "...".to_string());
+        }
+        if end_line + 1 < lines.len() {
+            kept_lines.push("...".to_string());
+        }
     }
 
     Ok(RewriteRuleResult {

@@ -1,0 +1,22 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf '%s\\n' '================================================================================' '=== Performance Results ===' '================================================================================' 'Use Compact Object Headers:   false' 'Heap Size:                    96M' 'Full GC Count:                0' '================================================================================' '[INFO] after'"
+      ],
+      "output": {
+        "caption": "Kept output with trailing trim marker",
+        "rewrite": [
+          {
+            "type": "keep_between",
+            "start": "=== Performance Results ===",
+            "end": "Full GC Count:                0",
+            "start_offset": -1,
+            "end_offset": 1
+          }
+        ]
+      }
+    }
+  ]
+}
