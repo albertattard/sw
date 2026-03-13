@@ -53,6 +53,8 @@ tying the test suite to a specific project.
 - Add or update automated tests for every user-visible CLI feature.
 - Prefer integration-style CLI tests for command behavior, exit codes, and output contracts.
 - Treat machine-readable CLI output as a stable contract for users and agents. Avoid unnecessary breaking changes.
+- Prefer discovery and introspection commands that are easy for both humans and agents to consume.
+- When exposing repository knowledge through the CLI, keep default output concise, stable, and suitable for programmatic use, while allowing fuller output when needed.
 - Keep CLI help output aligned with the implemented commands, options, defaults, and current feature set.
 - Any user-visible CLI change must update help text and help-focused tests in the same change.
 - Keep implementation aligned with the documented spec when behavior changes.
