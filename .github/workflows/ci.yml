@@ -4,11 +4,16 @@ on:
   push:
     branches:
       - "**"
+    tags:
+      - "v*"
     paths-ignore:
       - "docs/**"
   pull_request:
     paths-ignore:
       - "docs/**"
+
+permissions:
+  contents: write
 
 jobs:
   quality:
@@ -21,6 +26,9 @@ jobs:
         include:
           - os: ubuntu-latest
             experimental: false
+            binary_name: sw
+            binary_path: target/release/sw
+            artifact_name: sw-ubuntu-release
           # - os: macos-latest
           #   experimental: false
           # - os: windows-latest
@@ -44,3 +52,75 @@ jobs:
 
       - name: Build release
         run: cargo build --release --verbose
+
+      - name: Prepare release artifact
+        run: |
+          mkdir -p dist
+          cp "${{ matrix.binary_path }}" "dist/${{ matrix.binary_name }}"
+          cat <<EOF > dist/README.md
+          # Sociable Weaver Build Artifact
+
+          This artifact contains the release build output produced by the CI pipeline.
+
+          ## Contents
+
+          - \`${{ matrix.binary_name }}\`: release binary built with \`cargo build --release\`
+
+          ## Build Metadata
+
+          - OS: \`${{ matrix.os }}\`
+          - Commit: \`${{ github.sha }}\`
+          - Workflow run: \`${{ github.run_id }}\`
+          - Profile: \`release\`
+          EOF
+
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: dist/
+
+  release:
+    name: Release
+    needs: quality
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build release
+        run: cargo build --release --verbose
+
+      - name: Prepare official release assets
+        run: |
+          mkdir -p release
+          cp target/release/sw release/sw-linux-x86_64
+          cat <<EOF > release/README.md
+          # Sociable Weaver Release Artifact
+
+          This release contains the official downloadable build published from a tagged GitHub Release.
+
+          ## Contents
+
+          - \`sw-linux-x86_64\`: release binary built with \`cargo build --release\`
+
+          ## Build Metadata
+
+          - Tag: \`${GITHUB_REF_NAME}\`
+          - Commit: \`${GITHUB_SHA}\`
+          - OS: \`ubuntu-latest\`
+          - Target: \`linux-x86_64\`
+          - Profile: \`release\`
+          EOF
+
+      - name: Publish GitHub Release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release/sw-linux-x86_64
+            release/README.md

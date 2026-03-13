@@ -1,7 +1,7 @@
 ---
 id: TASK-035
 title: Publish Official Release Assets
-status: pending
+status: done
 related_features:
   - SPEC-007
 owner: @aattard
@@ -32,11 +32,11 @@ latest-release path.
 
 ## Acceptance Criteria
 
-- [ ] A tagged release publishes official assets to GitHub Releases.
-- [ ] The release includes the binary and release README.
-- [ ] The pipeline behavior clearly distinguishes CI artifacts from official
+- [x] A tagged release publishes official assets to GitHub Releases.
+- [x] The release includes the binary and release README.
+- [x] The pipeline behavior clearly distinguishes CI artifacts from official
       release assets.
-- [ ] The published output supports both version-specific and latest-release
+- [x] The published output supports both version-specific and latest-release
       access patterns.
 
 ## Notes
