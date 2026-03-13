@@ -198,6 +198,7 @@ fn ensure_expected_exit_code(
 
     Err(RenderError::CommandFailed(format_assertion_failure(
         entry,
+        execution,
         &format!(
             "expected exit code {expected}, got {}{suffix}",
             execution.exit_code
@@ -271,20 +272,31 @@ fn ensure_assert_check(
 
     Err(RenderError::CommandFailed(format_assertion_failure(
         entry,
+        execution,
         &format!("stdout did not contain `{expected}`"),
     )))
 }
 
-fn format_assertion_failure(entry: &Value, detail: &str) -> String {
+fn format_assertion_failure(entry: &Value, execution: &CommandExecution, detail: &str) -> String {
     format!(
-        "Command failed assertion for entry:\n{}\n{detail}",
-        format_command_entry(entry)
+        "Command failed assertion for entry:\n{}\nstdout:\n{}\nstderr:\n{}\n{detail}",
+        format_command_entry(entry),
+        format_command_stream(&execution.stdout),
+        format_command_stream(&execution.stderr),
     )
 }
 
 fn format_command_entry(entry: &Value) -> String {
     serde_json::to_string_pretty(entry)
         .unwrap_or_else(|_| "<failed to serialize command entry>".to_string())
+}
+
+fn format_command_stream(stream: &str) -> String {
+    if stream.is_empty() {
+        "(empty)".to_string()
+    } else {
+        stream.to_string()
+    }
 }
 
 fn timeout_for_entry(entry: &Value) -> Result<Duration, RenderError> {

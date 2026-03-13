@@ -1,0 +1,15 @@
+{
+  "entries": [
+    {
+      "type": "Heading",
+      "level": "H1",
+      "title": "Failing runbook with output"
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'from stdout\\n'; printf 'from stderr\\n' >&2; exit 1"
+      ]
+    }
+  ]
+}

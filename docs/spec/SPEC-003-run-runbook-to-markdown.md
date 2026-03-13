@@ -416,13 +416,14 @@ in the runbook.
       successful only when the actual exit code matches the asserted value.
 - [ ] Given a command with `assert.exit_code` that does not match the actual
       exit code, the command exits with `2` and does not write a partial output
-      file, and the error output includes the failing `Command` entry.
+      file, and the error output includes the failing `Command` entry together
+      with the captured stdout and stderr.
 - [ ] Given a command with `assert.checks` using `source: stdout` and
       `contains`, the command is considered successful only when stdout
       contains the expected text.
 - [ ] Given a command with a `stdout` `contains` check that fails, the run
       exits with `2`, does not write a partial output file, and reports the
-      failing `Command` entry.
+      failing `Command` entry together with the captured stdout and stderr.
 - [ ] Given multiple assertion checks, all checks must pass for the command to
       be considered successful.
 

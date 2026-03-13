@@ -255,7 +255,29 @@ fn command_failure_returns_exit_code_two_without_output_file() {
     assert!(stderr.contains("Command failed assertion for entry:"));
     assert!(stderr.contains("\"commands\": ["));
     assert!(stderr.contains("\"false\""));
+    assert!(stderr.contains("stdout:\n(empty)"));
+    assert!(stderr.contains("stderr:\n(empty)"));
     assert!(stderr.contains("expected exit code 0, got 1"));
+}
+
+#[test]
+fn command_failure_reports_captured_stdout_and_stderr() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-failure-with-output.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert_eq!(output.status.code(), Some(2));
+    assert!(!dir.join("README.md").exists());
+
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("stdout:\nfrom stdout\n"));
+    assert!(stderr.contains("stderr:\nfrom stderr\n"));
+    assert!(stderr.contains("expected exit code 0, got 1: from stderr"));
 }
 
 #[test]
@@ -302,6 +324,8 @@ fn asserted_exit_code_mismatch_fails_without_partial_output() {
     assert!(stderr.contains("Command failed assertion for entry:"));
     assert!(stderr.contains("\"commands\": ["));
     assert!(stderr.contains("\"false\""));
+    assert!(stderr.contains("stdout:\n(empty)"));
+    assert!(stderr.contains("stderr:\n(empty)"));
     assert!(stderr.contains("expected exit code 0, got 1"));
 }
 
@@ -357,6 +381,8 @@ fn stdout_contains_assertion_failure_stops_the_run_without_partial_output() {
     assert!(stderr.contains("Command failed assertion for entry:"));
     assert!(stderr.contains("\"commands\": ["));
     assert!(stderr.contains("\"printf 'actual output\\\\n'\""));
+    assert!(stderr.contains("stdout:\nactual output\n"));
+    assert!(stderr.contains("stderr:\n(empty)"));
     assert!(stderr.contains("stdout did not contain `expected output`"));
 }
 
