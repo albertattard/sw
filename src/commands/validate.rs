@@ -33,7 +33,7 @@ pub fn run(args: ValidateArgs) -> ExitCode {
 
     let print_result = match args.output_format {
         OutputFormat::Human => {
-            runbook::print_human(&result, &path);
+            runbook::print_human_with_runbook(&result, &path, Some(&runbook));
             Ok(())
         }
         OutputFormat::Json => runbook::print_json(&result),

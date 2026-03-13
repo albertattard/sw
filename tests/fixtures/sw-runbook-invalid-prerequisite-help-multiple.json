@@ -1,0 +1,33 @@
+{
+  "entries": [
+    {
+      "type": "Prerequisite",
+      "checks": [
+        {
+          "name": "jq",
+          "contents": [
+            "- [jq](https://jqlang.org/)"
+          ],
+          "commands": [
+            "jq --version"
+          ],
+          "help": [
+            "Install jq"
+          ]
+        },
+        {
+          "name": "curl",
+          "contents": [
+            "- [curl](https://curl.se/)"
+          ],
+          "commands": [
+            "curl --version"
+          ],
+          "help": [
+            "Install curl"
+          ]
+        }
+      ]
+    }
+  ]
+}

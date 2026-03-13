@@ -73,7 +73,8 @@ Default input behavior:
 - [ ] Given a missing input file, `sw check` exits with `1` and reports a
       clear file error.
 - [ ] Given an invalid runbook, `sw check` exits with `1` and reports that the
-      runbook is invalid.
+      runbook is invalid, including the offending runbook entry for
+      entry-scoped validation errors.
 - [ ] Given a failing prerequisite check, `sw check` exits with `2` before any
       normal `Command` entry executes.
 - [ ] Given a failing prerequisite check with `help`, the failure output

@@ -214,7 +214,11 @@ fn output_trailing_whitespace_can_be_preserved() {
 #[test]
 fn invalid_runbook_returns_validation_failure_without_output_file() {
     let dir = prepare_workspace();
-    write_runbook(&dir, "sw-runbook-missing-field.json", "sw-runbook.json");
+    write_runbook(
+        &dir,
+        "sw-runbook-invalid-prerequisite-help.json",
+        "sw-runbook.json",
+    );
 
     let output = run_in_dir(&["run"], &dir);
 
@@ -223,6 +227,10 @@ fn invalid_runbook_returns_validation_failure_without_output_file() {
 
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("Runbook is invalid"));
+    assert!(stdout.contains("Offending entries:"));
+    assert!(stdout.contains("- entries[0]:"));
+    assert!(stdout.contains("\"type\": \"Prerequisite\""));
+    assert!(stdout.contains("\"help\": ["));
 }
 
 #[test]

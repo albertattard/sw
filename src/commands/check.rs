@@ -18,7 +18,7 @@ pub fn run(args: CheckArgs) -> ExitCode {
 
     let validation_result = runbook::validate(&runbook);
     if !validation_result.valid {
-        runbook::print_human(&validation_result, &input_path);
+        runbook::print_human_with_runbook(&validation_result, &input_path, Some(&runbook));
         return ExitCode::from(1);
     }
 

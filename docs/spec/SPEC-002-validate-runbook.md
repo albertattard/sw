@@ -44,6 +44,12 @@ Supported output formats:
 - `human` (default): readable console text for interactive use.
 - `json`: machine-readable output for automation and agents.
 
+Output (`--output-format human`):
+- Human-readable validation summary.
+- Validation errors listed with their paths and messages.
+- For validation errors scoped to `entries[N]`, the output also prints the
+  offending runbook entry once per affected entry to aid debugging.
+
 Reserved for future consideration (not part of this feature):
 - `yaml`
 - `ndjson`
@@ -78,6 +84,8 @@ Exit codes:
       returns exit code `1` with a clear missing-file error.
 - [ ] Given no `--output-format` option, command uses `human` output by
       default.
+- [ ] Given a human-readable validation failure for `entries[N]`, the output
+      includes the offending runbook entry once for that entry.
 - [ ] Validation performs no write operations (read-only behavior).
 
 ## Non-goals

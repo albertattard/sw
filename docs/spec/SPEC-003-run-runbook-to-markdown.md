@@ -329,7 +329,8 @@ in the runbook.
 - [ ] Given `--output-file <path>`, the command writes the output to the
       provided path.
 - [ ] Given an invalid runbook, the command exits with `2` and does not write a
-      partial output file.
+      partial output file, and the human-readable validation output includes
+      the offending runbook entry for entry-scoped validation errors.
 - [ ] Given a missing input file, the command exits with `1` and reports a
       clear error.
 - [ ] Generated Markdown begins with the comment

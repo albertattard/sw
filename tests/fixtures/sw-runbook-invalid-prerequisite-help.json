@@ -1,0 +1,21 @@
+{
+  "entries": [
+    {
+      "type": "Prerequisite",
+      "checks": [
+        {
+          "name": "jq",
+          "contents": [
+            "- [jq](https://jqlang.org/)"
+          ],
+          "commands": [
+            "jq --version"
+          ],
+          "help": [
+            "Install jq"
+          ]
+        }
+      ]
+    }
+  ]
+}

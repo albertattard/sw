@@ -45,7 +45,7 @@ pub fn read(path: &Path) -> Result<Value, String> {
         .map_err(|err| format!("Invalid JSON in {}: {err}", path.display()))
 }
 
-pub fn print_human(result: &ValidationResult, path: &Path) {
+pub fn print_human_with_runbook(result: &ValidationResult, path: &Path, runbook: Option<&Value>) {
     if result.valid {
         println!("Runbook is valid: {}", path.display());
         return;
@@ -55,6 +55,31 @@ pub fn print_human(result: &ValidationResult, path: &Path) {
     for error in &result.errors {
         println!("- {}: {}", error.path, error.message);
     }
+
+    let Some(runbook) = runbook else {
+        return;
+    };
+    let Some(entries) = runbook.get("entries").and_then(Value::as_array) else {
+        return;
+    };
+
+    let offending_entries = offending_entry_indices(&result.errors);
+    if offending_entries.is_empty() {
+        return;
+    }
+
+    println!();
+    println!("Offending entries:");
+    for index in offending_entries {
+        let Some(entry) = entries.get(index) else {
+            continue;
+        };
+
+        println!("- entries[{index}]:");
+        for line in format_validation_entry(entry).lines() {
+            println!("  {line}");
+        }
+    }
 }
 
 pub fn print_json(result: &ValidationResult) -> Result<(), String> {
@@ -62,4 +87,29 @@ pub fn print_json(result: &ValidationResult) -> Result<(), String> {
         .map_err(|err| format!("Failed to serialize output: {err}"))?;
     println!("{output}");
     Ok(())
+}
+
+fn offending_entry_indices(errors: &[ValidationIssue]) -> Vec<usize> {
+    let mut indices = Vec::new();
+    for error in errors {
+        let Some(index) = entry_index_from_path(&error.path) else {
+            continue;
+        };
+
+        if !indices.contains(&index) {
+            indices.push(index);
+        }
+    }
+    indices
+}
+
+fn entry_index_from_path(path: &str) -> Option<usize> {
+    let suffix = path.strip_prefix("entries[")?;
+    let index_end = suffix.find(']')?;
+    suffix[..index_end].parse().ok()
+}
+
+fn format_validation_entry(entry: &Value) -> String {
+    serde_json::to_string_pretty(entry)
+        .unwrap_or_else(|_| "<failed to serialize offending entry>".to_string())
 }
