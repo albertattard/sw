@@ -98,11 +98,11 @@ in the runbook.
 - If the `DisplayFile` extension is not recognized, the generated Markdown
   uses a `text` fenced block.
 
-### Prerequisites Entries
+### Prerequisite Entries
 
-- `Prerequisites` entries render prerequisite documentation and verify the
+- `Prerequisite` entries render prerequisite documentation and verify the
   runtime environment before the rest of the runbook proceeds.
-- A `Prerequisites` entry contains a `checks` array.
+- A `Prerequisite` entry contains a `checks` array.
 - Each prerequisite check declares a short `name`.
 - Each prerequisite check declares `contents` as an array of Markdown lines.
 - `contents` is rendered into the generated Markdown in the declared order.
@@ -328,9 +328,9 @@ in the runbook.
 - [ ] Given a `DisplayFile` entry whose extension is not recognized, the
       generated Markdown uses a `text` fenced block.
 
-### Prerequisites Entries
+### Prerequisite Entries
 
-- [ ] Given a runbook with `Prerequisites` entries, the generated Markdown
+- [ ] Given a runbook with `Prerequisite` entries, the generated Markdown
       includes the declared prerequisite `contents` in order.
 - [ ] Given a prerequisite check with multiple command lines, those lines
       execute together in the same shell context.
@@ -522,7 +522,7 @@ in the runbook.
 
 - Empty runbook.
 - Unsupported entry type.
-- `Prerequisites` entry with an empty `checks` array.
+- `Prerequisite` entry with an empty `checks` array.
 - A prerequisite check omits `name`.
 - A prerequisite check omits `contents`.
 - A prerequisite check omits `commands`.
