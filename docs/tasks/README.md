@@ -38,6 +38,7 @@ File-based task tracker for Sociable Weaver.
 - [TASK-032: Implement Check Command](./TASK-032-implement-check-command.md)
 - [TASK-033: Implement Import Command](./TASK-033-implement-import-command.md)
 - [TASK-034: Expand Help Command Coverage](./TASK-034-expand-help-command-coverage.md)
+- [TASK-035: Publish Official Release Assets](./TASK-035-publish-official-release-assets.md)
 
 ## Pending
 
@@ -45,6 +46,7 @@ File-based task tracker for Sociable Weaver.
 - [ ] [TASK-028: Implement Init Command](./TASK-028-implement-init-command.md)
 - [ ] [TASK-033: Implement Import Command](./TASK-033-implement-import-command.md)
 - [ ] [TASK-034: Expand Help Command Coverage](./TASK-034-expand-help-command-coverage.md)
+- [ ] [TASK-035: Publish Official Release Assets](./TASK-035-publish-official-release-assets.md)
 
 ## In Progress
 
