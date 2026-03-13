@@ -12,3 +12,4 @@ acceptance criteria.
 - [SPEC-005: Check Runbook Prerequisites](./SPEC-005-check-prerequisites.md)
 - [SPEC-006: Import README to Runbook](./SPEC-006-import-readme-to-runbook.md)
 - [SPEC-007: Release Distribution Contract](./SPEC-007-release-distribution.md)
+- [SPEC-008: Example Snippets Contract](./SPEC-008-example-snippets.md)
