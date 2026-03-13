@@ -49,9 +49,9 @@ docs/
     TASK-001-*.md
 ```
 
-- `docs/spec/`: product vision and executable specifications, including expected behavior and acceptance criteria.
-- `docs/decisions/`: architecture decision records (ADRs) and technical tradeoff rationale.
-- `docs/tasks/`: file-based task tracking for pending, in-progress, blocked, and completed work.
+- [`docs/spec/README.md`](./docs/spec/README.md): product vision and executable specifications, including expected behavior and acceptance criteria.
+- [`docs/decisions/README.md`](./docs/decisions/README.md): architecture decision records (ADRs) and technical tradeoff rationale.
+- [`docs/tasks/README.md`](./docs/tasks/README.md): file-based task tracking for pending, in-progress, blocked, and completed work.
 
 ## License
 
