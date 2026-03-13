@@ -1,4 +1,5 @@
 pub mod check;
+pub mod example;
 pub mod run;
 pub mod validate;
 
@@ -20,6 +21,7 @@ pub fn run(cli: Cli) -> ExitCode {
             }
         },
         Some(Commands::Check(args)) => check::run(args),
+        Some(Commands::Example(args)) => example::run(args),
         Some(Commands::Run(args)) => run::run(args),
         Some(Commands::Validate(args)) => validate::run(args),
     }

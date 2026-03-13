@@ -1,7 +1,7 @@
 ---
 id: TASK-039
 title: Implement Example Command
-status: pending
+status: done
 related_features:
   - SPEC-008
 owner: @aattard
@@ -33,14 +33,14 @@ generating a full starter runbook.
 
 ## Acceptance Criteria
 
-- [ ] Given `sw example Command`, the CLI prints a valid JSON example of a
+- [x] Given `sw example Command`, the CLI prints a valid JSON example of a
       `Command` entry.
-- [ ] Given `sw example DisplayFile`, the CLI prints a valid JSON example of a
+- [x] Given `sw example DisplayFile`, the CLI prints a valid JSON example of a
       `DisplayFile` entry.
-- [ ] Given `sw example rewrite.keep_between`, the CLI prints a valid JSON
+- [x] Given `sw example rewrite.keep_between`, the CLI prints a valid JSON
       example of that rewrite rule fragment.
-- [ ] Given an unsupported topic, the CLI exits with `1`.
-- [ ] The `example` command appears in help output.
+- [x] Given an unsupported topic, the CLI exits with `1`.
+- [x] The `example` command appears in help output.
 
 ## Notes
 

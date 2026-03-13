@@ -18,6 +18,8 @@ pub struct Cli {
 pub enum Commands {
     /// Check runbook prerequisites.
     Check(CheckArgs),
+    /// Print a JSON example for a runbook topic.
+    Example(ExampleArgs),
     /// Render a runbook to output.
     Run(RunArgs),
     /// Show top-level help.
@@ -57,6 +59,12 @@ pub struct ValidateArgs {
     /// Output format.
     #[arg(long, value_enum, default_value_t = OutputFormat::Human)]
     pub output_format: OutputFormat,
+}
+
+#[derive(Debug, clap::Args)]
+pub struct ExampleArgs {
+    /// Example topic such as `Command`, `DisplayFile`, or `rewrite.keep_between`.
+    pub topic: String,
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, ValueEnum)]
