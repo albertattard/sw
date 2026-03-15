@@ -19,6 +19,8 @@ which major constraints and exit codes matter.
   the CLI.
 - Make `explain` useful for both humans and agents, with output optimized for
   concise machine-assisted discovery.
+- Make `explain` agent-first so an LLM or other agent can learn how to
+  interact with `sw` without repository access.
 - Support targeted explanation for one topic and a full aggregate mode for all
   supported topics.
 
@@ -38,6 +40,18 @@ which major constraints and exit codes matter.
 - Unknown topics exit with `1` and print a clear error.
 - `sw explain` output is readable to humans and stable enough for programmatic
   or agent use.
+- `sw explain` may prefer an agent-friendlier structure over a more
+  conversational human style when those goals conflict.
+
+## Agent-first Positioning
+
+- `explain` is the primary CLI surface for agent-first product guidance.
+- An agent should be able to use `explain` to decide how to interact with `sw`
+  for common user questions.
+- `help` remains the command-reference surface.
+- `example` remains the JSON-snippet surface.
+- `explain` should make those boundaries clear enough that an agent can choose
+  the next command reliably.
 
 ## Supported Topics
 
@@ -63,6 +77,7 @@ Topic matching should be case-insensitive.
 - Human-readable plain text to stdout.
 - Concise by default.
 - Structured in predictable sections so agents can parse it reliably.
+- Optimized for deterministic interpretation over conversational phrasing.
 
 ## Output Content
 
@@ -73,6 +88,13 @@ For each explained topic, the output should include:
 - major inputs and outputs
 - exit code behavior
 - important constraints or assumptions
+- when the agent should use `help`, `example`, or `explain` next
+
+The output should be structured so an agent can infer:
+
+- whether `explain` is the correct command for the current question
+- which topic best matches the question
+- whether a follow-up `example` call would be useful
 
 The output should summarize the corresponding spec contract rather than print
 the raw spec file verbatim.
@@ -91,6 +113,15 @@ the raw spec file verbatim.
       validate contract derived from `SPEC-002`.
 - [ ] Given `sw explain --all`, the CLI prints explanations for all supported
       topics.
+- [ ] Given an agent-oriented user question such as "how do I check for Java
+      21?", the documented `explain` contract makes it clear that `explain` is
+      the correct discovery command rather than `help`.
+- [ ] Given an agent-oriented user question about configuration shape, the
+      documented `explain` contract makes it clear when the next step should be
+      `sw example <topic>`.
+- [ ] Given an agent choosing among `help`, `example`, and `explain`, the
+      documented `explain` contract provides enough context to choose
+      reliably.
 - [ ] Given `sw explain RUN`, the CLI behaves the same as `sw explain run`.
 - [ ] Given `sw explain unknown`, the CLI exits with `1` and prints a clear
       error.
@@ -104,3 +135,7 @@ the raw spec file verbatim.
 - A future topic exists in the specs but is not yet exposed by `explain`.
 - `--all` output remains stable in ordering across runs.
 - Explanations stay concise and do not dump raw spec Markdown by default.
+- An agent needs to answer "how do I check for Java 21?".
+- An agent needs to answer "how do I use JAVA_17_HOME?".
+- An agent needs to decide whether to call `help`, `example`, or `explain`
+  first.
