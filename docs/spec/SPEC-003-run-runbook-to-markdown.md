@@ -120,11 +120,35 @@ in the runbook.
 - A `Prerequisite` entry is a single runbook entry that can group one or more
   prerequisite checks in its `checks` array.
 - Each prerequisite check declares a short `name`.
+- Each prerequisite check declares a `kind`.
+- In this increment, supported prerequisite check kinds are `command` and
+  `java`.
 - Each prerequisite check declares `contents` as an array of Markdown lines.
 - `contents` is rendered into the generated Markdown in the declared order.
-- Each prerequisite check declares `commands` as an array of command lines.
-- All lines within a single prerequisite check execute together in the same
-  shell context.
+- A `command` prerequisite check declares `commands` as an array of command
+  lines.
+- All lines within a single `command` prerequisite check execute together in
+  the same shell context.
+- A `command` prerequisite check may declare `assert` using the same structure
+  as `Command` assertions.
+- A `java` prerequisite check performs a built-in Java runtime validation
+  without requiring runbook-authored shell parsing.
+- A `java` prerequisite check declares `version`.
+- `version` supports an exact major version such as `17`.
+- `version` supports a minimum major version such as `24+`.
+- If a `java` prerequisite check omits both `java_home` and `java_home_env`,
+  the Java executable is resolved from `PATH`.
+- A `java` prerequisite check may declare `java_home`.
+- `java_home` is a literal path to a Java home directory.
+- A `java` prerequisite check may declare `java_home_env`.
+- `java_home_env` names an environment variable whose value must resolve to a
+  Java home directory.
+- `java_home` and `java_home_env` are mutually exclusive.
+- A `java` prerequisite check validates Java by executing the resolved
+  `<java-home>/bin/java` or `java` from `PATH`.
+- A `java` prerequisite check fails if the Java executable cannot be resolved.
+- A `java` prerequisite check fails if the resolved Java major version does not
+  satisfy `version`.
 - Each prerequisite check may declare `assert` using the same structure as
   `Command` assertions.
 - Each prerequisite check may declare `help` as a human-readable remediation

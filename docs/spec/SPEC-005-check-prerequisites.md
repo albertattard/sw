@@ -61,6 +61,12 @@ Default input behavior:
 - Prerequisite checks execute in the same order they appear in the runbook.
 - If a prerequisite check fails, `sw check` stops on that failure and reports
   the failing check.
+- `sw check` supports built-in prerequisite kinds.
+- In this increment, built-in prerequisite kinds include `java`.
+- A `java` prerequisite check validates the resolved Java runtime against the
+  declared version rule.
+- A `java` prerequisite check may target Java from `PATH`, a literal
+  `java_home`, or a `java_home_env` environment variable.
 - If a failing prerequisite check includes `help`, that remediation message is
   surfaced in the command output.
 
@@ -77,6 +83,16 @@ Default input behavior:
       entry-scoped validation errors.
 - [ ] Given a failing prerequisite check, `sw check` exits with `2` before any
       normal `Command` entry executes.
+- [ ] Given a `java` prerequisite check with `version: "24+"`, `sw check`
+      passes when the resolved Java runtime is Java 24 or higher.
+- [ ] Given a `java` prerequisite check with `version: "17"`, `sw check`
+      passes only when the resolved Java runtime is exactly Java 17.
+- [ ] Given a `java` prerequisite check with `java_home_env`, `sw check`
+      resolves Java from that environment variable.
+- [ ] Given a `java` prerequisite check with an unset `java_home_env`,
+      `sw check` fails with a clear prerequisite error.
+- [ ] Given a `java` prerequisite check with both `java_home` and
+      `java_home_env`, the runbook is invalid.
 - [ ] Given a failing prerequisite check with `help`, the failure output
       includes that remediation message.
 - [ ] Given a passing prerequisite check followed by a `Command` entry,
@@ -96,6 +112,10 @@ Default input behavior:
 - First prerequisite passes and a later prerequisite fails.
 - A prerequisite check times out.
 - A prerequisite check fails an assertion.
+- A Java prerequisite uses `version: "24+"`.
+- A Java prerequisite uses `version: "17"`.
+- A Java prerequisite resolves from `JAVA_17_HOME`.
+- A Java prerequisite names an unset Java home environment variable.
 - A runbook is structurally invalid before any checks run.
 
 ## Notes for Reimplementation
