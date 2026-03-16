@@ -1,0 +1,18 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'alpha\\n'"
+      ],
+      "debug": false
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'beta\\n'"
+      ],
+      "debug": true
+    }
+  ]
+}

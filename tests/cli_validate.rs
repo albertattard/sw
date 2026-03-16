@@ -159,6 +159,23 @@ fn invalid_assert_shape_returns_validation_failure() {
 }
 
 #[test]
+fn invalid_command_debug_returns_validation_failure() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-invalid-command-debug.json",
+        "--output-format",
+        "json",
+    ]);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": false"));
+    assert!(stdout.contains("\"path\": \"entries[0].debug\""));
+    assert!(stdout.contains("must be a boolean"));
+}
+
+#[test]
 fn invalid_assert_checks_shape_returns_validation_failure() {
     let output = run(&[
         "validate",

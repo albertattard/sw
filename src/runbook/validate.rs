@@ -914,6 +914,25 @@ fn validate_entry(
             None => push_error(&mut context.errors, format!("{path}.checks"), "is required"),
         },
         "Command" => {
+            for key in object.keys() {
+                if key != "type"
+                    && key != "commands"
+                    && key != "indent"
+                    && key != "debug"
+                    && key != "output"
+                    && key != "assert"
+                    && key != "timeout"
+                    && key != "cleanup"
+                    && key != "capture"
+                {
+                    push_error(
+                        &mut context.errors,
+                        format!("{path}.{key}"),
+                        "is not a supported Command property",
+                    );
+                }
+            }
+
             match object.get("commands") {
                 Some(commands) => {
                     validate_string_array(
@@ -943,6 +962,16 @@ fn validate_entry(
                     &mut context.errors,
                     format!("{path}.indent"),
                     "must be an integer",
+                );
+            }
+
+            if let Some(debug) = object.get("debug")
+                && !debug.is_boolean()
+            {
+                push_error(
+                    &mut context.errors,
+                    format!("{path}.debug"),
+                    "must be a boolean",
                 );
             }
 

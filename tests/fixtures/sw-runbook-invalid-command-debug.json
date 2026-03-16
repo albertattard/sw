@@ -1,0 +1,11 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'hello\\n'"
+      ],
+      "debug": "yes"
+    }
+  ]
+}

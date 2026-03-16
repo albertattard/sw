@@ -30,7 +30,7 @@ const CAPTURE_INTERPOLATION_PATTERN: &str =
 struct RenderState {
     datetime_anchors: HashMap<String, DatetimeShiftAnchor>,
     captured_values: HashMap<String, String>,
-    debug: bool,
+    debug_all_commands: bool,
 }
 
 struct RewriteCapturePair {
@@ -75,7 +75,7 @@ pub(crate) fn render_markdown(
     let mut state = RenderState {
         datetime_anchors: HashMap::new(),
         captured_values: HashMap::new(),
-        debug,
+        debug_all_commands: debug,
     };
     let mut progress = ProgressReporter::new(entries.len(), verbose);
 
@@ -748,8 +748,9 @@ fn render_command(entry: &Value, state: &mut RenderState) -> Result<String, Rend
     let command_text = resolved_command_lines.join("\n");
     let mut section = format!("```shell\n{command_text}\n```");
     let execution = execute_command(entry, &command_text)?;
+    let debug_enabled = command_debug_enabled(entry, state.debug_all_commands);
     let mut debug_lines = Vec::new();
-    if state.debug {
+    if debug_enabled {
         debug_lines.push("[debug] Command entry:".to_string());
         debug_lines.push(format_command_entry_for_debug(entry));
         debug_lines.push("[debug] Raw stdout:".to_string());
@@ -760,7 +761,7 @@ fn render_command(entry: &Value, state: &mut RenderState) -> Result<String, Rend
     let rewrite_result = match rewritten_stdout_for_capture(entry, &execution, state) {
         Ok(result) => result,
         Err(err) => {
-            emit_debug_lines(state.debug, &debug_lines);
+            emit_debug_lines(debug_enabled, &debug_lines);
             return Err(err);
         }
     };
@@ -770,13 +771,13 @@ fn render_command(entry: &Value, state: &mut RenderState) -> Result<String, Rend
         debug_lines: rewrite_debug_lines,
     } = rewrite_result;
     debug_lines.extend(rewrite_debug_lines);
-    if state.debug {
+    if debug_enabled {
         debug_lines.push("[debug] Rewritten stdout:".to_string());
         debug_lines.push(format_command_stream_for_debug(&rewritten_stdout));
     }
 
     if execution.timed_out {
-        emit_debug_lines(state.debug, &debug_lines);
+        emit_debug_lines(debug_enabled, &debug_lines);
         append_output(entry, &rewritten_stdout, &mut section)?;
         return Err(RenderError::Timeout {
             message: format!("Command timed out after {}", timeout_label(entry)),
@@ -792,11 +793,11 @@ fn render_command(entry: &Value, state: &mut RenderState) -> Result<String, Rend
         &mut state.captured_values,
         &mut debug_lines,
     ) {
-        emit_debug_lines(state.debug, &debug_lines);
+        emit_debug_lines(debug_enabled, &debug_lines);
         return Err(err);
     }
     store_generated_rewrite_captures(&generated_captures, &mut state.captured_values);
-    if state.debug {
+    if debug_enabled {
         for capture in &generated_captures {
             debug_lines.push(format!(
                 "[debug] Generated capture {} = {}",
@@ -808,9 +809,17 @@ fn render_command(entry: &Value, state: &mut RenderState) -> Result<String, Rend
             ));
         }
     }
-    emit_debug_lines(state.debug, &debug_lines);
+    emit_debug_lines(debug_enabled, &debug_lines);
     append_output(entry, &rewritten_stdout, &mut section)?;
     apply_indent(entry, section)
+}
+
+fn command_debug_enabled(entry: &Value, debug_all_commands: bool) -> bool {
+    if debug_all_commands {
+        return true;
+    }
+
+    entry.get("debug").and_then(Value::as_bool).unwrap_or(false)
 }
 
 fn append_output(entry: &Value, stdout: &str, section: &mut String) -> Result<(), RenderError> {

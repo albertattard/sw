@@ -204,6 +204,42 @@ fn debug_flag_before_subcommand_uses_default_run_behavior() {
 }
 
 #[test]
+fn command_scoped_debug_only_emits_diagnostics_for_flagged_commands() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-command-scoped-debug.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert_eq!(stderr.matches("[debug] Command entry:").count(), 1);
+    assert!(stderr.contains("beta"));
+    assert!(!stderr.contains("alpha"));
+}
+
+#[test]
+fn global_debug_still_emits_diagnostics_for_all_commands() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-command-scoped-debug.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run", "--debug"], &dir);
+
+    assert!(output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert_eq!(stderr.matches("[debug] Command entry:").count(), 2);
+    assert!(stderr.contains("alpha"));
+    assert!(stderr.contains("beta"));
+}
+
+#[test]
 fn generated_marker_appears_before_rendered_entries() {
     let dir = prepare_workspace();
     write_runbook(&dir, "sw-runbook-run-success.json", "sw-runbook.json");
