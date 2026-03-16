@@ -1,7 +1,7 @@
 ---
 id: TASK-060
 title: Improve Rewrite Capture Failure Diagnostics
-status: open
+status: done
 category: rewrite
 related_features:
   - SPEC-003
@@ -31,15 +31,15 @@ context and captured output when a rewrite matches the wrong number of values.
 
 ## Acceptance Criteria
 
-- [ ] Given a rewrite rule with `capture_as` that matches zero values,
+- [x] Given a rewrite rule with `capture_as` that matches zero values,
       `sw run` exits with `2`, does not write a partial output file, and
       reports the failing `Command` entry together with captured stdout and
       stderr.
-- [ ] Given a rewrite rule with `capture_as` that matches more than one value,
+- [x] Given a rewrite rule with `capture_as` that matches more than one value,
       `sw run` exits with `2`, does not write a partial output file, and
       reports the failing `Command` entry together with captured stdout and
       stderr.
-- [ ] Existing successful rewrite `capture_as` behavior remains unchanged.
+- [x] Existing successful rewrite `capture_as` behavior remains unchanged.
 
 ## Notes
 

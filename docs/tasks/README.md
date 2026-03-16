@@ -133,7 +133,6 @@ Expected task directories:
 - [ ] [TASK-043: Implement Explain Command](explain/TASK-043-implement-explain-command.md)
 - [ ] [TASK-056: Warn About Background Commands Holding Command Pipes Open](validate/TASK-056-warn-about-background-commands-holding-command-pipes-open.md)
 - [ ] [TASK-059: Implement Format Command](format/TASK-059-implement-format-command.md)
-- [ ] [TASK-060: Improve Rewrite Capture Failure Diagnostics](rewrite/TASK-060-improve-rewrite-capture-failure-diagnostics.md)
 
 ## In Progress
 
@@ -196,6 +195,7 @@ Expected task directories:
 - [x] [TASK-055: Refine Verbose Run Time Formatting](run/TASK-055-refine-verbose-run-time-formatting.md)
 - [x] [TASK-057: Support Multiline Cleanup Control Structures](run/TASK-057-support-multiline-cleanup-control-structures.md)
 - [x] [TASK-058: Migrate Tasks Into Category Directories](repo-process/TASK-058-migrate-tasks-into-category-directories.md)
+- [x] [TASK-060: Improve Rewrite Capture Failure Diagnostics](rewrite/TASK-060-improve-rewrite-capture-failure-diagnostics.md)
 
 ## Blocked
 

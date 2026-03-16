@@ -269,9 +269,10 @@ fn ensure_expected_exit_code(
         format!(": {}", execution.stderr.trim())
     };
 
-    Err(RenderError::CommandFailed(format_assertion_failure(
+    Err(RenderError::CommandFailed(format_command_failure(
         entry,
         execution,
+        "Command failed assertion for entry",
         &format!(
             "expected exit code {expected}, got {}{suffix}",
             execution.exit_code
@@ -351,9 +352,10 @@ fn ensure_stdout_assert_check(
         return Ok(());
     }
 
-    Err(RenderError::CommandFailed(format_assertion_failure(
+    Err(RenderError::CommandFailed(format_command_failure(
         entry,
         execution,
+        "Command failed assertion for entry",
         &format!("stdout did not contain `{expected}`"),
     )))
 }
@@ -390,9 +392,10 @@ fn ensure_file_exists_assertion(
         return Ok(());
     }
 
-    Err(RenderError::CommandFailed(format_assertion_failure(
+    Err(RenderError::CommandFailed(format_command_failure(
         entry,
         execution,
+        "Command failed assertion for entry",
         &format!("file `{display_path}` did not exist"),
     )))
 }
@@ -405,9 +408,10 @@ fn ensure_file_sha256_assertion(
     expected: &str,
 ) -> Result<(), RenderError> {
     let contents = fs::read(path).map_err(|_| {
-        RenderError::CommandFailed(format_assertion_failure(
+        RenderError::CommandFailed(format_command_failure(
             entry,
             execution,
+            "Command failed assertion for entry",
             &format!("file `{display_path}` did not exist"),
         ))
     })?;
@@ -417,9 +421,10 @@ fn ensure_file_sha256_assertion(
         return Ok(());
     }
 
-    Err(RenderError::CommandFailed(format_assertion_failure(
+    Err(RenderError::CommandFailed(format_command_failure(
         entry,
         execution,
+        "Command failed assertion for entry",
         &format!("file `{display_path}` had sha256 `{actual}` instead of `{expected}`"),
     )))
 }
@@ -429,9 +434,14 @@ fn sha256_hex(contents: &[u8]) -> String {
     digest.iter().map(|byte| format!("{byte:02x}")).collect()
 }
 
-fn format_assertion_failure(entry: &Value, execution: &CommandExecution, detail: &str) -> String {
+pub(crate) fn format_command_failure(
+    entry: &Value,
+    execution: &CommandExecution,
+    header: &str,
+    detail: &str,
+) -> String {
     format!(
-        "Command failed assertion for entry:\n{}\nstdout:\n{}\nstderr:\n{}\n{detail}",
+        "{header}:\n{}\nstdout:\n{}\nstderr:\n{}\n{detail}",
         format_command_entry(entry),
         format_command_stream(&execution.stdout),
         format_command_stream(&execution.stderr),

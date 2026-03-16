@@ -1,0 +1,20 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf '12283 ./target/other-app.jar\\n'"
+      ],
+      "output": {
+        "rewrite": [
+          {
+            "type": "replace",
+            "pattern": "^\\s*\\d+(\\s+\\./target/libs/continuous-recording-1\\.0\\.0\\.jar)$",
+            "replacement": "123456$1",
+            "capture_as": "continuous_recording_pid"
+          }
+        ]
+      }
+    }
+  ]
+}

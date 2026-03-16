@@ -924,6 +924,31 @@ fn rewrite_capture_as_generates_original_and_rewritten_variables() {
 }
 
 #[test]
+fn rewrite_capture_as_failure_reports_command_context_and_streams() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-rewrite-capture-failure.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert_eq!(output.status.code(), Some(2));
+    assert!(!dir.join("README.md").exists());
+
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("Rewrite capture_as failed for entry:"));
+    assert!(stderr.contains("\"capture_as\": \"continuous_recording_pid\""));
+    assert!(stderr.contains("stdout:"));
+    assert!(stderr.contains("12283 ./target/other-app.jar"));
+    assert!(stderr.contains("stderr:\n(empty)"));
+    assert!(stderr.contains(
+        "Rewrite capture_as `continuous_recording_pid` matched 0 values; expected exactly one"
+    ));
+}
+
+#[test]
 fn output_rewrite_datetime_shift_preserves_relative_timing() {
     let dir = prepare_workspace();
     write_runbook(
