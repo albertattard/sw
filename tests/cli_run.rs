@@ -1066,6 +1066,40 @@ fn output_rewrite_datetime_shift_uses_default_base_when_omitted() {
 }
 
 #[test]
+fn output_rewrite_datetime_shift_supports_rfc3339_without_fractional_seconds() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-output-rewrite-datetime-shift-rfc3339-no-fraction.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("2077-04-27T12:34:56+01:00 INFO Starting"));
+    assert!(readme.contains("2077-04-27T12:34:58+01:00 INFO Ready"));
+}
+
+#[test]
+fn output_rewrite_datetime_shift_supports_rfc3339_nanosecond_precision() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-output-rewrite-datetime-shift-rfc3339-nanos.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("2077-04-27T12:34:56.789000000+01:00 INFO Starting"));
+    assert!(readme.contains("2077-04-27T12:34:58.789000000+01:00 INFO Ready"));
+}
+
+#[test]
 fn output_rewrite_datetime_shift_supports_rfc1123() {
     let dir = prepare_workspace();
     write_runbook(

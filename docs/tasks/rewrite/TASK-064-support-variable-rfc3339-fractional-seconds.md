@@ -1,7 +1,7 @@
 ---
 id: TASK-064
 title: Support Variable RFC3339 Fractional Seconds
-status: open
+status: done
 category: rewrite
 related_features:
   - SPEC-003
@@ -32,15 +32,15 @@ nanosecond values.
 
 ## Acceptance Criteria
 
-- [ ] Given `datetime_shift` with `format: rfc3339` and a matched timestamp
+- [x] Given `datetime_shift` with `format: rfc3339` and a matched timestamp
       without fractional seconds, the timestamp is rewritten successfully.
-- [ ] Given `datetime_shift` with `format: rfc3339` and a matched timestamp
+- [x] Given `datetime_shift` with `format: rfc3339` and a matched timestamp
       with 3 fractional-second digits, the timestamp is rewritten
       successfully.
-- [ ] Given `datetime_shift` with `format: rfc3339` and a matched timestamp
+- [x] Given `datetime_shift` with `format: rfc3339` and a matched timestamp
       with 9 fractional-second digits, the timestamp is rewritten
       successfully.
-- [ ] The rewritten timestamp remains in RFC 3339 form and preserves the
+- [x] The rewritten timestamp remains in RFC 3339 form and preserves the
       original fractional precision width.
 
 ## Notes
