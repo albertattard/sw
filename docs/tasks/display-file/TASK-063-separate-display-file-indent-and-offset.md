@@ -1,7 +1,7 @@
 ---
 id: TASK-063
 title: Separate DisplayFile Indent And Offset
-status: open
+status: done
 category: display-file
 related_features:
   - SPEC-003
@@ -37,15 +37,15 @@ left or right independently.
 
 ## Acceptance Criteria
 
-- [ ] Given a `DisplayFile` entry with `indent: 3`, the opening fence, content
+- [x] Given a `DisplayFile` entry with `indent: 3`, the opening fence, content
       lines, and closing fence are all indented by three spaces.
-- [ ] Given a `DisplayFile` entry with `offset: -8`, up to eight leading
+- [x] Given a `DisplayFile` entry with `offset: -8`, up to eight leading
       spaces are removed from each non-empty copied file content line.
-- [ ] Given a `DisplayFile` entry with `offset: 4`, each non-empty copied file
+- [x] Given a `DisplayFile` entry with `offset: 4`, each non-empty copied file
       content line is prefixed with four spaces inside the fenced block.
-- [ ] Validation rejects negative `DisplayFile.indent` values.
-- [ ] Validation accepts signed integer `DisplayFile.offset` values.
-- [ ] Validation warns, without failing, when a negative `DisplayFile.offset`
+- [x] Validation rejects negative `DisplayFile.indent` values.
+- [x] Validation accepts signed integer `DisplayFile.offset` values.
+- [x] Validation warns, without failing, when a negative `DisplayFile.offset`
       cannot be fully applied to all non-empty copied file content lines.
 
 ## Notes

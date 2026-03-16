@@ -1,4 +1,44 @@
+use std::fs;
+use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::sync::atomic::{AtomicU64, Ordering};
+use std::time::{SystemTime, UNIX_EPOCH};
+
+static NEXT_ID: AtomicU64 = AtomicU64::new(0);
+
+fn unique_temp_dir() -> PathBuf {
+    let nanos = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .expect("time went backwards")
+        .as_nanos();
+    let id = NEXT_ID.fetch_add(1, Ordering::Relaxed);
+    std::env::temp_dir().join(format!(
+        "sw-validate-test-{}-{nanos}-{id}",
+        std::process::id()
+    ))
+}
+
+fn prepare_workspace() -> PathBuf {
+    let dir = unique_temp_dir();
+    fs::create_dir_all(&dir).expect("failed to create temp dir");
+    dir
+}
+
+fn run_in_dir(args: &[&str], dir: &Path) -> std::process::Output {
+    Command::new(env!("CARGO_BIN_EXE_sw"))
+        .args(args)
+        .current_dir(dir)
+        .output()
+        .expect("failed to execute sw")
+}
+
+fn write_runbook(dir: &Path, fixture_name: &str, target_name: &str) -> PathBuf {
+    let source = Path::new("tests/fixtures").join(fixture_name);
+    let target = dir.join(target_name);
+    let contents = fs::read_to_string(source).expect("failed to read fixture");
+    fs::write(&target, contents).expect("failed to write fixture");
+    target
+}
 
 fn run(args: &[&str]) -> std::process::Output {
     Command::new(env!("CARGO_BIN_EXE_sw"))
@@ -520,6 +560,44 @@ fn invalid_display_file_indent_returns_validation_failure() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("\"valid\": false"));
     assert!(stdout.contains("\"path\": \"entries[0].indent\""));
+}
+
+#[test]
+fn negative_display_file_indent_returns_validation_failure() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-invalid-display-file-indent-negative.json",
+        "--output-format",
+        "json",
+    ]);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": false"));
+    assert!(stdout.contains("\"path\": \"entries[0].indent\""));
+    assert!(stdout.contains("non-negative integer"));
+}
+
+#[test]
+fn display_file_negative_offset_warning_keeps_runbook_valid() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-valid-display-file-offset-warning.json",
+        "sw-runbook.json",
+    );
+    fs::write(dir.join("Example.java"), "    four spaces\n  two spaces\n")
+        .expect("failed to write Example.java");
+
+    let output = run_in_dir(&["validate", "--output-format", "json"], &dir);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": true"));
+    assert!(stdout.contains("\"warnings\": ["));
+    assert!(stdout.contains("\"path\": \"entries[0].offset\""));
+    assert!(stdout.contains("cannot be fully applied"));
 }
 
 #[test]

@@ -29,7 +29,7 @@ pub fn run(args: ValidateArgs) -> ExitCode {
         }
     };
 
-    let result = runbook::validate(&runbook);
+    let result = runbook::validate(&runbook, &path);
 
     let print_result = match args.output_format {
         OutputFormat::Human => {

@@ -3,9 +3,7 @@
     {
       "type": "DisplayFile",
       "path": "./Example.java",
-      "start_line": 2,
-      "line_count": 5,
-      "offset": -8
+      "offset": 4
     }
   ]
 }

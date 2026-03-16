@@ -2,6 +2,8 @@ use super::{ValidationIssue, ValidationResult};
 use regex::Regex;
 use serde_json::{Map, Value};
 use std::collections::HashSet;
+use std::fs;
+use std::path::Path;
 use std::time::Duration;
 
 const CAPTURE_NAME_PATTERN: &str = r"^[A-Za-z_][A-Za-z0-9_]*$";
@@ -14,6 +16,17 @@ fn push_error(
     message: impl Into<String>,
 ) {
     errors.push(ValidationIssue {
+        path: path.into(),
+        message: message.into(),
+    });
+}
+
+fn push_warning(
+    warnings: &mut Vec<ValidationIssue>,
+    path: impl Into<String>,
+    message: impl Into<String>,
+) {
+    warnings.push(ValidationIssue {
         path: path.into(),
         message: message.into(),
     });
@@ -795,40 +808,46 @@ fn validate_file_assert_check(
 fn validate_entry(
     value: &Value,
     index: usize,
-    errors: &mut Vec<ValidationIssue>,
-    global_datetime_anchor_ids: &mut HashSet<String>,
-    global_capture_names: &mut HashSet<String>,
-    available_capture_names: &mut HashSet<String>,
+    runbook_path: &Path,
+    context: &mut ValidationContext,
 ) {
     let path = format!("entries[{index}]");
-    let Some(object) = as_object(value, &path, errors) else {
+    let Some(object) = as_object(value, &path, &mut context.errors) else {
         return;
     };
 
     let entry_type = match object.get("type").and_then(Value::as_str) {
         Some(entry_type) => entry_type,
         None => {
-            push_error(errors, format!("{path}.type"), "must be a string");
+            push_error(
+                &mut context.errors,
+                format!("{path}.type"),
+                "must be a string",
+            );
             return;
         }
     };
 
     match entry_type {
         "Heading" => {
-            require_string(object, "level", &path, errors);
-            require_string(object, "title", &path, errors);
+            require_string(object, "level", &path, &mut context.errors);
+            require_string(object, "title", &path, &mut context.errors);
         }
         "Markdown" => match object.get("contents") {
             Some(contents) => {
-                validate_string_array(contents, &format!("{path}.contents"), errors);
+                validate_string_array(contents, &format!("{path}.contents"), &mut context.errors);
                 validate_capture_references(
                     contents,
                     &format!("{path}.contents"),
-                    errors,
-                    available_capture_names,
+                    &mut context.errors,
+                    &context.available_capture_names,
                 );
             }
-            None => push_error(errors, format!("{path}.contents"), "is required"),
+            None => push_error(
+                &mut context.errors,
+                format!("{path}.contents"),
+                "is required",
+            ),
         },
         "DisplayFile" => {
             for key in object.keys() {
@@ -837,105 +856,154 @@ fn validate_entry(
                     && key != "start_line"
                     && key != "line_count"
                     && key != "indent"
+                    && key != "offset"
                 {
                     push_error(
-                        errors,
+                        &mut context.errors,
                         format!("{path}.{key}"),
                         "is not a supported DisplayFile property",
                     );
                 }
             }
 
-            require_string(object, "path", &path, errors);
-            validate_positive_integer(object, "start_line", &path, errors);
-            validate_positive_integer(object, "line_count", &path, errors);
-            if let Some(indent) = object.get("indent")
-                && !indent.is_i64()
-                && !indent.is_u64()
+            require_string(object, "path", &path, &mut context.errors);
+            validate_positive_integer(object, "start_line", &path, &mut context.errors);
+            validate_positive_integer(object, "line_count", &path, &mut context.errors);
+            if let Some(indent) = object.get("indent") {
+                match (indent.as_u64(), indent.as_i64()) {
+                    (Some(_), _) => {}
+                    (None, Some(value)) if value >= 0 => {}
+                    _ => push_error(
+                        &mut context.errors,
+                        format!("{path}.indent"),
+                        "must be a non-negative integer",
+                    ),
+                }
+            }
+
+            if let Some(offset) = object.get("offset")
+                && !offset.is_i64()
+                && !offset.is_u64()
             {
-                push_error(errors, format!("{path}.indent"), "must be an integer");
+                push_error(
+                    &mut context.errors,
+                    format!("{path}.offset"),
+                    "must be an integer",
+                );
             }
 
             if object.get("line_count").is_some() && object.get("start_line").is_none() {
                 push_error(
-                    errors,
+                    &mut context.errors,
                     format!("{path}.line_count"),
                     "requires `start_line`",
                 );
             }
+
+            maybe_warn_display_file_negative_offset(
+                object,
+                &path,
+                &mut context.warnings,
+                runbook_path,
+            );
         }
         "Prerequisite" => match object.get("checks") {
-            Some(checks) => validate_prerequisite_checks(checks, &format!("{path}.checks"), errors),
-            None => push_error(errors, format!("{path}.checks"), "is required"),
+            Some(checks) => {
+                validate_prerequisite_checks(checks, &format!("{path}.checks"), &mut context.errors)
+            }
+            None => push_error(&mut context.errors, format!("{path}.checks"), "is required"),
         },
         "Command" => {
             match object.get("commands") {
                 Some(commands) => {
-                    validate_string_array(commands, &format!("{path}.commands"), errors);
+                    validate_string_array(
+                        commands,
+                        &format!("{path}.commands"),
+                        &mut context.errors,
+                    );
                     validate_capture_references(
                         commands,
                         &format!("{path}.commands"),
-                        errors,
-                        available_capture_names,
+                        &mut context.errors,
+                        &context.available_capture_names,
                     );
                 }
-                None => push_error(errors, format!("{path}.commands"), "is required"),
+                None => push_error(
+                    &mut context.errors,
+                    format!("{path}.commands"),
+                    "is required",
+                ),
             }
 
             if let Some(indent) = object.get("indent")
                 && !indent.is_i64()
                 && !indent.is_u64()
             {
-                push_error(errors, format!("{path}.indent"), "must be an integer");
+                push_error(
+                    &mut context.errors,
+                    format!("{path}.indent"),
+                    "must be an integer",
+                );
             }
 
             if let Some(output) = object.get("output") {
                 validate_output_with_context(
                     output,
                     &format!("{path}.output"),
-                    errors,
-                    global_datetime_anchor_ids,
-                    global_capture_names,
-                    available_capture_names,
+                    &mut context.errors,
+                    &mut context.global_datetime_anchor_ids,
+                    &mut context.global_capture_names,
+                    &context.available_capture_names,
                 );
-                register_rewrite_generated_capture_names(output, available_capture_names);
+                register_rewrite_generated_capture_names(
+                    output,
+                    &mut context.available_capture_names,
+                );
             }
 
             if let Some(assertion) = object.get("assert") {
-                validate_assert(assertion, &format!("{path}.assert"), errors);
+                validate_assert(assertion, &format!("{path}.assert"), &mut context.errors);
             }
 
             if let Some(timeout) = object.get("timeout") {
-                validate_timeout(timeout, &format!("{path}.timeout"), errors);
+                validate_timeout(timeout, &format!("{path}.timeout"), &mut context.errors);
             }
 
             if let Some(cleanup) = object.get("cleanup") {
-                validate_string_array(cleanup, &format!("{path}.cleanup"), errors);
+                validate_string_array(cleanup, &format!("{path}.cleanup"), &mut context.errors);
             }
 
             if let Some(capture) = object.get("capture") {
                 validate_capture(
                     capture,
                     &format!("{path}.capture"),
-                    errors,
-                    global_capture_names,
+                    &mut context.errors,
+                    &mut context.global_capture_names,
                 );
 
                 if let Some(captures) = capture.as_array() {
                     for capture in captures {
                         if let Some(name) = capture.get("name").and_then(Value::as_str) {
-                            available_capture_names.insert(name.to_string());
+                            context.available_capture_names.insert(name.to_string());
                         }
                     }
                 }
             }
         }
         _ => push_error(
-            errors,
+            &mut context.errors,
             format!("{path}.type"),
             format!("unsupported entry type `{entry_type}`"),
         ),
     }
+}
+
+struct ValidationContext {
+    errors: Vec<ValidationIssue>,
+    warnings: Vec<ValidationIssue>,
+    global_datetime_anchor_ids: HashSet<String>,
+    global_capture_names: HashSet<String>,
+    available_capture_names: HashSet<String>,
 }
 
 fn validate_prerequisite_checks(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>) {
@@ -1123,26 +1191,28 @@ fn parse_timeout(timeout: &str) -> Result<Duration, ()> {
     Ok(Duration::from_secs(seconds))
 }
 
-pub fn validate(runbook: &Value) -> ValidationResult {
-    let mut errors = Vec::new();
-    let warnings = Vec::new();
-    let mut global_datetime_anchor_ids = HashSet::new();
-    let mut global_capture_names = HashSet::new();
-    let mut available_capture_names = HashSet::new();
+pub fn validate(runbook: &Value, runbook_path: &Path) -> ValidationResult {
+    let mut context = ValidationContext {
+        errors: Vec::new(),
+        warnings: Vec::new(),
+        global_datetime_anchor_ids: HashSet::new(),
+        global_capture_names: HashSet::new(),
+        available_capture_names: HashSet::new(),
+    };
 
-    let Some(object) = as_object(runbook, "$", &mut errors) else {
+    let Some(object) = as_object(runbook, "$", &mut context.errors) else {
         return ValidationResult {
             schema_version: "1",
             valid: false,
-            errors,
-            warnings,
+            errors: context.errors,
+            warnings: context.warnings,
         };
     };
 
     for key in object.keys() {
         if key != "entries" {
             push_error(
-                &mut errors,
+                &mut context.errors,
                 format!("$.{key}"),
                 "unknown top-level property",
             );
@@ -1151,30 +1221,88 @@ pub fn validate(runbook: &Value) -> ValidationResult {
 
     match object.get("entries") {
         Some(entries) => {
-            if let Some(items) = as_array(entries, "$.entries", &mut errors) {
+            if let Some(items) = as_array(entries, "$.entries", &mut context.errors) {
                 if items.is_empty() {
-                    push_error(&mut errors, "$.entries", "must not be empty");
+                    push_error(&mut context.errors, "$.entries", "must not be empty");
                 }
 
                 for (index, entry) in items.iter().enumerate() {
-                    validate_entry(
-                        entry,
-                        index,
-                        &mut errors,
-                        &mut global_datetime_anchor_ids,
-                        &mut global_capture_names,
-                        &mut available_capture_names,
-                    );
+                    validate_entry(entry, index, runbook_path, &mut context);
                 }
             }
         }
-        None => push_error(&mut errors, "$.entries", "is required"),
+        None => push_error(&mut context.errors, "$.entries", "is required"),
     }
 
     ValidationResult {
         schema_version: "1",
-        valid: errors.is_empty(),
-        errors,
-        warnings,
+        valid: context.errors.is_empty(),
+        errors: context.errors,
+        warnings: context.warnings,
+    }
+}
+
+fn maybe_warn_display_file_negative_offset(
+    object: &Map<String, Value>,
+    path: &str,
+    warnings: &mut Vec<ValidationIssue>,
+    runbook_path: &Path,
+) {
+    let Some(offset) = object.get("offset").and_then(Value::as_i64) else {
+        return;
+    };
+    if offset >= 0 {
+        return;
+    }
+
+    let Some(relative_path) = object.get("path").and_then(Value::as_str) else {
+        return;
+    };
+
+    let base_dir = runbook_path.parent().unwrap_or_else(|| Path::new("."));
+    let display_path = base_dir.join(relative_path);
+    let Ok(contents) = fs::read_to_string(&display_path) else {
+        return;
+    };
+
+    let start_line = object
+        .get("start_line")
+        .and_then(Value::as_u64)
+        .map(|value| value as usize)
+        .unwrap_or(1);
+    let line_count = object
+        .get("line_count")
+        .and_then(Value::as_u64)
+        .map(|value| value as usize);
+
+    let lines: Vec<&str> = contents.lines().collect();
+    let start_index = start_line.saturating_sub(1);
+    if start_index >= lines.len() {
+        return;
+    }
+    let end_index = match line_count {
+        Some(count) => start_index.saturating_add(count).min(lines.len()),
+        None => lines.len(),
+    };
+
+    let spaces_to_remove = offset.unsigned_abs() as usize;
+    let partially_applicable = lines[start_index..end_index].iter().any(|line| {
+        if line.is_empty() {
+            return false;
+        }
+
+        let leading_spaces = line.bytes().take_while(|byte| *byte == b' ').count();
+        leading_spaces < spaces_to_remove
+    });
+
+    if partially_applicable {
+        push_warning(
+            warnings,
+            format!("{path}.offset"),
+            format!(
+                "negative offset {} cannot be fully applied to all non-empty lines; some lines have fewer than {} leading spaces",
+                offset, spaces_to_remove
+            ),
+        );
     }
 }

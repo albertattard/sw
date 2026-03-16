@@ -48,6 +48,9 @@ pub fn read(path: &Path) -> Result<Value, String> {
 pub fn print_human_with_runbook(result: &ValidationResult, path: &Path, runbook: Option<&Value>) {
     if result.valid {
         println!("Runbook is valid: {}", path.display());
+        for warning in &result.warnings {
+            println!("- warning {}: {}", warning.path, warning.message);
+        }
         return;
     }
 
@@ -65,6 +68,9 @@ pub fn print_human_with_runbook(result: &ValidationResult, path: &Path, runbook:
         for line in format_validation_entry(context).lines() {
             println!("    {line}");
         }
+    }
+    for warning in &result.warnings {
+        println!("- warning {}: {}", warning.path, warning.message);
     }
 }
 

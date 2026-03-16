@@ -1414,7 +1414,7 @@ fn display_file_can_render_from_start_line_to_end_of_file() {
 }
 
 #[test]
-fn display_file_positive_indent_prefixes_non_empty_lines() {
+fn display_file_indent_prefixes_the_whole_fenced_block() {
     let dir = prepare_workspace();
     write_runbook(
         &dir,
@@ -1428,11 +1428,11 @@ fn display_file_positive_indent_prefixes_non_empty_lines() {
 
     assert!(output.status.success());
     let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
-    assert!(readme.contains("```java\n  line 1\n\n  line 3\n```"));
+    assert!(readme.contains("  ```java\n  line 1\n\n  line 3\n  ```"));
 }
 
 #[test]
-fn display_file_negative_indent_can_remove_leading_spaces() {
+fn display_file_negative_offset_can_remove_leading_spaces() {
     let dir = prepare_workspace();
     write_runbook(
         &dir,
@@ -1452,6 +1452,24 @@ fn display_file_negative_indent_can_remove_leading_spaces() {
     assert!(readme.contains(
         "```java\npublic void demo() {\n    if (ready) {\n        work();\n    }\n}\n```"
     ));
+}
+
+#[test]
+fn display_file_positive_offset_can_add_leading_spaces_inside_the_fence() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-display-file-offset-positive.json",
+        "sw-runbook.json",
+    );
+    fs::write(dir.join("Example.java"), "line 1\n\nline 3\n")
+        .expect("failed to write Example.java");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```java\n    line 1\n\n    line 3\n```"));
 }
 
 #[test]
