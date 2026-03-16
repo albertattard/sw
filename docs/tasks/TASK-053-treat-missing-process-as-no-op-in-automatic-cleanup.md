@@ -1,7 +1,7 @@
 ---
 id: TASK-053
 title: Treat Missing Process As No-op In Automatic Cleanup
-status: open
+status: done
 related_features:
   - SPEC-003
 owner: @aattard
@@ -30,11 +30,11 @@ without printing noisy warnings.
 
 ## Acceptance Criteria
 
-- [ ] Given automatic cleanup for a command whose process group has already
+- [x] Given automatic cleanup for a command whose process group has already
       exited, the run still succeeds if nothing else failed.
-- [ ] Given automatic cleanup for a command whose process group has already
+- [x] Given automatic cleanup for a command whose process group has already
       exited, stderr does not include a "No such process" warning.
-- [ ] Existing automatic cleanup behavior remains unchanged when the process
+- [x] Existing automatic cleanup behavior remains unchanged when the process
       group still exists and must be terminated.
 
 ## Notes

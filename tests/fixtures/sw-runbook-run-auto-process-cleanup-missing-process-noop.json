@@ -1,0 +1,16 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "sleep 0.1 &",
+        "echo 'spawned short-lived background process'",
+        "sleep 0.3",
+        "echo 'done'"
+      ],
+      "output": {
+        "caption": "Command output"
+      }
+    }
+  ]
+}

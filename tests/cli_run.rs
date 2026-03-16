@@ -710,6 +710,25 @@ fn command_without_cleanup_automatically_terminates_started_processes_after_time
 }
 
 #[test]
+fn automatic_cleanup_treats_missing_process_group_as_noop() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-auto-process-cleanup-missing-process-noop.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(!stderr.contains("No such process"));
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("Command output"));
+    assert!(readme.contains("done"));
+}
+
+#[test]
 fn command_with_cleanup_uses_manual_cleanup_instead_of_automatic_process_cleanup() {
     let dir = prepare_workspace();
     write_runbook(

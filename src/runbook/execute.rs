@@ -448,12 +448,22 @@ fn terminate_child(child: &mut std::process::Child) -> Result<(), RenderError> {
 
 #[cfg(unix)]
 fn terminate_process_group(process_group_id: u32) -> Result<bool, RenderError> {
-    let status = Command::new("kill")
+    let output = Command::new("kill")
         .arg("-9")
         .arg(format!("-{process_group_id}"))
-        .status()
+        .output()
         .map_err(|err| {
             RenderError::Operational(format!("Failed to terminate command processes: {err}"))
         })?;
-    Ok(status.success())
+
+    if output.status.success() {
+        return Ok(true);
+    }
+
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    if stderr.contains("No such process") {
+        return Ok(true);
+    }
+
+    Ok(false)
 }
