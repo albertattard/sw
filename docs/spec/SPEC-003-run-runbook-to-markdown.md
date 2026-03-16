@@ -4,7 +4,7 @@ title: Run Runbook to Markdown
 status: in_progress
 priority: high
 owner: @aattard
-last_updated: 2026-03-15
+last_updated: 2026-03-16
 ---
 
 ## Problem
@@ -251,6 +251,35 @@ in the runbook.
 - If any prerequisite check fails, the run stops before executing the main
   workflow.
 - A failed prerequisite check is reported as a run failure with exit code `2`.
+
+### Patch Entries
+
+- `Patch` entries apply a textual patch to a target file during runbook
+  execution.
+- `Patch.path` is resolved relative to the runbook location.
+- `Patch` entries declare `patch` as an array of patch lines.
+- Patch lines are executed as one patch application step in the declared
+  order.
+- `Patch` entries render their patch contents as fenced `diff` blocks in the
+  generated Markdown.
+- A `Patch` entry may declare `indent`.
+- If `indent` is present, the rendered patch section is prefixed with that
+  number of leading spaces on each rendered line.
+- `Patch` entries are executed in order with other runbook entries.
+- `Patch` entries default to `restore: auto`.
+- `restore: auto` snapshots the original target file contents before the first
+  patch touching that file is applied in a run.
+- `restore: auto` restores the original pre-run contents after the run
+  completes successfully and also when the run stops early because of failure
+  or timeout.
+- If multiple `Patch` entries modify the same file, they may build on each
+  other during the run.
+- Automatic patch restoration unwinds in reverse patch-application order.
+- When multiple `Patch` entries modify the same file, restoration returns that
+  file to its original pre-run contents rather than to an intermediate state.
+- Automatic patch restoration is best-effort and continues unwinding later
+  registered patch restores even if an earlier restore step fails.
+- A run with one or more patch restore failures is considered failed.
 
 ### Command Entries
 
@@ -559,6 +588,22 @@ in the runbook.
 - [ ] Given passing prerequisite checks, the run continues to the main
       workflow.
 
+### Patch Entries
+
+- [ ] Given a runbook with `Patch` entries, the generated Markdown includes
+      fenced `diff` blocks for those patches.
+- [ ] Given a `Patch` entry without an explicit restore setting, the patched
+      file is restored automatically after a successful run.
+- [ ] Given a `Patch` entry without an explicit restore setting, the patched
+      file is restored automatically after a failed or timed-out run.
+- [ ] Given multiple `Patch` entries that modify the same file, later patch
+      entries may build on the earlier patched state during the run.
+- [ ] Given multiple `Patch` entries that modify the same file, restoration
+      unwinds in reverse patch-application order and leaves the file in its
+      original pre-run state.
+- [ ] Given a failure while restoring one patched file, later registered patch
+      restores still run.
+
 ### Command Execution
 
 - [ ] Given a runbook with `Command` entries, the commands are executed in the
@@ -816,6 +861,12 @@ in the runbook.
 - `DisplayFile` uses positive `indent` to nest a snippet more deeply.
 - `DisplayFile` uses negative `indent` to remove surrounding code indentation
   from a sliced method body.
+- `Patch` entry targets a missing file.
+- Multiple `Patch` entries modify the same file in sequence.
+- A `Patch` entry succeeds but the run later fails and restore still needs to
+  return the file to its original state.
+- A patch restore step fails but later registered patch restores still need to
+  run.
 - Output path points to an unwritable location.
 - Existing output file already present.
 - Command entry with multi-line commands.
@@ -925,7 +976,11 @@ extensible: `assert.exit_code` handles process-level expectations, while
 `source: file` with `exists` and `sha256`, while leaving room for future
 operators such as regular-expression or equality checks. Command execution must
 also enforce a bounded runtime so runaway processes do not remain after a
-failed run. Cleanup
+failed run. First-class patch execution should snapshot original target files
+before the first patch touches them so stacked patches can be restored safely
+without requiring authors to hand-write reverse patches. Patch restoration
+should unwind in reverse registration order and restore files to their
+original pre-run bytes rather than to intermediate patched states. Cleanup
 behavior should remain deterministic so resources started by earlier commands
 are reliably released even when the run stops early. Cleanup should be best
 effort rather than fail-fast: all registered cleanup blocks and all cleanup
