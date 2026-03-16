@@ -177,17 +177,27 @@ in the runbook.
 - `DisplayFile` may declare `start_line`.
 - `DisplayFile` may declare `line_count`.
 - `DisplayFile` may declare `indent`.
+- `DisplayFile` may declare `offset`.
 - `start_line` is 1-based.
 - If `start_line` is omitted, rendering starts from line 1.
 - If `start_line` is present and `line_count` is omitted, rendering continues
   from `start_line` to the end of the file.
 - If `line_count` is present, only that many lines are rendered starting from
   `start_line`.
-- If `indent` is present and positive, each non-empty rendered file line is
-  prefixed with that many spaces.
-- If `indent` is present and negative, up to that many leading spaces are
-  removed from each non-empty rendered file line.
-- Empty rendered file lines are preserved when `indent` is applied.
+- If `indent` is present, it is a non-negative integer.
+- `indent` applies to the whole rendered fenced block, including the opening
+  fence, inner content lines, and closing fence.
+- If `offset` is present, it is an integer.
+- `offset` applies only to the copied file content lines inside the fenced
+  block.
+- If `offset` is positive, each non-empty copied file content line is prefixed
+  with that many spaces.
+- If `offset` is negative, up to that many leading spaces are removed from each
+  non-empty copied file content line.
+- Empty copied file content lines are preserved when `offset` is applied.
+- If `offset` is negative and one or more non-empty copied file content lines
+  have fewer leading spaces than requested, validation may emit a non-blocking
+  warning that the negative offset cannot be fully applied to all lines.
 - `line_count` without `start_line` is invalid.
 - `DisplayFile` rendering does not execute the referenced file.
 - `DisplayFile` fenced blocks use a detected content type when the file
@@ -518,12 +528,16 @@ in the runbook.
       requested slice is rendered.
 - [ ] Given a `DisplayFile` entry with `start_line` and no `line_count`,
       rendering continues from that line to the end of the file.
-- [ ] Given a `DisplayFile` entry with a positive `indent`, each non-empty
-      rendered file line is prefixed with that many spaces.
-- [ ] Given a `DisplayFile` entry with a negative `indent`, up to that many
-      leading spaces are removed from each non-empty rendered file line.
-- [ ] Given a `DisplayFile` entry with blank lines and `indent`, blank lines
-      remain blank in the rendered output.
+- [ ] Given a `DisplayFile` entry with `indent`, the opening fence, copied
+      content lines, and closing fence are all prefixed with that many spaces.
+- [ ] Given a `DisplayFile` entry with a positive `offset`, each non-empty
+      copied file content line is prefixed with that many spaces inside the
+      fenced block.
+- [ ] Given a `DisplayFile` entry with a negative `offset`, up to that many
+      leading spaces are removed from each non-empty copied file content line
+      inside the fenced block.
+- [ ] Given a `DisplayFile` entry with blank lines and `offset`, blank copied
+      file content lines remain blank in the rendered output.
 
 ### Prerequisite Entries
 

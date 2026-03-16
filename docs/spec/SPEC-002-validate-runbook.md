@@ -128,6 +128,12 @@ Exit codes:
   make timeout or progress behavior misleading.
 - The warning recommends redirecting output to a file and saving `$!` to a PID
   file when the process needs to keep running across later steps.
+- In this increment, validation also warns when a `DisplayFile` entry uses a
+  negative `offset` that cannot be fully applied to all non-empty copied file
+  content lines.
+- This warning explains that some lines have fewer leading spaces than the
+  requested negative offset and that the content shift will therefore be only
+  partially applied on those lines.
 
 ## Notes for Reimplementation
 
