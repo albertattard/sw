@@ -4,7 +4,7 @@ title: Run Runbook to Markdown
 status: in_progress
 priority: high
 owner: @aattard
-last_updated: 2026-03-13
+last_updated: 2026-03-15
 ---
 
 ## Problem
@@ -26,6 +26,7 @@ The CLI also provides an explicit `run` command:
 
 ```bash
 sw
+sw --verbose
 sw run
 sw run --input-file <sw-runbook.json>
 ```
@@ -45,6 +46,9 @@ in the runbook.
 - Optional named input file parameter: `--input-file <runbook.json>`.
 - Optional output format parameter: `--output-format markdown`.
 - Optional output file parameter: `--output-file <path>`.
+- Optional progress parameter: `--verbose`.
+- `--verbose` may be provided either before the subcommand as a global flag or
+  after the `run` subcommand.
 
 ### CLI Defaults
 
@@ -52,11 +56,15 @@ in the runbook.
   `./sw-runbook.json`.
 - If `--output-format` is not provided, default to `markdown`.
 - If `--output-file` is not provided, default to `./README.md`.
+- If `--verbose` is not provided, progress output is suppressed.
+- If `sw` is invoked without a subcommand, `sw --verbose` behaves the same as
+  `sw run --verbose`.
 
 ## Outputs
 
 - Generated Markdown file written to the target path.
 - Human-readable status on stdout.
+- Optional human-readable progress output on stderr when `--verbose` is used.
 
 ### Exit Codes
 
@@ -68,6 +76,35 @@ in the runbook.
 ### Supported Output Formats
 
 - `markdown`
+
+### Verbose Progress Output
+
+- `sw run --verbose` emits one progress line before each runbook entry begins.
+- `sw --verbose` behaves the same as `sw run --verbose`.
+- Verbose progress output is written to stderr.
+- Verbose progress output is intended to help humans and agents follow
+  long-running execution without changing the stable stdout contract.
+- Each verbose line includes the entry position, the total number of entries,
+  the entry type, and a short summary.
+- The current entry number is left-padded with spaces so all entry numbers
+  align to the width of the total entry count.
+- `Markdown` entry summaries use the first non-empty content line.
+- `Command` entry summaries use the first non-empty command line.
+- `Heading` entry summaries use the title.
+- `DisplayFile` entry summaries use the file path and any declared line range.
+- `Prerequisite` entry summaries identify that prerequisite checks are being
+  processed.
+- Summaries are single-line and may be truncated for readability.
+- Verbose progress output does not print full long-form Markdown content or
+  full multi-line command blocks.
+- When stderr is a TTY, the current entry line includes a live elapsed timer
+  that updates in place while that entry is running.
+- While an entry is still running, the timer is rendered with a trailing `...`
+  to show that it is still increasing.
+- When an entry finishes, the final elapsed time remains on the completed line
+  without the trailing `...`.
+- When stderr is not a TTY, verbose progress falls back to non-live line-based
+  output and does not attempt in-place timer updates.
 
 ## Rendering Rules
 
@@ -368,6 +405,12 @@ in the runbook.
       renders entries in order and exits with `0`.
 - [ ] Given `--output-file <path>`, the command writes the output to the
       provided path.
+- [ ] Given `sw run --verbose`, progress lines are written to stderr without
+      changing the existing stdout contract.
+- [ ] Given `sw --verbose` with no subcommand, the command behaves the same as
+      `sw run --verbose`.
+- [ ] Given `sw run --verbose`, entry numbers are padded so summaries align to
+      the same starting column.
 - [ ] Given an invalid runbook, the command exits with `2` and does not write a
       partial output file, and the human-readable validation output includes a
       nearby offending block for entry-scoped validation errors.
@@ -440,6 +483,15 @@ in the runbook.
       fenced command blocks.
 - [ ] Given a `Command` entry with `indent`, each rendered line in that
       command section is prefixed with the configured number of spaces.
+- [ ] Given `sw run --verbose`, a `Markdown` entry summary uses the first
+      non-empty content line instead of the full block contents.
+- [ ] Given `sw run --verbose`, a `Command` entry summary uses the first
+      non-empty command line instead of the full command block.
+- [ ] Given `sw run --verbose` with stderr attached to a TTY, the current
+      entry line shows a live elapsed timer that updates in place while the
+      entry is running.
+- [ ] Given `sw run --verbose` with stderr not attached to a TTY, progress
+      output falls back to non-live line-based output.
 
 ### Command Cleanup
 
