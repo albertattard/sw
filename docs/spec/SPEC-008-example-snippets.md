@@ -3,7 +3,7 @@
 - Status: Draft
 - Owner: `@aattard`
 - Created: `2026-03-13`
-- Updated: `2026-03-13`
+- Updated: `2026-03-16`
 
 ## Goal
 
@@ -29,6 +29,7 @@ The snippet is intended as a copyable starting point.
 In this increment, supported entity types include:
 - `Command`
 - `DisplayFile`
+- `Patch`
 - `Prerequisite`
 
 ## Outputs
@@ -57,6 +58,8 @@ In this increment, supported entity types include:
       `Command` entry with its commonly used nested properties.
 - [ ] Given `sw example DisplayFile`, the CLI prints a valid JSON example of a
       `DisplayFile` entry.
+- [ ] Given `sw example Patch`, the CLI prints a valid JSON example of a
+      `Patch` entry that reflects the current automatic-restore contract.
 - [ ] Given `sw example command`, the CLI behaves the same as
       `sw example Command`.
 - [ ] Given an unsupported entity type, the CLI exits with `1` and reports
@@ -77,3 +80,5 @@ In this increment, supported entity types include:
 - Entry example becomes so minimal that users must immediately drill down into
   other examples to do anything useful.
 - Example output drifts from the currently supported schema.
+- A newly supported runbook entry type is implemented in `run` but missing from
+  `sw example`.
