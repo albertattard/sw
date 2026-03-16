@@ -1,7 +1,7 @@
 ---
 id: TASK-054
 title: Add Verbose Run Progress Output
-status: open
+status: done
 related_features:
   - SPEC-003
 owner: @aattard
@@ -37,20 +37,20 @@ entry is currently being processed.
 
 ## Acceptance Criteria
 
-- [ ] Given `sw run --verbose`, the CLI prints one progress line per entry to
+- [x] Given `sw run --verbose`, the CLI prints one progress line per entry to
       stderr.
-- [ ] Given `sw --verbose` with no subcommand, the CLI behaves the same as
+- [x] Given `sw --verbose` with no subcommand, the CLI behaves the same as
       `sw run --verbose`.
-- [ ] Given `sw run --verbose`, entry numbers are padded to align summaries.
-- [ ] Given `sw run --verbose`, `Markdown` entries use the first non-empty
+- [x] Given `sw run --verbose`, entry numbers are padded to align summaries.
+- [x] Given `sw run --verbose`, `Markdown` entries use the first non-empty
       content line as the progress summary.
-- [ ] Given `sw run --verbose`, `Command` entries use the first non-empty
+- [x] Given `sw run --verbose`, `Command` entries use the first non-empty
       command line as the progress summary.
-- [ ] Given `sw run --verbose` on a TTY, the current entry line shows a
+- [x] Given `sw run --verbose` on a TTY, the current entry line shows a
       live-updating elapsed timer until the entry completes.
-- [ ] Given `sw run --verbose` without a TTY stderr stream, progress output
+- [x] Given `sw run --verbose` without a TTY stderr stream, progress output
       falls back to non-live line-based output.
-- [ ] Given `sw run` without `--verbose`, the current stdout and stderr
+- [x] Given `sw run` without `--verbose`, the current stdout and stderr
       behavior remains unchanged.
 
 ## Notes

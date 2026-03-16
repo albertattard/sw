@@ -66,7 +66,6 @@ File-based task tracker for Sociable Weaver.
 - [ ] [TASK-034: Expand Help Command Coverage](./TASK-034-expand-help-command-coverage.md)
 - [ ] [TASK-038: Include Release Commit History In README](./TASK-038-include-release-commit-history-in-readme.md)
 - [ ] [TASK-043: Implement Explain Command](./TASK-043-implement-explain-command.md)
-- [ ] [TASK-054: Add Verbose Run Progress Output](./TASK-054-add-verbose-run-progress-output.md)
 
 ## In Progress
 
@@ -124,6 +123,7 @@ File-based task tracker for Sociable Weaver.
 - [x] [TASK-051: Default To Automatic Command Process Cleanup](./TASK-051-support-automatic-command-process-cleanup.md)
 - [x] [TASK-052: Support Built-In Java Prerequisite Checks](./TASK-052-support-built-in-java-prerequisite-checks.md)
 - [x] [TASK-053: Treat Missing Process As No-op In Automatic Cleanup](./TASK-053-treat-missing-process-as-no-op-in-automatic-cleanup.md)
+- [x] [TASK-054: Add Verbose Run Progress Output](./TASK-054-add-verbose-run-progress-output.md)
 
 ## Blocked
 

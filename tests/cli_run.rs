@@ -124,6 +124,37 @@ fn run_command_writes_requested_output_file() {
 }
 
 #[test]
+fn verbose_run_reports_entry_progress_to_stderr() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-run-success.json", "sw-runbook.json");
+
+    let output = run_in_dir(&["run", "--verbose"], &dir);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert_eq!(stdout.trim(), "Rendered runbook to README.md");
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("[1/5] Heading: Runbook execution ("));
+    assert!(
+        stderr.contains("[2/5] Markdown: This runbook verifies command execution and rendering. (")
+    );
+    assert!(stderr.contains("[3/5] Command: printf 'first\\n' > sequence.txt ("));
+}
+
+#[test]
+fn verbose_flag_before_subcommand_uses_default_run_behavior() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-run-success.json", "sw-runbook.json");
+
+    let output = run_in_dir(&["--verbose"], &dir);
+
+    assert!(output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("[1/5] Heading: Runbook execution ("));
+    assert!(stderr.contains("[5/5] Command: printf 'Hello there\\n' ("));
+}
+
+#[test]
 fn generated_marker_appears_before_rendered_entries() {
     let dir = prepare_workspace();
     write_runbook(&dir, "sw-runbook-run-success.json", "sw-runbook.json");

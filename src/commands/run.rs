@@ -3,7 +3,7 @@ use crate::runbook;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
-pub fn run(args: RunArgs) -> ExitCode {
+pub fn run(args: RunArgs, verbose: bool) -> ExitCode {
     let input_path = args
         .input_file
         .unwrap_or_else(|| PathBuf::from("sw-runbook.json"));
@@ -26,7 +26,8 @@ pub fn run(args: RunArgs) -> ExitCode {
     }
 
     let markdown = match args.output_format {
-        RunOutputFormat::Markdown => match runbook::render_markdown(&runbook, &input_path) {
+        RunOutputFormat::Markdown => match runbook::render_markdown(&runbook, &input_path, verbose)
+        {
             Ok(markdown) => markdown,
             Err(runbook::RenderError::Operational(message)) => {
                 eprintln!("{message}");

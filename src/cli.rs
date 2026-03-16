@@ -10,6 +10,10 @@ use std::path::PathBuf;
     after_help = "Still weaving the nest. Features are hatching soon."
 )]
 pub struct Cli {
+    /// Print entry progress while running long workflows.
+    #[arg(long, global = true)]
+    pub verbose: bool,
+
     #[command(subcommand)]
     pub command: Option<Commands>,
 }
