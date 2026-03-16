@@ -329,6 +329,10 @@ in the runbook.
   `@{<capture_as>_original}` and `@{<capture_as>_rewritten}`.
 - `capture_as` generated variable names participate in the same runbook-wide
   uniqueness rules as explicit `capture` names.
+- If a rewrite rule with `capture_as` matches anything other than exactly one
+  value, the run fails.
+- A rewrite `capture_as` failure reports the failing `Command` entry together
+  with the captured stdout and stderr so users can see why the match failed.
 - A `replace` rewrite rule may interpolate captured variables inside its
   `pattern` text using `@{name}` syntax.
 - `@@{name}` inside a `replace` rule `pattern` preserves the literal
@@ -631,6 +635,10 @@ in the runbook.
       reference those generated variables using the normal capture syntax.
 - [ ] Given a rewrite rule with `capture_as` whose generated names collide with
       an existing captured variable, validation rejects the runbook.
+- [ ] Given a rewrite rule with `capture_as` that matches zero values or more
+      than one value, the run exits with `2`, does not write a partial output
+      file, and reports the failing `Command` entry together with the captured
+      stdout and stderr.
 - [ ] Given a `replace` rewrite rule `pattern` that uses `@{name}` after that
       variable is captured earlier in the runbook, the pattern text includes
       the captured value before matching.
