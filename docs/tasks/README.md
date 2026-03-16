@@ -125,6 +125,7 @@ Expected task directories:
 - [TASK-061: Add Debug Run Diagnostics](run/TASK-061-add-debug-run-diagnostics.md)
 - [TASK-062: Support Command-Scoped Debug Diagnostics](run/TASK-062-support-command-scoped-debug-diagnostics.md)
 - [TASK-063: Separate DisplayFile Indent And Offset](display-file/TASK-063-separate-display-file-indent-and-offset.md)
+- [TASK-064: Support Variable RFC3339 Fractional Seconds](rewrite/TASK-064-support-variable-rfc3339-fractional-seconds.md)
 
 ## Pending
 
@@ -136,6 +137,7 @@ Expected task directories:
 - [ ] [TASK-043: Implement Explain Command](explain/TASK-043-implement-explain-command.md)
 - [ ] [TASK-056: Warn About Background Commands Holding Command Pipes Open](validate/TASK-056-warn-about-background-commands-holding-command-pipes-open.md)
 - [ ] [TASK-059: Implement Format Command](format/TASK-059-implement-format-command.md)
+- [ ] [TASK-064: Support Variable RFC3339 Fractional Seconds](rewrite/TASK-064-support-variable-rfc3339-fractional-seconds.md)
 
 ## In Progress
 
