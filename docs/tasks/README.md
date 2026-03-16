@@ -2,6 +2,39 @@
 
 File-based task tracker for Sociable Weaver.
 
+## Task Metadata
+
+New task files must include these front matter fields:
+
+- `id`
+- `title`
+- `status`
+- `category`
+- `related_features`
+- `owner`
+- `created`
+- `updated`
+
+## Task Categories
+
+Use one of these controlled `category` values for new tasks:
+
+- `discovery`
+- `validate`
+- `run`
+- `rewrite`
+- `prerequisite`
+- `display-file`
+- `example`
+- `explain`
+- `init`
+- `import`
+- `release`
+- `repo-process`
+
+These categories group tasks by feature or workstream without changing the
+flat task history. Existing task files may be backfilled incrementally.
+
 ## Task Files
 
 - [TASK-001: Implement SPEC-001 Help Placeholder](./TASK-001-implement-help-placeholder.md)

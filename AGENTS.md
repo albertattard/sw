@@ -15,7 +15,7 @@
     - `Commit:` with the short commit hash
     - `Branch:` with the branch name
     - `Remote:` with the pushed remote and branch
-    - `Commit message used:` followed by the full commit message as wrapped plain text with a blank line between subject and body, in a fenced code block
+    - `Commit message used:` followed by the full commit message with a blank line between subject and body
     - If unrelated local changes were intentionally left uncommitted, list them under `I left unrelated local changes uncommitted:`
 
 ## Git workflow
@@ -61,6 +61,20 @@ tying the test suite to a specific project.
 - If implementation and spec differ, treat the implementation as wrong until the spec is intentionally updated.
 - Do not change user-visible behavior without updating the relevant spec and task.
 - Treat specs as living documents and tasks as bounded delivery slices.
+- New task files must include a `category` field in front matter.
+- Use one of these controlled task categories when creating new tasks:
+  - `discovery`
+  - `validate`
+  - `run`
+  - `rewrite`
+  - `prerequisite`
+  - `display-file`
+  - `example`
+  - `explain`
+  - `init`
+  - `import`
+  - `release`
+  - `repo-process`
 - When a spec grows, prefer creating a new task for the new increment instead of reopening an already completed task.
 - Keep completed tasks as historical records unless they were tracked incorrectly.
 - Do not mark a task as done or check its acceptance criteria until the implementation and verification for that task have actually been completed.
