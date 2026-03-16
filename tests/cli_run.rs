@@ -139,6 +139,8 @@ fn verbose_run_reports_entry_progress_to_stderr() {
         stderr.contains("[2/5] Markdown: This runbook verifies command execution and rendering. (")
     );
     assert!(stderr.contains("[3/5] Command: printf 'first\\n' > sequence.txt ("));
+    assert!(stderr.contains(" / 2m)"));
+    assert!(!stderr.contains("...)"));
 }
 
 #[test]

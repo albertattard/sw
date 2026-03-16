@@ -169,9 +169,9 @@ struct ProgressReporter {
 }
 
 struct EntryProgress {
-    mode: ProgressMode,
     line: String,
     started_at: Instant,
+    timeout: Option<String>,
     stop_signal: Option<Arc<AtomicBool>>,
     thread: Option<thread::JoinHandle<()>>,
 }
@@ -201,13 +201,13 @@ impl ProgressReporter {
         match self.mode {
             ProgressMode::Off => None,
             ProgressMode::Plain => Some(EntryProgress {
-                mode: ProgressMode::Plain,
                 line: format_progress_line(
                     index + 1,
                     self.total_entries,
                     entry_summary(entry, runbook_path),
                 ),
                 started_at: Instant::now(),
+                timeout: verbose_timeout_label(entry),
                 stop_signal: None,
                 thread: None,
             }),
@@ -220,23 +220,24 @@ impl ProgressReporter {
                 let stop_signal = Arc::new(AtomicBool::new(false));
                 let thread_stop_signal = Arc::clone(&stop_signal);
                 let thread_line = line.clone();
+                let thread_timeout = verbose_timeout_label(entry);
                 let started_at = Instant::now();
                 let thread_started_at = started_at;
                 let thread = thread::spawn(move || {
                     while !thread_stop_signal.load(Ordering::Relaxed) {
                         let _ = write_live_progress_line(
                             &thread_line,
-                            format_elapsed_seconds(thread_started_at.elapsed()),
-                            true,
+                            &format_elapsed_time(thread_started_at.elapsed()),
+                            thread_timeout.as_deref(),
                         );
                         thread::sleep(StdDuration::from_millis(100));
                     }
                 });
 
                 Some(EntryProgress {
-                    mode: ProgressMode::Live,
                     line,
                     started_at,
+                    timeout: verbose_timeout_label(entry),
                     stop_signal: Some(stop_signal),
                     thread: Some(thread),
                 })
@@ -249,7 +250,7 @@ impl ProgressReporter {
             return;
         };
 
-        match progress.mode {
+        match self.mode {
             ProgressMode::Off => {}
             ProgressMode::Plain => {
                 let _ = writeln!(
@@ -257,8 +258,8 @@ impl ProgressReporter {
                     "{}",
                     progress_line_text(
                         &progress.line,
-                        &format_elapsed_seconds(progress.started_at.elapsed()),
-                        false,
+                        &format_elapsed_time(progress.started_at.elapsed()),
+                        progress.timeout.as_deref(),
                     )
                 );
             }
@@ -271,39 +272,65 @@ impl ProgressReporter {
                 }
                 let _ = write_live_progress_line(
                     &progress.line,
-                    format_elapsed_seconds(progress.started_at.elapsed()),
-                    false,
+                    &format_elapsed_time(progress.started_at.elapsed()),
+                    progress.timeout.as_deref(),
                 );
+                let _ = writeln!(io::stderr());
             }
         }
     }
 }
 
-fn write_live_progress_line(line: &str, elapsed: String, running: bool) -> io::Result<()> {
+fn write_live_progress_line(line: &str, elapsed: &str, timeout: Option<&str>) -> io::Result<()> {
     let mut stderr = io::stderr().lock();
     write!(
         &mut stderr,
         "\r\x1b[2K{}",
-        progress_line_text(line, &elapsed, running)
+        progress_line_text(line, elapsed, timeout)
     )?;
 
-    if running {
-        stderr.flush()
-    } else {
-        writeln!(&mut stderr)
+    stderr.flush()
+}
+
+fn progress_line_text(line: &str, elapsed: &str, timeout: Option<&str>) -> String {
+    match timeout {
+        Some(timeout) => format!("{line} ({elapsed} / {timeout})"),
+        None => format!("{line} ({elapsed})"),
     }
 }
 
-fn progress_line_text(line: &str, elapsed: &str, running: bool) -> String {
-    if running {
-        format!("{line} ({elapsed}...)")
-    } else {
-        format!("{line} ({elapsed})")
+fn format_elapsed_time(duration: StdDuration) -> String {
+    if duration.as_secs() < 60 {
+        return format!("{:.1}s", duration.as_secs_f64());
     }
+
+    let minutes = duration.as_secs() / 60;
+    let seconds = duration.as_secs() % 60;
+    format!("{minutes}m {seconds}s")
 }
 
-fn format_elapsed_seconds(duration: StdDuration) -> String {
-    format!("{:.1}s", duration.as_secs_f64())
+fn verbose_timeout_label(entry: &Value) -> Option<String> {
+    let entry_type = entry.get("type").and_then(Value::as_str)?;
+    if entry_type != "Command" {
+        return None;
+    }
+
+    let timeout = timeout_label(entry);
+    Some(compact_timeout_label(&timeout))
+}
+
+fn compact_timeout_label(timeout: &str) -> String {
+    let parts: Vec<_> = timeout.split_whitespace().collect();
+    if parts.len() != 2 {
+        return timeout.to_string();
+    }
+
+    let value = parts[0];
+    match parts[1].to_ascii_lowercase().as_str() {
+        "second" | "seconds" | "sec" | "secs" | "s" => format!("{value}s"),
+        "minute" | "minutes" | "min" | "mins" | "m" => format!("{value}m"),
+        _ => timeout.to_string(),
+    }
 }
 
 fn format_progress_line(current: usize, total: usize, summary: String) -> String {
@@ -390,10 +417,12 @@ fn truncate_progress_summary(summary: &str, max_chars: usize) -> String {
 #[cfg(test)]
 mod tests {
     use super::{
-        entry_summary, format_progress_line, progress_line_text, truncate_progress_summary,
+        compact_timeout_label, entry_summary, format_elapsed_time, format_progress_line,
+        progress_line_text, truncate_progress_summary,
     };
     use serde_json::json;
     use std::path::Path;
+    use std::time::Duration;
 
     #[test]
     fn progress_line_pads_entry_numbers_to_total_width() {
@@ -408,15 +437,27 @@ mod tests {
     }
 
     #[test]
-    fn progress_line_text_marks_running_entries_with_ellipsis() {
+    fn progress_line_text_can_include_timeout_window() {
         assert_eq!(
-            progress_line_text("[ 2/12] Command: demo", "1.2s", true),
-            "[ 2/12] Command: demo (1.2s...)"
+            progress_line_text("[ 2/12] Command: demo", "1.2s", Some("2m")),
+            "[ 2/12] Command: demo (1.2s / 2m)"
         );
         assert_eq!(
-            progress_line_text("[ 2/12] Command: demo", "1.2s", false),
+            progress_line_text("[ 2/12] Command: demo", "1.2s", None),
             "[ 2/12] Command: demo (1.2s)"
         );
+    }
+
+    #[test]
+    fn elapsed_time_uses_seconds_under_one_minute_and_minutes_afterward() {
+        assert_eq!(format_elapsed_time(Duration::from_millis(12_400)), "12.4s");
+        assert_eq!(format_elapsed_time(Duration::from_secs(68)), "1m 8s");
+    }
+
+    #[test]
+    fn compact_timeout_label_uses_short_units() {
+        assert_eq!(compact_timeout_label("2 minutes"), "2m");
+        assert_eq!(compact_timeout_label("30 seconds"), "30s");
     }
 
     #[test]

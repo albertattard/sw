@@ -1,7 +1,7 @@
 ---
 id: TASK-055
 title: Refine Verbose Run Time Formatting
-status: open
+status: done
 related_features:
   - SPEC-003
 owner: @aattard
@@ -32,15 +32,15 @@ running commands show their expected timeout window.
 
 ## Acceptance Criteria
 
-- [ ] Given `sw run --verbose`, elapsed time under one minute is rendered like
+- [x] Given `sw run --verbose`, elapsed time under one minute is rendered like
       `12.4s`.
-- [ ] Given `sw run --verbose`, elapsed time from one minute onward is rendered
+- [x] Given `sw run --verbose`, elapsed time from one minute onward is rendered
       like `1m 8s`.
-- [ ] Given a running `Command` entry in verbose mode, progress shows elapsed
+- [x] Given a running `Command` entry in verbose mode, progress shows elapsed
       time together with the expected timeout window.
-- [ ] Given a `Command` entry without an explicit timeout, verbose mode shows
+- [x] Given a `Command` entry without an explicit timeout, verbose mode shows
       the default timeout window.
-- [ ] Given a running entry in verbose mode, the timer does not include a
+- [x] Given a running entry in verbose mode, the timer does not include a
       trailing `...`.
 
 ## Notes
