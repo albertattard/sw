@@ -1,7 +1,7 @@
 ---
 id: TASK-061
 title: Add Debug Run Diagnostics
-status: open
+status: done
 category: run
 related_features:
   - SPEC-003
@@ -36,14 +36,14 @@ contract.
 
 ## Acceptance Criteria
 
-- [ ] Given `sw run --debug`, debug diagnostics are written to stderr without
+- [x] Given `sw run --debug`, debug diagnostics are written to stderr without
       changing stdout or generated Markdown output.
-- [ ] Given `sw --debug` with no subcommand, the command behaves the same as
+- [x] Given `sw --debug` with no subcommand, the command behaves the same as
       `sw run --debug`.
-- [ ] Given a `Command` entry with rewrites and captures, debug output includes
+- [x] Given a `Command` entry with rewrites and captures, debug output includes
       enough interpolated rewrite and capture information to diagnose matching
       failures.
-- [ ] Help output documents the `--debug` flag.
+- [x] Help output documents the `--debug` flag.
 
 ## Notes
 

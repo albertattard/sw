@@ -30,6 +30,7 @@ const CAPTURE_INTERPOLATION_PATTERN: &str =
 struct RenderState {
     datetime_anchors: HashMap<String, DatetimeShiftAnchor>,
     captured_values: HashMap<String, String>,
+    debug: bool,
 }
 
 struct RewriteCapturePair {
@@ -42,12 +43,24 @@ struct RewriteCapturePair {
 struct RewriteResult {
     rendered: String,
     generated_captures: Vec<RewriteCapturePair>,
+    debug_lines: Vec<String>,
+}
+
+fn emit_debug_lines(enabled: bool, lines: &[String]) {
+    if !enabled {
+        return;
+    }
+
+    for line in lines {
+        eprintln!("{line}");
+    }
 }
 
 pub(crate) fn render_markdown(
     runbook: &Value,
     runbook_path: &Path,
     verbose: bool,
+    debug: bool,
 ) -> Result<String, RenderError> {
     let entries = runbook
         .get("entries")
@@ -62,6 +75,7 @@ pub(crate) fn render_markdown(
     let mut state = RenderState {
         datetime_anchors: HashMap::new(),
         captured_values: HashMap::new(),
+        debug,
     };
     let mut progress = ProgressReporter::new(entries.len(), verbose);
 
@@ -693,10 +707,35 @@ fn render_command(entry: &Value, state: &mut RenderState) -> Result<String, Rend
     let command_text = resolved_command_lines.join("\n");
     let mut section = format!("```shell\n{command_text}\n```");
     let execution = execute_command(entry, &command_text)?;
-    let rewrite_result = rewritten_stdout_for_capture(entry, &execution, state)?;
-    let rewritten_stdout = rewrite_result.rendered;
+    let mut debug_lines = Vec::new();
+    if state.debug {
+        debug_lines.push("[debug] Command entry:".to_string());
+        debug_lines.push(format_command_entry_for_debug(entry));
+        debug_lines.push("[debug] Raw stdout:".to_string());
+        debug_lines.push(format_command_stream_for_debug(&execution.stdout));
+        debug_lines.push("[debug] Raw stderr:".to_string());
+        debug_lines.push(format_command_stream_for_debug(&execution.stderr));
+    }
+    let rewrite_result = match rewritten_stdout_for_capture(entry, &execution, state) {
+        Ok(result) => result,
+        Err(err) => {
+            emit_debug_lines(state.debug, &debug_lines);
+            return Err(err);
+        }
+    };
+    let RewriteResult {
+        rendered: rewritten_stdout,
+        generated_captures,
+        debug_lines: rewrite_debug_lines,
+    } = rewrite_result;
+    debug_lines.extend(rewrite_debug_lines);
+    if state.debug {
+        debug_lines.push("[debug] Rewritten stdout:".to_string());
+        debug_lines.push(format_command_stream_for_debug(&rewritten_stdout));
+    }
 
     if execution.timed_out {
+        emit_debug_lines(state.debug, &debug_lines);
         append_output(entry, &rewritten_stdout, &mut section)?;
         return Err(RenderError::Timeout {
             message: format!("Command timed out after {}", timeout_label(entry)),
@@ -705,16 +744,30 @@ fn render_command(entry: &Value, state: &mut RenderState) -> Result<String, Rend
     }
 
     ensure_assertions(entry, &execution)?;
-    extract_captured_values(
+    if let Err(err) = extract_captured_values(
         entry,
         &execution.stdout,
         &rewritten_stdout,
         &mut state.captured_values,
-    )?;
-    store_generated_rewrite_captures(
-        &rewrite_result.generated_captures,
-        &mut state.captured_values,
-    );
+        &mut debug_lines,
+    ) {
+        emit_debug_lines(state.debug, &debug_lines);
+        return Err(err);
+    }
+    store_generated_rewrite_captures(&generated_captures, &mut state.captured_values);
+    if state.debug {
+        for capture in &generated_captures {
+            debug_lines.push(format!(
+                "[debug] Generated capture {} = {}",
+                capture.original_name, capture.original_value
+            ));
+            debug_lines.push(format!(
+                "[debug] Generated capture {} = {}",
+                capture.rewritten_name, capture.rewritten_value
+            ));
+        }
+    }
+    emit_debug_lines(state.debug, &debug_lines);
     append_output(entry, &rewritten_stdout, &mut section)?;
     apply_indent(entry, section)
 }
@@ -1053,6 +1106,19 @@ fn output_fence_open(output: &Value) -> Result<&'static str, RenderError> {
     }
 }
 
+fn format_command_entry_for_debug(entry: &Value) -> String {
+    serde_json::to_string_pretty(entry)
+        .unwrap_or_else(|_| "<failed to serialize command entry>".to_string())
+}
+
+fn format_command_stream_for_debug(stream: &str) -> String {
+    if stream.is_empty() {
+        "(empty)".to_string()
+    } else {
+        stream.to_string()
+    }
+}
+
 fn normalize_rendered_output(
     entry: &Value,
     output: &Value,
@@ -1068,6 +1134,7 @@ fn normalize_rendered_output(
         return Ok(RewriteResult {
             rendered: rewritten,
             generated_captures: rewrite_result.generated_captures,
+            debug_lines: rewrite_result.debug_lines,
         });
     }
 
@@ -1077,6 +1144,7 @@ fn normalize_rendered_output(
             .map(trim_segment_trailing_whitespace)
             .collect(),
         generated_captures: rewrite_result.generated_captures,
+        debug_lines: rewrite_result.debug_lines,
     })
 }
 
@@ -1089,6 +1157,7 @@ fn rewritten_stdout_for_capture(
         return Ok(RewriteResult {
             rendered: execution.stdout.to_string(),
             generated_captures: Vec::new(),
+            debug_lines: Vec::new(),
         });
     };
 
@@ -1112,6 +1181,7 @@ fn apply_rewrite_rules(
         return Ok(RewriteResult {
             rendered: execution.stdout.to_string(),
             generated_captures: Vec::new(),
+            debug_lines: Vec::new(),
         });
     };
     let rules = rules.as_array().ok_or_else(|| {
@@ -1119,6 +1189,7 @@ fn apply_rewrite_rules(
     })?;
     let mut rendered = execution.stdout.to_string();
     let mut generated_captures = Vec::new();
+    let mut debug_lines = Vec::new();
     for rule in rules {
         let result = apply_rewrite_rule(
             entry,
@@ -1132,10 +1203,12 @@ fn apply_rewrite_rules(
         if let Some(capture) = result.generated_capture {
             generated_captures.push(capture);
         }
+        debug_lines.extend(result.debug_lines);
     }
     Ok(RewriteResult {
         rendered,
         generated_captures,
+        debug_lines,
     })
 }
 
@@ -1160,6 +1233,7 @@ fn extract_captured_values(
     raw_stdout: &str,
     rewritten_stdout: &str,
     captured_values: &mut HashMap<String, String>,
+    debug_lines: &mut Vec<String>,
 ) -> Result<(), RenderError> {
     let Some(capture) = entry.get("capture") else {
         return Ok(());
@@ -1225,6 +1299,7 @@ fn extract_captured_values(
         match matches.len() {
             1 => {
                 captured_values.insert(name.to_string(), matches[0].clone());
+                debug_lines.push(format!("[debug] Capture {name} ({stage}) = {}", matches[0]));
             }
             0 => {
                 return Err(RenderError::CommandFailed(format!(
@@ -1319,6 +1394,7 @@ fn apply_rewrite_rule(
 struct RewriteRuleResult {
     rendered: String,
     generated_capture: Option<RewriteCapturePair>,
+    debug_lines: Vec<String>,
 }
 
 fn apply_replace_rule(
@@ -1352,6 +1428,7 @@ fn apply_replace_rule(
     let regex = Regex::new(pattern.as_str()).map_err(|err| {
         RenderError::Operational(format!("Invalid output rewrite pattern `{pattern}`: {err}"))
     })?;
+    let match_count = regex.find_iter(rendered).count();
     let generated_capture = generated_rewrite_capture_for_replace(
         entry,
         execution,
@@ -1366,6 +1443,11 @@ fn apply_replace_rule(
             .replace_all(rendered, replacement.as_str())
             .into_owned(),
         generated_capture,
+        debug_lines: vec![
+            format!("[debug] Rewrite replace pattern: {}", pattern),
+            format!("[debug] Rewrite replace replacement: {}", replacement),
+            format!("[debug] Rewrite replace match count: {match_count}"),
+        ],
     })
 }
 
@@ -1405,6 +1487,7 @@ fn apply_datetime_shift_rule(
     let mut result = String::with_capacity(rendered.len());
     let mut last_end = 0;
     let mut capture_matches: Vec<(String, String)> = Vec::new();
+    let match_count = regex.find_iter(rendered).count();
 
     for matched in regex.find_iter(rendered) {
         result.push_str(&rendered[last_end..matched.start()]);
@@ -1449,6 +1532,10 @@ fn apply_datetime_shift_rule(
             rule,
             capture_matches,
         )?,
+        debug_lines: vec![
+            format!("[debug] Rewrite datetime_shift pattern: {}", config.pattern),
+            format!("[debug] Rewrite datetime_shift match count: {match_count}"),
+        ],
     })
 }
 
@@ -1469,6 +1556,10 @@ fn apply_keep_between_rule(rule: &Value, rendered: &str) -> Result<RewriteRuleRe
         return Ok(RewriteRuleResult {
             rendered: rendered.to_string(),
             generated_capture: None,
+            debug_lines: vec![format!(
+                "[debug] Rewrite keep_between start not found: {}",
+                start
+            )],
         });
     };
     let start_line = offset_index(start_index, start_offset, lines.len());
@@ -1480,6 +1571,10 @@ fn apply_keep_between_rule(rule: &Value, rendered: &str) -> Result<RewriteRuleRe
                 return Ok(RewriteRuleResult {
                     rendered: rendered.to_string(),
                     generated_capture: None,
+                    debug_lines: vec![format!(
+                        "[debug] Rewrite keep_between end not found: {}",
+                        end
+                    )],
                 });
             };
             let end_index = start_index + relative_end_index;
@@ -1492,6 +1587,9 @@ fn apply_keep_between_rule(rule: &Value, rendered: &str) -> Result<RewriteRuleRe
         return Ok(RewriteRuleResult {
             rendered: String::new(),
             generated_capture: None,
+            debug_lines: vec![format!(
+                "[debug] Rewrite keep_between resolved to an empty slice"
+            )],
         });
     };
 
@@ -1499,6 +1597,9 @@ fn apply_keep_between_rule(rule: &Value, rendered: &str) -> Result<RewriteRuleRe
         return Ok(RewriteRuleResult {
             rendered: String::new(),
             generated_capture: None,
+            debug_lines: vec![format!(
+                "[debug] Rewrite keep_between resolved to an empty slice"
+            )],
         });
     }
 
@@ -1518,6 +1619,17 @@ fn apply_keep_between_rule(rule: &Value, rendered: &str) -> Result<RewriteRuleRe
     Ok(RewriteRuleResult {
         rendered: kept_lines.join("\n"),
         generated_capture: None,
+        debug_lines: vec![
+            format!("[debug] Rewrite keep_between start: {}", start),
+            format!(
+                "[debug] Rewrite keep_between end: {}",
+                end.unwrap_or("(end of output)")
+            ),
+            format!(
+                "[debug] Rewrite keep_between line range: {}..={}",
+                start_line, end_line
+            ),
+        ],
     })
 }
 

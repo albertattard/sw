@@ -157,6 +157,53 @@ fn verbose_flag_before_subcommand_uses_default_run_behavior() {
 }
 
 #[test]
+fn debug_run_reports_rewrite_and_capture_diagnostics_to_stderr() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-rewrite-generated-capture-pair.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run", "--debug"], &dir);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert_eq!(stdout.trim(), "Rendered runbook to README.md");
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("[debug] Command entry:"));
+    assert!(stderr.contains("[debug] Raw stdout:"));
+    assert!(stderr.contains("audio file> target/audio/audio_20260312_142351.mp3"));
+    assert!(stderr.contains("[debug] Rewrite datetime_shift pattern: audio_\\d{8}_\\d{6}"));
+    assert!(stderr.contains("[debug] Rewrite datetime_shift match count: 1"));
+    assert!(stderr.contains("[debug] Rewritten stdout:"));
+    assert!(stderr.contains("audio file> target/audio/audio_20770427_123456.mp3"));
+    assert!(
+        stderr.contains("[debug] Generated capture audio_path_1_original = audio_20260312_142351")
+    );
+    assert!(
+        stderr.contains("[debug] Generated capture audio_path_1_rewritten = audio_20770427_123456")
+    );
+}
+
+#[test]
+fn debug_flag_before_subcommand_uses_default_run_behavior() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-rewrite-generated-capture-pair.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["--debug"], &dir);
+
+    assert!(output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("[debug] Command entry:"));
+    assert!(stderr.contains("[debug] Rewritten stdout:"));
+}
+
+#[test]
 fn generated_marker_appears_before_rendered_entries() {
     let dir = prepare_workspace();
     write_runbook(&dir, "sw-runbook-run-success.json", "sw-runbook.json");

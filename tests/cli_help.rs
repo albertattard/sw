@@ -25,6 +25,7 @@ fn help_subcommand_prints_help() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("Usage:"));
     assert!(stdout.contains("--verbose"));
+    assert!(stdout.contains("--debug"));
     assert!(stdout.contains("check"));
     assert!(stdout.contains("example"));
     assert!(stdout.contains("help"));
@@ -56,6 +57,7 @@ fn run_help_prints_help() {
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("--verbose"));
+    assert!(stdout.contains("--debug"));
     assert!(stdout.contains("--input-file"));
     assert!(stdout.contains("--output-format"));
     assert!(stdout.contains("--output-file"));
