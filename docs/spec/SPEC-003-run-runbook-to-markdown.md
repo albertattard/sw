@@ -217,6 +217,9 @@ in the runbook.
 - `cleanup` is a list of command lines, matching the shape of `commands`.
 - All lines within a single `cleanup` block execute together in the same shell
   context.
+- Multi-line shell control structures such as `if ... then ... fi` may be
+  expressed across multiple `cleanup` lines and must execute correctly as one
+  cleanup script.
 - `cleanup` is used after execution in order to release resources started by
   the main command.
 - `cleanup` is optional.
@@ -521,6 +524,8 @@ in the runbook.
       order after the run completes.
 - [ ] Given a `cleanup` block with multiple command lines, those lines execute
       in the declared order and in the same shell context.
+- [ ] Given a `cleanup` block that expresses a shell control structure across
+      multiple lines, that structure executes correctly during cleanup.
 - [ ] Given a command with `cleanup`, the explicit cleanup block is used
       instead of automatic process cleanup for that entry.
 - [ ] Given a command failure, previously registered cleanup commands still

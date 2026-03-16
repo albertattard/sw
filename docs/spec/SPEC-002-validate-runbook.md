@@ -4,7 +4,7 @@ title: Validate Runbook Input
 status: in_progress
 priority: high
 owner: @aattard
-last_updated: 2026-03-04
+last_updated: 2026-03-15
 ---
 
 ## Problem
@@ -47,8 +47,10 @@ Supported output formats:
 Output (`--output-format human`):
 - Human-readable validation summary.
 - Validation errors listed with their paths and messages.
+- Validation warnings listed with their paths and messages.
 - For validation errors scoped to runbook entry content, the output also prints
   a nearby offending block for each error to aid debugging.
+- Warnings do not make the runbook invalid.
 
 Reserved for future consideration (not part of this feature):
 - `yaml`
@@ -72,6 +74,9 @@ Exit codes:
 - [ ] Given a valid runbook file,
       `sw validate --input-file <file> --output-format json`
       returns `valid: true`, an empty `errors` array, and exit code `0`.
+- [ ] Given a runbook that triggers a warning but no validation errors,
+      `sw validate --input-file <file> --output-format json`
+      returns `valid: true`, a non-empty `warnings` array, and exit code `0`.
 - [ ] Given an invalid runbook file,
       `sw validate --input-file <file> --output-format json`
       returns `valid: false`, at least one structured error, and exit code `2`.
@@ -101,6 +106,8 @@ Exit codes:
 - Invalid JSON syntax.
 - Unknown top-level keys.
 - Missing required fields.
+- A `Command` entry that appears to start a background process with `&`
+  without redirecting stdout and stderr away from the captured command pipes.
 
 ## Test Cases
 
@@ -108,6 +115,19 @@ Exit codes:
 - Invalid JSON fixture.
 - Missing required field fixture.
 - File path that does not exist.
+- Runbook fixture with a background command warning.
+
+## Warnings
+
+- Validation may emit non-blocking warnings for runbook patterns that are
+  structurally valid but likely to cause confusing runtime behavior.
+- In this increment, validation warns when a `Command` entry appears to start
+  a background process with `&` without redirecting stdout and stderr away
+  from the command pipes.
+- This warning explains that the background process may keep the entry open and
+  make timeout or progress behavior misleading.
+- The warning recommends redirecting output to a file and saving `$!` to a PID
+  file when the process needs to keep running across later steps.
 
 ## Notes for Reimplementation
 

@@ -58,6 +58,8 @@ File-based task tracker for Sociable Weaver.
 - [TASK-053: Treat Missing Process As No-op In Automatic Cleanup](./TASK-053-treat-missing-process-as-no-op-in-automatic-cleanup.md)
 - [TASK-054: Add Verbose Run Progress Output](./TASK-054-add-verbose-run-progress-output.md)
 - [TASK-055: Refine Verbose Run Time Formatting](./TASK-055-refine-verbose-run-time-formatting.md)
+- [TASK-056: Warn About Background Commands Holding Command Pipes Open](./TASK-056-warn-about-background-commands-holding-command-pipes-open.md)
+- [TASK-057: Support Multiline Cleanup Control Structures](./TASK-057-support-multiline-cleanup-control-structures.md)
 
 ## Pending
 
@@ -67,6 +69,8 @@ File-based task tracker for Sociable Weaver.
 - [ ] [TASK-034: Expand Help Command Coverage](./TASK-034-expand-help-command-coverage.md)
 - [ ] [TASK-038: Include Release Commit History In README](./TASK-038-include-release-commit-history-in-readme.md)
 - [ ] [TASK-043: Implement Explain Command](./TASK-043-implement-explain-command.md)
+- [ ] [TASK-056: Warn About Background Commands Holding Command Pipes Open](./TASK-056-warn-about-background-commands-holding-command-pipes-open.md)
+- [ ] [TASK-057: Support Multiline Cleanup Control Structures](./TASK-057-support-multiline-cleanup-control-structures.md)
 
 ## In Progress
 
