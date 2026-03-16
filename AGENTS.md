@@ -62,6 +62,9 @@ tying the test suite to a specific project.
 - Do not change user-visible behavior without updating the relevant spec and task.
 - Treat specs as living documents and tasks as bounded delivery slices.
 - New task files must include a `category` field in front matter.
+- New task files must live under `docs/tasks/<category>/`.
+- Keep task filenames unchanged when moving tasks between directories.
+- Keep `docs/tasks/README.md` as the root entry point and index for all task files.
 - Use one of these controlled task categories when creating new tasks:
   - `discovery`
   - `validate`

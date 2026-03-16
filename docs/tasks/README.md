@@ -15,6 +15,12 @@ New task files must include these front matter fields:
 - `created`
 - `updated`
 
+## Task Directories
+
+- New task files live under `docs/tasks/<category>/`.
+- Task filenames stay unchanged when tasks are moved into category directories.
+- [README.md](./README.md) remains the root entry point and master index for all task files.
+
 ## Task Categories
 
 Use one of these controlled `category` values for new tasks:
@@ -33,7 +39,23 @@ Use one of these controlled `category` values for new tasks:
 - `repo-process`
 
 These categories group tasks by feature or workstream without changing the
-flat task history. Existing task files may be backfilled incrementally.
+task history. Existing task files may be backfilled incrementally into
+category-specific directories.
+
+Expected task directories:
+
+- `docs/tasks/discovery/`
+- `docs/tasks/validate/`
+- `docs/tasks/run/`
+- `docs/tasks/rewrite/`
+- `docs/tasks/prerequisite/`
+- `docs/tasks/display-file/`
+- `docs/tasks/example/`
+- `docs/tasks/explain/`
+- `docs/tasks/init/`
+- `docs/tasks/import/`
+- `docs/tasks/release/`
+- `docs/tasks/repo-process/`
 
 ## Task Files
 
@@ -93,6 +115,7 @@ flat task history. Existing task files may be backfilled incrementally.
 - [TASK-055: Refine Verbose Run Time Formatting](./TASK-055-refine-verbose-run-time-formatting.md)
 - [TASK-056: Warn About Background Commands Holding Command Pipes Open](./TASK-056-warn-about-background-commands-holding-command-pipes-open.md)
 - [TASK-057: Support Multiline Cleanup Control Structures](./TASK-057-support-multiline-cleanup-control-structures.md)
+- [TASK-058: Migrate Tasks Into Category Directories](./TASK-058-migrate-tasks-into-category-directories.md)
 
 ## Pending
 
@@ -104,6 +127,7 @@ flat task history. Existing task files may be backfilled incrementally.
 - [ ] [TASK-043: Implement Explain Command](./TASK-043-implement-explain-command.md)
 - [ ] [TASK-056: Warn About Background Commands Holding Command Pipes Open](./TASK-056-warn-about-background-commands-holding-command-pipes-open.md)
 - [ ] [TASK-057: Support Multiline Cleanup Control Structures](./TASK-057-support-multiline-cleanup-control-structures.md)
+- [ ] [TASK-058: Migrate Tasks Into Category Directories](./TASK-058-migrate-tasks-into-category-directories.md)
 
 ## In Progress
 
