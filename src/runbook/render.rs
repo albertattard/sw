@@ -1,7 +1,8 @@
 use super::RenderError;
 use super::execute::{
-    CommandExecution, cleanup_block, ensure_assertions, execute_command, format_command_failure,
-    run_cleanup_blocks, timeout_label,
+    CommandExecution, apply_patch_entry, cleanup_block, ensure_assertions, execute_command,
+    format_command_failure, patch_target_path, run_cleanup_blocks, run_patch_restores,
+    snapshot_patch_target, timeout_label,
 };
 use chrono::Timelike;
 use chrono::{DateTime, Duration, FixedOffset, NaiveDateTime, NaiveTime, TimeZone};
@@ -72,6 +73,8 @@ pub(crate) fn render_markdown(
 
     let mut sections = Vec::new();
     let mut cleanups: Vec<Vec<String>> = Vec::new();
+    let mut patch_restore_stack = Vec::new();
+    let mut patch_snapshots = HashMap::new();
     let mut failure: Option<RenderError> = None;
     let mut state = RenderState {
         datetime_anchors: HashMap::new(),
@@ -93,6 +96,19 @@ pub(crate) fn render_markdown(
             "Markdown" => render_markdown_entry(entry, &state.captured_values)?,
             "DisplayFile" => render_display_file(entry, runbook_path)?,
             "Prerequisite" => render_prerequisite_entry(entry)?,
+            "Patch" => match render_patch(
+                entry,
+                runbook_path,
+                &mut patch_restore_stack,
+                &mut patch_snapshots,
+            ) {
+                Ok(section) => section,
+                Err(err) => {
+                    progress.finish_entry(progress_line);
+                    failure = Some(err);
+                    break;
+                }
+            },
             "Command" => {
                 if let Some(cleanup) = cleanup_block(entry)? {
                     cleanups.push(cleanup);
@@ -140,29 +156,27 @@ pub(crate) fn render_markdown(
     }
 
     let cleanup_failures = run_cleanup_blocks(&cleanups);
-    let cleanup_message = if cleanup_failures.is_empty() {
-        None
-    } else {
-        Some(format!(
-            "Cleanup failed:\n- {}",
-            cleanup_failures.join("\n- ")
-        ))
-    };
+    let patch_restore_failures = run_patch_restores(&patch_restore_stack, &patch_snapshots);
+    let cleanup_message = post_run_failure_message("Cleanup failed", &cleanup_failures);
+    let patch_restore_message =
+        post_run_failure_message("Patch restore failed", &patch_restore_failures);
+    let post_run_message =
+        combine_optional_messages(cleanup_message.as_deref(), patch_restore_message.as_deref());
 
     match failure {
         Some(RenderError::Timeout { message, .. }) => Err(RenderError::Timeout {
-            message: combine_messages(&message, cleanup_message.as_deref()),
+            message: combine_messages(&message, post_run_message.as_deref()),
             partial_markdown: output,
         }),
         Some(RenderError::CommandFailed(message)) => Err(RenderError::CommandFailed(
-            combine_messages(&message, cleanup_message.as_deref()),
+            combine_messages(&message, post_run_message.as_deref()),
         )),
         Some(RenderError::Operational(message)) => Err(RenderError::Operational(combine_messages(
             &message,
-            cleanup_message.as_deref(),
+            post_run_message.as_deref(),
         ))),
         Some(RenderError::CleanupFailed { .. }) => unreachable!(),
-        None => match cleanup_message {
+        None => match post_run_message {
             Some(message) => Err(RenderError::CleanupFailed {
                 message,
                 markdown: output,
@@ -368,6 +382,7 @@ fn entry_summary(entry: &Value, runbook_path: &Path) -> String {
             .unwrap_or_else(|| "Command".to_string()),
         "DisplayFile" => display_file_summary(entry, runbook_path),
         "Prerequisite" => prerequisite_summary(entry),
+        "Patch" => patch_summary(entry, runbook_path),
         other => other.to_string(),
     };
 
@@ -419,6 +434,15 @@ fn prerequisite_summary(entry: &Value) -> String {
     } else {
         format!("Prerequisite checks ({checks} checks)")
     }
+}
+
+fn patch_summary(entry: &Value, runbook_path: &Path) -> String {
+    let relative_path = entry
+        .get("path")
+        .and_then(Value::as_str)
+        .unwrap_or("<missing path>");
+    let base_dir = runbook_path.parent().unwrap_or_else(|| Path::new("."));
+    base_dir.join(relative_path).display().to_string()
 }
 
 fn truncate_progress_summary(summary: &str, max_chars: usize) -> String {
@@ -728,6 +752,44 @@ fn render_markdown_entry(
     interpolate_command_lines(&lines, captured_values).map(|lines| lines.join("\n"))
 }
 
+fn render_patch(
+    entry: &Value,
+    runbook_path: &Path,
+    patch_restore_stack: &mut Vec<std::path::PathBuf>,
+    patch_snapshots: &mut HashMap<std::path::PathBuf, Vec<u8>>,
+) -> Result<String, RenderError> {
+    let patch_lines = entry
+        .get("patch")
+        .and_then(Value::as_array)
+        .ok_or_else(|| RenderError::Operational("Patch entry is missing patch".to_string()))?;
+
+    let mut lines = Vec::new();
+    for item in patch_lines {
+        lines.push(
+            item.as_str()
+                .ok_or_else(|| {
+                    RenderError::Operational("Patch lines must contain only strings".to_string())
+                })?
+                .to_string(),
+        );
+    }
+
+    let (target_path, relative_path) = patch_target_path(entry, runbook_path)?;
+    patch_snapshots
+        .entry(target_path.clone())
+        .or_insert(snapshot_patch_target(&target_path)?);
+    patch_restore_stack.push(target_path);
+    apply_patch_entry(runbook_path, &relative_path, &lines)?;
+
+    let mut section = String::from("```diff\n");
+    section.push_str(&lines.join("\n"));
+    if !lines.is_empty() {
+        section.push('\n');
+    }
+    section.push_str("```");
+    apply_indent(entry, section, "Patch")
+}
+
 fn render_command(entry: &Value, state: &mut RenderState) -> Result<String, RenderError> {
     let commands = entry
         .get("commands")
@@ -782,7 +844,7 @@ fn render_command(entry: &Value, state: &mut RenderState) -> Result<String, Rend
         append_output(entry, &rewritten_stdout, &mut section)?;
         return Err(RenderError::Timeout {
             message: format!("Command timed out after {}", timeout_label(entry)),
-            partial_markdown: apply_indent(entry, section)?,
+            partial_markdown: apply_indent(entry, section, "Command")?,
         });
     }
 
@@ -812,7 +874,7 @@ fn render_command(entry: &Value, state: &mut RenderState) -> Result<String, Rend
     }
     emit_debug_lines(debug_enabled, &debug_lines);
     append_output(entry, &rewritten_stdout, &mut section)?;
-    apply_indent(entry, section)
+    apply_indent(entry, section, "Command")
 }
 
 fn command_debug_enabled(entry: &Value, debug_all_commands: bool) -> bool {
@@ -2044,20 +2106,20 @@ fn display_file_content_type(path: &Path) -> &'static str {
     }
 }
 
-fn apply_indent(entry: &Value, section: String) -> Result<String, RenderError> {
+fn apply_indent(entry: &Value, section: String, entry_label: &str) -> Result<String, RenderError> {
     let Some(indent) = entry.get("indent") else {
         return Ok(section);
     };
 
     let indent_width = match (indent.as_u64(), indent.as_i64()) {
         (Some(width), _) => usize::try_from(width)
-            .map_err(|_| RenderError::Operational("Command indent is too large".to_string()))?,
+            .map_err(|_| RenderError::Operational(format!("{entry_label} indent is too large")))?,
         (None, Some(width)) if width >= 0 => usize::try_from(width)
-            .map_err(|_| RenderError::Operational("Command indent is too large".to_string()))?,
+            .map_err(|_| RenderError::Operational(format!("{entry_label} indent is too large")))?,
         _ => {
-            return Err(RenderError::Operational(
-                "Command indent must be a non-negative integer".to_string(),
-            ));
+            return Err(RenderError::Operational(format!(
+                "{entry_label} indent must be a non-negative integer"
+            )));
         }
     };
 
@@ -2083,5 +2145,22 @@ fn combine_messages(primary: &str, secondary: Option<&str>) -> String {
     match secondary {
         Some(secondary) => format!("{primary}\n{secondary}"),
         None => primary.to_string(),
+    }
+}
+
+fn post_run_failure_message(header: &str, failures: &[String]) -> Option<String> {
+    if failures.is_empty() {
+        None
+    } else {
+        Some(format!("{header}:\n- {}", failures.join("\n- ")))
+    }
+}
+
+fn combine_optional_messages(first: Option<&str>, second: Option<&str>) -> Option<String> {
+    match (first, second) {
+        (Some(first), Some(second)) => Some(format!("{first}\n{second}")),
+        (Some(first), None) => Some(first.to_string()),
+        (None, Some(second)) => Some(second.to_string()),
+        (None, None) => None,
     }
 }

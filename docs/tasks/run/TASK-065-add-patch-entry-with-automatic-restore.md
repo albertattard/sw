@@ -1,7 +1,7 @@
 ---
 id: TASK-065
 title: Add Patch Entry With Automatic Restore
-status: open
+status: done
 category: run
 related_features:
   - SPEC-003
@@ -39,17 +39,17 @@ commands.
 
 ## Acceptance Criteria
 
-- [ ] Given a runbook with a `Patch` entry, the patch is applied during the run
+- [x] Given a runbook with a `Patch` entry, the patch is applied during the run
       and rendered as a fenced `diff` block in the generated Markdown.
-- [ ] Given a successful run with a `Patch` entry, the target file is restored
+- [x] Given a successful run with a `Patch` entry, the target file is restored
       automatically at the end of the run.
-- [ ] Given a failed or timed-out run after a `Patch` entry, the target file is
+- [x] Given a failed or timed-out run after a `Patch` entry, the target file is
       still restored automatically.
-- [ ] Given multiple `Patch` entries that modify the same file, later patches
+- [x] Given multiple `Patch` entries that modify the same file, later patches
       can build on the earlier patched state during the run.
-- [ ] Given multiple `Patch` entries that modify the same file, the final
+- [x] Given multiple `Patch` entries that modify the same file, the final
       automatic restore leaves that file in its original pre-run state.
-- [ ] Given a failure in one patch restore step, later registered patch
+- [x] Given a failure in one patch restore step, later registered patch
       restores still run and the run reports restore failure afterward.
 
 ## Notes

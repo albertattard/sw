@@ -137,7 +137,6 @@ Expected task directories:
 - [ ] [TASK-038: Include Release Commit History In README](release/TASK-038-include-release-commit-history-in-readme.md)
 - [ ] [TASK-043: Implement Explain Command](explain/TASK-043-implement-explain-command.md)
 - [ ] [TASK-059: Implement Format Command](format/TASK-059-implement-format-command.md)
-- [ ] [TASK-065: Add Patch Entry With Automatic Restore](run/TASK-065-add-patch-entry-with-automatic-restore.md)
 
 ## In Progress
 
@@ -206,6 +205,7 @@ Expected task directories:
 - [x] [TASK-062: Support Command-Scoped Debug Diagnostics](run/TASK-062-support-command-scoped-debug-diagnostics.md)
 - [x] [TASK-063: Separate DisplayFile Indent And Offset](display-file/TASK-063-separate-display-file-indent-and-offset.md)
 - [x] [TASK-064: Support Variable RFC3339 Fractional Seconds](rewrite/TASK-064-support-variable-rfc3339-fractional-seconds.md)
+- [x] [TASK-065: Add Patch Entry With Automatic Restore](run/TASK-065-add-patch-entry-with-automatic-restore.md)
 
 ## Blocked
 

@@ -1,0 +1,31 @@
+{
+  "entries": [
+    {
+      "type": "Patch",
+      "path": "./demo.txt",
+      "patch": [
+        "@@ -1 +1 @@",
+        "-before",
+        "+middle"
+      ]
+    },
+    {
+      "type": "Patch",
+      "path": "./demo.txt",
+      "patch": [
+        "@@ -1 +1 @@",
+        "-middle",
+        "+after"
+      ]
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "cat './demo.txt'"
+      ],
+      "output": {
+        "caption": "Stacked patch contents"
+      }
+    }
+  ]
+}

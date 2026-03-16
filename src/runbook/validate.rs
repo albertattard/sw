@@ -913,6 +913,58 @@ fn validate_entry(
             }
             None => push_error(&mut context.errors, format!("{path}.checks"), "is required"),
         },
+        "Patch" => {
+            for key in object.keys() {
+                if key != "type"
+                    && key != "path"
+                    && key != "patch"
+                    && key != "indent"
+                    && key != "restore"
+                {
+                    push_error(
+                        &mut context.errors,
+                        format!("{path}.{key}"),
+                        "is not a supported Patch property",
+                    );
+                }
+            }
+
+            require_string(object, "path", &path, &mut context.errors);
+            match object.get("patch") {
+                Some(patch) => {
+                    validate_string_array(patch, &format!("{path}.patch"), &mut context.errors);
+                }
+                None => push_error(&mut context.errors, format!("{path}.patch"), "is required"),
+            }
+
+            if let Some(indent) = object.get("indent") {
+                match (indent.as_u64(), indent.as_i64()) {
+                    (Some(_), _) => {}
+                    (None, Some(value)) if value >= 0 => {}
+                    _ => push_error(
+                        &mut context.errors,
+                        format!("{path}.indent"),
+                        "must be a non-negative integer",
+                    ),
+                }
+            }
+
+            if let Some(restore) = object.get("restore").and_then(Value::as_str) {
+                if restore != "auto" {
+                    push_error(
+                        &mut context.errors,
+                        format!("{path}.restore"),
+                        "must be `auto` when provided",
+                    );
+                }
+            } else if object.get("restore").is_some() {
+                push_error(
+                    &mut context.errors,
+                    format!("{path}.restore"),
+                    "must be a string",
+                );
+            }
+        }
         "Command" => {
             for key in object.keys() {
                 if key != "type"

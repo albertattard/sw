@@ -1,9 +1,10 @@
 use super::RenderError;
 use serde_json::Value;
 use sha2::{Digest, Sha256};
+use std::collections::HashMap;
 use std::fs;
 use std::io::Read;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::thread;
 use std::time::{Duration, Instant};
@@ -13,6 +14,74 @@ pub(crate) struct CommandExecution {
     pub(crate) stdout: String,
     pub(crate) stderr: String,
     pub(crate) timed_out: bool,
+}
+
+pub(crate) fn patch_target_path(
+    entry: &Value,
+    runbook_path: &Path,
+) -> Result<(PathBuf, String), RenderError> {
+    let relative_path = entry
+        .get("path")
+        .and_then(Value::as_str)
+        .ok_or_else(|| RenderError::Operational("Patch entry is missing path".to_string()))?;
+    let base_dir = runbook_base_dir(runbook_path);
+    Ok((base_dir.join(relative_path), relative_path.to_string()))
+}
+
+pub(crate) fn snapshot_patch_target(path: &Path) -> Result<Vec<u8>, RenderError> {
+    fs::read(path).map_err(|err| {
+        RenderError::Operational(format!("Failed to read {}: {err}", path.display()))
+    })
+}
+
+pub(crate) fn apply_patch_entry(
+    runbook_path: &Path,
+    relative_path: &str,
+    patch_lines: &[String],
+) -> Result<(), RenderError> {
+    let base_dir = runbook_base_dir(runbook_path);
+    let patch_text = patch_text_for(relative_path, patch_lines);
+    let mut child = Command::new("patch")
+        .arg("--strip=0")
+        .arg("--quiet")
+        .current_dir(base_dir)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .map_err(|err| RenderError::Operational(format!("Failed to execute patch: {err}")))?;
+
+    if let Some(stdin) = child.stdin.as_mut() {
+        use std::io::Write;
+        stdin.write_all(patch_text.as_bytes()).map_err(|err| {
+            RenderError::Operational(format!("Failed to write patch stdin: {err}"))
+        })?;
+    }
+
+    let output = child.wait_with_output().map_err(|err| {
+        RenderError::Operational(format!("Failed to wait for patch command: {err}"))
+    })?;
+
+    if output.status.success() {
+        return Ok(());
+    }
+
+    let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
+    let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
+    let detail = if !stderr.is_empty() {
+        stderr
+    } else if !stdout.is_empty() {
+        stdout
+    } else {
+        format!(
+            "patch exited with code {}",
+            output.status.code().unwrap_or(-1)
+        )
+    };
+
+    Err(RenderError::Operational(format!(
+        "Failed to apply patch for {relative_path}: {detail}"
+    )))
 }
 
 fn uses_automatic_process_cleanup(entry: &Value) -> bool {
@@ -154,6 +223,32 @@ pub(crate) fn run_cleanup_blocks(cleanups: &[Vec<String>]) -> Vec<String> {
     for cleanup in cleanups.iter().rev() {
         if let Err(message) = run_cleanup_block(cleanup) {
             failures.push(message);
+        }
+    }
+
+    failures
+}
+
+pub(crate) fn run_patch_restores(
+    restore_stack: &[PathBuf],
+    snapshots: &HashMap<PathBuf, Vec<u8>>,
+) -> Vec<String> {
+    let mut failures = Vec::new();
+
+    for path in restore_stack.iter().rev() {
+        let Some(original_bytes) = snapshots.get(path) else {
+            failures.push(format!(
+                "Patch restore failed for {}: missing original snapshot",
+                path.display()
+            ));
+            continue;
+        };
+
+        if let Err(err) = fs::write(path, original_bytes) {
+            failures.push(format!(
+                "Patch restore failed for {}: {err}",
+                path.display()
+            ));
         }
     }
 
@@ -497,6 +592,30 @@ fn parse_timeout(timeout: &str) -> Result<Duration, String> {
     Ok(Duration::from_secs(seconds))
 }
 
+fn runbook_base_dir(runbook_path: &Path) -> &Path {
+    runbook_path
+        .parent()
+        .filter(|path| !path.as_os_str().is_empty())
+        .unwrap_or_else(|| Path::new("."))
+}
+
+fn patch_text_for(relative_path: &str, patch_lines: &[String]) -> String {
+    let patch_body = patch_lines.join("\n");
+    if patch_starts_with_headers(&patch_body) {
+        if patch_body.ends_with('\n') {
+            patch_body
+        } else {
+            format!("{patch_body}\n")
+        }
+    } else {
+        format!("--- {relative_path}\n+++ {relative_path}\n{patch_body}\n")
+    }
+}
+
+fn patch_starts_with_headers(patch_body: &str) -> bool {
+    patch_body.starts_with("--- ") || patch_body.starts_with("diff ")
+}
+
 fn terminate_child(child: &mut std::process::Child) -> Result<(), RenderError> {
     #[cfg(unix)]
     {
@@ -540,7 +659,9 @@ fn terminate_process_group(process_group_id: u32) -> Result<bool, RenderError> {
 
 #[cfg(test)]
 mod tests {
-    use super::{cleanup_chunks, cleanup_script};
+    use super::{cleanup_chunks, cleanup_script, patch_text_for, run_patch_restores};
+    use std::collections::HashMap;
+    use std::fs;
 
     #[test]
     fn cleanup_chunks_keep_multiline_if_block_together() {
@@ -585,5 +706,46 @@ mod tests {
         assert!(script.contains(
             "{\nif [ -f cleanup.txt ]; then\n  printf 'cleanup\\n' >> cleanup.txt\nfi\n} || status=$?\n"
         ));
+    }
+
+    #[test]
+    fn patch_text_adds_default_headers_when_missing() {
+        let text = patch_text_for(
+            "./src/main.rs",
+            &[
+                "@@ -1 +1 @@".to_string(),
+                "-old".to_string(),
+                "+new".to_string(),
+            ],
+        );
+
+        assert!(text.starts_with("--- ./src/main.rs\n+++ ./src/main.rs\n"));
+    }
+
+    #[test]
+    fn patch_restores_continue_after_a_failure() {
+        let dir = std::env::temp_dir().join(format!("sw-patch-restore-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&dir);
+        fs::create_dir_all(&dir).expect("create dir");
+
+        let good = dir.join("good.txt");
+        let bad = dir.join("bad-dir");
+        fs::write(&good, "patched").expect("write good");
+        fs::create_dir_all(&bad).expect("create bad dir");
+
+        let mut snapshots = HashMap::new();
+        snapshots.insert(good.clone(), b"original".to_vec());
+        snapshots.insert(bad.clone(), b"won't work".to_vec());
+
+        let restore_stack = vec![good.clone(), bad.clone(), good.clone()];
+        let failures = run_patch_restores(&restore_stack, &snapshots);
+
+        assert!(!failures.is_empty());
+        assert_eq!(
+            fs::read_to_string(&good).expect("good restored"),
+            "original"
+        );
+
+        let _ = fs::remove_dir_all(&dir);
     }
 }

@@ -258,6 +258,36 @@ fn valid_java_prerequisite_returns_success() {
 }
 
 #[test]
+fn valid_patch_returns_success() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-valid-patch.json",
+        "--output-format",
+        "json",
+    ]);
+
+    assert_eq!(output.status.code(), Some(0));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": true"));
+}
+
+#[test]
+fn invalid_patch_returns_validation_failure() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-invalid-patch.json",
+        "--output-format",
+        "json",
+    ]);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"path\": \"entries[0].restore\""));
+}
+
+#[test]
 fn invalid_java_prerequisite_with_both_java_home_and_java_home_env_returns_validation_failure() {
     let output = run(&[
         "validate",

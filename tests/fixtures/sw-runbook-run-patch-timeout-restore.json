@@ -1,0 +1,20 @@
+{
+  "entries": [
+    {
+      "type": "Patch",
+      "path": "./demo.txt",
+      "patch": [
+        "@@ -1 +1 @@",
+        "-before",
+        "+after"
+      ]
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "sleep 2"
+      ],
+      "timeout": "1 second"
+    }
+  ]
+}
