@@ -55,6 +55,7 @@ File-based task tracker for Sociable Weaver.
 - [TASK-050: Show Keep Between Markers Only Where Trimmed](./TASK-050-show-keep-between-markers-only-where-trimmed.md)
 - [TASK-051: Default To Automatic Command Process Cleanup](./TASK-051-support-automatic-command-process-cleanup.md)
 - [TASK-052: Support Built-In Java Prerequisite Checks](./TASK-052-support-built-in-java-prerequisite-checks.md)
+- [TASK-053: Treat Missing Process As No-op In Automatic Cleanup](./TASK-053-treat-missing-process-as-no-op-in-automatic-cleanup.md)
 
 ## Pending
 
@@ -64,6 +65,7 @@ File-based task tracker for Sociable Weaver.
 - [ ] [TASK-034: Expand Help Command Coverage](./TASK-034-expand-help-command-coverage.md)
 - [ ] [TASK-038: Include Release Commit History In README](./TASK-038-include-release-commit-history-in-readme.md)
 - [ ] [TASK-043: Implement Explain Command](./TASK-043-implement-explain-command.md)
+- [ ] [TASK-053: Treat Missing Process As No-op In Automatic Cleanup](./TASK-053-treat-missing-process-as-no-op-in-automatic-cleanup.md)
 
 ## In Progress
 

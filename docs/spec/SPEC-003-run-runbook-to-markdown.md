@@ -181,6 +181,10 @@ in the runbook.
   when the run stops early because of failure or timeout.
 - Automatic process cleanup applies only to processes started by that command
   entry, not to unrelated system processes.
+- If automatic process cleanup finds that the target process or process group
+  has already exited, that is treated as a successful no-op.
+- Automatic process cleanup must not surface a noisy "No such process" message
+  when the target is already gone.
 - Cleanup commands are executed after the run finishes and also when the run
   stops early because of failure.
 - If `cleanup` is present, the explicit cleanup block is used instead of
@@ -443,6 +447,10 @@ in the runbook.
       command are terminated automatically after the entry finishes.
 - [ ] Given a command without `cleanup`, remaining processes started by that
       command are terminated automatically after failure or timeout.
+- [ ] Given automatic process cleanup for a command whose process group has
+      already exited, the cleanup step is treated as a successful no-op.
+- [ ] Given automatic process cleanup for a command whose process group has
+      already exited, no user-visible "No such process" warning is printed.
 - [ ] Given commands that declare `cleanup`, cleanup commands execute in reverse
       order after the run completes.
 - [ ] Given a `cleanup` block with multiple command lines, those lines execute
@@ -718,6 +726,7 @@ in the runbook.
 - Variable assignment on one command line used by a later line in the same
   entry.
 - Command relies on default automatic process cleanup.
+- Command finishes before automatic process cleanup runs.
 - Command provides manual `cleanup` instead of relying on automatic process
   cleanup.
 - Multiple commands register cleanup and require reverse-order execution.
