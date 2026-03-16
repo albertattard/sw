@@ -82,6 +82,18 @@ fn example_for_topic(topic: &str) -> Option<&'static str> {
   "line_count": 12
 }"#,
         ),
+        "patch" => Some(
+            r#"{
+  "type": "Patch",
+  "path": "./src/main/java/demo/Main.java",
+  "patch": [
+    "@@ -10,3 +10,3 @@",
+    "-        return oldValue;",
+    "+        return newValue;"
+  ],
+  "indent": 3
+}"#,
+        ),
         "prerequisite" => Some(
             r#"{
   "type": "Prerequisite",

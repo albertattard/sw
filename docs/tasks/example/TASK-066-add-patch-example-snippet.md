@@ -1,7 +1,7 @@
 ---
 id: TASK-066
 title: Add Patch Example Snippet
-status: open
+status: done
 category: example
 related_features:
   - SPEC-008
@@ -33,11 +33,11 @@ entry shape directly from the CLI instead of guessing from the spec.
 
 ## Acceptance Criteria
 
-- [ ] Given `sw example Patch`, the CLI prints a valid JSON example of a
+- [x] Given `sw example Patch`, the CLI prints a valid JSON example of a
       `Patch` entry.
-- [ ] Given `sw example patch`, the CLI behaves the same as
+- [x] Given `sw example patch`, the CLI behaves the same as
       `sw example Patch`.
-- [ ] The returned example reflects the documented `Patch` contract, including
+- [x] The returned example reflects the documented `Patch` contract, including
       patch lines and a target path.
 
 ## Notes

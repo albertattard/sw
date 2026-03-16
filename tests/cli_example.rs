@@ -49,6 +49,20 @@ fn display_file_example_prints_valid_json_entry() {
 }
 
 #[test]
+fn patch_example_prints_valid_json_entry() {
+    let output = run(&["example", "Patch"]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let value: serde_json::Value =
+        serde_json::from_str(&stdout).expect("example output should be valid json");
+    assert_eq!(value["type"], "Patch");
+    assert_eq!(value["path"], "./src/main/java/demo/Main.java");
+    assert!(value["patch"].is_array());
+    assert!(value.get("restore").is_none());
+}
+
+#[test]
 fn unknown_example_topic_returns_operational_error() {
     let output = run(&["example", "unknown.topic"]);
 
@@ -66,6 +80,17 @@ fn command_example_topic_is_case_insensitive() {
     let value: serde_json::Value =
         serde_json::from_str(&stdout).expect("example output should be valid json");
     assert_eq!(value["type"], "Command");
+}
+
+#[test]
+fn patch_example_topic_is_case_insensitive() {
+    let output = run(&["example", "patch"]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let value: serde_json::Value =
+        serde_json::from_str(&stdout).expect("example output should be valid json");
+    assert_eq!(value["type"], "Patch");
 }
 
 #[test]
