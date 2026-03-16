@@ -14,3 +14,4 @@ acceptance criteria.
 - [SPEC-007: Release Distribution Contract](./SPEC-007-release-distribution.md)
 - [SPEC-008: Example Snippets Contract](./SPEC-008-example-snippets.md)
 - [SPEC-009: Explain Feature Contract](./SPEC-009-explain-feature-contract.md)
+- [SPEC-010: Format Runbook JSON](./SPEC-010-format-runbook-json.md)

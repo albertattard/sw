@@ -68,6 +68,7 @@ tying the test suite to a specific project.
 - Use one of these controlled task categories when creating new tasks:
   - `discovery`
   - `validate`
+  - `format`
   - `run`
   - `rewrite`
   - `prerequisite`
