@@ -129,6 +129,15 @@ in the runbook.
 - Debug output may be used together with `--verbose`.
 - When both flags are enabled, both progress and debug diagnostics are written
   to stderr.
+- `Command` entries may declare `debug`.
+- `Command.debug` is a boolean.
+- If `Command.debug` is omitted, it defaults to `false`.
+- When global `--debug` is enabled, all `Command` entries emit debug
+  diagnostics regardless of `Command.debug`.
+- When global `--debug` is not enabled, only `Command` entries with
+  `debug: true` emit debug diagnostics.
+- `Command.debug` applies only to the command entry where it is declared and
+  does not enable diagnostics for other entries.
 - Debug output is intended to help humans and agents troubleshoot runbook
   authoring issues such as rewrite matching, generated captures, and command
   output interpolation.
@@ -248,6 +257,7 @@ in the runbook.
 - `cleanup` is a list of command lines, matching the shape of `commands`.
 - All lines within a single `cleanup` block execute together in the same shell
   context.
+- A `Command` entry may declare `debug`.
 - Multi-line shell control structures such as `if ... then ... fi` may be
   expressed across multiple `cleanup` lines and must execute correctly as one
   cleanup script.
@@ -458,6 +468,13 @@ in the runbook.
       changing the existing stdout contract.
 - [ ] Given `sw --debug` with no subcommand, the command behaves the same as
       `sw run --debug`.
+- [ ] Given a runbook with one `Command` entry with `debug: true` and another
+      without it, and no global `--debug`, diagnostics are written only for
+      the flagged command entry.
+- [ ] Given a `Command` entry with `debug: false`, that entry does not emit
+      debug diagnostics unless global `--debug` is enabled.
+- [ ] Given global `--debug`, all command entries emit debug diagnostics
+      regardless of command-level `debug`.
 - [ ] Given `sw run --verbose`, entry numbers are padded so summaries align to
       the same starting column.
 - [ ] Given `sw run --verbose`, elapsed time is shown as seconds with one
