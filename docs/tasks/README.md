@@ -128,7 +128,6 @@ Expected task directories:
 - [ ] [TASK-038: Include Release Commit History In README](release/TASK-038-include-release-commit-history-in-readme.md)
 - [ ] [TASK-043: Implement Explain Command](explain/TASK-043-implement-explain-command.md)
 - [ ] [TASK-056: Warn About Background Commands Holding Command Pipes Open](validate/TASK-056-warn-about-background-commands-holding-command-pipes-open.md)
-- [ ] [TASK-057: Support Multiline Cleanup Control Structures](run/TASK-057-support-multiline-cleanup-control-structures.md)
 
 ## In Progress
 
@@ -189,6 +188,7 @@ Expected task directories:
 - [x] [TASK-053: Treat Missing Process As No-op In Automatic Cleanup](run/TASK-053-treat-missing-process-as-no-op-in-automatic-cleanup.md)
 - [x] [TASK-054: Add Verbose Run Progress Output](run/TASK-054-add-verbose-run-progress-output.md)
 - [x] [TASK-055: Refine Verbose Run Time Formatting](run/TASK-055-refine-verbose-run-time-formatting.md)
+- [x] [TASK-057: Support Multiline Cleanup Control Structures](run/TASK-057-support-multiline-cleanup-control-structures.md)
 - [x] [TASK-058: Migrate Tasks Into Category Directories](repo-process/TASK-058-migrate-tasks-into-category-directories.md)
 
 ## Blocked

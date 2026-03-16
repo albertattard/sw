@@ -1,7 +1,7 @@
 ---
 id: TASK-057
 title: Support Multiline Cleanup Control Structures
-status: open
+status: done
 category: run
 related_features:
   - SPEC-003
@@ -31,11 +31,11 @@ Make cleanup execution support multi-line shell control structures such as
 
 ## Acceptance Criteria
 
-- [ ] Given a cleanup block that expresses `if ... then ... fi` across multiple
+- [x] Given a cleanup block that expresses `if ... then ... fi` across multiple
       lines, cleanup executes successfully.
-- [ ] Given a multi-line cleanup control structure, cleanup still runs in the
+- [x] Given a multi-line cleanup control structure, cleanup still runs in the
       same shell context.
-- [ ] Given a failure inside one cleanup block, later registered cleanup blocks
+- [x] Given a failure inside one cleanup block, later registered cleanup blocks
       still execute.
 
 ## Notes

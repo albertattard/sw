@@ -1,0 +1,16 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'main\\n' >> cleanup-multiline.txt"
+      ],
+      "cleanup": [
+        "NAME='cleanup context'",
+        "if [ -n \"$NAME\" ]; then",
+        "  printf '%s\\n' \"$NAME\" >> cleanup-multiline.txt",
+        "fi"
+      ]
+    }
+  ]
+}

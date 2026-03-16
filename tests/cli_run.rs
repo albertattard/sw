@@ -650,6 +650,25 @@ fn cleanup_runs_after_timeout() {
 }
 
 #[test]
+fn cleanup_supports_multiline_control_structures() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-cleanup-multiline-control-structure.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    assert_eq!(
+        fs::read_to_string(dir.join("cleanup-multiline.txt"))
+            .expect("missing cleanup multiline file"),
+        "main\ncleanup context\n"
+    );
+}
+
+#[test]
 fn cleanup_failures_do_not_stop_remaining_cleanup_and_fail_the_run() {
     let dir = prepare_workspace();
     write_runbook(

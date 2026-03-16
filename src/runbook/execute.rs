@@ -185,13 +185,73 @@ fn run_cleanup_block(cleanup: &[String]) -> Result<(), String> {
 
 fn cleanup_script(cleanup: &[String]) -> String {
     let mut script = String::from("status=0\n");
-    for line in cleanup {
-        script.push_str("{ ");
-        script.push_str(line);
-        script.push_str("; } || status=$?\n");
+    for chunk in cleanup_chunks(cleanup) {
+        script.push_str("{\n");
+        for line in chunk {
+            script.push_str(&line);
+            script.push('\n');
+        }
+        script.push_str("} || status=$?\n");
     }
     script.push_str("exit $status\n");
     script
+}
+
+fn cleanup_chunks(cleanup: &[String]) -> Vec<Vec<String>> {
+    let mut chunks = Vec::new();
+    let mut current = Vec::new();
+    let mut compound_depth = 0usize;
+    let mut brace_depth = 0usize;
+
+    for line in cleanup {
+        current.push(line.clone());
+        let trimmed = line.trim();
+
+        if starts_compound_block(trimmed) {
+            compound_depth += 1;
+        }
+        brace_depth += opens_brace_block(trimmed);
+
+        if closes_compound_block(trimmed) && compound_depth > 0 {
+            compound_depth -= 1;
+        }
+        let closed_braces = closes_brace_block(trimmed);
+        brace_depth = brace_depth.saturating_sub(closed_braces);
+
+        if compound_depth == 0 && brace_depth == 0 {
+            chunks.push(std::mem::take(&mut current));
+        }
+    }
+
+    if !current.is_empty() {
+        chunks.push(current);
+    }
+
+    chunks
+}
+
+fn starts_compound_block(line: &str) -> bool {
+    let token = leading_token(line);
+    matches!(token, Some("if" | "for" | "while" | "until" | "case"))
+}
+
+fn closes_compound_block(line: &str) -> bool {
+    let token = leading_token(line);
+    matches!(token, Some("fi" | "done" | "esac"))
+}
+
+fn opens_brace_block(line: &str) -> usize {
+    let token = leading_token(line);
+    usize::from(matches!(token, Some("{")))
+}
+
+fn closes_brace_block(line: &str) -> usize {
+    let token = leading_token(line);
+    usize::from(matches!(token, Some("}")))
+}
+
+fn leading_token(line: &str) -> Option<&str> {
+    line.split_whitespace().next()
 }
 
 fn ensure_expected_exit_code(
@@ -466,4 +526,54 @@ fn terminate_process_group(process_group_id: u32) -> Result<bool, RenderError> {
     }
 
     Ok(false)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{cleanup_chunks, cleanup_script};
+
+    #[test]
+    fn cleanup_chunks_keep_multiline_if_block_together() {
+        let cleanup = vec![
+            "NAME='cleanup context'".to_string(),
+            "if [ -n \"$NAME\" ]; then".to_string(),
+            "  printf '%s\\n' \"$NAME\" >> cleanup.txt".to_string(),
+            "fi".to_string(),
+            "printf 'done\\n' >> cleanup.txt".to_string(),
+        ];
+
+        let chunks = cleanup_chunks(&cleanup);
+
+        assert_eq!(chunks.len(), 3);
+        assert_eq!(chunks[0], vec!["NAME='cleanup context'".to_string()]);
+        assert_eq!(
+            chunks[1],
+            vec![
+                "if [ -n \"$NAME\" ]; then".to_string(),
+                "  printf '%s\\n' \"$NAME\" >> cleanup.txt".to_string(),
+                "fi".to_string()
+            ]
+        );
+        assert_eq!(
+            chunks[2],
+            vec!["printf 'done\\n' >> cleanup.txt".to_string()]
+        );
+    }
+
+    #[test]
+    fn cleanup_script_wraps_each_top_level_chunk() {
+        let cleanup = vec![
+            "false".to_string(),
+            "if [ -f cleanup.txt ]; then".to_string(),
+            "  printf 'cleanup\\n' >> cleanup.txt".to_string(),
+            "fi".to_string(),
+        ];
+
+        let script = cleanup_script(&cleanup);
+
+        assert!(script.contains("{\nfalse\n} || status=$?\n"));
+        assert!(script.contains(
+            "{\nif [ -f cleanup.txt ]; then\n  printf 'cleanup\\n' >> cleanup.txt\nfi\n} || status=$?\n"
+        ));
+    }
 }
