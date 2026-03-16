@@ -4,6 +4,7 @@
       "type": "Prerequisite",
       "checks": [
         {
+          "kind": "command",
           "name": "Docker daemon",
           "contents": [
             "- Docker daemon"

@@ -9,6 +9,7 @@
       "type": "Prerequisite",
       "checks": [
         {
+          "kind": "command",
           "name": "Environment marker",
           "contents": [
             "- Environment marker file",

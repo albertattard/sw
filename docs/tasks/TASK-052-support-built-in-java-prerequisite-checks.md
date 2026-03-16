@@ -1,7 +1,7 @@
 ---
 id: TASK-052
 title: Support Built-In Java Prerequisite Checks
-status: open
+status: done
 related_features:
   - SPEC-003
   - SPEC-005
@@ -32,15 +32,15 @@ versions and Java home locations without shell-based parsing.
 
 ## Acceptance Criteria
 
-- [ ] Given a `java` prerequisite check with `version: "24+"`, the prerequisite
+- [x] Given a `java` prerequisite check with `version: "24+"`, the prerequisite
       passes when the resolved Java runtime is Java 24 or higher.
-- [ ] Given a `java` prerequisite check with `version: "17"`, the prerequisite
+- [x] Given a `java` prerequisite check with `version: "17"`, the prerequisite
       passes only when the resolved Java runtime is exactly Java 17.
-- [ ] Given a `java` prerequisite check with `java_home_env`, the runtime
+- [x] Given a `java` prerequisite check with `java_home_env`, the runtime
       resolves Java from that environment variable.
-- [ ] Given a `java` prerequisite check with an unset `java_home_env`, the
+- [x] Given a `java` prerequisite check with an unset `java_home_env`, the
       prerequisite fails with a clear message.
-- [ ] Given a `java` prerequisite check with both `java_home` and
+- [x] Given a `java` prerequisite check with both `java_home` and
       `java_home_env`, the runbook is rejected during validation.
 
 ## Notes

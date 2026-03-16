@@ -953,37 +953,24 @@ fn validate_prerequisite_checks(value: &Value, path: &str, errors: &mut Vec<Vali
             continue;
         };
 
-        for key in object.keys() {
-            if key != "name"
-                && key != "contents"
-                && key != "commands"
-                && key != "assert"
-                && key != "help"
-            {
-                push_error(
-                    errors,
-                    format!("{check_path}.{key}"),
-                    "is not a supported prerequisite property",
-                );
-            }
+        require_string(object, "name", &check_path, errors);
+        let kind = object.get("kind").and_then(Value::as_str);
+        match kind {
+            Some("command") => validate_command_prerequisite_check(object, &check_path, errors),
+            Some("java") => validate_java_prerequisite_check(object, &check_path, errors),
+            Some(_) => push_error(
+                errors,
+                format!("{check_path}.kind"),
+                "must be `command` or `java`",
+            ),
+            None => push_error(errors, format!("{check_path}.kind"), "must be a string"),
         }
 
-        require_string(object, "name", &check_path, errors);
         match object.get("contents") {
             Some(contents) => {
                 validate_string_array(contents, &format!("{check_path}.contents"), errors)
             }
             None => push_error(errors, format!("{check_path}.contents"), "is required"),
-        }
-        match object.get("commands") {
-            Some(commands) => {
-                validate_string_array(commands, &format!("{check_path}.commands"), errors)
-            }
-            None => push_error(errors, format!("{check_path}.commands"), "is required"),
-        }
-
-        if let Some(assertion) = object.get("assert") {
-            validate_assert(assertion, &format!("{check_path}.assert"), errors);
         }
 
         if let Some(help) = object.get("help")
@@ -1004,6 +991,105 @@ fn validate_prerequisite_checks(value: &Value, path: &str, errors: &mut Vec<Vali
             }
         }
     }
+}
+
+fn validate_command_prerequisite_check(
+    object: &Map<String, Value>,
+    path: &str,
+    errors: &mut Vec<ValidationIssue>,
+) {
+    for key in object.keys() {
+        if key != "kind"
+            && key != "name"
+            && key != "contents"
+            && key != "commands"
+            && key != "assert"
+            && key != "help"
+        {
+            push_error(
+                errors,
+                format!("{path}.{key}"),
+                "is not a supported prerequisite property",
+            );
+        }
+    }
+
+    match object.get("commands") {
+        Some(commands) => validate_string_array(commands, &format!("{path}.commands"), errors),
+        None => push_error(errors, format!("{path}.commands"), "is required"),
+    }
+
+    if let Some(assertion) = object.get("assert") {
+        validate_assert(assertion, &format!("{path}.assert"), errors);
+    }
+}
+
+fn validate_java_prerequisite_check(
+    object: &Map<String, Value>,
+    path: &str,
+    errors: &mut Vec<ValidationIssue>,
+) {
+    for key in object.keys() {
+        if key != "kind"
+            && key != "name"
+            && key != "contents"
+            && key != "version"
+            && key != "java_home"
+            && key != "java_home_env"
+            && key != "help"
+        {
+            push_error(
+                errors,
+                format!("{path}.{key}"),
+                "is not a supported prerequisite property",
+            );
+        }
+    }
+
+    match object.get("version").and_then(Value::as_str) {
+        Some(version) if is_valid_java_version_requirement(version) => {}
+        Some(_) => push_error(
+            errors,
+            format!("{path}.version"),
+            "must be a Java version like `17` or `24+`",
+        ),
+        None => push_error(errors, format!("{path}.version"), "must be a string"),
+    }
+
+    if let Some(java_home) = object.get("java_home")
+        && !java_home.is_string()
+    {
+        push_error(errors, format!("{path}.java_home"), "must be a string");
+    }
+
+    if let Some(java_home_env) = object.get("java_home_env")
+        && !java_home_env.is_string()
+    {
+        push_error(errors, format!("{path}.java_home_env"), "must be a string");
+    }
+
+    if object.get("java_home").is_some() && object.get("java_home_env").is_some() {
+        push_error(
+            errors,
+            path.to_string(),
+            "must not include both `java_home` and `java_home_env`",
+        );
+    }
+}
+
+fn is_valid_java_version_requirement(value: &str) -> bool {
+    let Some(first) = value.chars().next() else {
+        return false;
+    };
+    if !first.is_ascii_digit() {
+        return false;
+    }
+
+    if let Some(prefix) = value.strip_suffix('+') {
+        return !prefix.is_empty() && prefix.chars().all(|character| character.is_ascii_digit());
+    }
+
+    value.chars().all(|character| character.is_ascii_digit())
 }
 
 fn validate_timeout(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>) {

@@ -4,6 +4,7 @@
       "type": "Prerequisite",
       "checks": [
         {
+          "kind": "command",
           "name": "jq",
           "contents": [
             "- [jq](https://jqlang.org/)"

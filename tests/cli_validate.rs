@@ -186,6 +186,37 @@ fn invalid_cleanup_returns_validation_failure() {
 }
 
 #[test]
+fn valid_java_prerequisite_returns_success() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-valid-prerequisite-java.json",
+        "--output-format",
+        "json",
+    ]);
+
+    assert_eq!(output.status.code(), Some(0));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": true"));
+}
+
+#[test]
+fn invalid_java_prerequisite_with_both_java_home_and_java_home_env_returns_validation_failure() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-invalid-prerequisite-java-both-homes.json",
+        "--output-format",
+        "json",
+    ]);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": false"));
+    assert!(stdout.contains("\"path\": \"entries[0].checks[0]\""));
+}
+
+#[test]
 fn invalid_output_content_type_returns_validation_failure() {
     let output = run(&[
         "validate",

@@ -87,6 +87,7 @@ fn example_for_topic(topic: &str) -> Option<&'static str> {
   "type": "Prerequisite",
   "checks": [
     {
+      "kind": "command",
       "name": "Oracle Java 25",
       "contents": [
         "- [Oracle Java 25](https://www.oracle.com/java/technologies/downloads/#java25)"

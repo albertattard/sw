@@ -4,6 +4,7 @@
       "type": "Prerequisite",
       "checks": [
         {
+          "kind": "command",
           "name": "Oracle Java 25",
           "contents": [
             "- Oracle Java 25"

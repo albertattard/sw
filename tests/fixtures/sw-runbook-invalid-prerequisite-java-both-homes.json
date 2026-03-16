@@ -1,0 +1,20 @@
+{
+  "entries": [
+    {
+      "type": "Prerequisite",
+      "checks": [
+        {
+          "kind": "java",
+          "name": "Java 17",
+          "contents": [
+            "- Java 17"
+          ],
+          "java_home": "/opt/jdk-17",
+          "java_home_env": "JAVA_17_HOME",
+          "version": "17",
+          "help": "Set `JAVA_17_HOME` to a Java 17 home directory."
+        }
+      ]
+    }
+  ]
+}

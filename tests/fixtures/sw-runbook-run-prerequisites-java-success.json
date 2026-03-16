@@ -1,0 +1,35 @@
+{
+  "entries": [
+    {
+      "type": "Prerequisite",
+      "checks": [
+        {
+          "kind": "java",
+          "name": "Java 24+",
+          "contents": [
+            "- Java 24 or higher"
+          ],
+          "java_home_env": "JAVA_24_HOME",
+          "version": "24+",
+          "help": "Set `JAVA_24_HOME` to a Java 24 home directory."
+        },
+        {
+          "kind": "java",
+          "name": "Java 17",
+          "contents": [
+            "- Java 17"
+          ],
+          "java_home_env": "JAVA_17_HOME",
+          "version": "17",
+          "help": "Set `JAVA_17_HOME` to a Java 17 home directory."
+        }
+      ]
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "printf '%s\\n' main >> prereq-java-order.txt"
+      ]
+    }
+  ]
+}

@@ -4,6 +4,9 @@ use std::process::Command;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{SystemTime, UNIX_EPOCH};
 
+#[cfg(unix)]
+use std::os::unix::fs::PermissionsExt;
+
 static NEXT_ID: AtomicU64 = AtomicU64::new(0);
 
 fn unique_temp_dir() -> PathBuf {
@@ -29,12 +32,51 @@ fn run_in_dir(args: &[&str], dir: &Path) -> std::process::Output {
         .expect("failed to execute sw")
 }
 
+fn run_in_dir_with_env(args: &[&str], dir: &Path, envs: &[(&str, &Path)]) -> std::process::Output {
+    let mut command = Command::new(env!("CARGO_BIN_EXE_sw"));
+    command.args(args).current_dir(dir);
+    for (key, value) in envs {
+        command.env(key, value);
+    }
+    command.output().expect("failed to execute sw")
+}
+
+fn run_in_dir_clearing_env(args: &[&str], dir: &Path, keys: &[&str]) -> std::process::Output {
+    let mut command = Command::new(env!("CARGO_BIN_EXE_sw"));
+    command.args(args).current_dir(dir);
+    for key in keys {
+        command.env_remove(key);
+    }
+    command.output().expect("failed to execute sw")
+}
+
 fn write_runbook(dir: &Path, fixture_name: &str, target_name: &str) -> PathBuf {
     let source = Path::new("tests/fixtures").join(fixture_name);
     let target = dir.join(target_name);
     let contents = fs::read_to_string(source).expect("failed to read fixture");
     fs::write(&target, contents).expect("failed to write fixture");
     target
+}
+
+fn create_fake_java_home(dir: &Path, folder_name: &str, version: &str) -> PathBuf {
+    let java_home = dir.join(folder_name);
+    let bin_dir = java_home.join("bin");
+    fs::create_dir_all(&bin_dir).expect("failed to create fake java bin dir");
+    let java_path = bin_dir.join("java");
+    fs::write(
+        &java_path,
+        format!("#!/bin/sh\necho 'openjdk version \"{version}.0.1\"' >&2\necho 'Fake Java' >&2\n"),
+    )
+    .expect("failed to write fake java");
+    #[cfg(unix)]
+    {
+        let mut permissions = fs::metadata(&java_path)
+            .expect("missing fake java metadata")
+            .permissions();
+        permissions.set_mode(0o755);
+        fs::set_permissions(&java_path, permissions).expect("failed to make fake java executable");
+    }
+    java_home
 }
 
 #[test]
@@ -59,6 +101,32 @@ fn check_succeeds_when_prerequisites_pass_and_skips_main_commands() {
 }
 
 #[test]
+fn check_succeeds_when_java_prerequisites_pass() {
+    let dir = prepare_workspace();
+    let java_17_home = create_fake_java_home(&dir, "jdk-17", "17");
+    let java_24_home = create_fake_java_home(&dir, "jdk-24", "24");
+    write_runbook(
+        &dir,
+        "sw-runbook-run-prerequisites-java-success.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir_with_env(
+        &["check"],
+        &dir,
+        &[
+            ("JAVA_17_HOME", &java_17_home),
+            ("JAVA_24_HOME", &java_24_home),
+        ],
+    );
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("All prerequisite checks passed"));
+    assert!(!dir.join("prereq-java-order.txt").exists());
+}
+
+#[test]
 fn check_fails_when_prerequisite_fails_and_skips_main_commands() {
     let dir = prepare_workspace();
     write_runbook(
@@ -79,6 +147,24 @@ fn check_fails_when_prerequisite_fails_and_skips_main_commands() {
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(stderr.contains("Prerequisite failed: Docker daemon"));
     assert!(stderr.contains("Start Docker Desktop before running this example."));
+}
+
+#[test]
+fn check_fails_when_java_home_env_is_unset() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-prerequisites-java-env-missing.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir_clearing_env(&["check"], &dir, &["JAVA_17_HOME"]);
+
+    assert_eq!(output.status.code(), Some(2));
+    assert!(!dir.join("prereq-java-missing-order.txt").exists());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("environment variable `JAVA_17_HOME` is not set"));
+    assert!(stderr.contains("Set `JAVA_17_HOME` to a Java 17 home directory."));
 }
 
 #[test]

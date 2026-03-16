@@ -4,6 +4,7 @@
       "type": "Prerequisite",
       "checks": [
         {
+          "kind": "command",
           "name": "jq",
           "contents": [
             "- [jq](https://jqlang.org/)"
@@ -16,6 +17,7 @@
           ]
         },
         {
+          "kind": "command",
           "name": "curl",
           "contents": [
             "- [curl](https://curl.se/)"
