@@ -1,7 +1,7 @@
 ---
 id: TASK-034
 title: Expand Help Command Coverage
-status: pending
+status: done
 category: discovery
 related_features:
   - SPEC-001
@@ -31,10 +31,10 @@ the full help set for all known subcommands from one entry point.
 
 ## Acceptance Criteria
 
-- [ ] `sw help <subcommand>` prints help for a known subcommand and exits with `0`.
-- [ ] `sw help <subcommand>` with an unknown subcommand exits with `1`.
-- [ ] `sw help --all` prints help for all known subcommands and exits with `0`.
-- [ ] Existing help entry points keep working.
+- [x] `sw help <subcommand>` prints help for a known subcommand and exits with `0`.
+- [x] `sw help <subcommand>` with an unknown subcommand exits with `1`.
+- [x] `sw help --all` prints help for all known subcommands and exits with `0`.
+- [x] Existing help entry points keep working.
 
 ## Notes
 

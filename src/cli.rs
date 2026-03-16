@@ -30,8 +30,8 @@ pub enum Commands {
     Example(ExampleArgs),
     /// Render a runbook to output.
     Run(RunArgs),
-    /// Show top-level help.
-    Help,
+    /// Show help for the CLI or a specific subcommand.
+    Help(HelpArgs),
     /// Validate a runbook file.
     Validate(ValidateArgs),
 }
@@ -75,6 +75,16 @@ pub struct ExampleArgs {
     pub topic: String,
 }
 
+#[derive(Debug, clap::Args)]
+pub struct HelpArgs {
+    /// Print help for all known subcommands.
+    #[arg(long)]
+    pub all: bool,
+
+    /// Help topic such as `run` or `validate`.
+    pub topic: Option<String>,
+}
+
 #[derive(Copy, Clone, Debug, Eq, PartialEq, ValueEnum)]
 pub enum RunOutputFormat {
     Markdown,
@@ -91,4 +101,33 @@ pub fn print_top_level_help() -> std::io::Result<()> {
     cmd.print_help()?;
     println!();
     Ok(())
+}
+
+pub fn print_help_for_topic(topic: &str) -> Result<(), String> {
+    let mut cmd = Cli::command();
+    let Some(subcommand) = cmd.find_subcommand_mut(topic) else {
+        return Err(format!("Unknown help topic: {topic}"));
+    };
+
+    subcommand
+        .print_help()
+        .map_err(|err| format!("Failed to print help for `{topic}`: {err}"))?;
+    println!();
+    Ok(())
+}
+
+pub fn print_all_help() -> Result<(), String> {
+    print_top_level_help().map_err(|err| format!("Failed to print help: {err}"))?;
+
+    let topic_names = command_topic_names();
+    for topic in topic_names {
+        println!();
+        print_help_for_topic(topic)?;
+    }
+
+    Ok(())
+}
+
+fn command_topic_names() -> Vec<&'static str> {
+    vec!["check", "example", "run", "help", "validate"]
 }
