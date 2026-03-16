@@ -28,6 +28,7 @@ fn help_subcommand_prints_help() {
     assert!(stdout.contains("--debug"));
     assert!(stdout.contains("check"));
     assert!(stdout.contains("example"));
+    assert!(stdout.contains("explain"));
     assert!(stdout.contains("help"));
 }
 
@@ -61,6 +62,7 @@ fn help_all_prints_top_level_and_known_subcommand_help() {
     assert!(stdout.contains("Sociable Weaver (SW)"));
     assert!(stdout.contains("Check runbook prerequisites"));
     assert!(stdout.contains("Print a JSON example for a runbook topic"));
+    assert!(stdout.contains("Explain a feature contract or discovery path"));
     assert!(stdout.contains("Render a runbook to output"));
     assert!(stdout.contains("Show help for the CLI or a specific subcommand"));
     assert!(stdout.contains("Validate a runbook file"));
@@ -83,6 +85,16 @@ fn example_help_prints_help() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("Example topic"));
     assert!(stdout.contains("rewrite.keep_between"));
+}
+
+#[test]
+fn explain_help_prints_help() {
+    let output = run(&["explain", "--help"]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("Explain topic"));
+    assert!(stdout.contains("--all"));
 }
 
 #[test]

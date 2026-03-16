@@ -128,6 +128,7 @@ Expected task directories:
 - [TASK-064: Support Variable RFC3339 Fractional Seconds](rewrite/TASK-064-support-variable-rfc3339-fractional-seconds.md)
 - [TASK-065: Add Patch Entry With Automatic Restore](run/TASK-065-add-patch-entry-with-automatic-restore.md)
 - [TASK-066: Add Patch Example Snippet](example/TASK-066-add-patch-example-snippet.md)
+- [TASK-067: Add DisplayFile Transformations](display-file/TASK-067-add-display-file-transformations.md)
 
 ## Pending
 
@@ -135,8 +136,8 @@ Expected task directories:
 - [ ] [TASK-028: Implement Init Command](init/TASK-028-implement-init-command.md)
 - [ ] [TASK-033: Implement Import Command](import/TASK-033-implement-import-command.md)
 - [ ] [TASK-038: Include Release Commit History In README](release/TASK-038-include-release-commit-history-in-readme.md)
-- [ ] [TASK-043: Implement Explain Command](explain/TASK-043-implement-explain-command.md)
 - [ ] [TASK-059: Implement Format Command](format/TASK-059-implement-format-command.md)
+- [ ] [TASK-067: Add DisplayFile Transformations](display-file/TASK-067-add-display-file-transformations.md)
 
 ## In Progress
 
@@ -186,6 +187,7 @@ Expected task directories:
 - [x] [TASK-040: Expand Rewrite Example Coverage](rewrite/TASK-040-expand-rewrite-example-coverage.md)
 - [x] [TASK-041: Make Example Topics Case-Insensitive And Richer](example/TASK-041-make-example-topics-case-insensitive-and-richer.md)
 - [x] [TASK-042: Support Time-Only Datetime Shift](rewrite/TASK-042-support-time-only-datetime-shift.md)
+- [x] [TASK-043: Implement Explain Command](explain/TASK-043-implement-explain-command.md)
 - [x] [TASK-043: Include Failing Command Entry in Assertion Errors](run/TASK-043-include-failing-command-entry-in-assertion-errors.md)
 - [x] [TASK-044: Include Command Output In Assertion Errors](run/TASK-044-include-command-output-in-assertion-errors.md)
 - [x] [TASK-045: Support DisplayFile Indent Control](display-file/TASK-045-support-display-file-indent-control.md)

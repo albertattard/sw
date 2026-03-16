@@ -28,6 +28,8 @@ pub enum Commands {
     Check(CheckArgs),
     /// Print a JSON example for a runbook topic.
     Example(ExampleArgs),
+    /// Explain a feature contract or discovery path.
+    Explain(ExplainArgs),
     /// Render a runbook to output.
     Run(RunArgs),
     /// Show help for the CLI or a specific subcommand.
@@ -73,6 +75,16 @@ pub struct ValidateArgs {
 pub struct ExampleArgs {
     /// Example topic such as `Command`, `DisplayFile`, or `rewrite.keep_between`.
     pub topic: String,
+}
+
+#[derive(Debug, clap::Args)]
+pub struct ExplainArgs {
+    /// Print explanations for all supported topics.
+    #[arg(long)]
+    pub all: bool,
+
+    /// Explain topic such as `run`, `check`, or `example`.
+    pub topic: Option<String>,
 }
 
 #[derive(Debug, clap::Args)]
@@ -129,5 +141,5 @@ pub fn print_all_help() -> Result<(), String> {
 }
 
 fn command_topic_names() -> Vec<&'static str> {
-    vec!["check", "example", "run", "help", "validate"]
+    vec!["check", "example", "explain", "run", "help", "validate"]
 }

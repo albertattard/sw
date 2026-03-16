@@ -1,13 +1,13 @@
 ---
 id: TASK-043
 title: Implement Explain Command
-status: pending
+status: done
 category: explain
 related_features:
   - SPEC-009
 owner: @aattard
 created: 2026-03-13
-updated: 2026-03-13
+updated: 2026-03-16
 ---
 
 ## Summary
@@ -42,20 +42,20 @@ reading the repository specs directly.
 
 ## Acceptance Criteria
 
-- [ ] Given `sw explain run`, the CLI exits with `0` and prints a concise
+- [x] Given `sw explain run`, the CLI exits with `0` and prints a concise
       summary of the run contract.
-- [ ] Given `sw explain --all`, the CLI exits with `0` and prints all
+- [x] Given `sw explain --all`, the CLI exits with `0` and prints all
       supported topic explanations.
-- [ ] Given an agent-style question such as "how do I check for Java 21?",
+- [x] Given an agent-style question such as "how do I check for Java 21?",
       the `explain` output gives enough guidance to choose the correct next
       `sw` command and topic.
-- [ ] Given an agent deciding between `help`, `example`, and `explain`, the
+- [x] Given an agent deciding between `help`, `example`, and `explain`, the
       `explain` output makes those boundaries clear.
-- [ ] Given `sw explain RUN`, the CLI behaves the same as `sw explain run`.
-- [ ] Given `sw explain unknown`, the CLI exits with `1`.
-- [ ] Given `sw explain` with no topic and no `--all`, the CLI exits with `1`.
-- [ ] Top-level help includes `explain`.
-- [ ] `sw explain --help` documents the topic argument and `--all`.
+- [x] Given `sw explain RUN`, the CLI behaves the same as `sw explain run`.
+- [x] Given `sw explain unknown`, the CLI exits with `1`.
+- [x] Given `sw explain` with no topic and no `--all`, the CLI exits with `1`.
+- [x] Top-level help includes `explain`.
+- [x] `sw explain --help` documents the topic argument and `--all`.
 
 ## Notes
 

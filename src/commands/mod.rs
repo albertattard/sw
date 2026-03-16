@@ -1,9 +1,10 @@
 pub mod check;
 pub mod example;
+pub mod explain;
 pub mod run;
 pub mod validate;
 
-use crate::cli::{Cli, Commands, HelpArgs, RunArgs, RunOutputFormat};
+use crate::cli::{Cli, Commands, ExplainArgs, HelpArgs, RunArgs, RunOutputFormat};
 use std::process::ExitCode;
 
 pub fn run(cli: Cli) -> ExitCode {
@@ -26,6 +27,7 @@ pub fn run(cli: Cli) -> ExitCode {
         Some(Commands::Help(args)) => run_help(args),
         Some(Commands::Check(args)) => check::run(args),
         Some(Commands::Example(args)) => example::run(args),
+        Some(Commands::Explain(args)) => run_explain(args),
         Some(Commands::Run(args)) => run::run(args, verbose, debug),
         Some(Commands::Validate(args)) => validate::run(args),
     }
@@ -64,4 +66,8 @@ fn run_help(args: HelpArgs) -> ExitCode {
             ExitCode::from(1)
         }
     }
+}
+
+fn run_explain(args: ExplainArgs) -> ExitCode {
+    explain::run(args)
 }
