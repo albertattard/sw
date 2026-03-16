@@ -122,6 +122,7 @@ Expected task directories:
 - [TASK-058: Migrate Tasks Into Category Directories](repo-process/TASK-058-migrate-tasks-into-category-directories.md)
 - [TASK-059: Implement Format Command](format/TASK-059-implement-format-command.md)
 - [TASK-060: Improve Rewrite Capture Failure Diagnostics](rewrite/TASK-060-improve-rewrite-capture-failure-diagnostics.md)
+- [TASK-061: Add Debug Run Diagnostics](run/TASK-061-add-debug-run-diagnostics.md)
 
 ## Pending
 
@@ -133,6 +134,7 @@ Expected task directories:
 - [ ] [TASK-043: Implement Explain Command](explain/TASK-043-implement-explain-command.md)
 - [ ] [TASK-056: Warn About Background Commands Holding Command Pipes Open](validate/TASK-056-warn-about-background-commands-holding-command-pipes-open.md)
 - [ ] [TASK-059: Implement Format Command](format/TASK-059-implement-format-command.md)
+- [ ] [TASK-061: Add Debug Run Diagnostics](run/TASK-061-add-debug-run-diagnostics.md)
 
 ## In Progress
 

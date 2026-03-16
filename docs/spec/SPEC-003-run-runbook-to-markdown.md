@@ -27,6 +27,7 @@ The CLI also provides an explicit `run` command:
 ```bash
 sw
 sw --verbose
+sw --debug
 sw run
 sw run --input-file <sw-runbook.json>
 ```
@@ -47,7 +48,10 @@ in the runbook.
 - Optional output format parameter: `--output-format markdown`.
 - Optional output file parameter: `--output-file <path>`.
 - Optional progress parameter: `--verbose`.
+- Optional diagnostic parameter: `--debug`.
 - `--verbose` may be provided either before the subcommand as a global flag or
+  after the `run` subcommand.
+- `--debug` may be provided either before the subcommand as a global flag or
   after the `run` subcommand.
 
 ### CLI Defaults
@@ -57,14 +61,18 @@ in the runbook.
 - If `--output-format` is not provided, default to `markdown`.
 - If `--output-file` is not provided, default to `./README.md`.
 - If `--verbose` is not provided, progress output is suppressed.
+- If `--debug` is not provided, diagnostic output is suppressed.
 - If `sw` is invoked without a subcommand, `sw --verbose` behaves the same as
   `sw run --verbose`.
+- If `sw` is invoked without a subcommand, `sw --debug` behaves the same as
+  `sw run --debug`.
 
 ## Outputs
 
 - Generated Markdown file written to the target path.
 - Human-readable status on stdout.
 - Optional human-readable progress output on stderr when `--verbose` is used.
+- Optional diagnostic trace output on stderr when `--debug` is used.
 
 ### Exit Codes
 
@@ -112,6 +120,29 @@ in the runbook.
 - When an entry finishes, the final elapsed time remains on the completed line.
 - When stderr is not a TTY, verbose progress falls back to non-live line-based
   output and does not attempt in-place timer updates.
+
+### Debug Diagnostic Output
+
+- `sw run --debug` emits diagnostic execution details to stderr.
+- `sw --debug` behaves the same as `sw run --debug`.
+- Debug output is additive and must not change the stable stdout contract.
+- Debug output may be used together with `--verbose`.
+- When both flags are enabled, both progress and debug diagnostics are written
+  to stderr.
+- Debug output is intended to help humans and agents troubleshoot runbook
+  authoring issues such as rewrite matching, generated captures, and command
+  output interpolation.
+- For `Command` entries, debug output may include:
+  - raw stdout before rewrites
+  - rewritten stdout after rewrites
+  - rewrite rules after variable interpolation
+  - rewrite match counts
+  - explicit capture values
+  - generated `capture_as` values
+- Debug output should identify which command entry and which rewrite or capture
+  rule produced the diagnostic information.
+- Debug output is for troubleshooting and does not need to be a stable
+  machine-readable contract.
 
 ## Rendering Rules
 
@@ -423,6 +454,10 @@ in the runbook.
       changing the existing stdout contract.
 - [ ] Given `sw --verbose` with no subcommand, the command behaves the same as
       `sw run --verbose`.
+- [ ] Given `sw run --debug`, diagnostic output is written to stderr without
+      changing the existing stdout contract.
+- [ ] Given `sw --debug` with no subcommand, the command behaves the same as
+      `sw run --debug`.
 - [ ] Given `sw run --verbose`, entry numbers are padded so summaries align to
       the same starting column.
 - [ ] Given `sw run --verbose`, elapsed time is shown as seconds with one
@@ -513,6 +548,9 @@ in the runbook.
       `...`.
 - [ ] Given `sw run --verbose` with stderr not attached to a TTY, progress
       output falls back to non-live line-based output.
+- [ ] Given `sw run --debug` for a `Command` entry with rewrites and captures,
+      stderr includes enough interpolated rewrite and capture information to
+      help diagnose matching failures.
 
 ### Command Cleanup
 
