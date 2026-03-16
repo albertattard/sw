@@ -618,6 +618,57 @@ fn display_file_negative_offset_warning_keeps_runbook_valid() {
 }
 
 #[test]
+fn background_command_warning_keeps_runbook_valid_in_json_output() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-valid-background-command-warning.json",
+        "--output-format",
+        "json",
+    ]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": true"));
+    assert!(stdout.contains("\"warnings\": ["));
+    assert!(stdout.contains("\"path\": \"entries[0].commands\""));
+    assert!(stdout.contains("background process"));
+    assert!(stdout.contains("timeout or progress behavior misleading"));
+}
+
+#[test]
+fn background_command_warning_appears_in_human_output() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-valid-background-command-warning.json",
+    ]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("Runbook is valid"));
+    assert!(stdout.contains("warning entries[0].commands"));
+    assert!(stdout.contains("background process"));
+    assert!(stdout.contains("saving `$!` to a PID file"));
+}
+
+#[test]
+fn redirected_background_command_does_not_warn() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-valid-background-command-redirected.json",
+        "--output-format",
+        "json",
+    ]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": true"));
+    assert!(stdout.contains("\"warnings\": []"));
+}
+
+#[test]
 fn invalid_prerequisites_returns_validation_failure() {
     let output = run(&[
         "validate",

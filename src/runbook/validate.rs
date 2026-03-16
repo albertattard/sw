@@ -1018,6 +1018,8 @@ fn validate_entry(
                     }
                 }
             }
+
+            maybe_warn_background_command_without_redirects(object, &path, &mut context.warnings);
         }
         _ => push_error(
             &mut context.errors,
@@ -1334,4 +1336,44 @@ fn maybe_warn_display_file_negative_offset(
             ),
         );
     }
+}
+
+fn maybe_warn_background_command_without_redirects(
+    object: &Map<String, Value>,
+    path: &str,
+    warnings: &mut Vec<ValidationIssue>,
+) {
+    let Some(commands) = object.get("commands").and_then(Value::as_array) else {
+        return;
+    };
+
+    let starts_background_process_without_redirects = commands.iter().any(|command| {
+        let Some(command) = command.as_str() else {
+            return false;
+        };
+        let trimmed = command.trim();
+        if trimmed.is_empty() || trimmed.starts_with('#') || !trimmed.ends_with('&') {
+            return false;
+        }
+
+        let command_without_background = trimmed.trim_end_matches('&').trim_end();
+        !redirects_stdout_and_stderr_away(command_without_background)
+    });
+
+    if starts_background_process_without_redirects {
+        push_warning(
+            warnings,
+            format!("{path}.commands"),
+            "appears to start a background process without redirecting stdout and stderr away from the command pipes. This may keep the entry open and make timeout or progress behavior misleading. Consider redirecting output to a file and saving `$!` to a PID file.".to_string(),
+        );
+    }
+}
+
+fn redirects_stdout_and_stderr_away(command: &str) -> bool {
+    let redirects_both_streams = command.contains("2>&1")
+        || command.contains("&>")
+        || command.contains("&>>")
+        || (command.contains('>') && command.contains("2>"));
+
+    redirects_both_streams && command.contains('>')
 }

@@ -135,7 +135,6 @@ Expected task directories:
 - [ ] [TASK-034: Expand Help Command Coverage](discovery/TASK-034-expand-help-command-coverage.md)
 - [ ] [TASK-038: Include Release Commit History In README](release/TASK-038-include-release-commit-history-in-readme.md)
 - [ ] [TASK-043: Implement Explain Command](explain/TASK-043-implement-explain-command.md)
-- [ ] [TASK-056: Warn About Background Commands Holding Command Pipes Open](validate/TASK-056-warn-about-background-commands-holding-command-pipes-open.md)
 - [ ] [TASK-059: Implement Format Command](format/TASK-059-implement-format-command.md)
 
 ## In Progress
@@ -148,6 +147,7 @@ Expected task directories:
 - [x] Define `SPEC-002` in `docs/spec/` (validate runbook input).
 - [x] Define `SPEC-003` in `docs/spec/` (run runbook to markdown).
 - [x] [TASK-001: Implement SPEC-001 Help Placeholder](discovery/TASK-001-implement-help-placeholder.md)
+- [x] [TASK-056: Warn About Background Commands Holding Command Pipes Open](validate/TASK-056-warn-about-background-commands-holding-command-pipes-open.md)
 - [x] [TASK-002: Implement SPEC-002 Validate Command](validate/TASK-002-implement-validate-command.md)
 - [x] [TASK-003: Implement SPEC-003 Run Command](run/TASK-003-implement-run-command.md)
 - [x] [TASK-004: Support Command Exit Assertions](run/TASK-004-support-command-exit-assertions.md)

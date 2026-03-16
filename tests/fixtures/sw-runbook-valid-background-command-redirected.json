@@ -1,0 +1,10 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "java -jar './target/app.jar' > './target/app.log' 2>&1 &"
+      ]
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 ---
 id: TASK-056
 title: Warn About Background Commands Holding Command Pipes Open
-status: open
+status: done
 category: validate
 related_features:
   - SPEC-002
@@ -34,15 +34,15 @@ pipes.
 
 ## Acceptance Criteria
 
-- [ ] Given a command entry that starts a background process with `&` and does
+- [x] Given a command entry that starts a background process with `&` and does
       not redirect stdout and stderr away from the command pipes, validation
       returns a warning.
-- [ ] Given that warning pattern without any validation errors, the runbook
+- [x] Given that warning pattern without any validation errors, the runbook
       still validates successfully with exit code `0`.
-- [ ] Given human validation output, the warning explains that the background
+- [x] Given human validation output, the warning explains that the background
       process may keep the entry open and make timeout or progress behavior
       misleading.
-- [ ] Given JSON validation output, the warning is included in the `warnings`
+- [x] Given JSON validation output, the warning is included in the `warnings`
       array.
 
 ## Notes
