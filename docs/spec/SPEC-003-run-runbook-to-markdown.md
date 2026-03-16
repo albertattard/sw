@@ -99,10 +99,17 @@ in the runbook.
   full multi-line command blocks.
 - When stderr is a TTY, the current entry line includes a live elapsed timer
   that updates in place while that entry is running.
-- While an entry is still running, the timer is rendered with a trailing `...`
-  to show that it is still increasing.
-- When an entry finishes, the final elapsed time remains on the completed line
-  without the trailing `...`.
+- Elapsed time is formatted for readability:
+  - under one minute: seconds with one decimal place such as `12.4s`
+  - one minute or more: minutes and seconds such as `1m 8s`
+- `Command` entry progress includes an expected timeout window in addition to
+  elapsed time, using the declared timeout or the default timeout when no
+  timeout is set.
+- For example, a running command entry may render as
+  `[16/75] Command: java -jar './target/app.jar' (1m 8s / 2m)`.
+- A running timer does not use a trailing `...`; the fact that the value keeps
+  changing is sufficient to show that the entry is still active.
+- When an entry finishes, the final elapsed time remains on the completed line.
 - When stderr is not a TTY, verbose progress falls back to non-live line-based
   output and does not attempt in-place timer updates.
 
@@ -411,6 +418,9 @@ in the runbook.
       `sw run --verbose`.
 - [ ] Given `sw run --verbose`, entry numbers are padded so summaries align to
       the same starting column.
+- [ ] Given `sw run --verbose`, elapsed time is shown as seconds with one
+      decimal place under one minute and as minutes plus seconds from one
+      minute onward.
 - [ ] Given an invalid runbook, the command exits with `2` and does not write a
       partial output file, and the human-readable validation output includes a
       nearby offending block for entry-scoped validation errors.
@@ -487,9 +497,13 @@ in the runbook.
       non-empty content line instead of the full block contents.
 - [ ] Given `sw run --verbose`, a `Command` entry summary uses the first
       non-empty command line instead of the full command block.
+- [ ] Given `sw run --verbose`, a running `Command` entry shows elapsed time
+      together with the expected timeout window.
 - [ ] Given `sw run --verbose` with stderr attached to a TTY, the current
       entry line shows a live elapsed timer that updates in place while the
       entry is running.
+- [ ] Given `sw run --verbose`, the running timer does not use a trailing
+      `...`.
 - [ ] Given `sw run --verbose` with stderr not attached to a TTY, progress
       output falls back to non-live line-based output.
 
