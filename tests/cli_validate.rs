@@ -648,6 +648,40 @@ fn display_file_negative_offset_warning_keeps_runbook_valid() {
 }
 
 #[test]
+fn invalid_display_file_transform_language_returns_validation_failure() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-invalid-display-file-transform-language.json",
+        "--output-format",
+        "json",
+    ]);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": false"));
+    assert!(stdout.contains("\"path\": \"entries[0].transform.language\""));
+    assert!(stdout.contains("must be `java`"));
+}
+
+#[test]
+fn invalid_display_file_transform_operation_returns_validation_failure() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-invalid-display-file-transform-operation.json",
+        "--output-format",
+        "json",
+    ]);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": false"));
+    assert!(stdout.contains("\"path\": \"entries[0].transform.operations[0].type\""));
+    assert!(stdout.contains("collapse_method_body"));
+}
+
+#[test]
 fn background_command_warning_keeps_runbook_valid_in_json_output() {
     let output = run(&[
         "validate",

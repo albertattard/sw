@@ -1,7 +1,7 @@
 ---
 id: TASK-067
 title: Add DisplayFile Transformations
-status: pending
+status: done
 category: display-file
 related_features:
   - SPEC-011
@@ -40,18 +40,18 @@ the underlying source file.
 
 ## Acceptance Criteria
 
-- [ ] Given a Java source file with a method named `initialize`, a
+- [x] Given a Java source file with a method named `initialize`, a
       `DisplayFile` entry with `transform.language: "java"` and
       `collapse_method_body` renders that method as a single-line body with the
       provided replacement comment, or with `/* Closed for brevity */` when
       `replacement` is omitted.
-- [ ] Given a `DisplayFile` entry without `transform`, rendering matches the
+- [x] Given a `DisplayFile` entry without `transform`, rendering matches the
       current behavior.
-- [ ] Validation rejects an unknown `transform.language`.
-- [ ] Validation rejects an unknown transform operation type.
-- [ ] Given a Java transform targeting a missing method, `sw run` exits with
+- [x] Validation rejects an unknown `transform.language`.
+- [x] Validation rejects an unknown transform operation type.
+- [x] Given a Java transform targeting a missing method, `sw run` exits with
       `2` and reports a clear rendering failure.
-- [ ] Help and example coverage document the new `DisplayFile` transformation
+- [x] Help and example coverage document the new `DisplayFile` transformation
       shape.
 
 ## Notes

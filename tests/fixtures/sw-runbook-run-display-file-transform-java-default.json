@@ -1,0 +1,17 @@
+{
+  "entries": [
+    {
+      "type": "DisplayFile",
+      "path": "./Example.java",
+      "transform": {
+        "language": "java",
+        "operations": [
+          {
+            "type": "collapse_method_body",
+            "name": "initialize"
+          }
+        ]
+      }
+    }
+  ]
+}

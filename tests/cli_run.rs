@@ -1510,6 +1510,32 @@ fn display_file_java_uses_java_fenced_block() {
 }
 
 #[test]
+fn display_file_java_transform_can_collapse_a_method_body() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-display-file-transform-java-default.json",
+        "sw-runbook.json",
+    );
+    fs::write(
+        dir.join("Example.java"),
+        "public final class Example {\n    public void initialize(final int moduloDivisor) {\n        int remainder = moduloDivisor % 2;\n        System.out.println(remainder);\n    }\n}\n",
+    )
+    .expect("failed to write Example.java");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(
+        readme.contains(
+            "public void initialize(final int moduloDivisor) { /* Closed for brevity */ }"
+        )
+    );
+    assert!(!readme.contains("System.out.println"));
+}
+
+#[test]
 fn display_file_can_render_a_bounded_line_range() {
     let dir = prepare_workspace();
     write_runbook(
@@ -1666,4 +1692,27 @@ fn display_file_start_line_beyond_end_of_file_returns_operational_error() {
     assert!(!dir.join("README.md").exists());
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(stderr.contains("DisplayFile start_line 3 is beyond the end"));
+}
+
+#[test]
+fn display_file_transform_missing_method_returns_render_failure() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-display-file-transform-java-missing-method.json",
+        "sw-runbook.json",
+    );
+    fs::write(
+        dir.join("Example.java"),
+        "public final class Example {\n    public void initialize() {\n        System.out.println(\"hello\");\n    }\n}\n",
+    )
+    .expect("failed to write Example.java");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert_eq!(output.status.code(), Some(2));
+    assert!(!dir.join("README.md").exists());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("DisplayFile transform failed"));
+    assert!(stderr.contains("missingMethod"));
 }

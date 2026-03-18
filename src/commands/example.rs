@@ -79,7 +79,16 @@ fn example_for_topic(topic: &str) -> Option<&'static str> {
   "type": "DisplayFile",
   "path": "./src/main/java/demo/Example.java",
   "start_line": 1,
-  "line_count": 12
+  "line_count": 12,
+  "transform": {
+    "language": "java",
+    "operations": [
+      {
+        "type": "collapse_method_body",
+        "name": "initialize"
+      }
+    ]
+  }
 }"#,
         ),
         "patch" => Some(

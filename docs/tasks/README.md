@@ -210,6 +210,7 @@ Expected task directories:
 - [x] [TASK-064: Support Variable RFC3339 Fractional Seconds](rewrite/TASK-064-support-variable-rfc3339-fractional-seconds.md)
 - [x] [TASK-065: Add Patch Entry With Automatic Restore](run/TASK-065-add-patch-entry-with-automatic-restore.md)
 - [x] [TASK-066: Add Patch Example Snippet](example/TASK-066-add-patch-example-snippet.md)
+- [x] [TASK-067: Add DisplayFile Transformations](display-file/TASK-067-add-display-file-transformations.md)
 
 ## Blocked
 

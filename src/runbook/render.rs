@@ -552,6 +552,7 @@ fn render_display_file(entry: &Value, runbook_path: &Path) -> Result<String, Ren
     let contents = fs::read_to_string(&display_path).map_err(|err| {
         RenderError::Operational(format!("Failed to read {}: {err}", display_path.display()))
     })?;
+    let contents = apply_display_file_transform(entry, contents, &display_path)?;
     let start_line = entry
         .get("start_line")
         .and_then(Value::as_u64)
@@ -571,6 +572,310 @@ fn render_display_file(entry: &Value, runbook_path: &Path) -> Result<String, Ren
     }
     section.push_str("```");
     apply_display_file_indent(entry, section)
+}
+
+fn apply_display_file_transform(
+    entry: &Value,
+    contents: String,
+    display_path: &Path,
+) -> Result<String, RenderError> {
+    let Some(transform) = entry.get("transform") else {
+        return Ok(contents);
+    };
+
+    let language = transform
+        .get("language")
+        .and_then(Value::as_str)
+        .ok_or_else(|| {
+            RenderError::Operational("DisplayFile transform is missing language".to_string())
+        })?;
+    let operations = transform
+        .get("operations")
+        .and_then(Value::as_array)
+        .ok_or_else(|| {
+            RenderError::Operational("DisplayFile transform is missing operations".to_string())
+        })?;
+
+    let mut transformed = contents;
+    match language {
+        "java" => {
+            for operation in operations {
+                transformed =
+                    apply_java_display_file_transform(operation, transformed, display_path)?;
+            }
+        }
+        other => {
+            return Err(RenderError::Operational(format!(
+                "Unsupported DisplayFile transform language `{other}`"
+            )));
+        }
+    }
+
+    Ok(transformed)
+}
+
+fn apply_java_display_file_transform(
+    operation: &Value,
+    contents: String,
+    display_path: &Path,
+) -> Result<String, RenderError> {
+    let operation_type = operation
+        .get("type")
+        .and_then(Value::as_str)
+        .ok_or_else(|| {
+            RenderError::Operational("DisplayFile transform operation is missing type".to_string())
+        })?;
+
+    match operation_type {
+        "collapse_method_body" => collapse_java_method_body(operation, contents, display_path),
+        other => Err(RenderError::Operational(format!(
+            "Unsupported DisplayFile transform operation `{other}`"
+        ))),
+    }
+}
+
+fn collapse_java_method_body(
+    operation: &Value,
+    contents: String,
+    display_path: &Path,
+) -> Result<String, RenderError> {
+    let method_name = operation
+        .get("name")
+        .and_then(Value::as_str)
+        .ok_or_else(|| {
+            RenderError::Operational(
+                "DisplayFile collapse_method_body operation is missing name".to_string(),
+            )
+        })?;
+    let replacement = operation
+        .get("replacement")
+        .and_then(Value::as_str)
+        .unwrap_or("/* Closed for brevity */");
+
+    let matches = find_java_method_matches(&contents, method_name);
+    let method = match matches.as_slice() {
+        [single] => single,
+        [] => {
+            return Err(RenderError::CommandFailed(format!(
+                "DisplayFile transform failed for {}: Java method `{method_name}` was not found",
+                display_path.display()
+            )));
+        }
+        _ => {
+            return Err(RenderError::CommandFailed(format!(
+                "DisplayFile transform failed for {}: Java method `{method_name}` is ambiguous",
+                display_path.display()
+            )));
+        }
+    };
+
+    let replacement_body = format!("{{ {replacement} }}");
+    let mut collapsed = String::with_capacity(contents.len());
+    collapsed.push_str(&contents[..method.open_brace]);
+    collapsed.push_str(&replacement_body);
+    collapsed.push_str(&contents[method.close_brace + 1..]);
+    Ok(collapsed)
+}
+
+#[derive(Clone, Copy)]
+struct JavaMethodMatch {
+    open_brace: usize,
+    close_brace: usize,
+}
+
+fn find_java_method_matches(contents: &str, method_name: &str) -> Vec<JavaMethodMatch> {
+    let mut matches = Vec::new();
+    let mut search_index = 0;
+    let needle = format!("{method_name}(");
+
+    while let Some(relative) = contents[search_index..].find(&needle) {
+        let name_index = search_index + relative;
+        let Some(open_paren) = find_java_method_open_paren(contents, name_index, method_name.len())
+        else {
+            search_index = name_index + method_name.len();
+            continue;
+        };
+        let Some(close_paren) = find_matching_delimiter(contents, open_paren, b'(', b')') else {
+            search_index = name_index + method_name.len();
+            continue;
+        };
+        if !looks_like_java_method_declaration(contents, name_index, open_paren) {
+            search_index = name_index + method_name.len();
+            continue;
+        }
+        let Some(open_brace) = find_java_method_body_start(contents, close_paren + 1) else {
+            search_index = name_index + method_name.len();
+            continue;
+        };
+        let Some(close_brace) = find_matching_java_brace(contents, open_brace) else {
+            search_index = name_index + method_name.len();
+            continue;
+        };
+
+        matches.push(JavaMethodMatch {
+            open_brace,
+            close_brace,
+        });
+        search_index = close_brace + 1;
+    }
+
+    matches
+}
+
+fn find_java_method_open_paren(
+    contents: &str,
+    name_index: usize,
+    name_len: usize,
+) -> Option<usize> {
+    let mut index = name_index + name_len;
+    let bytes = contents.as_bytes();
+    while index < bytes.len() && bytes[index].is_ascii_whitespace() {
+        index += 1;
+    }
+    if bytes.get(index) == Some(&b'(') {
+        Some(index)
+    } else {
+        None
+    }
+}
+
+fn looks_like_java_method_declaration(
+    contents: &str,
+    name_index: usize,
+    open_paren: usize,
+) -> bool {
+    let bytes = contents.as_bytes();
+
+    if name_index > 0 {
+        let previous = bytes[name_index - 1];
+        if previous.is_ascii_alphanumeric()
+            || previous == b'_'
+            || previous == b'.'
+            || previous == b'$'
+        {
+            return false;
+        }
+    }
+
+    let line_start = contents[..name_index]
+        .rfind('\n')
+        .map_or(0, |index| index + 1);
+    let before_name = contents[line_start..name_index].trim();
+    if before_name.is_empty() {
+        return false;
+    }
+
+    let disallowed_prefixes = [
+        "if", "for", "while", "switch", "catch", "new", "return", "throw",
+    ];
+    if disallowed_prefixes
+        .iter()
+        .any(|keyword| before_name.ends_with(keyword))
+    {
+        return false;
+    }
+
+    !contents[line_start..open_paren].contains(';')
+}
+
+fn find_java_method_body_start(contents: &str, mut index: usize) -> Option<usize> {
+    let bytes = contents.as_bytes();
+    while index < bytes.len() {
+        match bytes[index] {
+            b' ' | b'\t' | b'\r' | b'\n' => index += 1,
+            b'/' if bytes.get(index + 1) == Some(&b'/') => {
+                index += 2;
+                while index < bytes.len() && bytes[index] != b'\n' {
+                    index += 1;
+                }
+            }
+            b'/' if bytes.get(index + 1) == Some(&b'*') => {
+                index += 2;
+                while index + 1 < bytes.len() && !(bytes[index] == b'*' && bytes[index + 1] == b'/')
+                {
+                    index += 1;
+                }
+                index = (index + 2).min(bytes.len());
+            }
+            b't' if contents[index..].starts_with("throws") => {
+                index += "throws".len();
+                while index < bytes.len() {
+                    match bytes[index] {
+                        b'{' => return Some(index),
+                        b';' => return None,
+                        _ => index += 1,
+                    }
+                }
+            }
+            b'{' => return Some(index),
+            b';' => return None,
+            _ => index += 1,
+        }
+    }
+
+    None
+}
+
+fn find_matching_delimiter(
+    contents: &str,
+    open_index: usize,
+    open: u8,
+    close: u8,
+) -> Option<usize> {
+    let bytes = contents.as_bytes();
+    let mut depth = 0usize;
+    let mut index = open_index;
+
+    while index < bytes.len() {
+        match bytes[index] {
+            byte if byte == open => depth += 1,
+            byte if byte == close => {
+                depth = depth.saturating_sub(1);
+                if depth == 0 {
+                    return Some(index);
+                }
+            }
+            b'"' => index = skip_quoted_literal(bytes, index, b'"'),
+            b'\'' => index = skip_quoted_literal(bytes, index, b'\''),
+            b'/' if bytes.get(index + 1) == Some(&b'/') => {
+                index += 2;
+                while index < bytes.len() && bytes[index] != b'\n' {
+                    index += 1;
+                }
+            }
+            b'/' if bytes.get(index + 1) == Some(&b'*') => {
+                index += 2;
+                while index + 1 < bytes.len() && !(bytes[index] == b'*' && bytes[index + 1] == b'/')
+                {
+                    index += 1;
+                }
+                index += 1;
+            }
+            _ => {}
+        }
+        index += 1;
+    }
+
+    None
+}
+
+fn find_matching_java_brace(contents: &str, open_index: usize) -> Option<usize> {
+    find_matching_delimiter(contents, open_index, b'{', b'}')
+}
+
+fn skip_quoted_literal(bytes: &[u8], mut index: usize, quote: u8) -> usize {
+    index += 1;
+    while index < bytes.len() {
+        if bytes[index] == b'\\' {
+            index += 2;
+            continue;
+        }
+        if bytes[index] == quote {
+            return index;
+        }
+        index += 1;
+    }
+    bytes.len().saturating_sub(1)
 }
 
 fn apply_display_file_indent(entry: &Value, contents: String) -> Result<String, RenderError> {

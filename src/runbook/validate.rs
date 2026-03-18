@@ -857,6 +857,7 @@ fn validate_entry(
                     && key != "line_count"
                     && key != "indent"
                     && key != "offset"
+                    && key != "transform"
                 {
                     push_error(
                         &mut context.errors,
@@ -897,6 +898,14 @@ fn validate_entry(
                     &mut context.errors,
                     format!("{path}.line_count"),
                     "requires `start_line`",
+                );
+            }
+
+            if let Some(transform) = object.get("transform") {
+                validate_display_file_transform(
+                    transform,
+                    &format!("{path}.transform"),
+                    &mut context.errors,
                 );
             }
 
@@ -1387,6 +1396,94 @@ fn maybe_warn_display_file_negative_offset(
                 offset, spaces_to_remove
             ),
         );
+    }
+}
+
+fn validate_display_file_transform(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>) {
+    let Some(object) = as_object(value, path, errors) else {
+        return;
+    };
+
+    for key in object.keys() {
+        if key != "language" && key != "operations" {
+            push_error(
+                errors,
+                format!("{path}.{key}"),
+                "is not a supported DisplayFile transform property",
+            );
+        }
+    }
+
+    match object.get("language").and_then(Value::as_str) {
+        Some("java") => {}
+        Some(_) => push_error(errors, format!("{path}.language"), "must be `java`"),
+        None => push_error(errors, format!("{path}.language"), "must be a string"),
+    }
+
+    match object.get("operations") {
+        Some(operations) => validate_display_file_transform_operations(
+            operations,
+            &format!("{path}.operations"),
+            errors,
+        ),
+        None => push_error(errors, format!("{path}.operations"), "is required"),
+    }
+}
+
+fn validate_display_file_transform_operations(
+    value: &Value,
+    path: &str,
+    errors: &mut Vec<ValidationIssue>,
+) {
+    let Some(operations) = as_array(value, path, errors) else {
+        return;
+    };
+
+    if operations.is_empty() {
+        push_error(errors, path.to_string(), "must not be empty");
+    }
+
+    for (index, operation) in operations.iter().enumerate() {
+        let operation_path = format!("{path}[{index}]");
+        let Some(object) = as_object(operation, &operation_path, errors) else {
+            continue;
+        };
+
+        match object.get("type").and_then(Value::as_str) {
+            Some("collapse_method_body") => {
+                validate_display_file_collapse_method_body(object, &operation_path, errors);
+            }
+            Some(_) => push_error(
+                errors,
+                format!("{operation_path}.type"),
+                "must be `collapse_method_body`",
+            ),
+            None => push_error(errors, format!("{operation_path}.type"), "must be a string"),
+        }
+    }
+}
+
+fn validate_display_file_collapse_method_body(
+    object: &Map<String, Value>,
+    path: &str,
+    errors: &mut Vec<ValidationIssue>,
+) {
+    for key in object.keys() {
+        if key != "type" && key != "name" && key != "replacement" {
+            push_error(
+                errors,
+                format!("{path}.{key}"),
+                "is not a supported collapse_method_body property",
+            );
+        }
+    }
+
+    require_string(object, "name", path, errors);
+
+    if let Some(replacement) = object.get("replacement")
+        && !replacement.is_string()
+    {
+        push_error(errors, format!("{path}.replacement"), "must be a string");
     }
 }
 
