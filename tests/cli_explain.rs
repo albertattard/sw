@@ -1,10 +1,48 @@
+use std::fs;
+use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::sync::atomic::{AtomicU64, Ordering};
+use std::time::{SystemTime, UNIX_EPOCH};
+
+static NEXT_ID: AtomicU64 = AtomicU64::new(0);
+
+fn unique_temp_dir() -> PathBuf {
+    let nanos = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .expect("time went backwards")
+        .as_nanos();
+    let id = NEXT_ID.fetch_add(1, Ordering::Relaxed);
+    std::env::temp_dir().join(format!("sw-test-{}-{nanos}-{id}", std::process::id()))
+}
+
+fn prepare_workspace() -> PathBuf {
+    let dir = unique_temp_dir();
+    fs::create_dir_all(&dir).expect("failed to create temp dir");
+    dir
+}
 
 fn run(args: &[&str]) -> std::process::Output {
     Command::new(env!("CARGO_BIN_EXE_sw"))
         .args(args)
         .output()
         .expect("failed to execute sw")
+}
+
+fn run_in_dir(args: &[&str], dir: &Path) -> std::process::Output {
+    Command::new(env!("CARGO_BIN_EXE_sw"))
+        .args(args)
+        .current_dir(dir)
+        .output()
+        .expect("failed to execute sw")
+}
+
+fn run_in_dir_with_env(args: &[&str], dir: &Path, envs: &[(&str, &Path)]) -> std::process::Output {
+    let mut command = Command::new(env!("CARGO_BIN_EXE_sw"));
+    command.args(args).current_dir(dir);
+    for (key, value) in envs {
+        command.env(key, value);
+    }
+    command.output().expect("failed to execute sw")
 }
 
 #[test]
@@ -108,4 +146,110 @@ fn explain_without_topic_or_all_returns_usage_error() {
     assert_eq!(output.status.code(), Some(1));
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(stderr.contains("The explain command requires a topic or --all"));
+}
+
+#[test]
+fn explain_skill_prints_skill_document_to_stdout() {
+    let output = run(&["explain", "--output-format=skill"]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.starts_with("# sw\n"));
+    assert!(stdout.contains("## Guidance"));
+    assert!(stdout.contains("### run"));
+    assert!(stdout.contains("- Availability: implemented"));
+    assert!(stdout.contains("### init"));
+    assert!(stdout.contains("- Availability: planned"));
+    assert!(stdout.contains("Use `sw help <subcommand>`"));
+    assert!(stdout.contains("Use `sw example <topic>`"));
+}
+
+#[test]
+fn explain_skill_output_file_without_value_writes_to_default_codex_path() {
+    let dir = prepare_workspace();
+    let codex_home = dir.join(".codex-home");
+
+    let output = run_in_dir_with_env(
+        &["explain", "--output-format=skill", "--output-file"],
+        &dir,
+        &[("CODEX_HOME", &codex_home)],
+    );
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let output_path = codex_home.join("skills/sw/SKILL.md");
+    assert!(stdout.contains(&format!("Wrote explain skill to {}", output_path.display())));
+    let skill = fs::read_to_string(&output_path).expect("missing skill output");
+    assert!(skill.contains("### check"));
+    assert!(skill.contains("Availability: implemented"));
+}
+
+#[test]
+fn explain_skill_output_file_with_explicit_path_writes_to_requested_location() {
+    let dir = prepare_workspace();
+    let output_path = dir.join("nested/custom-skill.md");
+    let output_path_arg = format!("--output-file={}", output_path.display());
+
+    let output = run_in_dir(
+        &["explain", "--output-format=skill", &output_path_arg],
+        &dir,
+    );
+
+    assert!(output.status.success());
+    let skill = fs::read_to_string(&output_path).expect("missing skill output");
+    assert!(skill.contains("### example"));
+    assert!(skill.contains("Availability: implemented"));
+}
+
+#[test]
+fn explain_skill_refuses_to_overwrite_existing_file_without_force() {
+    let dir = prepare_workspace();
+    let output_path = dir.join("SKILL.md");
+    fs::write(&output_path, "existing skill\n").expect("failed to seed skill file");
+    let output_path_arg = format!("--output-file={}", output_path.display());
+
+    let output = run_in_dir(
+        &["explain", "--output-format=skill", &output_path_arg],
+        &dir,
+    );
+
+    assert_eq!(output.status.code(), Some(1));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("Refusing to overwrite existing explain skill output"));
+    assert_eq!(
+        fs::read_to_string(&output_path).expect("missing original skill"),
+        "existing skill\n"
+    );
+}
+
+#[test]
+fn explain_skill_force_overwrites_existing_file() {
+    let dir = prepare_workspace();
+    let output_path = dir.join("SKILL.md");
+    fs::write(&output_path, "existing skill\n").expect("failed to seed skill file");
+    let output_path_arg = format!("--output-file={}", output_path.display());
+
+    let output = run_in_dir(
+        &[
+            "explain",
+            "--output-format=skill",
+            &output_path_arg,
+            "--force",
+        ],
+        &dir,
+    );
+
+    assert!(output.status.success());
+    let skill = fs::read_to_string(&output_path).expect("missing overwritten skill");
+    assert!(skill.starts_with("# sw\n"));
+    assert!(!skill.contains("existing skill"));
+}
+
+#[test]
+fn explain_skill_force_without_output_file_returns_usage_error() {
+    let output = run(&["explain", "--output-format=skill", "--force"]);
+
+    assert_eq!(output.status.code(), Some(1));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("only accepts --force when --output-file is used"));
 }

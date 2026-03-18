@@ -138,7 +138,6 @@ Expected task directories:
 - [ ] [TASK-033: Implement Import Command](import/TASK-033-implement-import-command.md)
 - [ ] [TASK-038: Include Release Commit History In README](release/TASK-038-include-release-commit-history-in-readme.md)
 - [ ] [TASK-059: Implement Format Command](format/TASK-059-implement-format-command.md)
-- [ ] [TASK-068: Add Skill Output Format To Explain Command](explain/TASK-068-add-skill-output-format-to-explain-command.md)
 
 ## In Progress
 
@@ -212,6 +211,7 @@ Expected task directories:
 - [x] [TASK-065: Add Patch Entry With Automatic Restore](run/TASK-065-add-patch-entry-with-automatic-restore.md)
 - [x] [TASK-066: Add Patch Example Snippet](example/TASK-066-add-patch-example-snippet.md)
 - [x] [TASK-067: Add DisplayFile Transformations](display-file/TASK-067-add-display-file-transformations.md)
+- [x] [TASK-068: Add Skill Output Format To Explain Command](explain/TASK-068-add-skill-output-format-to-explain-command.md)
 
 ## Blocked
 

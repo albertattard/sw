@@ -83,6 +83,18 @@ pub struct ExplainArgs {
     #[arg(long)]
     pub all: bool,
 
+    /// Explain output format.
+    #[arg(long, value_enum, default_value_t = ExplainOutputFormat::Text)]
+    pub output_format: ExplainOutputFormat,
+
+    /// Write skill output to the default Codex skill path or to the provided path.
+    #[arg(long, value_name = "PATH", num_args = 0..=1, require_equals = true)]
+    pub output_file: Option<Option<PathBuf>>,
+
+    /// Overwrite the output file if it already exists.
+    #[arg(long)]
+    pub force: bool,
+
     /// Explain topic such as `run`, `check`, or `example`.
     pub topic: Option<String>,
 }
@@ -106,6 +118,12 @@ pub enum RunOutputFormat {
 pub enum OutputFormat {
     Human,
     Json,
+}
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq, ValueEnum)]
+pub enum ExplainOutputFormat {
+    Text,
+    Skill,
 }
 
 pub fn print_top_level_help() -> std::io::Result<()> {

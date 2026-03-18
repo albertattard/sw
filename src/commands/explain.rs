@@ -1,7 +1,27 @@
-use crate::cli::ExplainArgs;
+use crate::cli::{ExplainArgs, ExplainOutputFormat};
+use std::env;
+use std::fs;
+use std::path::PathBuf;
 use std::process::ExitCode;
 
 pub fn run(args: ExplainArgs) -> ExitCode {
+    match args.output_format {
+        ExplainOutputFormat::Text => run_text(args),
+        ExplainOutputFormat::Skill => run_skill(args),
+    }
+}
+
+fn run_text(args: ExplainArgs) -> ExitCode {
+    if args.output_file.is_some() {
+        eprintln!("The explain command only accepts --output-file with --output-format=skill");
+        return ExitCode::from(1);
+    }
+
+    if args.force {
+        eprintln!("The explain command only accepts --force with --output-format=skill");
+        return ExitCode::from(1);
+    }
+
     if args.all {
         if let Some(topic) = args.topic {
             eprintln!("The explain command does not accept both a topic and --all: {topic}");
@@ -38,15 +58,156 @@ pub fn run(args: ExplainArgs) -> ExitCode {
     ExitCode::SUCCESS
 }
 
+fn run_skill(args: ExplainArgs) -> ExitCode {
+    if let Some(topic) = args.topic {
+        eprintln!(
+            "The explain command does not accept a topic with --output-format=skill: {topic}"
+        );
+        return ExitCode::from(1);
+    }
+
+    if args.all {
+        eprintln!("The explain command does not accept --all with --output-format=skill");
+        return ExitCode::from(1);
+    }
+
+    if args.force && args.output_file.is_none() {
+        eprintln!("The explain command only accepts --force when --output-file is used");
+        return ExitCode::from(1);
+    }
+
+    let skill_document = build_skill_document();
+
+    let Some(output_file) = args.output_file else {
+        println!("{skill_document}");
+        return ExitCode::SUCCESS;
+    };
+
+    let path = match output_file_path(output_file) {
+        Ok(path) => path,
+        Err(err) => {
+            eprintln!("{err}");
+            return ExitCode::from(1);
+        }
+    };
+
+    if path.exists() && !args.force {
+        eprintln!(
+            "Refusing to overwrite existing explain skill output: {}. Re-run with --force to overwrite it.",
+            path.display()
+        );
+        return ExitCode::from(1);
+    }
+
+    if let Some(parent) = path.parent()
+        && let Err(err) = fs::create_dir_all(parent)
+    {
+        eprintln!(
+            "Failed to create parent directory for explain skill output {}: {err}",
+            path.display()
+        );
+        return ExitCode::from(1);
+    }
+
+    if let Err(err) = fs::write(&path, skill_document) {
+        eprintln!(
+            "Failed to write explain skill output {}: {err}",
+            path.display()
+        );
+        return ExitCode::from(1);
+    }
+
+    println!("Wrote explain skill to {}", path.display());
+    ExitCode::SUCCESS
+}
+
+fn output_file_path(output_file: Option<PathBuf>) -> Result<PathBuf, String> {
+    match output_file {
+        Some(path) => Ok(path),
+        None => default_skill_output_path(),
+    }
+}
+
+fn default_skill_output_path() -> Result<PathBuf, String> {
+    if let Some(codex_home) = env::var_os("CODEX_HOME")
+        && !codex_home.is_empty()
+    {
+        return Ok(PathBuf::from(codex_home).join("skills/sw/SKILL.md"));
+    }
+
+    if let Some(home) = env::var_os("HOME")
+        && !home.is_empty()
+    {
+        return Ok(PathBuf::from(home).join(".codex/skills/sw/SKILL.md"));
+    }
+
+    Err(
+        "Could not determine the default Codex skill path because neither CODEX_HOME nor HOME is set."
+            .to_string(),
+    )
+}
+
 fn topic_names() -> Vec<&'static str> {
-    vec![
-        "help", "validate", "run", "check", "init", "import", "example",
-    ]
+    explanations()
+        .iter()
+        .map(|explanation| explanation.topic)
+        .collect()
 }
 
 fn explanation_for_topic(topic: &str) -> Option<String> {
-    let explanation = match topic.to_ascii_lowercase().as_str() {
-        "help" => build_explanation(Explanation {
+    explanations()
+        .into_iter()
+        .find(|explanation| explanation.topic.eq_ignore_ascii_case(topic))
+        .map(build_explanation)
+}
+
+fn build_skill_document() -> String {
+    let explanations = explanations();
+    let mut lines = vec![
+        "# sw".to_string(),
+        "".to_string(),
+        "Use this skill when the user needs help understanding or operating the `sw` CLI.".to_string(),
+        "".to_string(),
+        "## Guidance".to_string(),
+        "".to_string(),
+        "- Use `sw help <subcommand>` when the question is about exact flags or invocation syntax."
+            .to_string(),
+        "- Use `sw explain <topic>` when the question is about behavior, defaults, constraints, or which command to call next."
+            .to_string(),
+        "- Use `sw example <topic>` when the question is about runbook JSON shape."
+            .to_string(),
+        "- Treat the CLI output and the documented specs as authoritative over any cached assumptions."
+            .to_string(),
+        "".to_string(),
+        "## Command Map".to_string(),
+    ];
+
+    for explanation in explanations {
+        lines.push("".to_string());
+        lines.push(format!("### {}", explanation.topic));
+        lines.push(format!("- Availability: {}", explanation.availability));
+        lines.push(format!("- Purpose: {}", explanation.purpose));
+        push_markdown_section(&mut lines, "Defaults", explanation.defaults);
+        push_markdown_section(&mut lines, "Inputs", explanation.inputs);
+        push_markdown_section(&mut lines, "Outputs", explanation.outputs);
+        push_markdown_section(&mut lines, "Exit codes", explanation.exit_codes);
+        push_markdown_section(&mut lines, "Constraints", explanation.constraints);
+        push_markdown_section(&mut lines, "Next", explanation.next);
+    }
+
+    lines.join("\n")
+}
+
+fn push_markdown_section(lines: &mut Vec<String>, heading: &str, values: &[&str]) {
+    lines.push(format!("- {}:", heading));
+    for value in values {
+        lines.push(format!("  - {value}"));
+    }
+}
+
+fn explanations() -> Vec<Explanation<'static>> {
+    vec![
+        Explanation {
             topic: "help",
             availability: "implemented",
             purpose: "Show command usage, options, and subcommand discovery.",
@@ -75,8 +236,8 @@ fn explanation_for_topic(topic: &str) -> Option<String> {
                 "If you need the product contract behind a command, use `sw explain <topic>` next.",
                 "If you need JSON shape examples, use `sw example <topic>` next.",
             ],
-        }),
-        "validate" => build_explanation(Explanation {
+        },
+        Explanation {
             topic: "validate",
             availability: "implemented",
             purpose: "Check that a runbook is structurally valid without executing workflow steps.",
@@ -108,8 +269,8 @@ fn explanation_for_topic(topic: &str) -> Option<String> {
                 "Use `sw help validate` for flags and exact CLI syntax.",
                 "Use `sw example <topic>` when you need a valid entry shape to copy.",
             ],
-        }),
-        "run" => build_explanation(Explanation {
+        },
+        Explanation {
             topic: "run",
             availability: "implemented",
             purpose: "Execute a runbook in order and render the resulting documentation output.",
@@ -146,8 +307,8 @@ fn explanation_for_topic(topic: &str) -> Option<String> {
                 "Use `sw validate` first if the question is whether the runbook shape is valid.",
                 "Use `sw check` first if the question is whether prerequisites such as Java are available.",
             ],
-        }),
-        "check" => build_explanation(Explanation {
+        },
+        Explanation {
             topic: "check",
             availability: "implemented",
             purpose: "Validate the runbook and execute only prerequisite checks to confirm the environment is ready.",
@@ -173,8 +334,8 @@ fn explanation_for_topic(topic: &str) -> Option<String> {
                 "Use `sw help check` for exact flags and invocation syntax.",
                 "Use `sw example Prerequisite` when you need the runbook JSON shape for prerequisite checks.",
             ],
-        }),
-        "init" => build_explanation(Explanation {
+        },
+        Explanation {
             topic: "init",
             availability: "planned",
             purpose: "Generate a starter `sw-runbook.json` file from a realistic sample.",
@@ -203,8 +364,8 @@ fn explanation_for_topic(topic: &str) -> Option<String> {
                 "Use `sw example <topic>` today when you need JSON snippets from implemented commands.",
                 "Use `sw help` to see which subcommands are currently available in this build.",
             ],
-        }),
-        "import" => build_explanation(Explanation {
+        },
+        Explanation {
             topic: "import",
             availability: "planned",
             purpose: "Import an existing Markdown README into a starter runbook JSON file.",
@@ -234,8 +395,8 @@ fn explanation_for_topic(topic: &str) -> Option<String> {
                 "Use `sw example <topic>` when you need current JSON snippets for manual authoring.",
                 "Use `sw help` to confirm which commands are actually available in this build.",
             ],
-        }),
-        "example" => build_explanation(Explanation {
+        },
+        Explanation {
             topic: "example",
             availability: "implemented",
             purpose: "Print a focused JSON snippet for a supported runbook topic.",
@@ -265,13 +426,11 @@ fn explanation_for_topic(topic: &str) -> Option<String> {
                 "Use `sw explain <topic>` when the question is about behavior, defaults, or command boundaries.",
                 "Use `sw help example` for exact invocation syntax.",
             ],
-        }),
-        _ => return None,
-    };
-
-    Some(explanation)
+        },
+    ]
 }
 
+#[derive(Clone, Copy)]
 struct Explanation<'a> {
     topic: &'a str,
     availability: &'a str,

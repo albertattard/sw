@@ -95,6 +95,9 @@ fn explain_help_prints_help() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("Explain topic"));
     assert!(stdout.contains("--all"));
+    assert!(stdout.contains("--output-format"));
+    assert!(stdout.contains("--output-file"));
+    assert!(stdout.contains("--force"));
 }
 
 #[test]

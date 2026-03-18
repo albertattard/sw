@@ -1,7 +1,7 @@
 ---
 id: TASK-068
 title: Add Skill Output Format To Explain Command
-status: pending
+status: done
 category: explain
 related_features:
   - SPEC-009
@@ -44,25 +44,25 @@ repository access.
 
 ## Acceptance Criteria
 
-- [ ] Given `sw explain --output-format=skill`, the CLI exits with `0` and
+- [x] Given `sw explain --output-format=skill`, the CLI exits with `0` and
       prints a deterministic `SKILL.md`-compatible document to stdout.
-- [ ] Given `sw explain --output-format=skill --output-file`, the CLI exits
+- [x] Given `sw explain --output-format=skill --output-file`, the CLI exits
       with `0` and writes the document to the default Codex skill location
       for `sw`.
-- [ ] Given `sw explain --output-format=skill --output-file=<path>`, the CLI
+- [x] Given `sw explain --output-format=skill --output-file=<path>`, the CLI
       exits with `0` and writes the document to the provided path.
-- [ ] Given `sw explain --output-format=skill --output-file` when the default
+- [x] Given `sw explain --output-format=skill --output-file` when the default
       target file already exists, the CLI exits with `1` and leaves the file
       unchanged.
-- [ ] Given `sw explain --output-format=skill --output-file=<path>` when the
+- [x] Given `sw explain --output-format=skill --output-file=<path>` when the
       target file already exists, the CLI exits with `1` and leaves the file
       unchanged.
-- [ ] Given `sw explain --output-format=skill --output-file --force` or
+- [x] Given `sw explain --output-format=skill --output-file --force` or
       `sw explain --output-format=skill --output-file=<path> --force`, the CLI
       overwrites the existing file and exits with `0`.
-- [ ] Given `sw explain --output-format=skill`, the generated content makes it
+- [x] Given `sw explain --output-format=skill`, the generated content makes it
       clear which `sw` commands are implemented and which are still planned.
-- [ ] `sw explain --help` documents `--output-format=<format>`,
+- [x] `sw explain --help` documents `--output-format=<format>`,
       `--output-file[=<path>]`, and `--force`.
 
 ## Notes
