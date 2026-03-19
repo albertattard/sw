@@ -1518,6 +1518,7 @@ fn output_fence_open(output: &Value) -> Result<&'static str, RenderError> {
         Some("text") | None => Ok("```\n"),
         Some("json") => Ok("```json\n"),
         Some("xml") => Ok("```xml\n"),
+        Some("java") => Ok("```java\n"),
         Some(other) => Err(RenderError::Operational(format!(
             "Unsupported output content type `{other}`"
         ))),

@@ -373,6 +373,7 @@ fn invalid_output_content_type_returns_validation_failure() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("\"valid\": false"));
     assert!(stdout.contains("\"path\": \"entries[0].output.content_type\""));
+    assert!(stdout.contains("must be one of `text`, `json`, `xml`, or `java`"));
 }
 
 #[test]

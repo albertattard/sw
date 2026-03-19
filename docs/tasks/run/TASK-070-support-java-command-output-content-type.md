@@ -1,7 +1,7 @@
 ---
 id: TASK-070
 title: Support Java Command Output Content Type
-status: pending
+status: done
 category: run
 related_features:
   - SPEC-003
@@ -32,12 +32,12 @@ render captured Java output in a `java` fenced block.
 
 ## Acceptance Criteria
 
-- [ ] Given `output.content_type: java`, validation accepts the runbook.
-- [ ] Given a `Command` entry with `output.content_type: java`, the generated
+- [x] Given `output.content_type: java`, validation accepts the runbook.
+- [x] Given a `Command` entry with `output.content_type: java`, the generated
       Markdown uses a `java` fenced block for captured output.
-- [ ] Given existing `text`, `json`, and `xml` content types, behavior remains
+- [x] Given existing `text`, `json`, and `xml` content types, behavior remains
       unchanged.
-- [ ] Unsupported `output.content_type` values other than the supported set
+- [x] Unsupported `output.content_type` values other than the supported set
       are still rejected by validation.
 
 ## Notes
