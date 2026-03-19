@@ -132,6 +132,31 @@ fn run_command_writes_requested_output_file() {
 }
 
 #[test]
+fn run_command_accepts_yaml_input_file() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-run-success.yaml", "example.yaml");
+
+    let output = run_in_dir(&["run", "--input-file", "example.yaml"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("# Runbook execution"));
+    assert!(readme.contains("Captured output"));
+}
+
+#[test]
+fn run_uses_yml_default_when_json_and_yaml_are_missing() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-run-success.yaml", "sw-runbook.yml");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("# Runbook execution"));
+}
+
+#[test]
 fn verbose_run_reports_entry_progress_to_stderr() {
     let dir = prepare_workspace();
     write_runbook(&dir, "sw-runbook-run-success.json", "sw-runbook.json");

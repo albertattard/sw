@@ -1,13 +1,10 @@
 use crate::cli::{OutputFormat, ValidateArgs};
 use crate::runbook;
 use serde_json::json;
-use std::path::PathBuf;
 use std::process::ExitCode;
 
 pub fn run(args: ValidateArgs) -> ExitCode {
-    let path = args
-        .input_file
-        .unwrap_or_else(|| PathBuf::from("sw-runbook.json"));
+    let path = runbook::resolve_input_path(args.input_file);
 
     let runbook = match runbook::read(&path) {
         Ok(runbook) => runbook,

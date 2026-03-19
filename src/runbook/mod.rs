@@ -5,7 +5,7 @@ mod validate;
 use serde::Serialize;
 use serde_json::Value;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 pub(crate) use render::{check_prerequisites, render_markdown};
 pub use validate::validate;
@@ -41,8 +41,34 @@ pub fn read(path: &Path) -> Result<Value, String> {
     let contents = fs::read_to_string(path)
         .map_err(|err| format!("Failed to read {}: {err}", path.display()))?;
 
-    serde_json::from_str(&contents)
-        .map_err(|err| format!("Invalid JSON in {}: {err}", path.display()))
+    match path.extension().and_then(|value| value.to_str()) {
+        Some("yaml" | "yml") => serde_yaml::from_str(&contents)
+            .map_err(|err| format!("Invalid YAML in {}: {err}", path.display())),
+        _ => serde_json::from_str(&contents)
+            .map_err(|err| format!("Invalid JSON in {}: {err}", path.display())),
+    }
+}
+
+pub fn resolve_input_path(input_file: Option<PathBuf>) -> PathBuf {
+    let Some(path) = input_file else {
+        return resolve_default_input_path();
+    };
+
+    path
+}
+
+fn resolve_default_input_path() -> PathBuf {
+    for candidate in [
+        PathBuf::from("sw-runbook.json"),
+        PathBuf::from("sw-runbook.yaml"),
+        PathBuf::from("sw-runbook.yml"),
+    ] {
+        if candidate.exists() {
+            return candidate;
+        }
+    }
+
+    PathBuf::from("sw-runbook.json")
 }
 
 pub fn print_human_with_runbook(result: &ValidationResult, path: &Path, runbook: Option<&Value>) {

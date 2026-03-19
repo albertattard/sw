@@ -4,9 +4,7 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 pub fn run(args: RunArgs, verbose: bool, debug: bool) -> ExitCode {
-    let input_path = args
-        .input_file
-        .unwrap_or_else(|| PathBuf::from("sw-runbook.json"));
+    let input_path = runbook::resolve_input_path(args.input_file);
     let output_path = args
         .output_file
         .unwrap_or_else(|| PathBuf::from("README.md"));

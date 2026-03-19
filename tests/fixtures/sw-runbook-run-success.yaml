@@ -1,0 +1,19 @@
+entries:
+  - type: Heading
+    level: H1
+    title: Runbook execution
+  - type: Markdown
+    contents:
+      - This runbook verifies command execution and rendering.
+  - type: Command
+    commands:
+      - "printf 'first\\n' > sequence.txt"
+  - type: Command
+    commands:
+      - "printf 'second\\n' >> sequence.txt"
+    output:
+      caption:
+        - Captured output
+  - type: Command
+    commands:
+      - "printf 'Hello there\\n'"

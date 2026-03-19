@@ -130,6 +130,7 @@ Expected task directories:
 - [TASK-066: Add Patch Example Snippet](example/TASK-066-add-patch-example-snippet.md)
 - [TASK-067: Add DisplayFile Transformations](display-file/TASK-067-add-display-file-transformations.md)
 - [TASK-068: Add Skill Output Format To Explain Command](explain/TASK-068-add-skill-output-format-to-explain-command.md)
+- [TASK-069: Support YAML Runbook Input](run/TASK-069-support-yaml-runbook-input.md)
 
 ## Pending
 
@@ -212,6 +213,7 @@ Expected task directories:
 - [x] [TASK-066: Add Patch Example Snippet](example/TASK-066-add-patch-example-snippet.md)
 - [x] [TASK-067: Add DisplayFile Transformations](display-file/TASK-067-add-display-file-transformations.md)
 - [x] [TASK-068: Add Skill Output Format To Explain Command](explain/TASK-068-add-skill-output-format-to-explain-command.md)
+- [x] [TASK-069: Support YAML Runbook Input](run/TASK-069-support-yaml-runbook-input.md)
 
 ## Blocked
 

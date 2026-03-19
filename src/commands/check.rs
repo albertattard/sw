@@ -1,12 +1,9 @@
 use crate::cli::CheckArgs;
 use crate::runbook;
-use std::path::PathBuf;
 use std::process::ExitCode;
 
 pub fn run(args: CheckArgs) -> ExitCode {
-    let input_path = args
-        .input_file
-        .unwrap_or_else(|| PathBuf::from("sw-runbook.json"));
+    let input_path = runbook::resolve_input_path(args.input_file);
 
     let runbook = match runbook::read(&input_path) {
         Ok(runbook) => runbook,

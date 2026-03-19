@@ -64,6 +64,22 @@ fn valid_runbook_returns_success_json() {
 }
 
 #[test]
+fn valid_yaml_runbook_returns_success_json() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-run-success.yaml",
+        "--output-format",
+        "json",
+    ]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": true"));
+    assert!(stdout.contains("\"errors\": []"));
+}
+
+#[test]
 fn invalid_runbook_returns_validation_failure() {
     let output = run(&[
         "validate",
@@ -112,6 +128,22 @@ fn invalid_runbook_human_output_prints_a_block_for_each_error() {
 }
 
 #[test]
+fn invalid_yaml_returns_operational_error() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-invalid-yaml.yaml",
+        "--output-format",
+        "json",
+    ]);
+
+    assert_eq!(output.status.code(), Some(1));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\":false"));
+    assert!(stdout.contains("Invalid YAML"));
+}
+
+#[test]
 fn invalid_json_returns_operational_error() {
     let output = run(&[
         "validate",
@@ -125,6 +157,30 @@ fn invalid_json_returns_operational_error() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("\"valid\":false"));
     assert!(stdout.contains("Invalid JSON"));
+}
+
+#[test]
+fn validate_uses_yaml_default_when_json_is_missing() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-run-success.yaml", "sw-runbook.yaml");
+
+    let output = run_in_dir(&["validate", "--output-format", "json"], &dir);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": true"));
+}
+
+#[test]
+fn validate_uses_yml_default_when_json_and_yaml_are_missing() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-run-success.yaml", "sw-runbook.yml");
+
+    let output = run_in_dir(&["validate", "--output-format", "json"], &dir);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": true"));
 }
 
 #[test]

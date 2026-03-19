@@ -53,6 +53,7 @@ fn explain_run_prints_concise_contract_summary() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("topic: run"));
     assert!(stdout.contains("availability: implemented"));
+    assert!(stdout.contains("Default input file lookup order is `./sw-runbook.json`, `./sw-runbook.yaml`, then `./sw-runbook.yml`."));
     assert!(stdout.contains("Default output file is `./README.md`."));
     assert!(stdout.contains(
         "Use `sw check` first if the question is whether prerequisites such as Java are available."
@@ -67,6 +68,7 @@ fn explain_validate_prints_validation_contract_summary() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("topic: validate"));
     assert!(stdout.contains("Default output format is `human`."));
+    assert!(stdout.contains("Validation accepts JSON, YAML, and YML runbooks."));
     assert!(stdout.contains("The command performs no writes."));
 }
 
@@ -105,6 +107,7 @@ fn explain_check_guides_agent_to_prerequisites_and_examples() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("how do I check for Java 21?"));
     assert!(stdout.contains("Use `sw example Prerequisite`"));
+    assert!(stdout.contains("Check accepts JSON, YAML, and YML runbooks."));
     assert!(stdout.contains("Built-in prerequisite kinds include `java`"));
 }
 

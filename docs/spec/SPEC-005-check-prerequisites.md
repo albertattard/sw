@@ -4,7 +4,7 @@ title: Check Runbook Prerequisites
 status: proposed
 priority: medium
 owner: @aattard
-last_updated: 2026-03-13
+last_updated: 2026-03-18
 ---
 
 ## Problem
@@ -18,10 +18,17 @@ README output or executing the main workflow.
 The CLI provides a prerequisite-check command:
 
 ```bash
-sw check --input-file <sw-runbook.json>
+sw check --input-file <sw-runbook.yaml>
 ```
 
-If no input file is provided, the command uses `./sw-runbook.json` by default:
+If no input file is provided, the command uses the first existing default
+runbook file in this order:
+
+- `./sw-runbook.json`
+- `./sw-runbook.yaml`
+- `./sw-runbook.yml`
+
+For example:
 
 ```bash
 sw check
@@ -32,11 +39,13 @@ entries and reports whether the current environment is ready for `sw run`.
 
 ## Inputs
 
-- Optional named input file parameter: `--input-file <runbook.json>`.
+- Optional named input file parameter: `--input-file <runbook.{json|yaml|yml}>`.
 
 Default input behavior:
 - If `--input-file` is provided, use that path.
-- If no file path is provided, use `./sw-runbook.json`.
+- If no file path is provided, use the first existing path from
+  `./sw-runbook.json`, `./sw-runbook.yaml`, and `./sw-runbook.yml`.
+- Supported input formats are JSON, YAML, and YML.
 
 ## Outputs
 
@@ -76,8 +85,16 @@ Default input behavior:
       exits with `0`.
 - [ ] Given no `--input-file` and a valid `./sw-runbook.json`, `sw check`
       checks that file.
+- [ ] Given no `--input-file`, no `./sw-runbook.json`, and a valid
+      `./sw-runbook.yaml`, `sw check` checks that file.
+- [ ] Given no `--input-file`, no `./sw-runbook.json` or
+      `./sw-runbook.yaml`, and a valid `./sw-runbook.yml`, `sw check` checks
+      that file.
 - [ ] Given a missing input file, `sw check` exits with `1` and reports a
       clear file error.
+- [ ] Given `sw check --input-file <file.yaml>` with a valid YAML runbook,
+      `sw check` applies the same prerequisite-check contract and exit codes as
+      a JSON runbook.
 - [ ] Given an invalid runbook, `sw check` exits with `1` and reports that the
       runbook is invalid, including a nearby offending block for
       entry-scoped validation errors.

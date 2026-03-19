@@ -4,7 +4,7 @@ title: Run Runbook to Markdown
 status: in_progress
 priority: high
 owner: @aattard
-last_updated: 2026-03-16
+last_updated: 2026-03-18
 ---
 
 ## Problem
@@ -29,11 +29,12 @@ sw
 sw --verbose
 sw --debug
 sw run
-sw run --input-file <sw-runbook.json>
+sw run --input-file <sw-runbook.yaml>
 ```
 
 Initial version behavior:
-- Read `sw-runbook.json` from the current directory when no file is provided.
+- Read the first existing default runbook file from the current directory in
+  this order: `sw-runbook.json`, `sw-runbook.yaml`, then `sw-runbook.yml`.
 - Render the runbook entries in order.
 - Execute command entries in order.
 - Produce Markdown output.
@@ -44,7 +45,7 @@ in the runbook.
 
 ## Inputs
 
-- Optional named input file parameter: `--input-file <runbook.json>`.
+- Optional named input file parameter: `--input-file <runbook.{json|yaml|yml}>`.
 - Optional output format parameter: `--output-format markdown`.
 - Optional output file parameter: `--output-file <path>`.
 - Optional progress parameter: `--verbose`.
@@ -57,7 +58,8 @@ in the runbook.
 ### CLI Defaults
 
 - If `--input-file` is provided, use that path. Otherwise use
-  `./sw-runbook.json`.
+  the first existing path from `./sw-runbook.json`, `./sw-runbook.yaml`, and
+  `./sw-runbook.yml`.
 - If `--output-format` is not provided, default to `markdown`.
 - If `--output-file` is not provided, default to `./README.md`.
 - If `--verbose` is not provided, progress output is suppressed.
@@ -77,7 +79,8 @@ in the runbook.
 ### Exit Codes
 
 - `0`: runbook executed and rendered successfully.
-- `1`: operational error (missing file, unreadable file, invalid JSON, write
+- `1`: operational error (missing file, unreadable file, invalid JSON, invalid
+  YAML, write
   failure, internal error).
 - `2`: invalid runbook input or command execution failure.
 

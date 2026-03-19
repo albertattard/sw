@@ -4,7 +4,7 @@ title: Validate Runbook Input
 status: in_progress
 priority: high
 owner: @aattard
-last_updated: 2026-03-15
+last_updated: 2026-03-18
 ---
 
 ## Problem
@@ -17,10 +17,17 @@ to confirm that a runbook file is valid input.
 The CLI provides a validation command:
 
 ```bash
-sw validate --input-file <sw-runbook.json> --output-format json
+sw validate --input-file <sw-runbook.yaml> --output-format json
 ```
 
-If no input file is provided, the command uses `./sw-runbook.json` by default:
+If no input file is provided, the command uses the first existing default
+runbook file in this order:
+
+- `./sw-runbook.json`
+- `./sw-runbook.yaml`
+- `./sw-runbook.yml`
+
+For example:
 
 ```bash
 sw validate --output-format json
@@ -32,12 +39,14 @@ files.
 ## Inputs/Outputs
 
 Input:
-- Optional named input file parameter: `--input-file <runbook.json>`.
+- Optional named input file parameter: `--input-file <runbook.{json|yaml|yml}>`.
 - Optional output format (`json` or `human`) via `--output-format`.
 
 Default input behavior:
 - If `--input-file` is provided, use that path. When no file path is provided,
-  use `sw-runbook.json` in the current directory.
+  use the first existing path from `sw-runbook.json`, `sw-runbook.yaml`, and
+  `sw-runbook.yml` in the current directory.
+- Supported input formats are JSON, YAML, and YML.
 - If `--output-format` is not provided, default to `human`.
 
 Supported output formats:
@@ -85,8 +94,18 @@ Exit codes:
 - [ ] Given no input file argument and a valid `./sw-runbook.json`,
       `sw validate --output-format json` validates that file and returns exit
       code `0`.
-- [ ] Given no input file argument and no `./sw-runbook.json` present, command
-      returns exit code `1` with a clear missing-file error.
+- [ ] Given no input file argument, no `./sw-runbook.json`, and a valid
+      `./sw-runbook.yaml`, `sw validate --output-format json` validates that
+      file and returns exit code `0`.
+- [ ] Given no input file argument, no `./sw-runbook.json` or
+      `./sw-runbook.yaml`, and a valid `./sw-runbook.yml`,
+      `sw validate --output-format json` validates that file and returns exit
+      code `0`.
+- [ ] Given no input file argument and none of `./sw-runbook.json`,
+      `./sw-runbook.yaml`, or `./sw-runbook.yml` present, the command returns
+      exit code `1` with a clear missing-file error.
+- [ ] Given `sw validate --input-file <file.yaml>` with a valid YAML runbook,
+      the command validates that file and returns exit code `0`.
 - [ ] Given no `--output-format` option, command uses `human` output by
       default.
 - [ ] Given a human-readable validation failure for `entries[N]`, the output
@@ -102,8 +121,9 @@ Exit codes:
 
 ## Edge Cases
 
-- Empty JSON file.
+- Empty input file.
 - Invalid JSON syntax.
+- Invalid YAML syntax.
 - Unknown top-level keys.
 - Missing required fields.
 - A `Command` entry that appears to start a background process with `&`

@@ -101,6 +101,42 @@ fn check_succeeds_when_prerequisites_pass_and_skips_main_commands() {
 }
 
 #[test]
+fn check_accepts_yaml_input_file() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-prerequisites-success.yaml",
+        "example.yaml",
+    );
+
+    let output = run_in_dir(&["check", "--input-file", "example.yaml"], &dir);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("All prerequisite checks passed"));
+    assert_eq!(
+        fs::read_to_string(dir.join("prereq-order.txt")).expect("missing prereq-order.txt"),
+        "prereq\n"
+    );
+}
+
+#[test]
+fn check_uses_yaml_default_when_json_is_missing() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-prerequisites-success.yaml",
+        "sw-runbook.yaml",
+    );
+
+    let output = run_in_dir(&["check"], &dir);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("All prerequisite checks passed"));
+}
+
+#[test]
 fn check_succeeds_when_java_prerequisites_pass() {
     let dir = prepare_workspace();
     let java_17_home = create_fake_java_home(&dir, "jdk-17", "17");

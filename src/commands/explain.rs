@@ -242,11 +242,11 @@ fn explanations() -> Vec<Explanation<'static>> {
             availability: "implemented",
             purpose: "Check that a runbook is structurally valid without executing workflow steps.",
             defaults: &[
-                "Default input file is `./sw-runbook.json`.",
+                "Default input file lookup order is `./sw-runbook.json`, `./sw-runbook.yaml`, then `./sw-runbook.yml`.",
                 "Default output format is `human`.",
             ],
             inputs: &[
-                "`sw validate --input-file <runbook.json>`",
+                "`sw validate --input-file <runbook.{json|yaml|yml}>`",
                 "`--output-format human|json`",
             ],
             outputs: &[
@@ -257,9 +257,10 @@ fn explanations() -> Vec<Explanation<'static>> {
             exit_codes: &[
                 "`0` for a valid runbook.",
                 "`2` for structural validation failures.",
-                "`1` for missing files, unreadable files, invalid JSON syntax, or internal errors.",
+                "`1` for missing files, unreadable files, invalid JSON syntax, invalid YAML syntax, or internal errors.",
             ],
             constraints: &[
+                "Validation accepts JSON, YAML, and YML runbooks.",
                 "Validation checks schema and documented field rules only.",
                 "Warnings do not make a runbook invalid.",
                 "Use `validate` before `run` or `check` when the question is about input correctness.",
@@ -276,12 +277,12 @@ fn explanations() -> Vec<Explanation<'static>> {
             purpose: "Execute a runbook in order and render the resulting documentation output.",
             defaults: &[
                 "Running `sw` with no subcommand is equivalent to `sw run`.",
-                "Default input file is `./sw-runbook.json`.",
+                "Default input file lookup order is `./sw-runbook.json`, `./sw-runbook.yaml`, then `./sw-runbook.yml`.",
                 "Default output format is `markdown`.",
                 "Default output file is `./README.md`.",
             ],
             inputs: &[
-                "`sw run --input-file <runbook.json>`",
+                "`sw run --input-file <runbook.{json|yaml|yml}>`",
                 "`--output-format markdown`",
                 "`--output-file <path>`",
                 "`--verbose` for progress output on stderr",
@@ -295,9 +296,10 @@ fn explanations() -> Vec<Explanation<'static>> {
             exit_codes: &[
                 "`0` for successful execution and rendering.",
                 "`2` for invalid runbook input or command execution failure.",
-                "`1` for missing files, write failures, invalid JSON syntax, or internal errors.",
+                "`1` for missing files, write failures, invalid JSON syntax, invalid YAML syntax, or internal errors.",
             ],
             constraints: &[
+                "Run accepts JSON, YAML, and YML runbooks.",
                 "Entries execute in runbook order.",
                 "Command execution and rendering are part of the same workflow.",
                 "Machine-readable contracts live in the runbook input, not in stdout.",
@@ -312,8 +314,10 @@ fn explanations() -> Vec<Explanation<'static>> {
             topic: "check",
             availability: "implemented",
             purpose: "Validate the runbook and execute only prerequisite checks to confirm the environment is ready.",
-            defaults: &["Default input file is `./sw-runbook.json`."],
-            inputs: &["`sw check --input-file <runbook.json>`"],
+            defaults: &[
+                "Default input file lookup order is `./sw-runbook.json`, `./sw-runbook.yaml`, then `./sw-runbook.yml`.",
+            ],
+            inputs: &["`sw check --input-file <runbook.{json|yaml|yml}>`"],
             outputs: &[
                 "Prints human-readable prerequisite status.",
                 "Does not render or write `README.md`.",
@@ -325,6 +329,7 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "`1` for missing files, invalid runbooks, or other operational errors.",
             ],
             constraints: &[
+                "Check accepts JSON, YAML, and YML runbooks.",
                 "The runbook is validated before prerequisite execution begins.",
                 "Checks run in runbook order and stop on the first failing prerequisite.",
                 "Built-in prerequisite kinds include `java`, including version rules such as `21` or `21+`.",

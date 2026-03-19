@@ -1,0 +1,19 @@
+entries:
+  - type: Heading
+    level: H2
+    title: Prerequisites
+  - type: Prerequisite
+    checks:
+      - kind: command
+        name: Environment marker
+        contents:
+          - Environment marker file
+          - Must be available before the main workflow runs.
+        commands:
+          - "printf '%s\\n' prereq >> prereq-order.txt"
+        assert:
+          exit_code: 0
+        help: Create the environment marker before running this example.
+  - type: Command
+    commands:
+      - "printf '%s\\n' main >> prereq-order.txt"

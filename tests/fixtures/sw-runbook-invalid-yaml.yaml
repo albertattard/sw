@@ -1,0 +1,6 @@
+entries:
+  - type: Heading
+    level: H1
+    title: Broken
+  - type: Command
+    commands: [unclosed
