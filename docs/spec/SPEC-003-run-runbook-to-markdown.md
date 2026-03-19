@@ -391,7 +391,7 @@ in the runbook.
 - If `output.content_type` is present, the generated Markdown fenced block uses
   the declared content type.
 - In this increment, supported `output.content_type` values are `text`, `json`,
-  and `xml`.
+  `xml`, and `java`.
 - If `output.trim_trailing_whitespace` is omitted, trailing whitespace is
   removed from the end of each rendered output line.
 - `output.trim_trailing_whitespace` affects only trailing whitespace, not
@@ -735,6 +735,8 @@ in the runbook.
       Markdown uses a `json` fenced block for captured output.
 - [ ] Given a `Command` entry with `output.content_type: xml`, the generated
       Markdown uses an `xml` fenced block for captured output.
+- [ ] Given a `Command` entry with `output.content_type: java`, the generated
+      Markdown uses a `java` fenced block for captured output.
 - [ ] Given a `Command` entry with `output` but no `content_type`, the
       generated Markdown uses an unlabeled fenced block for captured output.
 - [ ] Given a `Command` entry with `output.content_type: text`, the generated

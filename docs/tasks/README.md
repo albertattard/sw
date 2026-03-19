@@ -131,6 +131,7 @@ Expected task directories:
 - [TASK-067: Add DisplayFile Transformations](display-file/TASK-067-add-display-file-transformations.md)
 - [TASK-068: Add Skill Output Format To Explain Command](explain/TASK-068-add-skill-output-format-to-explain-command.md)
 - [TASK-069: Support YAML Runbook Input](run/TASK-069-support-yaml-runbook-input.md)
+- [TASK-070: Support Java Command Output Content Type](run/TASK-070-support-java-command-output-content-type.md)
 
 ## Pending
 
@@ -139,6 +140,7 @@ Expected task directories:
 - [ ] [TASK-033: Implement Import Command](import/TASK-033-implement-import-command.md)
 - [ ] [TASK-038: Include Release Commit History In README](release/TASK-038-include-release-commit-history-in-readme.md)
 - [ ] [TASK-059: Implement Format Command](format/TASK-059-implement-format-command.md)
+- [ ] [TASK-070: Support Java Command Output Content Type](run/TASK-070-support-java-command-output-content-type.md)
 
 ## In Progress
 
