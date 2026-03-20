@@ -303,6 +303,8 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "Entries execute in runbook order.",
                 "Command execution and rendering are part of the same workflow.",
                 "Machine-readable contracts live in the runbook input, not in stdout.",
+                "Prefer `output.rewrite` with `type: datetime_shift` over `replace` for semantic dates and times so relative timing stays intact.",
+                "Use `replace` for dates and times only when the text is not semantically a date or time, or when `datetime_shift` cannot express the required format.",
             ],
             next: &[
                 "Use this when you want the workflow executed and the README-style output generated.",

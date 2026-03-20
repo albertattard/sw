@@ -3,7 +3,7 @@
 - Status: Proposed
 - Owner: @aattard
 - Created: 2026-03-13
-- Last updated: 2026-03-18
+- Last updated: 2026-03-20
 
 ## Problem
 
@@ -114,6 +114,12 @@ The output should be structured so an agent can infer:
 The output should summarize the corresponding spec contract rather than print
 the raw spec file verbatim.
 
+When a topic includes authoring guidance for structured runbook fields, the
+output should prefer the most semantic documented mechanism over brittle text
+substitution. For example, run-oriented guidance should tell agents to prefer
+`output.rewrite` with `type: datetime_shift` for real dates and times, and to
+use `replace` only for non-semantic text or unsupported formats.
+
 When `--output-format=skill` is selected:
 
 - The command emits one aggregate skill document for the current `sw` build
@@ -125,6 +131,9 @@ When `--output-format=skill` is selected:
   `sw explain` for authoritative command, snippet, and contract discovery.
 - The skill content must make implemented versus planned commands clear enough
   that an agent does not treat planned commands as available by default.
+- The skill content should preserve important authoring guidance from explain
+  topics, including preferring `datetime_shift` over `replace` for semantic
+  dates and times in runbook rewrites.
 - The output should remain deterministic so repeated exports produce stable
   skill content aside from intentional contract changes.
 
@@ -138,6 +147,9 @@ When `--output-format=skill` is selected:
 
 - [ ] Given `sw explain run`, the CLI prints a concise explanation of the run
       contract derived from `SPEC-003`.
+- [ ] Given `sw explain run`, the CLI tells agents to prefer
+      `datetime_shift` over `replace` for semantic dates and times, using
+      `replace` only for non-semantic text or unsupported formats.
 - [ ] Given `sw explain validate`, the CLI prints a concise explanation of the
       validate contract derived from `SPEC-002`.
 - [ ] Given `sw explain --all`, the CLI prints explanations for all supported
@@ -174,6 +186,9 @@ When `--output-format=skill` is selected:
       overwrites the target file and exits with `0`.
 - [ ] Given `sw explain --output-format=skill`, the generated skill content
       clearly distinguishes implemented commands from planned commands.
+- [ ] Given `sw explain --output-format=skill`, the generated skill content
+      preserves the documented preference for `datetime_shift` over `replace`
+      for semantic dates and times.
 - [ ] Help output documents `--output-format=<format>`,
       `--output-file[=<path>]`, and `--force` for `explain`.
 - [ ] Help output documents the `explain` command and the `--all` option.

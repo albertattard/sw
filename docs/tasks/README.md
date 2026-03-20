@@ -132,6 +132,7 @@ Expected task directories:
 - [TASK-068: Add Skill Output Format To Explain Command](explain/TASK-068-add-skill-output-format-to-explain-command.md)
 - [TASK-069: Support YAML Runbook Input](run/TASK-069-support-yaml-runbook-input.md)
 - [TASK-070: Support Java Command Output Content Type](run/TASK-070-support-java-command-output-content-type.md)
+- [TASK-071: Prefer Datetime Shift Guidance In Explain](explain/TASK-071-prefer-datetime-shift-guidance-in-explain.md)
 
 ## Pending
 
@@ -216,6 +217,7 @@ Expected task directories:
 - [x] [TASK-068: Add Skill Output Format To Explain Command](explain/TASK-068-add-skill-output-format-to-explain-command.md)
 - [x] [TASK-069: Support YAML Runbook Input](run/TASK-069-support-yaml-runbook-input.md)
 - [x] [TASK-070: Support Java Command Output Content Type](run/TASK-070-support-java-command-output-content-type.md)
+- [x] [TASK-071: Prefer Datetime Shift Guidance In Explain](explain/TASK-071-prefer-datetime-shift-guidance-in-explain.md)
 
 ## Blocked
 

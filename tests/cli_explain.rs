@@ -58,6 +58,12 @@ fn explain_run_prints_concise_contract_summary() {
     assert!(stdout.contains(
         "Use `sw check` first if the question is whether prerequisites such as Java are available."
     ));
+    assert!(stdout.contains(
+        "Prefer `output.rewrite` with `type: datetime_shift` over `replace` for semantic dates and times so relative timing stays intact."
+    ));
+    assert!(stdout.contains(
+        "Use `replace` for dates and times only when the text is not semantically a date or time, or when `datetime_shift` cannot express the required format."
+    ));
 }
 
 #[test]
@@ -165,6 +171,12 @@ fn explain_skill_prints_skill_document_to_stdout() {
     assert!(stdout.contains("- Availability: planned"));
     assert!(stdout.contains("Use `sw help <subcommand>`"));
     assert!(stdout.contains("Use `sw example <topic>`"));
+    assert!(stdout.contains(
+        "Prefer `output.rewrite` with `type: datetime_shift` over `replace` for semantic dates and times so relative timing stays intact."
+    ));
+    assert!(stdout.contains(
+        "Use `replace` for dates and times only when the text is not semantically a date or time, or when `datetime_shift` cannot express the required format."
+    ));
 }
 
 #[test]
