@@ -64,6 +64,12 @@ fn explain_run_prints_concise_contract_summary() {
     assert!(stdout.contains(
         "Use `replace` for dates and times only when the text is not semantically a date or time, or when `datetime_shift` cannot express the required format."
     ));
+    assert!(stdout.contains(
+        "Command output can trim outer empty lines with `output.trim_empty_lines` using `leading_trailing`, `leading`, `trailing`, or `none`."
+    ));
+    assert!(stdout.contains(
+        "Use `sw example Command` when you need the current JSON shape for output fields such as `trim_empty_lines`."
+    ));
 }
 
 #[test]
@@ -129,6 +135,17 @@ fn explain_boundaries_between_help_example_and_explain_are_clear() {
 }
 
 #[test]
+fn explain_example_mentions_trim_empty_lines_in_command_example() {
+    let output = run(&["explain", "example"]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains(
+        "The `Command` example includes current nested output fields such as `trim_empty_lines`."
+    ));
+}
+
+#[test]
 fn explain_topic_matching_is_case_insensitive() {
     let lower = run(&["explain", "run"]);
     let upper = run(&["explain", "RUN"]);
@@ -176,6 +193,12 @@ fn explain_skill_prints_skill_document_to_stdout() {
     ));
     assert!(stdout.contains(
         "Use `replace` for dates and times only when the text is not semantically a date or time, or when `datetime_shift` cannot express the required format."
+    ));
+    assert!(stdout.contains(
+        "Command output can trim outer empty lines with `output.trim_empty_lines` using `leading_trailing`, `leading`, `trailing`, or `none`."
+    ));
+    assert!(stdout.contains(
+        "The `Command` example includes current nested output fields such as `trim_empty_lines`."
     ));
 }
 

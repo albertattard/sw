@@ -41,6 +41,9 @@ fn help_subcommand_for_known_topic_prints_targeted_help() {
     assert!(stdout.contains("Render a runbook to output"));
     assert!(stdout.contains("--input-file"));
     assert!(stdout.contains("--output-file"));
+    assert!(stdout.contains("trim_empty_lines"));
+    assert!(stdout.contains("sw example Command"));
+    assert!(stdout.contains("sw explain run"));
     assert!(!stdout.contains("Check runbook prerequisites"));
 }
 
@@ -84,7 +87,8 @@ fn example_help_prints_help() {
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("Example topic"));
-    assert!(stdout.contains("rewrite.keep_between"));
+    assert!(stdout.contains("trim_empty_lines"));
+    assert!(stdout.contains("The `Command` example includes current nested output fields"));
 }
 
 #[test]
@@ -111,6 +115,9 @@ fn run_help_prints_help() {
     assert!(stdout.contains("--input-file"));
     assert!(stdout.contains("--output-format"));
     assert!(stdout.contains("--output-file"));
+    assert!(stdout.contains("trim_empty_lines"));
+    assert!(stdout.contains("sw example Command"));
+    assert!(stdout.contains("sw explain run"));
 }
 
 #[test]

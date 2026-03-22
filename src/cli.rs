@@ -39,6 +39,9 @@ pub enum Commands {
 }
 
 #[derive(Debug, clap::Args)]
+#[command(
+    after_help = "Runbook-authored output fields such as `trim_empty_lines` are configured in the runbook, not as CLI flags.\nUse `sw example Command` for a current JSON snippet and `sw explain run` for behavior and defaults."
+)]
 pub struct RunArgs {
     /// Path to the input runbook file.
     #[arg(long)]
@@ -72,6 +75,9 @@ pub struct ValidateArgs {
 }
 
 #[derive(Debug, clap::Args)]
+#[command(
+    after_help = "The `Command` example includes current nested output fields such as `trim_empty_lines`, along with rewrite, capture, and cleanup examples."
+)]
 pub struct ExampleArgs {
     /// Example topic such as `Command`, `DisplayFile`, or `rewrite.keep_between`.
     pub topic: String,

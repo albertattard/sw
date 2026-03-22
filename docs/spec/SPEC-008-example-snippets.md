@@ -3,7 +3,7 @@
 - Status: Draft
 - Owner: `@aattard`
 - Created: `2026-03-13`
-- Updated: `2026-03-16`
+- Updated: `2026-03-22`
 
 ## Goal
 
@@ -49,6 +49,8 @@ In this increment, supported entity types include:
 - Entry-type examples should print a single JSON object representing that
   entry and should include the commonly used nested properties for that entry
   type so users can remove what they do not need.
+- The `Command` example should reflect the current output contract, including
+  supported output-cleanup fields such as `trim_empty_lines` when available.
 - Example output is documentation-oriented and does not need to be executable
   without further user editing.
 
@@ -56,6 +58,8 @@ In this increment, supported entity types include:
 
 - [ ] Given `sw example Command`, the CLI prints a valid JSON example of a
       `Command` entry with its commonly used nested properties.
+- [ ] Given `sw example Command`, the example includes the implemented
+      `trim_empty_lines` output field.
 - [ ] Given `sw example DisplayFile`, the CLI prints a valid JSON example of a
       `DisplayFile` entry.
 - [ ] Given `sw example Patch`, the CLI prints a valid JSON example of a

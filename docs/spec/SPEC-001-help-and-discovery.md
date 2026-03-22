@@ -4,7 +4,7 @@ title: Help and Discovery Contract
 status: in_progress
 priority: high
 owner: @aattard
-last_updated: 2026-03-13
+last_updated: 2026-03-22
 ---
 
 ## Problem
@@ -43,6 +43,8 @@ Output:
 - Placeholder line indicating work in progress while applicable.
 - `sw help <subcommand>` prints the help for that subcommand only.
 - `sw help --all` prints top-level help plus help for each known subcommand.
+- Subcommand help may point users to `example` or `explain` when a question is
+  about runbook-authored fields rather than CLI flags.
 
 Exit codes:
 - `0`: help printed successfully.
@@ -53,6 +55,9 @@ Exit codes:
 - [x] `sw --help` prints top-level usage and exits with `0`.
 - [x] `sw help` prints top-level usage and exits with `0`.
 - [ ] `sw help <subcommand>` prints help for a known subcommand and exits with `0`.
+- [ ] `sw help run` documents the CLI flags for `run` and directs users to
+      `sw example Command` and `sw explain run` for runbook-authored output
+      fields such as `trim_empty_lines`.
 - [ ] `sw help <subcommand>` with an unknown subcommand exits with `1` and reports a clear error.
 - [ ] `sw help --all` prints top-level help plus help for each known subcommand and exits with `0`.
 - [x] `sw [command] --help` is documented as the command-level help pattern.

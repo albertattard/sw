@@ -3,7 +3,7 @@
 - Status: Proposed
 - Owner: @aattard
 - Created: 2026-03-13
-- Last updated: 2026-03-20
+- Last updated: 2026-03-22
 
 ## Problem
 
@@ -120,6 +120,10 @@ substitution. For example, run-oriented guidance should tell agents to prefer
 `output.rewrite` with `type: datetime_shift` for real dates and times, and to
 use `replace` only for non-semantic text or unsupported formats.
 
+When a topic covers runbook output cleanup behavior, the explanation should
+describe current first-class output fields such as `trim_empty_lines` and make
+their allowed values and intent discoverable without requiring the raw spec.
+
 When `--output-format=skill` is selected:
 
 - The command emits one aggregate skill document for the current `sw` build
@@ -150,6 +154,9 @@ When `--output-format=skill` is selected:
 - [ ] Given `sw explain run`, the CLI tells agents to prefer
       `datetime_shift` over `replace` for semantic dates and times, using
       `replace` only for non-semantic text or unsupported formats.
+- [ ] Given `sw explain run`, the CLI documents `output.trim_empty_lines` and
+      its supported values for trimming leading and trailing empty output
+      lines.
 - [ ] Given `sw explain validate`, the CLI prints a concise explanation of the
       validate contract derived from `SPEC-002`.
 - [ ] Given `sw explain --all`, the CLI prints explanations for all supported
@@ -160,6 +167,8 @@ When `--output-format=skill` is selected:
 - [ ] Given an agent-oriented user question about configuration shape, the
       documented `explain` contract makes it clear when the next step should be
       `sw example <topic>`.
+- [ ] Given `sw explain example`, the CLI makes it clear that the `Command`
+      example includes current nested output fields such as `trim_empty_lines`.
 - [ ] Given an agent choosing among `help`, `example`, and `explain`, the
       documented `explain` contract provides enough context to choose
       reliably.

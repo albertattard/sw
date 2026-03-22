@@ -303,6 +303,7 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "Entries execute in runbook order.",
                 "Command execution and rendering are part of the same workflow.",
                 "Machine-readable contracts live in the runbook input, not in stdout.",
+                "Command output can trim outer empty lines with `output.trim_empty_lines` using `leading_trailing`, `leading`, `trailing`, or `none`.",
                 "Prefer `output.rewrite` with `type: datetime_shift` over `replace` for semantic dates and times so relative timing stays intact.",
                 "Use `replace` for dates and times only when the text is not semantically a date or time, or when `datetime_shift` cannot express the required format.",
             ],
@@ -310,6 +311,7 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "Use this when you want the workflow executed and the README-style output generated.",
                 "Use `sw validate` first if the question is whether the runbook shape is valid.",
                 "Use `sw check` first if the question is whether prerequisites such as Java are available.",
+                "Use `sw example Command` when you need the current JSON shape for output fields such as `trim_empty_lines`.",
             ],
         },
         Explanation {
@@ -426,6 +428,7 @@ fn explanations() -> Vec<Explanation<'static>> {
             constraints: &[
                 "Example output is documentation-oriented and may need editing before use.",
                 "Use `example` for JSON shape, not for command behavior or defaults.",
+                "The `Command` example includes current nested output fields such as `trim_empty_lines`.",
                 "The printed snippet is intended to remain a stable starting point for users and agents.",
             ],
             next: &[
