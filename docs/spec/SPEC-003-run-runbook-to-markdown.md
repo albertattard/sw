@@ -394,10 +394,26 @@ in the runbook.
   output after the command block.
 - If `output.caption` is present, render that caption before the captured
   command output.
+- `output` may declare `stream`.
 - `output` may declare `content_type`.
 - `output` may declare `trim_empty_lines`.
 - `output` may declare `trim_trailing_whitespace`.
 - `output` may declare `rewrite`.
+- If `output.stream` is omitted, captured command stdout is rendered.
+- `output.stream` accepts `stdout`, `stderr`, and `combined`.
+- `output.stream: stdout` renders only captured command stdout.
+- `output.stream: stderr` renders only captured command stderr.
+- `output.stream: combined` renders captured stdout followed by captured
+  stderr.
+- `output.stream` selects the rendered output stream before
+  `output.trim_trailing_whitespace`, `output.rewrite`, and
+  `output.trim_empty_lines` are applied.
+- `output.stream` affects rendering only and does not change command
+  assertions, capture sources, or process execution behavior.
+- In this increment, `capture.source` remains limited to `stdout` even when
+  `output.stream` renders `stderr` or `combined`.
+- In this increment, assertion check sources remain unchanged even when
+  `output.stream` renders `stderr` or `combined`.
 - If `output.content_type` is omitted, captured command output is rendered as
   plain output in an unlabeled fenced block.
 - If `output.content_type` is `text`, captured command output is rendered in an
@@ -670,6 +686,22 @@ in the runbook.
 - [ ] Given `sw run --debug` for a `Command` entry with rewrites and captures,
       stderr includes enough interpolated rewrite and capture information to
       help diagnose matching failures.
+- [ ] Given `output.stream: stdout`, rendered command output includes only
+      captured stdout.
+- [ ] Given `output.stream: stderr`, rendered command output includes only
+      captured stderr.
+- [ ] Given `output.stream: combined`, rendered command output includes
+      captured stdout followed by captured stderr.
+- [ ] Given no `output.stream`, rendered command output defaults to stdout.
+- [ ] Given an invalid `output.stream` value, validation rejects the runbook
+      with a clear error.
+- [ ] Given `output.stream: stderr` together with `output.rewrite`, rewrites
+      apply to the selected stderr stream before rendering.
+- [ ] Given `output.stream: combined` together with output trimming, trimming
+      applies to the selected combined stream before rendering.
+- [ ] Given `output.stream: stderr` or `output.stream: combined`,
+      `capture.source` and assertion-check sources keep their existing
+      contracts and are not implicitly widened.
 
 ### Command Cleanup
 

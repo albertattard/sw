@@ -50,7 +50,8 @@ In this increment, supported entity types include:
   entry and should include the commonly used nested properties for that entry
   type so users can remove what they do not need.
 - The `Command` example should reflect the current output contract, including
-  supported output-cleanup fields such as `trim_empty_lines` when available.
+  supported output fields such as `stream` and `trim_empty_lines` when
+  available.
 - The `DisplayFile` example should reflect the current transform contract,
   including Java `collapse_method_body` when implemented.
 - Example output is documentation-oriented and does not need to be executable
@@ -62,6 +63,8 @@ In this increment, supported entity types include:
       `Command` entry with its commonly used nested properties.
 - [ ] Given `sw example Command`, the example includes the implemented
       `trim_empty_lines` output field.
+- [ ] Given `sw example Command`, the example includes the implemented
+      `stream` output field.
 - [ ] Given `sw example DisplayFile`, the CLI prints a valid JSON example of a
       `DisplayFile` entry.
 - [ ] Given `sw example DisplayFile`, the example includes the implemented

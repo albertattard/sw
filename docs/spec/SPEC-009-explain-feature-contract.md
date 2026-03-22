@@ -132,6 +132,11 @@ When a topic covers runbook output cleanup behavior, the explanation should
 describe current first-class output fields such as `trim_empty_lines` and make
 their allowed values and intent discoverable without requiring the raw spec.
 
+When a topic covers runbook output stream selection, the explanation should
+describe `output.stream`, its supported values, and the boundary between
+rendered output selection versus the narrower existing `capture.source` and
+assertion-check source contracts.
+
 When `--output-format=skill` is selected:
 
 - The command emits one aggregate skill document for the current `sw` build
@@ -165,6 +170,11 @@ When `--output-format=skill` is selected:
 - [ ] Given `sw explain run`, the CLI documents `output.trim_empty_lines` and
       its supported values for trimming leading and trailing empty output
       lines.
+- [ ] Given `sw explain run`, the CLI documents `output.stream` and its
+      supported values `stdout`, `stderr`, and `combined`.
+- [ ] Given `sw explain run`, the CLI makes it clear that `output.stream`
+      changes rendered output only and does not broaden `capture.source` or
+      assertion-check sources beyond their current contracts.
 - [ ] Given `sw explain validate`, the CLI prints a concise explanation of the
       validate contract derived from `SPEC-002`.
 - [ ] Given `sw explain validate`, the CLI documents `--input-file=-` for
@@ -179,7 +189,8 @@ When `--output-format=skill` is selected:
       documented `explain` contract makes it clear when the next step should be
       `sw example <topic>`.
 - [ ] Given `sw explain example`, the CLI makes it clear that the `Command`
-      example includes current nested output fields such as `trim_empty_lines`.
+      example includes current nested output fields such as `trim_empty_lines`
+      and `stream`.
 - [ ] Given `sw explain example`, the CLI makes it clear that the `DisplayFile`
       example includes the Java `collapse_method_body` transform for
       collapsing method bodies.
@@ -218,6 +229,9 @@ When `--output-format=skill` is selected:
 - [ ] Given `sw explain --output-format=skill`, the generated skill content
       preserves the documented preference for `datetime_shift` over `replace`
       for semantic dates and times.
+- [ ] Given `sw explain --output-format=skill`, the generated skill content
+      preserves the `output.stream` guidance for rendered stdout, stderr, and
+      combined output selection.
 - [ ] Given `sw explain --output-format=skill`, the generated skill content
       preserves the stdin runbook input guidance for agents, including
       `--input-file=-`, default JSON stdin parsing, and explicit YAML stdin

@@ -60,7 +60,7 @@ Exit codes:
 - [ ] `sw help <subcommand>` prints help for a known subcommand and exits with `0`.
 - [ ] `sw help run` documents the CLI flags for `run` and directs users to
       `sw example Command` and `sw explain run` for runbook-authored output
-      fields such as `trim_empty_lines`.
+      fields such as `trim_empty_lines` and `stream`.
 - [ ] `sw help run`, `sw help check`, and `sw help validate` document
       `--input-file=-` for stdin-backed runbook input and `--input-format` for
       explicit YAML stdin input.
