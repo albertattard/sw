@@ -11,13 +11,14 @@ pub fn run(cli: Cli) -> ExitCode {
     let Cli {
         verbose,
         debug,
+        default_run_input,
         command,
     } = cli;
 
     match command {
         None => run::run(
             RunArgs {
-                input_file: None,
+                input: default_run_input,
                 output_format: RunOutputFormat::Markdown,
                 output_file: None,
             },

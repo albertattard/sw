@@ -3,15 +3,15 @@ use crate::runbook;
 use std::process::ExitCode;
 
 pub fn run(args: CheckArgs) -> ExitCode {
-    let input_path = runbook::resolve_input_path(args.input_file);
-
-    let runbook = match runbook::read(&input_path) {
-        Ok(runbook) => runbook,
+    let loaded = match runbook::load(args.input.input_file, args.input.input_format) {
+        Ok(loaded) => loaded,
         Err(message) => {
             eprintln!("{message}");
             return ExitCode::from(1);
         }
     };
+    let input_path = loaded.path;
+    let runbook = loaded.document;
 
     let validation_result = runbook::validate(&runbook, &input_path);
     if !validation_result.valid {

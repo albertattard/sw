@@ -40,6 +40,9 @@ fn help_subcommand_for_known_topic_prints_targeted_help() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("Render a runbook to output"));
     assert!(stdout.contains("--input-file"));
+    assert!(stdout.contains("Use `-` to read from stdin"));
+    assert!(stdout.contains("--input-format"));
+    assert!(stdout.contains("Ignored unless `--input-file=-` is used"));
     assert!(stdout.contains("--output-file"));
     assert!(stdout.contains("trim_empty_lines"));
     assert!(stdout.contains("sw example Command"));
@@ -78,6 +81,9 @@ fn check_help_prints_help() {
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("--input-file"));
+    assert!(stdout.contains("Use `-` to read from stdin"));
+    assert!(stdout.contains("--input-format"));
+    assert!(stdout.contains("Ignored unless `--input-file=-` is used"));
 }
 
 #[test]
@@ -115,6 +121,9 @@ fn run_help_prints_help() {
     assert!(stdout.contains("--verbose"));
     assert!(stdout.contains("--debug"));
     assert!(stdout.contains("--input-file"));
+    assert!(stdout.contains("Use `-` to read from stdin"));
+    assert!(stdout.contains("--input-format"));
+    assert!(stdout.contains("Ignored unless `--input-file=-` is used"));
     assert!(stdout.contains("--output-format"));
     assert!(stdout.contains("--output-file"));
     assert!(stdout.contains("trim_empty_lines"));
@@ -129,6 +138,9 @@ fn validate_help_prints_help() {
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("--input-file"));
+    assert!(stdout.contains("Use `-` to read from stdin"));
+    assert!(stdout.contains("--input-format"));
+    assert!(stdout.contains("Ignored unless `--input-file=-` is used"));
     assert!(stdout.contains("--output-format"));
 }
 

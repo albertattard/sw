@@ -1,7 +1,7 @@
 ---
 id: TASK-078
 title: Support Stdin Runbook Input
-status: pending
+status: done
 category: run
 related_features:
   - SPEC-001
@@ -51,30 +51,30 @@ creating a temporary file first.
 
 ## Acceptance Criteria
 
-- [ ] Given `sw run --input-file=-` with a valid JSON runbook on stdin, the
+- [x] Given `sw run --input-file=-` with a valid JSON runbook on stdin, the
       command renders the runbook and exits with `0`.
-- [ ] Given `sw --input-file=-` with a valid JSON runbook on stdin, the
+- [x] Given `sw --input-file=-` with a valid JSON runbook on stdin, the
       command behaves the same as `sw run --input-file=-`.
-- [ ] Given `sw validate --input-file=- --output-format=json` with a valid JSON
+- [x] Given `sw validate --input-file=- --output-format=json` with a valid JSON
       runbook on stdin, the command validates stdin and exits with `0`.
-- [ ] Given `sw check --input-file=-` with a valid JSON runbook on stdin, the
+- [x] Given `sw check --input-file=-` with a valid JSON runbook on stdin, the
       command applies the existing prerequisite-check contract and exit codes.
-- [ ] Given `run`, `check`, or `validate` with
+- [x] Given `run`, `check`, or `validate` with
       `--input-file=- --input-format=yaml` and a valid YAML runbook on stdin,
       the command parses stdin as YAML and applies the existing contract for
       that subcommand.
-- [ ] Given `run`, `check`, or `validate` with `--input-file=-` and YAML on
+- [x] Given `run`, `check`, or `validate` with `--input-file=-` and YAML on
       stdin but without `--input-format=yaml`, the command exits with `1` and
       reports a clear parsing error.
-- [ ] Given `--input-format=json` or `--input-format=yaml` without
+- [x] Given `--input-format=json` or `--input-format=yaml` without
       `--input-file=-`, `run`, `check`, and `validate` keep the current default
       file lookup behavior.
-- [ ] Help output for `run`, `check`, and `validate` documents `--input-file=-`
+- [x] Help output for `run`, `check`, and `validate` documents `--input-file=-`
       and `--input-format`.
-- [ ] `sw explain run`, `sw explain check`, and `sw explain validate` document
+- [x] `sw explain run`, `sw explain check`, and `sw explain validate` document
       stdin-backed runbook input, default JSON stdin parsing, and explicit YAML
       stdin selection.
-- [ ] `sw explain --output-format=skill` preserves the stdin guidance for
+- [x] `sw explain --output-format=skill` preserves the stdin guidance for
       agents.
 
 ## Notes

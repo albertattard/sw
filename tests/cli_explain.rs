@@ -54,9 +54,25 @@ fn explain_run_prints_concise_contract_summary() {
     assert!(stdout.contains("topic: run"));
     assert!(stdout.contains("availability: implemented"));
     assert!(stdout.contains("Default input file lookup order is `./sw-runbook.json`, `./sw-runbook.yaml`, then `./sw-runbook.yml`."));
+    assert!(stdout.contains(
+        "When `--input-file=-` is used, stdin is parsed as JSON unless `--input-format=yaml` is provided."
+    ));
     assert!(stdout.contains("Default output file is `./README.md`."));
     assert!(stdout.contains(
         "Command output trims leading and trailing empty lines by default unless `output.trim_empty_lines` overrides it."
+    ));
+    assert!(
+        stdout.contains(
+            "`sw --input-file=-` or `sw run --input-file=-` for stdin-backed JSON runbooks"
+        )
+    );
+    assert!(stdout.contains("`--input-format json|yaml` for stdin-backed input"));
+    assert!(stdout.contains("`--input-file=-` reads the runbook from stdin."));
+    assert!(stdout.contains(
+        "For stdin input, JSON is the default format and piped YAML requires `--input-format=yaml`."
+    ));
+    assert!(stdout.contains(
+        "Without `--input-file=-`, `--input-format` keeps the existing file-backed defaults and does not override file-extension-based parsing."
     ));
     assert!(stdout.contains(
         "Use `sw check` first if the question is whether prerequisites such as Java are available."
@@ -83,7 +99,16 @@ fn explain_validate_prints_validation_contract_summary() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("topic: validate"));
     assert!(stdout.contains("Default output format is `human`."));
+    assert!(stdout.contains(
+        "When `--input-file=-` is used, stdin is parsed as JSON unless `--input-format=yaml` is provided."
+    ));
+    assert!(stdout.contains("`sw validate --input-file=-`"));
+    assert!(stdout.contains("`--input-format json|yaml` for stdin-backed input"));
     assert!(stdout.contains("Validation accepts JSON, YAML, and YML runbooks."));
+    assert!(stdout.contains("`--input-file=-` reads the runbook from stdin."));
+    assert!(stdout.contains(
+        "Without `--input-file=-`, `--input-format` does not replace the normal file lookup or file-extension-based parsing behavior."
+    ));
     assert!(stdout.contains("The command performs no writes."));
 }
 
@@ -123,6 +148,15 @@ fn explain_check_guides_agent_to_prerequisites_and_examples() {
     assert!(stdout.contains("how do I check for Java 21?"));
     assert!(stdout.contains("Use `sw example Prerequisite`"));
     assert!(stdout.contains("Check accepts JSON, YAML, and YML runbooks."));
+    assert!(stdout.contains(
+        "When `--input-file=-` is used, stdin is parsed as JSON unless `--input-format=yaml` is provided."
+    ));
+    assert!(stdout.contains("`sw check --input-file=-`"));
+    assert!(stdout.contains("`--input-format json|yaml` for stdin-backed input"));
+    assert!(stdout.contains("`--input-file=-` reads the runbook from stdin."));
+    assert!(stdout.contains(
+        "Without `--input-file=-`, `--input-format` keeps the existing file-backed defaults and does not override file-extension-based parsing."
+    ));
     assert!(stdout.contains("Built-in prerequisite kinds include `java`"));
 }
 
@@ -197,6 +231,10 @@ fn explain_skill_prints_skill_document_to_stdout() {
     assert!(stdout.contains("- Availability: planned"));
     assert!(stdout.contains("Use `sw help <subcommand>`"));
     assert!(stdout.contains("Use `sw example <topic>`"));
+    assert!(stdout.contains(
+        "When `--input-file=-` is used, stdin is parsed as JSON unless `--input-format=yaml` is provided."
+    ));
+    assert!(stdout.contains("`--input-file=-` reads the runbook from stdin."));
     assert!(stdout.contains(
         "Prefer `output.rewrite` with `type: datetime_shift` over `replace` for semantic dates and times so relative timing stays intact."
     ));

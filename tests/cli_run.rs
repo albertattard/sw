@@ -1,6 +1,7 @@
 use std::fs;
+use std::io::Write;
 use std::path::{Path, PathBuf};
-use std::process::Command;
+use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -30,6 +31,26 @@ fn run_in_dir(args: &[&str], dir: &Path) -> std::process::Output {
         .current_dir(dir)
         .output()
         .expect("failed to execute sw")
+}
+
+fn run_in_dir_with_stdin(args: &[&str], dir: &Path, stdin: &str) -> std::process::Output {
+    let mut child = Command::new(env!("CARGO_BIN_EXE_sw"))
+        .args(args)
+        .current_dir(dir)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .expect("failed to execute sw");
+
+    child
+        .stdin
+        .as_mut()
+        .expect("missing stdin pipe")
+        .write_all(stdin.as_bytes())
+        .expect("failed to write stdin");
+
+    child.wait_with_output().expect("failed to read sw output")
 }
 
 fn run_in_dir_with_env(args: &[&str], dir: &Path, envs: &[(&str, &Path)]) -> std::process::Output {
@@ -142,6 +163,79 @@ fn run_command_accepts_yaml_input_file() {
     let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
     assert!(readme.contains("# Runbook execution"));
     assert!(readme.contains("Captured output"));
+}
+
+#[test]
+fn run_command_accepts_json_runbook_from_stdin() {
+    let dir = prepare_workspace();
+    let stdin = fs::read_to_string("tests/fixtures/sw-runbook-run-success.json")
+        .expect("failed to read fixture");
+
+    let output = run_in_dir_with_stdin(&["run", "--input-file=-"], &dir, &stdin);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("# Runbook execution"));
+    assert!(readme.contains("Captured output"));
+}
+
+#[test]
+fn top_level_run_accepts_json_runbook_from_stdin() {
+    let dir = prepare_workspace();
+    let stdin = fs::read_to_string("tests/fixtures/sw-runbook-run-success.json")
+        .expect("failed to read fixture");
+
+    let output = run_in_dir_with_stdin(&["--input-file=-"], &dir, &stdin);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("Rendered runbook to README.md"));
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("# Runbook execution"));
+}
+
+#[test]
+fn run_command_accepts_yaml_runbook_from_stdin_with_explicit_format() {
+    let dir = prepare_workspace();
+    let stdin = fs::read_to_string("tests/fixtures/sw-runbook-run-success.yaml")
+        .expect("failed to read fixture");
+
+    let output = run_in_dir_with_stdin(
+        &["run", "--input-file=-", "--input-format=yaml"],
+        &dir,
+        &stdin,
+    );
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("# Runbook execution"));
+    assert!(readme.contains("Captured output"));
+}
+
+#[test]
+fn run_command_rejects_yaml_runbook_from_stdin_without_explicit_format() {
+    let dir = prepare_workspace();
+    let stdin = fs::read_to_string("tests/fixtures/sw-runbook-run-success.yaml")
+        .expect("failed to read fixture");
+
+    let output = run_in_dir_with_stdin(&["run", "--input-file=-"], &dir, &stdin);
+
+    assert_eq!(output.status.code(), Some(1));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("Invalid JSON in stdin"));
+    assert!(!dir.join("README.md").exists());
+}
+
+#[test]
+fn top_level_input_format_without_stdin_keeps_default_file_lookup() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-run-success.json", "sw-runbook.json");
+
+    let output = run_in_dir(&["--input-format=yaml"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("# Runbook execution"));
 }
 
 #[test]

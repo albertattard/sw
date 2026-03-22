@@ -18,6 +18,9 @@ pub struct Cli {
     #[arg(long, global = true)]
     pub debug: bool,
 
+    #[command(flatten)]
+    pub default_run_input: RunbookInputArgs,
+
     #[command(subcommand)]
     pub command: Option<Commands>,
 }
@@ -43,9 +46,8 @@ pub enum Commands {
     after_help = "Runbook-authored output fields such as `trim_empty_lines` are configured in the runbook, not as CLI flags.\nUse `sw example Command` for a current JSON snippet and `sw explain run` for behavior and defaults."
 )]
 pub struct RunArgs {
-    /// Path to the input runbook file.
-    #[arg(long)]
-    pub input_file: Option<PathBuf>,
+    #[command(flatten)]
+    pub input: RunbookInputArgs,
 
     /// Output format.
     #[arg(long, value_enum, default_value_t = RunOutputFormat::Markdown)]
@@ -58,20 +60,29 @@ pub struct RunArgs {
 
 #[derive(Debug, clap::Args)]
 pub struct CheckArgs {
-    /// Path to the input runbook file.
-    #[arg(long)]
-    pub input_file: Option<PathBuf>,
+    #[command(flatten)]
+    pub input: RunbookInputArgs,
 }
 
 #[derive(Debug, clap::Args)]
 pub struct ValidateArgs {
-    /// Path to the input runbook file.
-    #[arg(long)]
-    pub input_file: Option<PathBuf>,
+    #[command(flatten)]
+    pub input: RunbookInputArgs,
 
     /// Output format.
     #[arg(long, value_enum, default_value_t = OutputFormat::Human)]
     pub output_format: OutputFormat,
+}
+
+#[derive(Debug, Default, Clone, clap::Args)]
+pub struct RunbookInputArgs {
+    /// Path to the input runbook file. Use `-` to read from stdin.
+    #[arg(long)]
+    pub input_file: Option<PathBuf>,
+
+    /// Input format for stdin runbooks. Ignored unless `--input-file=-` is used.
+    #[arg(long, value_enum)]
+    pub input_format: Option<InputFormat>,
 }
 
 #[derive(Debug, clap::Args)]
@@ -124,6 +135,12 @@ pub enum RunOutputFormat {
 pub enum OutputFormat {
     Human,
     Json,
+}
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq, ValueEnum)]
+pub enum InputFormat {
+    Json,
+    Yaml,
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, ValueEnum)]

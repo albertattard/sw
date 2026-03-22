@@ -244,9 +244,12 @@ fn explanations() -> Vec<Explanation<'static>> {
             defaults: &[
                 "Default input file lookup order is `./sw-runbook.json`, `./sw-runbook.yaml`, then `./sw-runbook.yml`.",
                 "Default output format is `human`.",
+                "When `--input-file=-` is used, stdin is parsed as JSON unless `--input-format=yaml` is provided.",
             ],
             inputs: &[
                 "`sw validate --input-file <runbook.{json|yaml|yml}>`",
+                "`sw validate --input-file=-`",
+                "`--input-format json|yaml` for stdin-backed input",
                 "`--output-format human|json`",
             ],
             outputs: &[
@@ -261,6 +264,9 @@ fn explanations() -> Vec<Explanation<'static>> {
             ],
             constraints: &[
                 "Validation accepts JSON, YAML, and YML runbooks.",
+                "`--input-file=-` reads the runbook from stdin.",
+                "For stdin input, JSON is the default format and piped YAML requires `--input-format=yaml`.",
+                "Without `--input-file=-`, `--input-format` does not replace the normal file lookup or file-extension-based parsing behavior.",
                 "Validation checks schema and documented field rules only.",
                 "Warnings do not make a runbook invalid.",
                 "Use `validate` before `run` or `check` when the question is about input correctness.",
@@ -280,10 +286,13 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "Default input file lookup order is `./sw-runbook.json`, `./sw-runbook.yaml`, then `./sw-runbook.yml`.",
                 "Default output format is `markdown`.",
                 "Default output file is `./README.md`.",
+                "When `--input-file=-` is used, stdin is parsed as JSON unless `--input-format=yaml` is provided.",
                 "Command output trims leading and trailing empty lines by default unless `output.trim_empty_lines` overrides it.",
             ],
             inputs: &[
                 "`sw run --input-file <runbook.{json|yaml|yml}>`",
+                "`sw --input-file=-` or `sw run --input-file=-` for stdin-backed JSON runbooks",
+                "`--input-format json|yaml` for stdin-backed input",
                 "`--output-format markdown`",
                 "`--output-file <path>`",
                 "`--verbose` for progress output on stderr",
@@ -301,6 +310,9 @@ fn explanations() -> Vec<Explanation<'static>> {
             ],
             constraints: &[
                 "Run accepts JSON, YAML, and YML runbooks.",
+                "`--input-file=-` reads the runbook from stdin.",
+                "For stdin input, JSON is the default format and piped YAML requires `--input-format=yaml`.",
+                "Without `--input-file=-`, `--input-format` keeps the existing file-backed defaults and does not override file-extension-based parsing.",
                 "Entries execute in runbook order.",
                 "Command execution and rendering are part of the same workflow.",
                 "Machine-readable contracts live in the runbook input, not in stdout.",
@@ -321,8 +333,13 @@ fn explanations() -> Vec<Explanation<'static>> {
             purpose: "Validate the runbook and execute only prerequisite checks to confirm the environment is ready.",
             defaults: &[
                 "Default input file lookup order is `./sw-runbook.json`, `./sw-runbook.yaml`, then `./sw-runbook.yml`.",
+                "When `--input-file=-` is used, stdin is parsed as JSON unless `--input-format=yaml` is provided.",
             ],
-            inputs: &["`sw check --input-file <runbook.{json|yaml|yml}>`"],
+            inputs: &[
+                "`sw check --input-file <runbook.{json|yaml|yml}>`",
+                "`sw check --input-file=-`",
+                "`--input-format json|yaml` for stdin-backed input",
+            ],
             outputs: &[
                 "Prints human-readable prerequisite status.",
                 "Does not render or write `README.md`.",
@@ -335,6 +352,9 @@ fn explanations() -> Vec<Explanation<'static>> {
             ],
             constraints: &[
                 "Check accepts JSON, YAML, and YML runbooks.",
+                "`--input-file=-` reads the runbook from stdin.",
+                "For stdin input, JSON is the default format and piped YAML requires `--input-format=yaml`.",
+                "Without `--input-file=-`, `--input-format` keeps the existing file-backed defaults and does not override file-extension-based parsing.",
                 "The runbook is validated before prerequisite execution begins.",
                 "Checks run in runbook order and stop on the first failing prerequisite.",
                 "Built-in prerequisite kinds include `java`, including version rules such as `21` or `21+`.",

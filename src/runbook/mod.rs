@@ -2,9 +2,11 @@ mod execute;
 mod render;
 mod validate;
 
+use crate::cli::InputFormat;
 use serde::Serialize;
 use serde_json::Value;
 use std::fs;
+use std::io::{self, Read};
 use std::path::{Path, PathBuf};
 
 pub(crate) use render::{check_prerequisites, render_markdown};
@@ -37,6 +39,37 @@ pub enum RenderError {
     },
 }
 
+pub struct LoadedRunbook {
+    pub path: PathBuf,
+    pub document: Value,
+}
+
+enum InputSource {
+    File(PathBuf),
+    Stdin(InputFormat),
+}
+
+const STDIN_INPUT_PATH: &str = "-";
+
+pub fn load(
+    input_file: Option<PathBuf>,
+    input_format: Option<InputFormat>,
+) -> Result<LoadedRunbook, String> {
+    match resolve_input_source(input_file, input_format) {
+        InputSource::File(path) => {
+            let document = read(&path)?;
+            Ok(LoadedRunbook { path, document })
+        }
+        InputSource::Stdin(format) => {
+            let document = read_stdin(format)?;
+            Ok(LoadedRunbook {
+                path: PathBuf::from(STDIN_INPUT_PATH),
+                document,
+            })
+        }
+    }
+}
+
 pub fn read(path: &Path) -> Result<Value, String> {
     let contents = fs::read_to_string(path)
         .map_err(|err| format!("Failed to read {}: {err}", path.display()))?;
@@ -49,12 +82,35 @@ pub fn read(path: &Path) -> Result<Value, String> {
     }
 }
 
-pub fn resolve_input_path(input_file: Option<PathBuf>) -> PathBuf {
+fn read_stdin(format: InputFormat) -> Result<Value, String> {
+    let mut contents = String::new();
+    io::stdin()
+        .read_to_string(&mut contents)
+        .map_err(|err| format!("Failed to read stdin: {err}"))?;
+
+    match format {
+        InputFormat::Json => {
+            serde_json::from_str(&contents).map_err(|err| format!("Invalid JSON in stdin: {err}"))
+        }
+        InputFormat::Yaml => {
+            serde_yaml::from_str(&contents).map_err(|err| format!("Invalid YAML in stdin: {err}"))
+        }
+    }
+}
+
+fn resolve_input_source(
+    input_file: Option<PathBuf>,
+    input_format: Option<InputFormat>,
+) -> InputSource {
     let Some(path) = input_file else {
-        return resolve_default_input_path();
+        return InputSource::File(resolve_default_input_path());
     };
 
-    path
+    if path == Path::new(STDIN_INPUT_PATH) {
+        return InputSource::Stdin(input_format.unwrap_or(InputFormat::Json));
+    }
+
+    InputSource::File(path)
 }
 
 fn resolve_default_input_path() -> PathBuf {

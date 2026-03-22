@@ -4,10 +4,8 @@ use serde_json::json;
 use std::process::ExitCode;
 
 pub fn run(args: ValidateArgs) -> ExitCode {
-    let path = runbook::resolve_input_path(args.input_file);
-
-    let runbook = match runbook::read(&path) {
-        Ok(runbook) => runbook,
+    let loaded = match runbook::load(args.input.input_file, args.input.input_format) {
+        Ok(loaded) => loaded,
         Err(message) => {
             if args.output_format == OutputFormat::Json {
                 println!(
@@ -25,6 +23,8 @@ pub fn run(args: ValidateArgs) -> ExitCode {
             return ExitCode::from(1);
         }
     };
+    let path = loaded.path;
+    let runbook = loaded.document;
 
     let result = runbook::validate(&runbook, &path);
 
