@@ -4,7 +4,7 @@ title: Check Runbook Prerequisites
 status: proposed
 priority: medium
 owner: @aattard
-last_updated: 2026-03-18
+last_updated: 2026-03-22
 ---
 
 ## Problem
@@ -19,6 +19,7 @@ The CLI provides a prerequisite-check command:
 
 ```bash
 sw check --input-file <sw-runbook.yaml>
+sw check --input-file=-
 ```
 
 If no input file is provided, the command uses the first existing default
@@ -39,13 +40,25 @@ entries and reports whether the current environment is ready for `sw run`.
 
 ## Inputs
 
-- Optional named input file parameter: `--input-file <runbook.{json|yaml|yml}>`.
+- Optional named input file parameter: `--input-file <runbook.{json|yaml|yml}>`
+  or `--input-file=-` to read the runbook from stdin.
+- Optional input format parameter: `--input-format json|yaml`.
 
 Default input behavior:
-- If `--input-file` is provided, use that path.
+- If `--input-file=-` is provided, read the runbook from stdin.
+- If `--input-file=-` is provided and `--input-format` is omitted, parse stdin
+  as JSON.
+- If `--input-file=-` is provided and `--input-format=yaml`, parse stdin as
+  YAML.
+- If `--input-file` is provided with a path, use that path.
 - If no file path is provided, use the first existing path from
   `./sw-runbook.json`, `./sw-runbook.yaml`, and `./sw-runbook.yml`.
-- Supported input formats are JSON, YAML, and YML.
+- When reading from a file path or from the default file lookup, infer the
+  input format from the file extension or default file name.
+- `--input-format` does not change the existing file lookup order when
+  `--input-file=-` is not used.
+- Supported input formats are JSON, YAML, and YML for files, and JSON or YAML
+  for stdin.
 
 ## Outputs
 
@@ -95,6 +108,18 @@ Default input behavior:
 - [ ] Given `sw check --input-file <file.yaml>` with a valid YAML runbook,
       `sw check` applies the same prerequisite-check contract and exit codes as
       a JSON runbook.
+- [ ] Given `sw check --input-file=-` with a valid JSON runbook on stdin,
+      `sw check` applies the same prerequisite-check contract and exit codes as
+      a file-backed JSON runbook.
+- [ ] Given `sw check --input-file=- --input-format=yaml` with a valid YAML
+      runbook on stdin, `sw check` applies the same prerequisite-check
+      contract and exit codes as a file-backed YAML runbook.
+- [ ] Given `sw check --input-file=-` with YAML on stdin and no
+      `--input-format=yaml`, the command exits with `1` and reports a clear
+      parsing error.
+- [ ] Given `--input-format=json` or `--input-format=yaml` without
+      `--input-file=-`, the command still uses the existing default file lookup
+      behavior.
 - [ ] Given an invalid runbook, `sw check` exits with `1` and reports that the
       runbook is invalid, including a nearby offending block for
       entry-scoped validation errors.

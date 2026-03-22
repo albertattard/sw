@@ -45,6 +45,9 @@ Output:
 - `sw help --all` prints top-level help plus help for each known subcommand.
 - Subcommand help may point users to `example` or `explain` when a question is
   about runbook-authored fields rather than CLI flags.
+- Subcommand help should document `--input-file=-` as the stdin convention for
+  runbook input where supported, and should explain when `--input-format` is
+  needed for piped YAML input.
 
 Exit codes:
 - `0`: help printed successfully.
@@ -58,6 +61,9 @@ Exit codes:
 - [ ] `sw help run` documents the CLI flags for `run` and directs users to
       `sw example Command` and `sw explain run` for runbook-authored output
       fields such as `trim_empty_lines`.
+- [ ] `sw help run`, `sw help check`, and `sw help validate` document
+      `--input-file=-` for stdin-backed runbook input and `--input-format` for
+      explicit YAML stdin input.
 - [ ] `sw help example` makes it clear that `sw example DisplayFile` includes
       the Java `collapse_method_body` transform for collapsing method bodies.
 - [ ] `sw help <subcommand>` with an unknown subcommand exits with `1` and reports a clear error.

@@ -28,8 +28,10 @@ The CLI also provides an explicit `run` command:
 sw
 sw --verbose
 sw --debug
+sw --input-file=-
 sw run
 sw run --input-file <sw-runbook.yaml>
+sw run --input-file=- --input-format=yaml
 ```
 
 Initial version behavior:
@@ -45,7 +47,9 @@ in the runbook.
 
 ## Inputs
 
-- Optional named input file parameter: `--input-file <runbook.{json|yaml|yml}>`.
+- Optional named input file parameter: `--input-file <runbook.{json|yaml|yml}>`
+  or `--input-file=-` to read the runbook from stdin.
+- Optional input format parameter: `--input-format json|yaml`.
 - Optional output format parameter: `--output-format markdown`.
 - Optional output file parameter: `--output-file <path>`.
 - Optional progress parameter: `--verbose`.
@@ -57,9 +61,18 @@ in the runbook.
 
 ### CLI Defaults
 
-- If `--input-file` is provided, use that path. Otherwise use
-  the first existing path from `./sw-runbook.json`, `./sw-runbook.yaml`, and
+- If `--input-file=-` is provided, read the runbook from stdin.
+- If `--input-file=-` is provided and `--input-format` is omitted, parse stdin
+  as JSON.
+- If `--input-file=-` is provided and `--input-format=yaml`, parse stdin as
+  YAML.
+- If `--input-file` is provided with a path, use that path. Otherwise use the
+  first existing path from `./sw-runbook.json`, `./sw-runbook.yaml`, and
   `./sw-runbook.yml`.
+- If `--input-file` is omitted, `--input-format` does not change the existing
+  default file lookup behavior.
+- When reading from a file path or from the default file lookup, infer the
+  input format from the file extension or default file name.
 - If `--output-format` is not provided, default to `markdown`.
 - If `--output-file` is not provided, default to `./README.md`.
 - If `--verbose` is not provided, progress output is suppressed.
@@ -514,6 +527,19 @@ in the runbook.
       renders the file and writes `./README.md`.
 - [ ] Given `sw run --input-file <file>` with a valid runbook, the command
       renders entries in order and exits with `0`.
+- [ ] Given `sw run --input-file=-` with a valid JSON runbook on stdin, the
+      command renders entries in order and exits with `0`.
+- [ ] Given `sw --input-file=-` with a valid JSON runbook on stdin, the
+      command behaves the same as `sw run --input-file=-`.
+- [ ] Given `sw run --input-file=- --input-format=yaml` with a valid YAML
+      runbook on stdin, the command renders entries in order and exits with
+      `0`.
+- [ ] Given `sw run --input-file=-` with YAML on stdin and no
+      `--input-format=yaml`, the command exits with `1` and reports a clear
+      parsing error.
+- [ ] Given `--input-format=json` or `--input-format=yaml` without
+      `--input-file=-`, the command still uses the existing default file lookup
+      behavior.
 - [ ] Given `--output-file <path>`, the command writes the output to the
       provided path.
 - [ ] Given `sw run --verbose`, progress lines are written to stderr without

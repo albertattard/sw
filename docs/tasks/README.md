@@ -139,6 +139,7 @@ Expected task directories:
 - [TASK-075: Make Output Empty Line Trimming Default](run/TASK-075-make-output-empty-line-trimming-default.md)
 - [TASK-076: Surface DisplayFile Transform Discovery In Help](discovery/TASK-076-surface-display-file-transform-discovery-in-help.md)
 - [TASK-077: Document DisplayFile Transform Discovery In Explain](explain/TASK-077-document-display-file-transform-discovery-in-explain.md)
+- [TASK-078: Support Stdin Runbook Input](run/TASK-078-support-stdin-runbook-input.md)
 
 ## Pending
 
@@ -146,6 +147,7 @@ Expected task directories:
 - [ ] [TASK-033: Implement Import Command](import/TASK-033-implement-import-command.md)
 - [ ] [TASK-038: Include Release Commit History In README](release/TASK-038-include-release-commit-history-in-readme.md)
 - [ ] [TASK-059: Implement Format Command](format/TASK-059-implement-format-command.md)
+- [ ] [TASK-078: Support Stdin Runbook Input](run/TASK-078-support-stdin-runbook-input.md)
 
 ## In Progress
 

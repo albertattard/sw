@@ -114,6 +114,14 @@ The output should be structured so an agent can infer:
 The output should summarize the corresponding spec contract rather than print
 the raw spec file verbatim.
 
+When a topic supports stdin-backed runbook input, the output should explain
+`--input-file=-`, the default JSON parsing behavior for stdin, and when
+`--input-format=yaml` is required for piped YAML input.
+
+When a topic uses file-backed runbook input by default, the output should make
+it clear that `--input-format` does not replace the existing default file
+lookup behavior unless stdin is explicitly selected with `--input-file=-`.
+
 When a topic includes authoring guidance for structured runbook fields, the
 output should prefer the most semantic documented mechanism over brittle text
 substitution. For example, run-oriented guidance should tell agents to prefer
@@ -159,6 +167,9 @@ When `--output-format=skill` is selected:
       lines.
 - [ ] Given `sw explain validate`, the CLI prints a concise explanation of the
       validate contract derived from `SPEC-002`.
+- [ ] Given `sw explain validate`, the CLI documents `--input-file=-` for
+      stdin input, JSON as the default stdin format, and `--input-format=yaml`
+      for YAML stdin input.
 - [ ] Given `sw explain --all`, the CLI prints explanations for all supported
       topics.
 - [ ] Given an agent-oriented user question such as "how do I check for Java
@@ -172,6 +183,12 @@ When `--output-format=skill` is selected:
 - [ ] Given `sw explain example`, the CLI makes it clear that the `DisplayFile`
       example includes the Java `collapse_method_body` transform for
       collapsing method bodies.
+- [ ] Given `sw explain run` or `sw explain check`, the CLI documents
+      `--input-file=-` for stdin input, JSON as the default stdin format, and
+      `--input-format=yaml` for YAML stdin input.
+- [ ] Given `sw explain run`, `sw explain check`, or `sw explain validate`,
+      the CLI makes it clear that `--input-format=json|yaml` without
+      `--input-file=-` keeps the existing file-backed default behavior.
 - [ ] Given an agent choosing among `help`, `example`, and `explain`, the
       documented `explain` contract provides enough context to choose
       reliably.
@@ -201,6 +218,10 @@ When `--output-format=skill` is selected:
 - [ ] Given `sw explain --output-format=skill`, the generated skill content
       preserves the documented preference for `datetime_shift` over `replace`
       for semantic dates and times.
+- [ ] Given `sw explain --output-format=skill`, the generated skill content
+      preserves the stdin runbook input guidance for agents, including
+      `--input-file=-`, default JSON stdin parsing, and explicit YAML stdin
+      selection.
 - [ ] Help output documents `--output-format=<format>`,
       `--output-file[=<path>]`, and `--force` for `explain`.
 - [ ] Help output documents the `explain` command and the `--all` option.

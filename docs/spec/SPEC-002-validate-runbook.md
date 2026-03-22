@@ -4,7 +4,7 @@ title: Validate Runbook Input
 status: in_progress
 priority: high
 owner: @aattard
-last_updated: 2026-03-18
+last_updated: 2026-03-22
 ---
 
 ## Problem
@@ -18,6 +18,7 @@ The CLI provides a validation command:
 
 ```bash
 sw validate --input-file <sw-runbook.yaml> --output-format json
+sw validate --input-file=- --output-format json
 ```
 
 If no input file is provided, the command uses the first existing default
@@ -39,14 +40,26 @@ files.
 ## Inputs/Outputs
 
 Input:
-- Optional named input file parameter: `--input-file <runbook.{json|yaml|yml}>`.
+- Optional named input file parameter: `--input-file <runbook.{json|yaml|yml}>`
+  or `--input-file=-` to read the runbook from stdin.
+- Optional input format (`json` or `yaml`) via `--input-format`.
 - Optional output format (`json` or `human`) via `--output-format`.
 
 Default input behavior:
-- If `--input-file` is provided, use that path. When no file path is provided,
-  use the first existing path from `sw-runbook.json`, `sw-runbook.yaml`, and
-  `sw-runbook.yml` in the current directory.
-- Supported input formats are JSON, YAML, and YML.
+- If `--input-file=-` is provided, read the runbook from stdin.
+- If `--input-file=-` is provided and `--input-format` is omitted, parse stdin
+  as JSON.
+- If `--input-file=-` is provided and `--input-format=yaml`, parse stdin as
+  YAML.
+- If `--input-file` is provided with a path, use that path. When no file path
+  is provided, use the first existing path from `sw-runbook.json`,
+  `sw-runbook.yaml`, and `sw-runbook.yml` in the current directory.
+- When reading from a file path or from the default file lookup, infer the
+  input format from the file extension or default file name.
+- `--input-format` does not change the existing file lookup order when
+  `--input-file=-` is not used.
+- Supported input formats are JSON, YAML, and YML for files, and JSON or YAML
+  for stdin.
 - If `--output-format` is not provided, default to `human`.
 
 Supported output formats:
@@ -106,6 +119,18 @@ Exit codes:
       exit code `1` with a clear missing-file error.
 - [ ] Given `sw validate --input-file <file.yaml>` with a valid YAML runbook,
       the command validates that file and returns exit code `0`.
+- [ ] Given `sw validate --input-file=- --output-format json` with a valid
+      JSON runbook on stdin, the command validates stdin and returns exit code
+      `0`.
+- [ ] Given `sw validate --input-file=- --input-format yaml --output-format json`
+      with a valid YAML runbook on stdin, the command validates stdin and
+      returns exit code `0`.
+- [ ] Given `sw validate --input-file=- --output-format json` with YAML on
+      stdin and no `--input-format=yaml`, the command exits with `1` and
+      reports a clear parsing error.
+- [ ] Given `--input-format=json` or `--input-format=yaml` without
+      `--input-file=-`, the command still uses the existing default file lookup
+      behavior.
 - [ ] Given no `--output-format` option, command uses `human` output by
       default.
 - [ ] Given a human-readable validation failure for `entries[N]`, the output
