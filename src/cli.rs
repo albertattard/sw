@@ -76,7 +76,7 @@ pub struct ValidateArgs {
 
 #[derive(Debug, clap::Args)]
 #[command(
-    after_help = "The `Command` example includes current nested output fields such as `trim_empty_lines`, along with rewrite, capture, and cleanup examples."
+    after_help = "The `Command` example includes current nested output fields such as `trim_empty_lines`, along with rewrite, capture, and cleanup examples.\nUse `sw example DisplayFile` when you need the Java `collapse_method_body` transform for collapsing method bodies."
 )]
 pub struct ExampleArgs {
     /// Example topic such as `Command`, `DisplayFile`, or `rewrite.keep_between`.

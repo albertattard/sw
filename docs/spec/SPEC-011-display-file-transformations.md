@@ -4,7 +4,7 @@ title: DisplayFile Transformations
 status: proposed
 priority: medium
 owner: @aattard
-last_updated: 2026-03-16
+last_updated: 2026-03-22
 ---
 
 ## Problem
@@ -184,8 +184,9 @@ public void initialize(final int moduloDivisor) { /* Closed for brevity */ }
 - [ ] Validation rejects unknown transform operation types.
 - [ ] Given a named Java method that does not exist, rendering fails with a
       clear operational error.
-- [ ] Help and examples are updated when the first transform increment is
-      implemented.
+- [ ] Help, explain, and examples are updated when the first transform
+      increment is implemented so users and agents can discover
+      `collapse_method_body`.
 
 ## Notes for Reimplementation
 

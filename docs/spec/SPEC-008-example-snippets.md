@@ -51,6 +51,8 @@ In this increment, supported entity types include:
   type so users can remove what they do not need.
 - The `Command` example should reflect the current output contract, including
   supported output-cleanup fields such as `trim_empty_lines` when available.
+- The `DisplayFile` example should reflect the current transform contract,
+  including Java `collapse_method_body` when implemented.
 - Example output is documentation-oriented and does not need to be executable
   without further user editing.
 
@@ -62,6 +64,8 @@ In this increment, supported entity types include:
       `trim_empty_lines` output field.
 - [ ] Given `sw example DisplayFile`, the CLI prints a valid JSON example of a
       `DisplayFile` entry.
+- [ ] Given `sw example DisplayFile`, the example includes the implemented
+      Java `collapse_method_body` transform shape.
 - [ ] Given `sw example Patch`, the CLI prints a valid JSON example of a
       `Patch` entry that reflects the current automatic-restore contract.
 - [ ] Given `sw example command`, the CLI behaves the same as

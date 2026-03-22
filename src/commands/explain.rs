@@ -430,10 +430,12 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "Example output is documentation-oriented and may need editing before use.",
                 "Use `example` for JSON shape, not for command behavior or defaults.",
                 "The `Command` example includes current nested output fields such as `trim_empty_lines`.",
+                "The `DisplayFile` example includes the Java `collapse_method_body` transform for collapsing method bodies.",
                 "The printed snippet is intended to remain a stable starting point for users and agents.",
             ],
             next: &[
                 "Use this when the question is \"what JSON should I write?\"",
+                "Use `sw example DisplayFile` when you need the Java `collapse_method_body` transform shape.",
                 "Use `sw explain <topic>` when the question is about behavior, defaults, or command boundaries.",
                 "Use `sw help example` for exact invocation syntax.",
             ],

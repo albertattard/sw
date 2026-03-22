@@ -137,6 +137,8 @@ Expected task directories:
 - [TASK-073: Surface Runbook Output Field Discovery In Help](discovery/TASK-073-surface-runbook-output-field-discovery-in-help.md)
 - [TASK-074: Document Output Empty Line Trimming In Explain](explain/TASK-074-document-output-empty-line-trimming-in-explain.md)
 - [TASK-075: Make Output Empty Line Trimming Default](run/TASK-075-make-output-empty-line-trimming-default.md)
+- [TASK-076: Surface DisplayFile Transform Discovery In Help](discovery/TASK-076-surface-display-file-transform-discovery-in-help.md)
+- [TASK-077: Document DisplayFile Transform Discovery In Explain](explain/TASK-077-document-display-file-transform-discovery-in-explain.md)
 
 ## Pending
 
@@ -226,6 +228,8 @@ Expected task directories:
 - [x] [TASK-073: Surface Runbook Output Field Discovery In Help](discovery/TASK-073-surface-runbook-output-field-discovery-in-help.md)
 - [x] [TASK-074: Document Output Empty Line Trimming In Explain](explain/TASK-074-document-output-empty-line-trimming-in-explain.md)
 - [x] [TASK-075: Make Output Empty Line Trimming Default](run/TASK-075-make-output-empty-line-trimming-default.md)
+- [x] [TASK-076: Surface DisplayFile Transform Discovery In Help](discovery/TASK-076-surface-display-file-transform-discovery-in-help.md)
+- [x] [TASK-077: Document DisplayFile Transform Discovery In Explain](explain/TASK-077-document-display-file-transform-discovery-in-explain.md)
 
 ## Blocked
 

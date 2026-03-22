@@ -169,6 +169,9 @@ When `--output-format=skill` is selected:
       `sw example <topic>`.
 - [ ] Given `sw explain example`, the CLI makes it clear that the `Command`
       example includes current nested output fields such as `trim_empty_lines`.
+- [ ] Given `sw explain example`, the CLI makes it clear that the `DisplayFile`
+      example includes the Java `collapse_method_body` transform for
+      collapsing method bodies.
 - [ ] Given an agent choosing among `help`, `example`, and `explain`, the
       documented `explain` contract provides enough context to choose
       reliably.

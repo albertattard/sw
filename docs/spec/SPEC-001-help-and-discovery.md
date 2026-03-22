@@ -58,6 +58,8 @@ Exit codes:
 - [ ] `sw help run` documents the CLI flags for `run` and directs users to
       `sw example Command` and `sw explain run` for runbook-authored output
       fields such as `trim_empty_lines`.
+- [ ] `sw help example` makes it clear that `sw example DisplayFile` includes
+      the Java `collapse_method_body` transform for collapsing method bodies.
 - [ ] `sw help <subcommand>` with an unknown subcommand exits with `1` and reports a clear error.
 - [ ] `sw help --all` prints top-level help plus help for each known subcommand and exits with `0`.
 - [x] `sw [command] --help` is documented as the command-level help pattern.

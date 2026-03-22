@@ -146,6 +146,12 @@ fn explain_example_mentions_trim_empty_lines_in_command_example() {
     assert!(stdout.contains(
         "The `Command` example includes current nested output fields such as `trim_empty_lines`."
     ));
+    assert!(stdout.contains(
+        "The `DisplayFile` example includes the Java `collapse_method_body` transform for collapsing method bodies."
+    ));
+    assert!(stdout.contains(
+        "Use `sw example DisplayFile` when you need the Java `collapse_method_body` transform shape."
+    ));
 }
 
 #[test]
@@ -202,6 +208,9 @@ fn explain_skill_prints_skill_document_to_stdout() {
     ));
     assert!(stdout.contains(
         "The `Command` example includes current nested output fields such as `trim_empty_lines`."
+    ));
+    assert!(stdout.contains(
+        "The `DisplayFile` example includes the Java `collapse_method_body` transform for collapsing method bodies."
     ));
 }
 

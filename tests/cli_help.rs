@@ -89,6 +89,8 @@ fn example_help_prints_help() {
     assert!(stdout.contains("Example topic"));
     assert!(stdout.contains("trim_empty_lines"));
     assert!(stdout.contains("The `Command` example includes current nested output fields"));
+    assert!(stdout.contains("sw example DisplayFile"));
+    assert!(stdout.contains("collapse_method_body"));
 }
 
 #[test]
