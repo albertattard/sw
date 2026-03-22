@@ -393,7 +393,7 @@ in the runbook.
   the declared content type.
 - In this increment, supported `output.content_type` values are `text`, `json`,
   `xml`, and `java`.
-- If `output.trim_empty_lines` is omitted, the captured output keeps leading
+- If `output.trim_empty_lines` is omitted, the captured output trims leading
   and trailing empty lines.
 - `output.trim_empty_lines` accepts `leading_trailing`, `leading`, `trailing`,
   and `none`.
@@ -752,6 +752,8 @@ in the runbook.
 - [ ] Given a `Command` entry with `output.content_type: text`, the generated
       Markdown uses an unlabeled fenced block for captured output.
 - [ ] Given a `Command` entry with `output.trim_empty_lines: leading_trailing`,
+      leading and trailing empty lines are removed from rendered output.
+- [ ] Given a `Command` entry with `output` and no `trim_empty_lines`,
       leading and trailing empty lines are removed from rendered output.
 - [ ] Given a `Command` entry with `output.trim_empty_lines: leading`, only
       leading empty lines are removed from rendered output.

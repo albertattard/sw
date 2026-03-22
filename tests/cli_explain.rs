@@ -56,6 +56,9 @@ fn explain_run_prints_concise_contract_summary() {
     assert!(stdout.contains("Default input file lookup order is `./sw-runbook.json`, `./sw-runbook.yaml`, then `./sw-runbook.yml`."));
     assert!(stdout.contains("Default output file is `./README.md`."));
     assert!(stdout.contains(
+        "Command output trims leading and trailing empty lines by default unless `output.trim_empty_lines` overrides it."
+    ));
+    assert!(stdout.contains(
         "Use `sw check` first if the question is whether prerequisites such as Java are available."
     ));
     assert!(stdout.contains(

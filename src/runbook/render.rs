@@ -2464,7 +2464,8 @@ fn trim_empty_lines(output: &Value) -> Result<EmptyLineTrimMode, RenderError> {
         Some("leading_trailing") => Ok(EmptyLineTrimMode::LeadingTrailing),
         Some("leading") => Ok(EmptyLineTrimMode::Leading),
         Some("trailing") => Ok(EmptyLineTrimMode::Trailing),
-        Some("none") | None => Ok(EmptyLineTrimMode::None),
+        Some("none") => Ok(EmptyLineTrimMode::None),
+        None => Ok(EmptyLineTrimMode::LeadingTrailing),
         Some(_) => Err(RenderError::Operational(
             "Command output trim_empty_lines must be one of `leading_trailing`, `leading`, `trailing`, or `none`".to_string(),
         )),

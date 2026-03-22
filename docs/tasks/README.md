@@ -136,6 +136,7 @@ Expected task directories:
 - [TASK-072: Support Output Empty Line Trimming](run/TASK-072-support-output-empty-line-trimming.md)
 - [TASK-073: Surface Runbook Output Field Discovery In Help](discovery/TASK-073-surface-runbook-output-field-discovery-in-help.md)
 - [TASK-074: Document Output Empty Line Trimming In Explain](explain/TASK-074-document-output-empty-line-trimming-in-explain.md)
+- [TASK-075: Make Output Empty Line Trimming Default](run/TASK-075-make-output-empty-line-trimming-default.md)
 
 ## Pending
 
@@ -224,6 +225,7 @@ Expected task directories:
 - [x] [TASK-072: Support Output Empty Line Trimming](run/TASK-072-support-output-empty-line-trimming.md)
 - [x] [TASK-073: Surface Runbook Output Field Discovery In Help](discovery/TASK-073-surface-runbook-output-field-discovery-in-help.md)
 - [x] [TASK-074: Document Output Empty Line Trimming In Explain](explain/TASK-074-document-output-empty-line-trimming-in-explain.md)
+- [x] [TASK-075: Make Output Empty Line Trimming Default](run/TASK-075-make-output-empty-line-trimming-default.md)
 
 ## Blocked
 

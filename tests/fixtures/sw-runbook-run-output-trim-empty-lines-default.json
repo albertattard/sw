@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf '\\n  \\nalpha\\n\\nbeta\\n \\n\\n'"
+      ],
+      "output": {
+        "caption": "Trimmed output"
+      }
+    }
+  ]
+}

@@ -1052,6 +1052,22 @@ fn output_trim_empty_lines_leading_trailing_removes_outer_blank_lines() {
 }
 
 #[test]
+fn output_trim_empty_lines_defaults_to_leading_trailing() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-output-trim-empty-lines-default.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```\nalpha\n\nbeta\n```"));
+}
+
+#[test]
 fn output_trim_empty_lines_leading_removes_only_leading_blank_lines() {
     let dir = prepare_workspace();
     write_runbook(

@@ -280,6 +280,7 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "Default input file lookup order is `./sw-runbook.json`, `./sw-runbook.yaml`, then `./sw-runbook.yml`.",
                 "Default output format is `markdown`.",
                 "Default output file is `./README.md`.",
+                "Command output trims leading and trailing empty lines by default unless `output.trim_empty_lines` overrides it.",
             ],
             inputs: &[
                 "`sw run --input-file <runbook.{json|yaml|yml}>`",
