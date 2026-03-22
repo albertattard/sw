@@ -48,6 +48,17 @@ struct RewriteResult {
     debug_lines: Vec<String>,
 }
 
+enum RenderSection {
+    Ready(String),
+    DeferredMarkdown(Vec<String>),
+}
+
+#[derive(Clone, Copy)]
+enum MissingCaptureBehavior {
+    Error,
+    Preserve,
+}
+
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum EmptyLineTrimMode {
     LeadingTrailing,
@@ -100,17 +111,17 @@ pub(crate) fn render_markdown(
         let progress_line = progress.start_entry(index, entry, runbook_path);
 
         let rendered = match entry_type {
-            "Heading" => render_heading(entry)?,
-            "Markdown" => render_markdown_entry(entry, &state.captured_values)?,
-            "DisplayFile" => render_display_file(entry, runbook_path)?,
-            "Prerequisite" => render_prerequisite_entry(entry)?,
+            "Heading" => RenderSection::Ready(render_heading(entry)?),
+            "Markdown" => RenderSection::DeferredMarkdown(markdown_lines(entry)?),
+            "DisplayFile" => RenderSection::Ready(render_display_file(entry, runbook_path)?),
+            "Prerequisite" => RenderSection::Ready(render_prerequisite_entry(entry)?),
             "Patch" => match render_patch(
                 entry,
                 runbook_path,
                 &mut patch_restore_stack,
                 &mut patch_snapshots,
             ) {
-                Ok(section) => section,
+                Ok(section) => RenderSection::Ready(section),
                 Err(err) => {
                     progress.finish_entry(progress_line);
                     failure = Some(err);
@@ -123,13 +134,13 @@ pub(crate) fn render_markdown(
                 }
 
                 match render_command(entry, &mut state) {
-                    Ok(section) => section,
+                    Ok(section) => RenderSection::Ready(section),
                     Err(RenderError::Timeout {
                         message,
                         partial_markdown,
                     }) => {
                         progress.finish_entry(progress_line);
-                        sections.push(partial_markdown);
+                        sections.push(RenderSection::Ready(partial_markdown));
                         failure = Some(RenderError::Timeout {
                             message,
                             partial_markdown: String::new(),
@@ -154,10 +165,12 @@ pub(crate) fn render_markdown(
         sections.push(rendered);
     }
 
+    let rendered_sections = render_sections(&sections, &state.captured_values, failure.is_none())?;
+
     let mut output = GENERATED_MARKER.to_string();
-    if !sections.is_empty() {
+    if !rendered_sections.is_empty() {
         output.push_str("\n\n");
-        output.push_str(&sections.join("\n\n"));
+        output.push_str(&rendered_sections.join("\n\n"));
     }
     if !output.ends_with('\n') {
         output.push('\n');
@@ -1038,10 +1051,7 @@ fn render_heading(entry: &Value) -> Result<String, RenderError> {
     Ok(format!("{marker} {title}"))
 }
 
-fn render_markdown_entry(
-    entry: &Value,
-    captured_values: &HashMap<String, String>,
-) -> Result<String, RenderError> {
+fn markdown_lines(entry: &Value) -> Result<Vec<String>, RenderError> {
     let contents = entry
         .get("contents")
         .and_then(Value::as_array)
@@ -1062,7 +1072,50 @@ fn render_markdown_entry(
         );
     }
 
-    interpolate_command_lines(&lines, captured_values).map(|lines| lines.join("\n"))
+    Ok(lines)
+}
+
+fn render_sections(
+    sections: &[RenderSection],
+    captured_values: &HashMap<String, String>,
+    strict_markdown: bool,
+) -> Result<Vec<String>, RenderError> {
+    let missing_behavior = if strict_markdown {
+        MissingCaptureBehavior::Error
+    } else {
+        MissingCaptureBehavior::Preserve
+    };
+
+    sections
+        .iter()
+        .map(|section| match section {
+            RenderSection::Ready(rendered) => Ok(rendered.clone()),
+            RenderSection::DeferredMarkdown(lines) => {
+                render_markdown_lines(lines, captured_values, missing_behavior)
+            }
+        })
+        .collect()
+}
+
+fn render_markdown_lines(
+    lines: &[String],
+    captured_values: &HashMap<String, String>,
+    missing_behavior: MissingCaptureBehavior,
+) -> Result<String, RenderError> {
+    interpolate_lines(lines, captured_values, "Markdown", missing_behavior)
+        .map(|lines| lines.join("\n"))
+}
+
+fn interpolate_command_lines(
+    command_lines: &[String],
+    captured_values: &HashMap<String, String>,
+) -> Result<Vec<String>, RenderError> {
+    interpolate_lines(
+        command_lines,
+        captured_values,
+        "Command",
+        MissingCaptureBehavior::Error,
+    )
 }
 
 fn render_patch(
@@ -1742,27 +1795,30 @@ fn extract_captured_values(
     Ok(())
 }
 
-fn interpolate_command_lines(
-    command_lines: &[String],
+fn interpolate_lines(
+    lines: &[String],
     captured_values: &HashMap<String, String>,
+    context: &str,
+    missing_behavior: MissingCaptureBehavior,
 ) -> Result<Vec<String>, RenderError> {
-    command_lines
+    lines
         .iter()
-        .map(|line| interpolate_captured_variables(line, captured_values))
+        .map(|line| {
+            interpolate_captured_variables_with_context(
+                line,
+                captured_values,
+                context,
+                missing_behavior,
+            )
+        })
         .collect()
-}
-
-fn interpolate_captured_variables(
-    input: &str,
-    captured_values: &HashMap<String, String>,
-) -> Result<String, RenderError> {
-    interpolate_captured_variables_with_context(input, captured_values, "Command")
 }
 
 fn interpolate_captured_variables_with_context(
     input: &str,
     captured_values: &HashMap<String, String>,
     context: &str,
+    missing_behavior: MissingCaptureBehavior,
 ) -> Result<String, RenderError> {
     let regex =
         Regex::new(CAPTURE_INTERPOLATION_PATTERN).expect("valid capture interpolation regex");
@@ -1776,13 +1832,19 @@ fn interpolate_captured_variables_with_context(
         if let Some(escaped_name) = captures.get(1) {
             output.push_str(&format!("@{{{}}}", escaped_name.as_str()));
         } else if let Some(name) = captures.get(2) {
-            let value = captured_values.get(name.as_str()).ok_or_else(|| {
-                RenderError::CommandFailed(format!(
-                    "{context} references unknown captured variable `@{{{}}}`",
-                    name.as_str(),
-                ))
-            })?;
-            output.push_str(value);
+            if let Some(value) = captured_values.get(name.as_str()) {
+                output.push_str(value);
+            } else {
+                match missing_behavior {
+                    MissingCaptureBehavior::Error => {
+                        return Err(RenderError::CommandFailed(format!(
+                            "{context} references unknown captured variable `@{{{}}}`",
+                            name.as_str(),
+                        )));
+                    }
+                    MissingCaptureBehavior::Preserve => output.push_str(matched.as_str()),
+                }
+            }
         }
 
         last_end = matched.end();
@@ -1836,6 +1898,7 @@ fn apply_replace_rule(
         pattern,
         captured_values,
         "Command output rewrite pattern",
+        MissingCaptureBehavior::Error,
     )?;
     let replacement = rule
         .get("replacement")
@@ -1849,6 +1912,7 @@ fn apply_replace_rule(
         replacement,
         captured_values,
         "Command output rewrite replacement",
+        MissingCaptureBehavior::Error,
     )?;
     let regex = Regex::new(pattern.as_str()).map_err(|err| {
         RenderError::Operational(format!("Invalid output rewrite pattern `{pattern}`: {err}"))

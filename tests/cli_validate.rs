@@ -920,7 +920,22 @@ fn invalid_rewrite_generated_capture_collision_returns_validation_failure() {
 }
 
 #[test]
-fn invalid_markdown_forward_reference_returns_validation_failure() {
+fn markdown_later_capture_reference_returns_validation_success() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-run-markdown-interpolation-later-capture.json",
+        "--output-format",
+        "json",
+    ]);
+
+    assert_eq!(output.status.code(), Some(0));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": true"));
+}
+
+#[test]
+fn invalid_markdown_reference_without_capture_returns_validation_failure() {
     let output = run(&[
         "validate",
         "--input-file",

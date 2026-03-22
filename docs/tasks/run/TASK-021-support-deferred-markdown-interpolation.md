@@ -1,13 +1,13 @@
 ---
 id: TASK-021
 title: Support Deferred Markdown Interpolation
-status: pending
+status: done
 category: run
 related_features:
   - SPEC-003
 owner: @aattard
 created: 2026-03-12
-updated: 2026-03-12
+updated: 2026-03-22
 ---
 
 ## Summary
@@ -32,14 +32,14 @@ variables are only captured later in the runbook.
 
 ## Acceptance Criteria
 
-- [ ] Given a `Markdown` entry that uses `@{name}` before a later command
+- [x] Given a `Markdown` entry that uses `@{name}` before a later command
       captures that variable, the rendered Markdown includes the captured
       value.
-- [ ] Given `@@{name}` in a `Markdown` entry, the literal `@{name}` is
+- [x] Given `@@{name}` in a `Markdown` entry, the literal `@{name}` is
       preserved.
-- [ ] Given a `Markdown` interpolation reference that is never captured
+- [x] Given a `Markdown` interpolation reference that is never captured
       anywhere in the runbook, the run fails.
-- [ ] Given a command that references `@{name}` before it is captured, that
+- [x] Given a command that references `@{name}` before it is captured, that
       command reference remains invalid.
 
 ## Notes

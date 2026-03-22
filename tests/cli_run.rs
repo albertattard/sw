@@ -1581,6 +1581,23 @@ fn markdown_interpolates_earlier_captured_values_and_preserves_escaped_literals(
 }
 
 #[test]
+fn markdown_interpolates_later_captured_values() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-markdown-interpolation-later-capture.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("Captured file: `audio_20770427_123500.mp3`"));
+    assert!(readme.contains("Literal example: `@{audio_file_1}`"));
+}
+
+#[test]
 fn xml_output_content_type_uses_xml_fenced_block() {
     let dir = prepare_workspace();
     write_runbook(&dir, "sw-runbook-run-output-xml.json", "sw-runbook.json");

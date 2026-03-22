@@ -139,7 +139,6 @@ Expected task directories:
 
 ## Pending
 
-- [ ] [TASK-021: Support Deferred Markdown Interpolation](run/TASK-021-support-deferred-markdown-interpolation.md)
 - [ ] [TASK-028: Implement Init Command](init/TASK-028-implement-init-command.md)
 - [ ] [TASK-033: Implement Import Command](import/TASK-033-implement-import-command.md)
 - [ ] [TASK-038: Include Release Commit History In README](release/TASK-038-include-release-commit-history-in-readme.md)
@@ -154,6 +153,7 @@ Expected task directories:
 - [x] Define `SPEC-001` in `docs/spec/` (help and discovery).
 - [x] Define `SPEC-002` in `docs/spec/` (validate runbook input).
 - [x] Define `SPEC-003` in `docs/spec/` (run runbook to markdown).
+- [x] [TASK-021: Support Deferred Markdown Interpolation](run/TASK-021-support-deferred-markdown-interpolation.md)
 - [x] [TASK-001: Implement SPEC-001 Help Placeholder](discovery/TASK-001-implement-help-placeholder.md)
 - [x] [TASK-056: Warn About Background Commands Holding Command Pipes Open](validate/TASK-056-warn-about-background-commands-holding-command-pipes-open.md)
 - [x] [TASK-002: Implement SPEC-002 Validate Command](validate/TASK-002-implement-validate-command.md)

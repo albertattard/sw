@@ -5,20 +5,6 @@
       "contents": [
         "Captured file: `@{audio_file_1}`"
       ]
-    },
-    {
-      "type": "Command",
-      "commands": [
-        "printf 'audio_20770427_123500.mp3\\n'"
-      ],
-      "capture": [
-        {
-          "name": "audio_file_1",
-          "source": "stdout",
-          "stage": "raw",
-          "pattern": "(audio_\\d{8}_\\d{6}\\.mp3)"
-        }
-      ]
     }
   ]
 }

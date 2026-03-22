@@ -851,7 +851,7 @@ fn validate_entry(
                     contents,
                     &format!("{path}.contents"),
                     &mut context.errors,
-                    &context.available_capture_names,
+                    &context.all_capture_names,
                 );
             }
             None => push_error(
@@ -1106,7 +1106,36 @@ struct ValidationContext {
     warnings: Vec<ValidationIssue>,
     global_datetime_anchor_ids: HashSet<String>,
     global_capture_names: HashSet<String>,
+    all_capture_names: HashSet<String>,
     available_capture_names: HashSet<String>,
+}
+
+fn collect_all_capture_names(entries: &[Value]) -> HashSet<String> {
+    let mut capture_names = HashSet::new();
+
+    for entry in entries {
+        let Some(object) = entry.as_object() else {
+            continue;
+        };
+
+        if object.get("type").and_then(Value::as_str) != Some("Command") {
+            continue;
+        }
+
+        if let Some(output) = object.get("output") {
+            register_rewrite_generated_capture_names(output, &mut capture_names);
+        }
+
+        if let Some(capture_rules) = object.get("capture").and_then(Value::as_array) {
+            for rule in capture_rules {
+                if let Some(name) = rule.get("name").and_then(Value::as_str) {
+                    capture_names.insert(name.to_string());
+                }
+            }
+        }
+    }
+
+    capture_names
 }
 
 fn validate_prerequisite_checks(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>) {
@@ -1300,6 +1329,7 @@ pub fn validate(runbook: &Value, runbook_path: &Path) -> ValidationResult {
         warnings: Vec::new(),
         global_datetime_anchor_ids: HashSet::new(),
         global_capture_names: HashSet::new(),
+        all_capture_names: HashSet::new(),
         available_capture_names: HashSet::new(),
     };
 
@@ -1328,6 +1358,8 @@ pub fn validate(runbook: &Value, runbook_path: &Path) -> ValidationResult {
                 if items.is_empty() {
                     push_error(&mut context.errors, "$.entries", "must not be empty");
                 }
+
+                context.all_capture_names = collect_all_capture_names(items);
 
                 for (index, entry) in items.iter().enumerate() {
                     validate_entry(entry, index, runbook_path, &mut context);
