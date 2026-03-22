@@ -133,6 +133,7 @@ Expected task directories:
 - [TASK-069: Support YAML Runbook Input](run/TASK-069-support-yaml-runbook-input.md)
 - [TASK-070: Support Java Command Output Content Type](run/TASK-070-support-java-command-output-content-type.md)
 - [TASK-071: Prefer Datetime Shift Guidance In Explain](explain/TASK-071-prefer-datetime-shift-guidance-in-explain.md)
+- [TASK-072: Support Output Empty Line Trimming](run/TASK-072-support-output-empty-line-trimming.md)
 
 ## Pending
 
@@ -218,6 +219,7 @@ Expected task directories:
 - [x] [TASK-069: Support YAML Runbook Input](run/TASK-069-support-yaml-runbook-input.md)
 - [x] [TASK-070: Support Java Command Output Content Type](run/TASK-070-support-java-command-output-content-type.md)
 - [x] [TASK-071: Prefer Datetime Shift Guidance In Explain](explain/TASK-071-prefer-datetime-shift-guidance-in-explain.md)
+- [x] [TASK-072: Support Output Empty Line Trimming](run/TASK-072-support-output-empty-line-trimming.md)
 
 ## Blocked
 

@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "echo 'hello'"
+      ],
+      "output": {
+        "trim_empty_lines": "LEADING_TRAILING"
+      }
+    }
+  ]
+}

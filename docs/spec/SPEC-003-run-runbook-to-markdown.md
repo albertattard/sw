@@ -4,7 +4,7 @@ title: Run Runbook to Markdown
 status: in_progress
 priority: high
 owner: @aattard
-last_updated: 2026-03-18
+last_updated: 2026-03-22
 ---
 
 ## Problem
@@ -382,6 +382,7 @@ in the runbook.
 - If `output.caption` is present, render that caption before the captured
   command output.
 - `output` may declare `content_type`.
+- `output` may declare `trim_empty_lines`.
 - `output` may declare `trim_trailing_whitespace`.
 - `output` may declare `rewrite`.
 - If `output.content_type` is omitted, captured command output is rendered as
@@ -392,6 +393,15 @@ in the runbook.
   the declared content type.
 - In this increment, supported `output.content_type` values are `text`, `json`,
   `xml`, and `java`.
+- If `output.trim_empty_lines` is omitted, the captured output keeps leading
+  and trailing empty lines.
+- `output.trim_empty_lines` accepts `leading_trailing`, `leading`, `trailing`,
+  and `none`.
+- `output.trim_empty_lines` trims only leading and/or trailing empty lines; it
+  does not remove empty lines inside the kept output.
+- For `trim_empty_lines`, an empty line is a line that contains only
+  whitespace.
+- `trim_empty_lines` is applied after `output.rewrite`.
 - If `output.trim_trailing_whitespace` is omitted, trailing whitespace is
   removed from the end of each rendered output line.
 - `output.trim_trailing_whitespace` affects only trailing whitespace, not
@@ -741,6 +751,14 @@ in the runbook.
       generated Markdown uses an unlabeled fenced block for captured output.
 - [ ] Given a `Command` entry with `output.content_type: text`, the generated
       Markdown uses an unlabeled fenced block for captured output.
+- [ ] Given a `Command` entry with `output.trim_empty_lines: leading_trailing`,
+      leading and trailing empty lines are removed from rendered output.
+- [ ] Given a `Command` entry with `output.trim_empty_lines: leading`, only
+      leading empty lines are removed from rendered output.
+- [ ] Given a `Command` entry with `output.trim_empty_lines: trailing`, only
+      trailing empty lines are removed from rendered output.
+- [ ] Given a `Command` entry with `output.trim_empty_lines: none`, leading and
+      trailing empty lines are preserved in rendered output.
 - [ ] Given a `Command` entry with `output` and no
       `trim_trailing_whitespace`, trailing whitespace is removed from the end
       of each rendered output line.

@@ -23,6 +23,7 @@ fn command_example_prints_valid_json_entry() {
     assert_eq!(value["type"], "Command");
     assert!(value["commands"].is_array());
     assert!(value["assert"].is_object());
+    assert_eq!(value["output"]["trim_empty_lines"], "leading_trailing");
     assert!(value["output"]["rewrite"].is_array());
     assert!(
         value["output"]["rewrite"]
@@ -31,6 +32,7 @@ fn command_example_prints_valid_json_entry() {
             .iter()
             .any(|rule| rule["custom_format"] == "%H:%M:%S%.3f")
     );
+    assert_eq!(value["output"]["trim_trailing_whitespace"], true);
     assert!(value["capture"].is_array());
     assert!(value["cleanup"].is_array());
 }

@@ -393,6 +393,23 @@ fn invalid_output_trim_trailing_whitespace_returns_validation_failure() {
 }
 
 #[test]
+fn invalid_output_trim_empty_lines_returns_validation_failure() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-invalid-output-trim-empty-lines.json",
+        "--output-format",
+        "json",
+    ]);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": false"));
+    assert!(stdout.contains("\"path\": \"entries[0].output.trim_empty_lines\""));
+    assert!(stdout.contains("must be one of `leading_trailing`, `leading`, `trailing`, or `none`"));
+}
+
+#[test]
 fn invalid_output_rewrite_returns_validation_failure() {
     let output = run(&[
         "validate",

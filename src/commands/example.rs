@@ -33,6 +33,7 @@ fn example_for_topic(topic: &str) -> Option<&'static str> {
   "output": {
     "caption": "Command output",
     "content_type": "text",
+    "trim_empty_lines": "leading_trailing",
     "trim_trailing_whitespace": true,
     "rewrite": [
       {

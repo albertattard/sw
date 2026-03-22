@@ -117,6 +117,7 @@ fn validate_output_with_context(
     for key in object.keys() {
         if key != "caption"
             && key != "content_type"
+            && key != "trim_empty_lines"
             && key != "trim_trailing_whitespace"
             && key != "rewrite"
         {
@@ -147,6 +148,16 @@ fn validate_output_with_context(
             errors,
             format!("{path}.content_type"),
             "must be one of `text`, `json`, `xml`, or `java`",
+        ),
+        None => {}
+    }
+
+    match object.get("trim_empty_lines").and_then(Value::as_str) {
+        Some("leading_trailing" | "leading" | "trailing" | "none") => {}
+        Some(_) => push_error(
+            errors,
+            format!("{path}.trim_empty_lines"),
+            "must be one of `leading_trailing`, `leading`, `trailing`, or `none`",
         ),
         None => {}
     }

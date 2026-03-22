@@ -48,6 +48,14 @@ struct RewriteResult {
     debug_lines: Vec<String>,
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum EmptyLineTrimMode {
+    LeadingTrailing,
+    Leading,
+    Trailing,
+    None,
+}
+
 fn emit_debug_lines(enabled: bool, lines: &[String]) {
     if !enabled {
         return;
@@ -1547,21 +1555,19 @@ fn normalize_rendered_output(
 ) -> Result<RewriteResult, RenderError> {
     let rewrite_result =
         apply_rewrite_rules(entry, output, execution, datetime_anchors, captured_values)?;
-    let rewritten = rewrite_result.rendered;
+    let mut rendered = rewrite_result.rendered;
 
-    if !trim_trailing_whitespace(output)? {
-        return Ok(RewriteResult {
-            rendered: rewritten,
-            generated_captures: rewrite_result.generated_captures,
-            debug_lines: rewrite_result.debug_lines,
-        });
-    }
-
-    Ok(RewriteResult {
-        rendered: rewritten
+    if trim_trailing_whitespace(output)? {
+        rendered = rendered
             .split_inclusive('\n')
             .map(trim_segment_trailing_whitespace)
-            .collect(),
+            .collect();
+    }
+
+    rendered = trim_outer_empty_lines(rendered, trim_empty_lines(output)?);
+
+    Ok(RewriteResult {
+        rendered,
         generated_captures: rewrite_result.generated_captures,
         debug_lines: rewrite_result.debug_lines,
     })
@@ -2387,6 +2393,48 @@ fn trim_trailing_whitespace(output: &Value) -> Result<bool, RenderError> {
         )),
         None => Ok(true),
     }
+}
+
+fn trim_empty_lines(output: &Value) -> Result<EmptyLineTrimMode, RenderError> {
+    match output.get("trim_empty_lines").and_then(Value::as_str) {
+        Some("leading_trailing") => Ok(EmptyLineTrimMode::LeadingTrailing),
+        Some("leading") => Ok(EmptyLineTrimMode::Leading),
+        Some("trailing") => Ok(EmptyLineTrimMode::Trailing),
+        Some("none") | None => Ok(EmptyLineTrimMode::None),
+        Some(_) => Err(RenderError::Operational(
+            "Command output trim_empty_lines must be one of `leading_trailing`, `leading`, `trailing`, or `none`".to_string(),
+        )),
+    }
+}
+
+fn trim_outer_empty_lines(rendered: String, mode: EmptyLineTrimMode) -> String {
+    if mode == EmptyLineTrimMode::None || rendered.is_empty() {
+        return rendered;
+    }
+
+    let segments: Vec<&str> = rendered.split_inclusive('\n').collect();
+    let Some(first_non_empty) = segments.iter().position(|segment| !is_empty_line(segment)) else {
+        return String::new();
+    };
+    let Some(last_non_empty) = segments.iter().rposition(|segment| !is_empty_line(segment)) else {
+        return String::new();
+    };
+
+    let start = match mode {
+        EmptyLineTrimMode::LeadingTrailing | EmptyLineTrimMode::Leading => first_non_empty,
+        EmptyLineTrimMode::Trailing | EmptyLineTrimMode::None => 0,
+    };
+    let end = match mode {
+        EmptyLineTrimMode::LeadingTrailing | EmptyLineTrimMode::Trailing => last_non_empty + 1,
+        EmptyLineTrimMode::Leading | EmptyLineTrimMode::None => segments.len(),
+    };
+
+    segments[start..end].concat()
+}
+
+fn is_empty_line(segment: &str) -> bool {
+    let body = segment.strip_suffix('\n').unwrap_or(segment);
+    body.trim().is_empty()
 }
 
 fn trim_segment_trailing_whitespace(segment: &str) -> String {
