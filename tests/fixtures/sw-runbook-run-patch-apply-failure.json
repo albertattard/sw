@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "type": "Patch",
+      "path": "./demo.txt",
+      "patch": [
+        "@@ -1 +1 @@",
+        "-before",
+        "+after"
+      ]
+    }
+  ]
+}

@@ -141,6 +141,7 @@ Expected task directories:
 - [TASK-077: Document DisplayFile Transform Discovery In Explain](explain/TASK-077-document-display-file-transform-discovery-in-explain.md)
 - [TASK-078: Support Stdin Runbook Input](run/TASK-078-support-stdin-runbook-input.md)
 - [TASK-079: Support Command Output Stream Selection](run/TASK-079-support-command-output-stream-selection.md)
+- [TASK-080: Make Patch Application Non-Interactive](run/TASK-080-make-patch-application-non-interactive.md)
 
 ## Pending
 
@@ -234,6 +235,7 @@ Expected task directories:
 - [x] [TASK-077: Document DisplayFile Transform Discovery In Explain](explain/TASK-077-document-display-file-transform-discovery-in-explain.md)
 - [x] [TASK-078: Support Stdin Runbook Input](run/TASK-078-support-stdin-runbook-input.md)
 - [x] [TASK-079: Support Command Output Stream Selection](run/TASK-079-support-command-output-stream-selection.md)
+- [x] [TASK-080: Make Patch Application Non-Interactive](run/TASK-080-make-patch-application-non-interactive.md)
 
 ## Blocked
 

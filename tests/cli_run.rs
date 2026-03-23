@@ -439,6 +439,32 @@ fn patch_entry_restores_file_after_timeout() {
 }
 
 #[test]
+fn patch_entry_failure_is_non_interactive_and_leaves_no_sidecar_files() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-patch-apply-failure.json",
+        "sw-runbook.json",
+    );
+    write_text_file(&dir, "demo.txt", "after\n");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert_eq!(output.status.code(), Some(1));
+    assert!(!dir.join("README.md").exists());
+    assert_eq!(
+        fs::read_to_string(dir.join("demo.txt")).expect("missing target file"),
+        "after\n"
+    );
+    assert!(!dir.join("demo.txt.orig").exists());
+    assert!(!dir.join("demo.txt.rej").exists());
+
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("Failed to apply patch for ./demo.txt"));
+    assert!(stderr.contains("hunks failed"));
+}
+
+#[test]
 fn multiline_command_lines_share_the_same_shell_context() {
     let dir = prepare_workspace();
     write_runbook(&dir, "sw-runbook-run-multiline.json", "sw-runbook.json");

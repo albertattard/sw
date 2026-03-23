@@ -285,6 +285,11 @@ in the runbook.
 - `Patch` entries default to `restore: auto`.
 - `restore: auto` snapshots the original target file contents before the first
   patch touching that file is applied in a run.
+- Patch application is non-interactive.
+- If a patch cannot be applied cleanly, the run fails instead of waiting for
+  interactive input from the patch tool.
+- Patch application failures must not leave `.orig` or `.rej` sidecar files
+  behind in the working tree.
 - `restore: auto` restores the original pre-run contents after the run
   completes successfully and also when the run stops early because of failure
   or timeout.
@@ -658,6 +663,11 @@ in the runbook.
       original pre-run state.
 - [ ] Given a failure while restoring one patched file, later registered patch
       restores still run.
+- [ ] Given a `Patch` entry that cannot be applied cleanly, the run fails
+      without waiting for interactive input from the patch tool.
+- [ ] Given a `Patch` entry that cannot be applied cleanly, the target file
+      remains unchanged and no `.orig` or `.rej` sidecar files are left
+      behind.
 
 ### Command Execution
 
