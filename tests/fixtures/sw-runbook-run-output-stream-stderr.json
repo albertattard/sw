@@ -1,0 +1,15 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'stdout only\\n'",
+        "printf 'stderr only\\n' >&2"
+      ],
+      "output": {
+        "caption": "Stream output",
+        "stream": "stderr"
+      }
+    }
+  ]
+}

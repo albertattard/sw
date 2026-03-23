@@ -61,6 +61,12 @@ fn explain_run_prints_concise_contract_summary() {
     assert!(stdout.contains(
         "Command output trims leading and trailing empty lines by default unless `output.trim_empty_lines` overrides it."
     ));
+    assert!(stdout.contains(
+        "Command output can render `stdout`, `stderr`, or `combined` with `output.stream`; if omitted, rendered output defaults to `stdout`."
+    ));
+    assert!(stdout.contains(
+        "`output.stream` changes rendered output only and does not widen capture or assertion sources."
+    ));
     assert!(
         stdout.contains(
             "`sw --input-file=-` or `sw run --input-file=-` for stdin-backed JSON runbooks"
@@ -87,7 +93,7 @@ fn explain_run_prints_concise_contract_summary() {
         "Command output can trim outer empty lines with `output.trim_empty_lines` using `leading_trailing`, `leading`, `trailing`, or `none`."
     ));
     assert!(stdout.contains(
-        "Use `sw example Command` when you need the current JSON shape for output fields such as `trim_empty_lines`."
+        "Use `sw example Command` when you need the current JSON shape for output fields such as `trim_empty_lines` and `stream`."
     ));
 }
 
@@ -178,7 +184,7 @@ fn explain_example_mentions_trim_empty_lines_in_command_example() {
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains(
-        "The `Command` example includes current nested output fields such as `trim_empty_lines`."
+        "The `Command` example includes current nested output fields such as `trim_empty_lines` and `stream`."
     ));
     assert!(stdout.contains(
         "The `DisplayFile` example includes the Java `collapse_method_body` transform for collapsing method bodies."
@@ -236,6 +242,12 @@ fn explain_skill_prints_skill_document_to_stdout() {
     ));
     assert!(stdout.contains("`--input-file=-` reads the runbook from stdin."));
     assert!(stdout.contains(
+        "Command output can render `stdout`, `stderr`, or `combined` with `output.stream`; if omitted, rendered output defaults to `stdout`."
+    ));
+    assert!(stdout.contains(
+        "`output.stream` changes rendered output only and does not widen capture or assertion sources."
+    ));
+    assert!(stdout.contains(
         "Prefer `output.rewrite` with `type: datetime_shift` over `replace` for semantic dates and times so relative timing stays intact."
     ));
     assert!(stdout.contains(
@@ -245,7 +257,7 @@ fn explain_skill_prints_skill_document_to_stdout() {
         "Command output can trim outer empty lines with `output.trim_empty_lines` using `leading_trailing`, `leading`, `trailing`, or `none`."
     ));
     assert!(stdout.contains(
-        "The `Command` example includes current nested output fields such as `trim_empty_lines`."
+        "The `Command` example includes current nested output fields such as `trim_empty_lines` and `stream`."
     ));
     assert!(stdout.contains(
         "The `DisplayFile` example includes the Java `collapse_method_body` transform for collapsing method bodies."

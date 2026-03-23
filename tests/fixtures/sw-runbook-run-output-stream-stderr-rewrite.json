@@ -1,0 +1,22 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'stdout should stay hidden\\n'",
+        "printf 'level=warn\\n' >&2"
+      ],
+      "output": {
+        "caption": "Rewritten stream output",
+        "stream": "stderr",
+        "rewrite": [
+          {
+            "type": "replace",
+            "pattern": "warn",
+            "replacement": "info"
+          }
+        ]
+      }
+    }
+  ]
+}

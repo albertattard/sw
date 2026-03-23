@@ -116,6 +116,7 @@ fn validate_output_with_context(
 
     for key in object.keys() {
         if key != "caption"
+            && key != "stream"
             && key != "content_type"
             && key != "trim_empty_lines"
             && key != "trim_trailing_whitespace"
@@ -138,6 +139,16 @@ fn validate_output_with_context(
             errors,
             format!("{path}.caption"),
             "must be a string or array of strings",
+        ),
+        None => {}
+    }
+
+    match object.get("stream").and_then(Value::as_str) {
+        Some("stdout" | "stderr" | "combined") => {}
+        Some(_) => push_error(
+            errors,
+            format!("{path}.stream"),
+            "must be one of `stdout`, `stderr`, or `combined`",
         ),
         None => {}
     }

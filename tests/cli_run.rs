@@ -1210,6 +1210,108 @@ fn output_trim_empty_lines_none_preserves_outer_blank_lines() {
 }
 
 #[test]
+fn output_stream_defaults_to_stdout() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-output-stream-default.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("Stream output\n\n```\nstdout only\n```"));
+    assert!(!readme.contains("Stream output\n\n```\nstderr only\n```"));
+}
+
+#[test]
+fn output_stream_stderr_renders_only_stderr() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-output-stream-stderr.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("Stream output\n\n```\nstderr only\n```"));
+    assert!(!readme.contains("Stream output\n\n```\nstdout only\n```"));
+}
+
+#[test]
+fn output_stream_combined_renders_stdout_then_stderr() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-output-stream-combined.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```\nstdout line\nstderr line\n```"));
+}
+
+#[test]
+fn output_stream_stderr_applies_rewrites_to_selected_stream() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-output-stream-stderr-rewrite.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("Rewritten stream output\n\n```\nlevel=info\n```"));
+    assert!(!readme.contains("Rewritten stream output\n\n```\nlevel=warn\n```"));
+    assert!(!readme.contains("Rewritten stream output\n\n```\nstdout should stay hidden\n```"));
+}
+
+#[test]
+fn output_stream_combined_applies_trimming_after_stream_selection() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-output-stream-combined-trim.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```\nalpha\n\nbeta\n```"));
+}
+
+#[test]
+fn output_stream_does_not_change_stdout_capture_or_assertions() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-output-stream-capture-stdout.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("Rendered stderr\n\n```\nvisible stderr\n```"));
+    assert!(readme.contains("Captured token\n\n```\ncaptured=stdout-value\n```"));
+    assert!(!readme.contains("Rendered stderr\n\n```\ntoken=stdout-value\n```"));
+}
+
+#[test]
 fn output_rewrite_replace_rules_apply_in_order() {
     let dir = prepare_workspace();
     write_runbook(

@@ -148,7 +148,6 @@ Expected task directories:
 - [ ] [TASK-033: Implement Import Command](import/TASK-033-implement-import-command.md)
 - [ ] [TASK-038: Include Release Commit History In README](release/TASK-038-include-release-commit-history-in-readme.md)
 - [ ] [TASK-059: Implement Format Command](format/TASK-059-implement-format-command.md)
-- [ ] [TASK-079: Support Command Output Stream Selection](run/TASK-079-support-command-output-stream-selection.md)
 
 ## In Progress
 
@@ -234,6 +233,7 @@ Expected task directories:
 - [x] [TASK-076: Surface DisplayFile Transform Discovery In Help](discovery/TASK-076-surface-display-file-transform-discovery-in-help.md)
 - [x] [TASK-077: Document DisplayFile Transform Discovery In Explain](explain/TASK-077-document-display-file-transform-discovery-in-explain.md)
 - [x] [TASK-078: Support Stdin Runbook Input](run/TASK-078-support-stdin-runbook-input.md)
+- [x] [TASK-079: Support Command Output Stream Selection](run/TASK-079-support-command-output-stream-selection.md)
 
 ## Blocked
 

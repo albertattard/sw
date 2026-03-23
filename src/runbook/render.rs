@@ -67,6 +67,13 @@ enum EmptyLineTrimMode {
     None,
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum OutputStream {
+    Stdout,
+    Stderr,
+    Combined,
+}
+
 fn emit_debug_lines(enabled: bool, lines: &[String]) {
     if !enabled {
         return;
@@ -1187,27 +1194,42 @@ fn render_command(entry: &Value, state: &mut RenderState) -> Result<String, Rend
         debug_lines.push("[debug] Raw stderr:".to_string());
         debug_lines.push(format_command_stream_for_debug(&execution.stderr));
     }
-    let rewrite_result = match rewritten_stdout_for_capture(entry, &execution, state) {
+    let capture_rewrite_result = match rewritten_stdout_for_capture(entry, &execution, state) {
         Ok(result) => result,
         Err(err) => {
             emit_debug_lines(debug_enabled, &debug_lines);
             return Err(err);
         }
     };
-    let RewriteResult {
-        rendered: rewritten_stdout,
-        generated_captures,
-        debug_lines: rewrite_debug_lines,
-    } = rewrite_result;
-    debug_lines.extend(rewrite_debug_lines);
-    if debug_enabled {
-        debug_lines.push("[debug] Rewritten stdout:".to_string());
+    let rewritten_stdout = capture_rewrite_result.rendered.clone();
+    let generated_captures = capture_rewrite_result.generated_captures;
+    let output_stream = rendered_output_stream(entry)?;
+    let render_rewrite_result = match rendered_output_for_entry(entry, &execution, state) {
+        Ok(result) => result,
+        Err(err) => {
+            emit_debug_lines(debug_enabled, &debug_lines);
+            return Err(err);
+        }
+    };
+    if output_stream != OutputStream::Stdout && debug_enabled {
+        debug_lines.push("[debug] Rewritten stdout for capture:".to_string());
         debug_lines.push(format_command_stream_for_debug(&rewritten_stdout));
+    }
+    debug_lines.extend(render_rewrite_result.debug_lines);
+    let rendered_output = render_rewrite_result.rendered;
+    if debug_enabled {
+        if output_stream == OutputStream::Stdout {
+            debug_lines.push("[debug] Rewritten stdout:".to_string());
+            debug_lines.push(format_command_stream_for_debug(&rendered_output));
+        } else {
+            debug_lines.push("[debug] Rewritten rendered output stream:".to_string());
+            debug_lines.push(format_command_stream_for_debug(&rendered_output));
+        }
     }
 
     if execution.timed_out {
         emit_debug_lines(debug_enabled, &debug_lines);
-        append_output(entry, &rewritten_stdout, &mut section)?;
+        append_output(entry, &rendered_output, &mut section)?;
         return Err(RenderError::Timeout {
             message: format!("Command timed out after {}", timeout_label(entry)),
             partial_markdown: apply_indent(entry, section, "Command")?,
@@ -1239,7 +1261,7 @@ fn render_command(entry: &Value, state: &mut RenderState) -> Result<String, Rend
         }
     }
     emit_debug_lines(debug_enabled, &debug_lines);
-    append_output(entry, &rewritten_stdout, &mut section)?;
+    append_output(entry, &rendered_output, &mut section)?;
     apply_indent(entry, section, "Command")
 }
 
@@ -1251,7 +1273,11 @@ fn command_debug_enabled(entry: &Value, debug_all_commands: bool) -> bool {
     entry.get("debug").and_then(Value::as_bool).unwrap_or(false)
 }
 
-fn append_output(entry: &Value, stdout: &str, section: &mut String) -> Result<(), RenderError> {
+fn append_output(
+    entry: &Value,
+    rendered_output: &str,
+    section: &mut String,
+) -> Result<(), RenderError> {
     let Some(output) = entry.get("output") else {
         return Ok(());
     };
@@ -1264,8 +1290,8 @@ fn append_output(entry: &Value, stdout: &str, section: &mut String) -> Result<()
 
     section.push_str("\n\n");
     section.push_str(output_fence_open(output)?);
-    section.push_str(stdout);
-    if !stdout.ends_with('\n') && !stdout.is_empty() {
+    section.push_str(rendered_output);
+    if !rendered_output.ends_with('\n') && !rendered_output.is_empty() {
         section.push('\n');
     }
     section.push_str("```");
@@ -1603,11 +1629,18 @@ fn normalize_rendered_output(
     entry: &Value,
     output: &Value,
     execution: &CommandExecution,
+    source_output: &str,
     datetime_anchors: &mut HashMap<String, DatetimeShiftAnchor>,
     captured_values: &HashMap<String, String>,
 ) -> Result<RewriteResult, RenderError> {
-    let rewrite_result =
-        apply_rewrite_rules(entry, output, execution, datetime_anchors, captured_values)?;
+    let rewrite_result = apply_rewrite_rules(
+        entry,
+        output,
+        execution,
+        source_output,
+        datetime_anchors,
+        captured_values,
+    )?;
     let mut rendered = rewrite_result.rendered;
 
     if trim_trailing_whitespace(output)? {
@@ -1639,10 +1672,36 @@ fn rewritten_stdout_for_capture(
         });
     };
 
+    let mut local_datetime_anchors = state.datetime_anchors.clone();
     normalize_rendered_output(
         entry,
         output,
         execution,
+        &execution.stdout,
+        &mut local_datetime_anchors,
+        &state.captured_values,
+    )
+}
+
+fn rendered_output_for_entry(
+    entry: &Value,
+    execution: &CommandExecution,
+    state: &mut RenderState,
+) -> Result<RewriteResult, RenderError> {
+    let Some(output) = entry.get("output") else {
+        return Ok(RewriteResult {
+            rendered: execution.stdout.to_string(),
+            generated_captures: Vec::new(),
+            debug_lines: Vec::new(),
+        });
+    };
+
+    let source_output = rendered_output_source(output, execution)?;
+    normalize_rendered_output(
+        entry,
+        output,
+        execution,
+        &source_output,
         &mut state.datetime_anchors,
         &state.captured_values,
     )
@@ -1652,12 +1711,13 @@ fn apply_rewrite_rules(
     entry: &Value,
     output: &Value,
     execution: &CommandExecution,
+    source_output: &str,
     datetime_anchors: &mut HashMap<String, DatetimeShiftAnchor>,
     captured_values: &HashMap<String, String>,
 ) -> Result<RewriteResult, RenderError> {
     let Some(rules) = output.get("rewrite") else {
         return Ok(RewriteResult {
-            rendered: execution.stdout.to_string(),
+            rendered: source_output.to_string(),
             generated_captures: Vec::new(),
             debug_lines: Vec::new(),
         });
@@ -1665,7 +1725,7 @@ fn apply_rewrite_rules(
     let rules = rules.as_array().ok_or_else(|| {
         RenderError::Operational("Command output rewrite must be an array".to_string())
     })?;
-    let mut rendered = execution.stdout.to_string();
+    let mut rendered = source_output.to_string();
     let mut generated_captures = Vec::new();
     let mut debug_lines = Vec::new();
     for rule in rules {
@@ -1688,6 +1748,35 @@ fn apply_rewrite_rules(
         generated_captures,
         debug_lines,
     })
+}
+
+fn rendered_output_stream(entry: &Value) -> Result<OutputStream, RenderError> {
+    let Some(output) = entry.get("output") else {
+        return Ok(OutputStream::Stdout);
+    };
+
+    match output.get("stream").and_then(Value::as_str) {
+        None | Some("stdout") => Ok(OutputStream::Stdout),
+        Some("stderr") => Ok(OutputStream::Stderr),
+        Some("combined") => Ok(OutputStream::Combined),
+        Some(other) => Err(RenderError::Operational(format!(
+            "Unsupported command output stream `{other}`"
+        ))),
+    }
+}
+
+fn rendered_output_source(
+    output: &Value,
+    execution: &CommandExecution,
+) -> Result<String, RenderError> {
+    match output.get("stream").and_then(Value::as_str) {
+        None | Some("stdout") => Ok(execution.stdout.to_string()),
+        Some("stderr") => Ok(execution.stderr.to_string()),
+        Some("combined") => Ok(format!("{}{}", execution.stdout, execution.stderr)),
+        Some(other) => Err(RenderError::Operational(format!(
+            "Unsupported command output stream `{other}`"
+        ))),
+    }
 }
 
 fn store_generated_rewrite_captures(
@@ -2249,6 +2338,7 @@ enum DatetimeShiftMatcher<'a> {
     Custom(&'a str),
 }
 
+#[derive(Clone)]
 struct DatetimeShiftAnchor {
     first_original: DateTime<FixedOffset>,
     base_timestamp: DateTime<FixedOffset>,

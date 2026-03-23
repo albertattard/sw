@@ -1,0 +1,16 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf '\\nalpha\\n'",
+        "printf '\\nbeta\\n\\n' >&2"
+      ],
+      "output": {
+        "caption": "Trimmed stream output",
+        "stream": "combined",
+        "trim_empty_lines": "leading_trailing"
+      }
+    }
+  ]
+}

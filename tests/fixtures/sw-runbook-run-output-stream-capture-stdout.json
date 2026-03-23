@@ -1,0 +1,41 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'token=stdout-value\\n'",
+        "printf 'visible stderr\\n' >&2"
+      ],
+      "assert": {
+        "exit_code": 0,
+        "checks": [
+          {
+            "source": "stdout",
+            "contains": "stdout-value"
+          }
+        ]
+      },
+      "output": {
+        "caption": "Rendered stderr",
+        "stream": "stderr"
+      },
+      "capture": [
+        {
+          "name": "captured_token",
+          "source": "stdout",
+          "stage": "raw",
+          "pattern": "token=(.+)"
+        }
+      ]
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'captured=%s\\n' '@{captured_token}'"
+      ],
+      "output": {
+        "caption": "Captured token"
+      }
+    }
+  ]
+}

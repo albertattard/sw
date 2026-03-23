@@ -1,7 +1,7 @@
 ---
 id: TASK-079
 title: Support Command Output Stream Selection
-status: pending
+status: done
 category: run
 related_features:
   - SPEC-001
@@ -10,7 +10,7 @@ related_features:
   - SPEC-009
 owner: @aattard
 created: 2026-03-22
-updated: 2026-03-22
+updated: 2026-03-23
 ---
 
 ## Summary
@@ -44,27 +44,27 @@ tools that report meaningful output on stderr without shell-level redirection.
 
 ## Acceptance Criteria
 
-- [ ] Given `output.stream: stdout`, rendered command output includes only
+- [x] Given `output.stream: stdout`, rendered command output includes only
       captured stdout.
-- [ ] Given `output.stream: stderr`, rendered command output includes only
+- [x] Given `output.stream: stderr`, rendered command output includes only
       captured stderr.
-- [ ] Given `output.stream: combined`, rendered command output includes
+- [x] Given `output.stream: combined`, rendered command output includes
       captured stdout followed by captured stderr.
-- [ ] Given no `output.stream`, rendered command output defaults to stdout.
-- [ ] Given `output.stream: stderr` together with `output.rewrite`,
+- [x] Given no `output.stream`, rendered command output defaults to stdout.
+- [x] Given `output.stream: stderr` together with `output.rewrite`,
       rewrites apply to the selected stderr stream before rendering.
-- [ ] Given `output.stream: combined` together with output trimming, trimming
+- [x] Given `output.stream: combined` together with output trimming, trimming
       applies to the selected combined stream before rendering.
-- [ ] Given an invalid `output.stream` value, validation rejects the runbook
+- [x] Given an invalid `output.stream` value, validation rejects the runbook
       with a clear error.
-- [ ] Given `output.stream: stderr` or `output.stream: combined`,
+- [x] Given `output.stream: stderr` or `output.stream: combined`,
       `capture.source` and assertion-check sources keep their current
       contracts and are not implicitly widened.
-- [ ] Given `sw example Command`, the printed JSON snippet includes `stream`
+- [x] Given `sw example Command`, the printed JSON snippet includes `stream`
       as part of the current output contract.
-- [ ] Given `sw explain run`, the CLI documents `output.stream` and the
+- [x] Given `sw explain run`, the CLI documents `output.stream` and the
       supported values `stdout`, `stderr`, and `combined`.
-- [ ] Given `sw explain example`, the CLI notes that the `Command` example
+- [x] Given `sw explain example`, the CLI notes that the `Command` example
       includes current nested output fields such as `trim_empty_lines` and
       `stream`.
 
