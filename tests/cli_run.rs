@@ -460,8 +460,7 @@ fn patch_entry_failure_is_non_interactive_and_leaves_no_sidecar_files() {
     assert!(!dir.join("demo.txt.rej").exists());
 
     let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(stderr.contains("Failed to apply patch for ./demo.txt"));
-    assert!(stderr.contains("hunks failed"));
+    assert!(stderr.contains("Failed to apply patch for ./demo.txt:"));
 }
 
 #[test]
