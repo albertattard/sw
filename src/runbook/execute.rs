@@ -638,11 +638,23 @@ fn patch_starts_with_headers(patch_body: &str) -> bool {
 fn terminate_child(child: &mut std::process::Child) -> Result<(), RenderError> {
     #[cfg(unix)]
     {
-        if !terminate_process_group(child.id())? {
-            child.kill().map_err(|err| {
-                RenderError::Operational(format!("Failed to terminate timed out command: {err}"))
-            })?;
+        terminate_process_group(child.id())?;
+
+        for _ in 0..5 {
+            match child.try_wait() {
+                Ok(Some(_)) => return Ok(()),
+                Ok(None) => thread::sleep(Duration::from_millis(20)),
+                Err(err) => {
+                    return Err(RenderError::Operational(format!(
+                        "Failed to inspect timed out command state: {err}"
+                    )));
+                }
+            }
         }
+
+        child.kill().map_err(|err| {
+            RenderError::Operational(format!("Failed to terminate timed out command: {err}"))
+        })?;
         Ok(())
     }
 
