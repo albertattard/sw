@@ -145,6 +145,7 @@ Expected task directories:
 - [TASK-081: Add Skill Frontmatter To Explain Export](explain/TASK-081-add-skill-frontmatter-to-explain-export.md)
 - [TASK-082: Minimize Skill Export To Discovery Entrypoint](explain/TASK-082-minimize-skill-export-to-discovery-entrypoint.md)
 - [TASK-083: Default Command Prerequisite Timeouts To Five Seconds](prerequisite/TASK-083-default-command-prerequisite-timeouts-to-five-seconds.md)
+- [TASK-084: Add Version Discovery Output](discovery/TASK-084-add-version-discovery-output.md)
 
 ## Pending
 
@@ -152,6 +153,7 @@ Expected task directories:
 - [ ] [TASK-033: Implement Import Command](import/TASK-033-implement-import-command.md)
 - [ ] [TASK-038: Include Release Commit History In README](release/TASK-038-include-release-commit-history-in-readme.md)
 - [ ] [TASK-059: Implement Format Command](format/TASK-059-implement-format-command.md)
+- [ ] [TASK-084: Add Version Discovery Output](discovery/TASK-084-add-version-discovery-output.md)
 
 ## In Progress
 

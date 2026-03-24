@@ -4,7 +4,7 @@ title: Help and Discovery Contract
 status: in_progress
 priority: high
 owner: @aattard
-last_updated: 2026-03-22
+last_updated: 2026-03-24
 ---
 
 ## Problem
@@ -18,14 +18,17 @@ The CLI provides help entry points:
 
 ```bash
 sw --help
+sw --version
 sw help
 sw help <subcommand>
 sw help --all
 sw [command] --help
+sw version
 ```
 
 Current help behavior is human-readable and non-interactive:
 - Print usage/help text.
+- Print version/build identity on demand.
 - Support targeted help for a known subcommand via `sw help <subcommand>`.
 - Support aggregated help for all known subcommands via `sw help --all`.
 - Keep the placeholder line while help remains incomplete.
@@ -34,15 +37,22 @@ Current help behavior is human-readable and non-interactive:
 
 Input:
 - Top-level help flags/command.
+- Top-level version flag/command.
 - Optional help target subcommand name.
 - Optional `--all` flag for expanded command coverage.
 - Command-specific help flags (for known commands).
 
 Output:
 - Human-readable help on stdout.
+- Human-readable version text on stdout.
 - Placeholder line indicating work in progress while applicable.
 - `sw help <subcommand>` prints the help for that subcommand only.
 - `sw help --all` prints top-level help plus help for each known subcommand.
+- `sw --version` and `sw version` print the same version string.
+- The version string includes the package version and build identity metadata.
+- Build identity metadata includes the source commit when available.
+- If the binary was built from a working tree with uncommitted changes, the
+  version string includes a `-dirty` marker.
 - Subcommand help may point users to `example` or `explain` when a question is
   about runbook-authored fields rather than CLI flags.
 - Subcommand help should document `--input-file=-` as the stdin convention for
@@ -56,7 +66,10 @@ Exit codes:
 ## Acceptance Criteria
 
 - [x] `sw --help` prints top-level usage and exits with `0`.
+- [ ] `sw --version` prints version/build identity and exits with `0`.
 - [x] `sw help` prints top-level usage and exits with `0`.
+- [ ] `sw version` prints the same version/build identity as `sw --version`
+      and exits with `0`.
 - [ ] `sw help <subcommand>` prints help for a known subcommand and exits with `0`.
 - [ ] `sw help run` documents the CLI flags for `run` and directs users to
       `sw example Command` and `sw explain run` for runbook-authored output
@@ -70,11 +83,15 @@ Exit codes:
 - [ ] `sw help --all` prints top-level help plus help for each known subcommand and exits with `0`.
 - [x] `sw [command] --help` is documented as the command-level help pattern.
 - [x] Help output includes a short in-progress placeholder line.
+- [ ] The version output contains the package version from `Cargo.toml`.
+- [ ] The version output includes the source commit identifier when available.
+- [ ] A build from a dirty working tree appends `-dirty` to the build identity.
 
 ## Non-goals
 
 - Full machine-readable help output in v1.
 - Complete command implementation beyond help text.
+- Auto-incrementing the product version on every local build.
 
 ## Notes for Reimplementation
 
