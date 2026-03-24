@@ -229,7 +229,9 @@ fn explain_skill_prints_skill_document_to_stdout() {
 
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(stdout.starts_with("# sw\n"));
+    assert!(stdout.starts_with(
+        "---\nname: sw\ndescription: Use this skill when the user needs help understanding or operating the `sw` CLI.\n---\n\n# sw\n"
+    ));
     assert!(stdout.contains("## Guidance"));
     assert!(stdout.contains("### run"));
     assert!(stdout.contains("- Availability: implemented"));
@@ -280,6 +282,9 @@ fn explain_skill_output_file_without_value_writes_to_default_codex_path() {
     let output_path = codex_home.join("skills/sw/SKILL.md");
     assert!(stdout.contains(&format!("Wrote explain skill to {}", output_path.display())));
     let skill = fs::read_to_string(&output_path).expect("missing skill output");
+    assert!(skill.starts_with(
+        "---\nname: sw\ndescription: Use this skill when the user needs help understanding or operating the `sw` CLI.\n---\n\n# sw\n"
+    ));
     assert!(skill.contains("### check"));
     assert!(skill.contains("Availability: implemented"));
 }
@@ -297,6 +302,9 @@ fn explain_skill_output_file_with_explicit_path_writes_to_requested_location() {
 
     assert!(output.status.success());
     let skill = fs::read_to_string(&output_path).expect("missing skill output");
+    assert!(skill.starts_with(
+        "---\nname: sw\ndescription: Use this skill when the user needs help understanding or operating the `sw` CLI.\n---\n\n# sw\n"
+    ));
     assert!(skill.contains("### example"));
     assert!(skill.contains("Availability: implemented"));
 }
@@ -341,7 +349,9 @@ fn explain_skill_force_overwrites_existing_file() {
 
     assert!(output.status.success());
     let skill = fs::read_to_string(&output_path).expect("missing overwritten skill");
-    assert!(skill.starts_with("# sw\n"));
+    assert!(skill.starts_with(
+        "---\nname: sw\ndescription: Use this skill when the user needs help understanding or operating the `sw` CLI.\n---\n\n# sw\n"
+    ));
     assert!(!skill.contains("existing skill"));
 }
 

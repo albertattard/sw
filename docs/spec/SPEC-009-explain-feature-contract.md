@@ -141,6 +141,9 @@ When `--output-format=skill` is selected:
 
 - The command emits one aggregate skill document for the current `sw` build
   rather than a per-topic explanation.
+- The emitted document is a valid Codex `SKILL.md` file with YAML frontmatter
+  delimited by `---`.
+- The YAML frontmatter includes at least `name` and `description`.
 - The default file destination for `--output-file` without a value is the
   standard Codex skill path for the `sw` skill, such as
   `~/.codex/skills/sw/SKILL.md`.
@@ -210,6 +213,10 @@ When `--output-format=skill` is selected:
       with `1` and prints a clear usage error.
 - [ ] Given `sw explain --output-format=skill`, the CLI exits with `0` and
       prints a deterministic `SKILL.md`-compatible document to stdout.
+- [ ] Given `sw explain --output-format=skill`, the generated document starts
+      with YAML frontmatter delimited by `---`.
+- [ ] Given `sw explain --output-format=skill`, the generated YAML frontmatter
+      includes `name: sw` and a non-empty `description`.
 - [ ] Given `sw explain --output-format=skill --output-file`, the CLI exits
       with `0` and writes the skill document to the default Codex skill
       location for `sw`.

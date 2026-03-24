@@ -164,6 +164,11 @@ fn explanation_for_topic(topic: &str) -> Option<String> {
 fn build_skill_document() -> String {
     let explanations = explanations();
     let mut lines = vec![
+        "---".to_string(),
+        "name: sw".to_string(),
+        "description: Use this skill when the user needs help understanding or operating the `sw` CLI.".to_string(),
+        "---".to_string(),
+        "".to_string(),
         "# sw".to_string(),
         "".to_string(),
         "Use this skill when the user needs help understanding or operating the `sw` CLI.".to_string(),
