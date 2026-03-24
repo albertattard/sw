@@ -233,37 +233,12 @@ fn explain_skill_prints_skill_document_to_stdout() {
         "---\nname: sw\ndescription: Use this skill when the user needs help understanding or operating the `sw` CLI.\n---\n\n# sw\n"
     ));
     assert!(stdout.contains("## Guidance"));
-    assert!(stdout.contains("### run"));
-    assert!(stdout.contains("- Availability: implemented"));
-    assert!(stdout.contains("### init"));
-    assert!(stdout.contains("- Availability: planned"));
-    assert!(stdout.contains("Use `sw help <subcommand>`"));
-    assert!(stdout.contains("Use `sw example <topic>`"));
+    assert!(stdout.contains("Start with `sw explain --all`."));
     assert!(stdout.contains(
-        "When `--input-file=-` is used, stdin is parsed as JSON unless `--input-format=yaml` is provided."
+        "Treat the CLI output and the documented specs as authoritative over any cached assumptions."
     ));
-    assert!(stdout.contains("`--input-file=-` reads the runbook from stdin."));
-    assert!(stdout.contains(
-        "Command output can render `stdout`, `stderr`, or `combined` with `output.stream`; if omitted, rendered output defaults to `stdout`."
-    ));
-    assert!(stdout.contains(
-        "`output.stream` changes rendered output only and does not widen capture or assertion sources."
-    ));
-    assert!(stdout.contains(
-        "Prefer `output.rewrite` with `type: datetime_shift` over `replace` for semantic dates and times so relative timing stays intact."
-    ));
-    assert!(stdout.contains(
-        "Use `replace` for dates and times only when the text is not semantically a date or time, or when `datetime_shift` cannot express the required format."
-    ));
-    assert!(stdout.contains(
-        "Command output can trim outer empty lines with `output.trim_empty_lines` using `leading_trailing`, `leading`, `trailing`, or `none`."
-    ));
-    assert!(stdout.contains(
-        "The `Command` example includes current nested output fields such as `trim_empty_lines` and `stream`."
-    ));
-    assert!(stdout.contains(
-        "The `DisplayFile` example includes the Java `collapse_method_body` transform for collapsing method bodies."
-    ));
+    assert!(!stdout.contains("## Command Map"));
+    assert!(!stdout.contains("### run"));
 }
 
 #[test]
@@ -285,8 +260,8 @@ fn explain_skill_output_file_without_value_writes_to_default_codex_path() {
     assert!(skill.starts_with(
         "---\nname: sw\ndescription: Use this skill when the user needs help understanding or operating the `sw` CLI.\n---\n\n# sw\n"
     ));
-    assert!(skill.contains("### check"));
-    assert!(skill.contains("Availability: implemented"));
+    assert!(skill.contains("Start with `sw explain --all`."));
+    assert!(!skill.contains("## Command Map"));
 }
 
 #[test]
@@ -305,8 +280,8 @@ fn explain_skill_output_file_with_explicit_path_writes_to_requested_location() {
     assert!(skill.starts_with(
         "---\nname: sw\ndescription: Use this skill when the user needs help understanding or operating the `sw` CLI.\n---\n\n# sw\n"
     ));
-    assert!(skill.contains("### example"));
-    assert!(skill.contains("Availability: implemented"));
+    assert!(skill.contains("Start with `sw explain --all`."));
+    assert!(!skill.contains("## Command Map"));
 }
 
 #[test]

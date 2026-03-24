@@ -147,13 +147,11 @@ When `--output-format=skill` is selected:
 - The default file destination for `--output-file` without a value is the
   standard Codex skill path for the `sw` skill, such as
   `~/.codex/skills/sw/SKILL.md`.
-- The skill content should direct agents toward `sw help`, `sw example`, and
-  `sw explain` for authoritative command, snippet, and contract discovery.
-- The skill content must make implemented versus planned commands clear enough
-  that an agent does not treat planned commands as available by default.
-- The skill content should preserve important authoring guidance from explain
-  topics, including preferring `datetime_shift` over `replace` for semantic
-  dates and times in runbook rewrites.
+- The skill content is intentionally minimal and acts as a routing layer rather
+  than an embedded contract dump.
+- The skill content should direct agents to start with `sw explain --all`.
+- The skill content should treat `sw` output as authoritative over cached
+  assumptions.
 - The output should remain deterministic so repeated exports produce stable
   skill content aside from intentional contract changes.
 
@@ -231,18 +229,12 @@ When `--output-format=skill` is selected:
 - [ ] Given `sw explain --output-format=skill --output-file --force` or
       `sw explain --output-format=skill --output-file=<path> --force`, the CLI
       overwrites the target file and exits with `0`.
+- [ ] Given `sw explain --output-format=skill`, the generated skill content is
+      concise and routes agents to `sw explain --all` instead of embedding the
+      full command map.
 - [ ] Given `sw explain --output-format=skill`, the generated skill content
-      clearly distinguishes implemented commands from planned commands.
-- [ ] Given `sw explain --output-format=skill`, the generated skill content
-      preserves the documented preference for `datetime_shift` over `replace`
-      for semantic dates and times.
-- [ ] Given `sw explain --output-format=skill`, the generated skill content
-      preserves the `output.stream` guidance for rendered stdout, stderr, and
-      combined output selection.
-- [ ] Given `sw explain --output-format=skill`, the generated skill content
-      preserves the stdin runbook input guidance for agents, including
-      `--input-file=-`, default JSON stdin parsing, and explicit YAML stdin
-      selection.
+      tells agents to treat `sw` output as authoritative over cached
+      assumptions.
 - [ ] Help output documents `--output-format=<format>`,
       `--output-file[=<path>]`, and `--force` for `explain`.
 - [ ] Help output documents the `explain` command and the `--all` option.

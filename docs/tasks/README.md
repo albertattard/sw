@@ -143,6 +143,7 @@ Expected task directories:
 - [TASK-079: Support Command Output Stream Selection](run/TASK-079-support-command-output-stream-selection.md)
 - [TASK-080: Make Patch Application Non-Interactive](run/TASK-080-make-patch-application-non-interactive.md)
 - [TASK-081: Add Skill Frontmatter To Explain Export](explain/TASK-081-add-skill-frontmatter-to-explain-export.md)
+- [TASK-082: Minimize Skill Export To Discovery Entrypoint](explain/TASK-082-minimize-skill-export-to-discovery-entrypoint.md)
 
 ## Pending
 
@@ -238,6 +239,7 @@ Expected task directories:
 - [x] [TASK-079: Support Command Output Stream Selection](run/TASK-079-support-command-output-stream-selection.md)
 - [x] [TASK-080: Make Patch Application Non-Interactive](run/TASK-080-make-patch-application-non-interactive.md)
 - [x] [TASK-081: Add Skill Frontmatter To Explain Export](explain/TASK-081-add-skill-frontmatter-to-explain-export.md)
+- [x] [TASK-082: Minimize Skill Export To Discovery Entrypoint](explain/TASK-082-minimize-skill-export-to-discovery-entrypoint.md)
 
 ## Blocked
 

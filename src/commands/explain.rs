@@ -162,8 +162,7 @@ fn explanation_for_topic(topic: &str) -> Option<String> {
 }
 
 fn build_skill_document() -> String {
-    let explanations = explanations();
-    let mut lines = vec![
+    let lines = vec![
         "---".to_string(),
         "name: sw".to_string(),
         "description: Use this skill when the user needs help understanding or operating the `sw` CLI.".to_string(),
@@ -175,39 +174,12 @@ fn build_skill_document() -> String {
         "".to_string(),
         "## Guidance".to_string(),
         "".to_string(),
-        "- Use `sw help <subcommand>` when the question is about exact flags or invocation syntax."
-            .to_string(),
-        "- Use `sw explain <topic>` when the question is about behavior, defaults, constraints, or which command to call next."
-            .to_string(),
-        "- Use `sw example <topic>` when the question is about runbook JSON shape."
-            .to_string(),
+        "- Start with `sw explain --all`.".to_string(),
         "- Treat the CLI output and the documented specs as authoritative over any cached assumptions."
             .to_string(),
-        "".to_string(),
-        "## Command Map".to_string(),
     ];
 
-    for explanation in explanations {
-        lines.push("".to_string());
-        lines.push(format!("### {}", explanation.topic));
-        lines.push(format!("- Availability: {}", explanation.availability));
-        lines.push(format!("- Purpose: {}", explanation.purpose));
-        push_markdown_section(&mut lines, "Defaults", explanation.defaults);
-        push_markdown_section(&mut lines, "Inputs", explanation.inputs);
-        push_markdown_section(&mut lines, "Outputs", explanation.outputs);
-        push_markdown_section(&mut lines, "Exit codes", explanation.exit_codes);
-        push_markdown_section(&mut lines, "Constraints", explanation.constraints);
-        push_markdown_section(&mut lines, "Next", explanation.next);
-    }
-
     lines.join("\n")
-}
-
-fn push_markdown_section(lines: &mut Vec<String>, heading: &str, values: &[&str]) {
-    lines.push(format!("- {}:", heading));
-    for value in values {
-        lines.push(format!("  - {value}"));
-    }
 }
 
 fn explanations() -> Vec<Explanation<'static>> {
