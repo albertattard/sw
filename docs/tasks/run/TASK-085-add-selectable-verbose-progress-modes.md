@@ -1,7 +1,7 @@
 ---
 id: TASK-085
 title: Add Selectable Verbose Progress Modes
-status: pending
+status: done
 category: run
 related_features:
   - SPEC-003
@@ -36,17 +36,17 @@ redraws.
 
 ## Acceptance Criteria
 
-- [ ] Given `sw run --verbose --verbose-mode=auto`, verbose output keeps the
+- [x] Given `sw run --verbose --verbose-mode=auto`, verbose output keeps the
       existing automatic live-vs-plain behavior.
-- [ ] Given `sw run --verbose --verbose-mode=live`, verbose output uses
+- [x] Given `sw run --verbose --verbose-mode=live`, verbose output uses
       in-place timer updates when possible.
-- [ ] Given `sw run --verbose --verbose-mode=plain`, verbose output uses
+- [x] Given `sw run --verbose --verbose-mode=plain`, verbose output uses
       line-based progress even when stderr is a TTY.
-- [ ] Given plain mode, each entry prints a start line when it begins and a
+- [x] Given plain mode, each entry prints a start line when it begins and a
       completion line when it finishes.
-- [ ] Given `sw --verbose --verbose-mode=plain`, the default `run` behavior
+- [x] Given `sw --verbose --verbose-mode=plain`, the default `run` behavior
       accepts the same mode selection without requiring the `run` subcommand.
-- [ ] Help and explain output document the new verbose mode flag and when to
+- [x] Help and explain output document the new verbose mode flag and when to
       prefer `plain`.
 
 ## Notes

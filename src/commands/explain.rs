@@ -284,6 +284,7 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "`--output-format markdown`",
                 "`--output-file <path>`",
                 "`--verbose` for progress output on stderr",
+                "`--verbose-mode auto|live|plain` to choose how verbose progress renders",
                 "`--debug` for command rewrite and capture diagnostics on stderr",
             ],
             outputs: &[
@@ -308,6 +309,7 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "`output.stream` changes rendered output only and does not widen capture or assertion sources.",
                 "Command output can trim outer empty lines with `output.trim_empty_lines` using `leading_trailing`, `leading`, `trailing`, or `none`.",
                 "Command-based prerequisite checks use a shorter default timeout of `5 seconds` unless they declare `timeout`.",
+                "`--verbose-mode=plain` is useful for SSH and wrapper-driven execution where in-place redraws are fragile.",
                 "Prefer `output.rewrite` with `type: datetime_shift` over `replace` for semantic dates and times so relative timing stays intact.",
                 "Use `replace` for dates and times only when the text is not semantically a date or time, or when `datetime_shift` cannot express the required format.",
             ],

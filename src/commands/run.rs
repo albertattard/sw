@@ -1,9 +1,9 @@
-use crate::cli::{RunArgs, RunOutputFormat};
+use crate::cli::{RunArgs, RunOutputFormat, VerboseMode};
 use crate::runbook;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
-pub fn run(args: RunArgs, verbose: bool, debug: bool) -> ExitCode {
+pub fn run(args: RunArgs, verbose: bool, verbose_mode: VerboseMode, debug: bool) -> ExitCode {
     let output_path = args
         .output_file
         .unwrap_or_else(|| PathBuf::from("README.md"));
@@ -26,7 +26,7 @@ pub fn run(args: RunArgs, verbose: bool, debug: bool) -> ExitCode {
 
     let markdown = match args.output_format {
         RunOutputFormat::Markdown => {
-            match runbook::render_markdown(&runbook, &input_path, verbose, debug) {
+            match runbook::render_markdown(&runbook, &input_path, verbose, verbose_mode, debug) {
                 Ok(markdown) => markdown,
                 Err(runbook::RenderError::Operational(message)) => {
                     eprintln!("{message}");

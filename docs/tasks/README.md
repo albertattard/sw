@@ -154,7 +154,6 @@ Expected task directories:
 - [ ] [TASK-033: Implement Import Command](import/TASK-033-implement-import-command.md)
 - [ ] [TASK-038: Include Release Commit History In README](release/TASK-038-include-release-commit-history-in-readme.md)
 - [ ] [TASK-059: Implement Format Command](format/TASK-059-implement-format-command.md)
-- [ ] [TASK-085: Add Selectable Verbose Progress Modes](run/TASK-085-add-selectable-verbose-progress-modes.md)
 
 ## In Progress
 
@@ -224,6 +223,7 @@ Expected task directories:
 - [x] [TASK-060: Improve Rewrite Capture Failure Diagnostics](rewrite/TASK-060-improve-rewrite-capture-failure-diagnostics.md)
 - [x] [TASK-083: Default Command Prerequisite Timeouts To Five Seconds](prerequisite/TASK-083-default-command-prerequisite-timeouts-to-five-seconds.md)
 - [x] [TASK-084: Add Version Discovery Output](discovery/TASK-084-add-version-discovery-output.md)
+- [x] [TASK-085: Add Selectable Verbose Progress Modes](run/TASK-085-add-selectable-verbose-progress-modes.md)
 - [x] [TASK-061: Add Debug Run Diagnostics](run/TASK-061-add-debug-run-diagnostics.md)
 - [x] [TASK-062: Support Command-Scoped Debug Diagnostics](run/TASK-062-support-command-scoped-debug-diagnostics.md)
 - [x] [TASK-063: Separate DisplayFile Indent And Offset](display-file/TASK-063-separate-display-file-indent-and-offset.md)

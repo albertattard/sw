@@ -4,6 +4,7 @@ use super::execute::{
     format_command_failure, patch_target_path, run_cleanup_blocks, run_patch_restores,
     snapshot_patch_target, timeout_label,
 };
+use crate::cli::VerboseMode;
 use chrono::Timelike;
 use chrono::{DateTime, Duration, FixedOffset, NaiveDateTime, NaiveTime, TimeZone};
 use regex::Regex;
@@ -88,6 +89,7 @@ pub(crate) fn render_markdown(
     runbook: &Value,
     runbook_path: &Path,
     verbose: bool,
+    verbose_mode: VerboseMode,
     debug: bool,
 ) -> Result<String, RenderError> {
     let entries = runbook
@@ -107,7 +109,7 @@ pub(crate) fn render_markdown(
         captured_values: HashMap::new(),
         debug_all_commands: debug,
     };
-    let mut progress = ProgressReporter::new(entries.len(), verbose);
+    let mut progress = ProgressReporter::new(entries.len(), verbose, verbose_mode);
 
     run_prerequisite_checks(entries)?;
 
@@ -235,14 +237,8 @@ struct EntryProgress {
 }
 
 impl ProgressReporter {
-    fn new(total_entries: usize, verbose: bool) -> Self {
-        let mode = if !verbose {
-            ProgressMode::Off
-        } else if io::stderr().is_terminal() {
-            ProgressMode::Live
-        } else {
-            ProgressMode::Plain
-        };
+    fn new(total_entries: usize, verbose: bool, verbose_mode: VerboseMode) -> Self {
+        let mode = resolve_progress_mode(verbose, verbose_mode, io::stderr().is_terminal());
 
         Self {
             total_entries,
@@ -258,17 +254,27 @@ impl ProgressReporter {
     ) -> Option<EntryProgress> {
         match self.mode {
             ProgressMode::Off => None,
-            ProgressMode::Plain => Some(EntryProgress {
-                line: format_progress_line(
+            ProgressMode::Plain => {
+                let line = format_progress_line(
                     index + 1,
                     self.total_entries,
                     entry_summary(entry, runbook_path),
-                ),
-                started_at: Instant::now(),
-                timeout: verbose_timeout_label(entry),
-                stop_signal: None,
-                thread: None,
-            }),
+                );
+                let timeout = verbose_timeout_label(entry);
+                let _ = writeln!(
+                    io::stderr(),
+                    "{}",
+                    progress_start_line_text(&line, timeout.as_deref())
+                );
+
+                Some(EntryProgress {
+                    line,
+                    started_at: Instant::now(),
+                    timeout,
+                    stop_signal: None,
+                    thread: None,
+                })
+            }
             ProgressMode::Live => {
                 let line = format_progress_line(
                     index + 1,
@@ -350,10 +356,39 @@ fn write_live_progress_line(line: &str, elapsed: &str, timeout: Option<&str>) ->
     stderr.flush()
 }
 
+fn progress_start_line_text(line: &str, timeout: Option<&str>) -> String {
+    match timeout {
+        Some(timeout) => format!("{line} (starting / {timeout})"),
+        None => format!("{line} (starting)"),
+    }
+}
+
 fn progress_line_text(line: &str, elapsed: &str, timeout: Option<&str>) -> String {
     match timeout {
         Some(timeout) => format!("{line} ({elapsed} / {timeout})"),
         None => format!("{line} ({elapsed})"),
+    }
+}
+
+fn resolve_progress_mode(
+    verbose: bool,
+    verbose_mode: VerboseMode,
+    stderr_is_tty: bool,
+) -> ProgressMode {
+    if !verbose {
+        return ProgressMode::Off;
+    }
+
+    match verbose_mode {
+        VerboseMode::Auto => {
+            if stderr_is_tty {
+                ProgressMode::Live
+            } else {
+                ProgressMode::Plain
+            }
+        }
+        VerboseMode::Live => ProgressMode::Live,
+        VerboseMode::Plain => ProgressMode::Plain,
     }
 }
 
@@ -486,8 +521,10 @@ fn truncate_progress_summary(summary: &str, max_chars: usize) -> String {
 mod tests {
     use super::{
         compact_timeout_label, entry_summary, format_elapsed_time, format_progress_line,
-        progress_line_text, truncate_progress_summary,
+        progress_line_text, progress_start_line_text, resolve_progress_mode,
+        truncate_progress_summary,
     };
+    use crate::cli::VerboseMode;
     use serde_json::json;
     use std::path::Path;
     use std::time::Duration;
@@ -517,6 +554,18 @@ mod tests {
     }
 
     #[test]
+    fn progress_start_line_text_can_include_timeout_window() {
+        assert_eq!(
+            progress_start_line_text("[ 2/12] Command: demo", Some("2m")),
+            "[ 2/12] Command: demo (starting / 2m)"
+        );
+        assert_eq!(
+            progress_start_line_text("[ 2/12] Heading: demo", None),
+            "[ 2/12] Heading: demo (starting)"
+        );
+    }
+
+    #[test]
     fn elapsed_time_uses_seconds_under_one_minute_and_minutes_afterward() {
         assert_eq!(format_elapsed_time(Duration::from_millis(12_400)), "12.4s");
         assert_eq!(format_elapsed_time(Duration::from_secs(68)), "1m 8s");
@@ -526,6 +575,30 @@ mod tests {
     fn compact_timeout_label_uses_short_units() {
         assert_eq!(compact_timeout_label("2 minutes"), "2m");
         assert_eq!(compact_timeout_label("30 seconds"), "30s");
+    }
+
+    #[test]
+    fn resolve_progress_mode_obeys_requested_mode() {
+        assert!(matches!(
+            resolve_progress_mode(true, VerboseMode::Auto, true),
+            super::ProgressMode::Live
+        ));
+        assert!(matches!(
+            resolve_progress_mode(true, VerboseMode::Auto, false),
+            super::ProgressMode::Plain
+        ));
+        assert!(matches!(
+            resolve_progress_mode(true, VerboseMode::Plain, true),
+            super::ProgressMode::Plain
+        ));
+        assert!(matches!(
+            resolve_progress_mode(true, VerboseMode::Live, false),
+            super::ProgressMode::Live
+        ));
+        assert!(matches!(
+            resolve_progress_mode(false, VerboseMode::Live, true),
+            super::ProgressMode::Off
+        ));
     }
 
     #[test]

@@ -76,6 +76,9 @@ fn explain_run_prints_concise_contract_summary() {
         )
     );
     assert!(stdout.contains("`--input-format json|yaml` for stdin-backed input"));
+    assert!(
+        stdout.contains("`--verbose-mode auto|live|plain` to choose how verbose progress renders")
+    );
     assert!(stdout.contains("`--input-file=-` reads the runbook from stdin."));
     assert!(stdout.contains(
         "For stdin input, JSON is the default format and piped YAML requires `--input-format=yaml`."
@@ -97,6 +100,9 @@ fn explain_run_prints_concise_contract_summary() {
     ));
     assert!(stdout.contains(
         "Command-based prerequisite checks use a shorter default timeout of `5 seconds` unless they declare `timeout`."
+    ));
+    assert!(stdout.contains(
+        "`--verbose-mode=plain` is useful for SSH and wrapper-driven execution where in-place redraws are fragile."
     ));
     assert!(stdout.contains(
         "Use `sw example Command` when you need the current JSON shape for output fields such as `trim_empty_lines` and `stream`."

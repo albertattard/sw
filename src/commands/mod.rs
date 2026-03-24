@@ -11,6 +11,7 @@ use std::process::ExitCode;
 pub fn run(cli: Cli) -> ExitCode {
     let Cli {
         verbose,
+        verbose_mode,
         debug,
         default_run_input,
         command,
@@ -24,13 +25,14 @@ pub fn run(cli: Cli) -> ExitCode {
                 output_file: None,
             },
             verbose,
+            verbose_mode,
             debug,
         ),
         Some(Commands::Help(args)) => run_help(args),
         Some(Commands::Check(args)) => check::run(args),
         Some(Commands::Example(args)) => example::run(args),
         Some(Commands::Explain(args)) => run_explain(args),
-        Some(Commands::Run(args)) => run::run(args, verbose, debug),
+        Some(Commands::Run(args)) => run::run(args, verbose, verbose_mode, debug),
         Some(Commands::Version) => version::run(),
         Some(Commands::Validate(args)) => validate::run(args),
     }

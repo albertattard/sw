@@ -14,6 +14,10 @@ pub struct Cli {
     #[arg(long, global = true)]
     pub verbose: bool,
 
+    /// Verbose progress mode. `auto` uses live redraws on a TTY and plain lines otherwise.
+    #[arg(long, global = true, value_enum, default_value_t = VerboseMode::Auto)]
+    pub verbose_mode: VerboseMode,
+
     /// Print diagnostic details for command rewrites and captures.
     #[arg(long, global = true)]
     pub debug: bool,
@@ -45,7 +49,7 @@ pub enum Commands {
 
 #[derive(Debug, clap::Args)]
 #[command(
-    after_help = "Runbook-authored output fields such as `trim_empty_lines` and `stream` are configured in the runbook, not as CLI flags.\n`Command` entries default to a `2 minutes` timeout, while command-based prerequisite checks default to `5 seconds` unless the runbook sets `timeout`.\nUse `sw example Command` for a current JSON snippet and `sw explain run` for behavior and defaults."
+    after_help = "Runbook-authored output fields such as `trim_empty_lines` and `stream` are configured in the runbook, not as CLI flags.\n`Command` entries default to a `2 minutes` timeout, while command-based prerequisite checks default to `5 seconds` unless the runbook sets `timeout`.\nUse `--verbose-mode=plain` for SSH-safe line-based progress output when terminal redraws are unreliable.\nUse `sw example Command` for a current JSON snippet and `sw explain run` for behavior and defaults."
 )]
 pub struct RunArgs {
     #[command(flatten)]
@@ -152,6 +156,13 @@ pub enum InputFormat {
 pub enum ExplainOutputFormat {
     Text,
     Skill,
+}
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq, ValueEnum)]
+pub enum VerboseMode {
+    Auto,
+    Live,
+    Plain,
 }
 
 pub fn print_top_level_help() -> std::io::Result<()> {

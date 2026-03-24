@@ -15,6 +15,7 @@ fn help_flag_prints_help() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("Sociable Weaver (SW)"));
     assert!(stdout.contains("--version"));
+    assert!(stdout.contains("--verbose-mode"));
     assert!(stdout.contains("Still weaving the nest. Features are hatching soon."));
 }
 
@@ -26,6 +27,7 @@ fn help_subcommand_prints_help() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("Usage:"));
     assert!(stdout.contains("--verbose"));
+    assert!(stdout.contains("--verbose-mode"));
     assert!(stdout.contains("--debug"));
     assert!(stdout.contains("check"));
     assert!(stdout.contains("example"));
@@ -126,6 +128,7 @@ fn run_help_prints_help() {
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("--verbose"));
+    assert!(stdout.contains("--verbose-mode"));
     assert!(stdout.contains("--debug"));
     assert!(stdout.contains("--input-file"));
     assert!(stdout.contains("Use `-` to read from stdin"));
@@ -137,6 +140,7 @@ fn run_help_prints_help() {
     assert!(stdout.contains("stream"));
     assert!(stdout.contains("`Command` entries default to a `2 minutes` timeout"));
     assert!(stdout.contains("prerequisite checks default to `5 seconds`"));
+    assert!(stdout.contains("SSH-safe line-based progress output"));
     assert!(stdout.contains("sw example Command"));
     assert!(stdout.contains("sw explain run"));
 }
