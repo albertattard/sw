@@ -425,7 +425,8 @@ in the runbook.
 - `output` may declare `trim_empty_lines`.
 - `output` may declare `trim_trailing_whitespace`.
 - `output` may declare `rewrite`.
-- If `output.stream` is omitted, captured command stdout is rendered.
+- If `output.stream` is omitted, captured stdout followed by captured stderr is
+  rendered.
 - `output.stream` accepts `stdout`, `stderr`, and `combined`.
 - `output.stream: stdout` renders only captured command stdout.
 - `output.stream: stderr` renders only captured command stderr.
@@ -723,7 +724,8 @@ in the runbook.
       captured stderr.
 - [ ] Given `output.stream: combined`, rendered command output includes
       captured stdout followed by captured stderr.
-- [ ] Given no `output.stream`, rendered command output defaults to stdout.
+- [ ] Given no `output.stream`, rendered command output defaults to combined
+      stdout followed by stderr.
 - [ ] Given an invalid `output.stream` value, validation rejects the runbook
       with a clear error.
 - [ ] Given `output.stream: stderr` together with `output.rewrite`, rewrites

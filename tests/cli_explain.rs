@@ -65,7 +65,7 @@ fn explain_run_prints_concise_contract_summary() {
         "`Command` entries default to a `2 minutes` timeout unless `timeout` is provided."
     ));
     assert!(stdout.contains(
-        "Command output can render `stdout`, `stderr`, or `combined` with `output.stream`; if omitted, rendered output defaults to `stdout`."
+        "Command output can render `stdout`, `stderr`, or `combined` with `output.stream`; if omitted, rendered output defaults to `combined`."
     ));
     assert!(stdout.contains(
         "`output.stream` changes rendered output only and does not widen capture or assertion sources."

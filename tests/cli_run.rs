@@ -336,7 +336,8 @@ fn debug_run_reports_rewrite_and_capture_diagnostics_to_stderr() {
     assert!(stderr.contains("audio file> target/audio/audio_20260312_142351.mp3"));
     assert!(stderr.contains("[debug] Rewrite datetime_shift pattern: audio_\\d{8}_\\d{6}"));
     assert!(stderr.contains("[debug] Rewrite datetime_shift match count: 1"));
-    assert!(stderr.contains("[debug] Rewritten stdout:"));
+    assert!(stderr.contains("[debug] Rewritten stdout for capture:"));
+    assert!(stderr.contains("[debug] Rewritten rendered output stream:"));
     assert!(stderr.contains("audio file> target/audio/audio_20770427_123456.mp3"));
     assert!(
         stderr.contains("[debug] Generated capture audio_path_1_original = audio_20260312_142351")
@@ -360,7 +361,8 @@ fn debug_flag_before_subcommand_uses_default_run_behavior() {
     assert!(output.status.success());
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(stderr.contains("[debug] Command entry:"));
-    assert!(stderr.contains("[debug] Rewritten stdout:"));
+    assert!(stderr.contains("[debug] Rewritten stdout for capture:"));
+    assert!(stderr.contains("[debug] Rewritten rendered output stream:"));
 }
 
 #[test]
@@ -1268,7 +1270,7 @@ fn output_trim_empty_lines_none_preserves_outer_blank_lines() {
 }
 
 #[test]
-fn output_stream_defaults_to_stdout() {
+fn output_stream_defaults_to_combined() {
     let dir = prepare_workspace();
     write_runbook(
         &dir,
@@ -1280,8 +1282,7 @@ fn output_stream_defaults_to_stdout() {
 
     assert!(output.status.success());
     let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
-    assert!(readme.contains("Stream output\n\n```\nstdout only\n```"));
-    assert!(!readme.contains("Stream output\n\n```\nstderr only\n```"));
+    assert!(readme.contains("Stream output\n\n```\nstdout only\nstderr only\n```"));
 }
 
 #[test]

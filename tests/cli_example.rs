@@ -23,7 +23,7 @@ fn command_example_prints_valid_json_entry() {
     assert_eq!(value["type"], "Command");
     assert!(value["commands"].is_array());
     assert!(value["assert"].is_object());
-    assert_eq!(value["output"]["stream"], "stdout");
+    assert_eq!(value["output"]["stream"], "combined");
     assert_eq!(value["output"]["trim_empty_lines"], "leading_trailing");
     assert!(value["output"]["rewrite"].is_array());
     assert!(

@@ -3,7 +3,7 @@
 - Status: Draft
 - Owner: `@aattard`
 - Created: `2026-03-13`
-- Updated: `2026-03-22`
+- Updated: `2026-03-24`
 
 ## Goal
 
@@ -52,6 +52,9 @@ In this increment, supported entity types include:
 - The `Command` example should reflect the current output contract, including
   supported output fields such as `stream` and `trim_empty_lines` when
   available.
+- When the `Command` example includes `output.stream`, it should use the
+  current default value so users and agents can start from the default
+  behavior.
 - The `DisplayFile` example should reflect the current transform contract,
   including Java `collapse_method_body` when implemented.
 - Example output is documentation-oriented and does not need to be executable

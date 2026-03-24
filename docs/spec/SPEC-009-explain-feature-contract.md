@@ -3,7 +3,7 @@
 - Status: Proposed
 - Owner: @aattard
 - Created: 2026-03-13
-- Last updated: 2026-03-22
+- Last updated: 2026-03-24
 
 ## Problem
 
@@ -135,7 +135,8 @@ their allowed values and intent discoverable without requiring the raw spec.
 When a topic covers runbook output stream selection, the explanation should
 describe `output.stream`, its supported values, and the boundary between
 rendered output selection versus the narrower existing `capture.source` and
-assertion-check source contracts.
+assertion-check source contracts. For `run`, the explanation should also state
+the current default when `output.stream` is omitted.
 
 When `--output-format=skill` is selected:
 
@@ -173,6 +174,8 @@ When `--output-format=skill` is selected:
       lines.
 - [ ] Given `sw explain run`, the CLI documents `output.stream` and its
       supported values `stdout`, `stderr`, and `combined`.
+- [ ] Given `sw explain run`, the CLI documents that omitted `output.stream`
+      defaults to `combined`.
 - [ ] Given `sw explain run`, the CLI makes it clear that `output.stream`
       changes rendered output only and does not broaden `capture.source` or
       assertion-check sources beyond their current contracts.

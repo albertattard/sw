@@ -1825,13 +1825,13 @@ fn apply_rewrite_rules(
 
 fn rendered_output_stream(entry: &Value) -> Result<OutputStream, RenderError> {
     let Some(output) = entry.get("output") else {
-        return Ok(OutputStream::Stdout);
+        return Ok(OutputStream::Combined);
     };
 
     match output.get("stream").and_then(Value::as_str) {
-        None | Some("stdout") => Ok(OutputStream::Stdout),
+        None | Some("combined") => Ok(OutputStream::Combined),
+        Some("stdout") => Ok(OutputStream::Stdout),
         Some("stderr") => Ok(OutputStream::Stderr),
-        Some("combined") => Ok(OutputStream::Combined),
         Some(other) => Err(RenderError::Operational(format!(
             "Unsupported command output stream `{other}`"
         ))),
@@ -1843,9 +1843,9 @@ fn rendered_output_source(
     execution: &CommandExecution,
 ) -> Result<String, RenderError> {
     match output.get("stream").and_then(Value::as_str) {
-        None | Some("stdout") => Ok(execution.stdout.to_string()),
+        None | Some("combined") => Ok(format!("{}{}", execution.stdout, execution.stderr)),
+        Some("stdout") => Ok(execution.stdout.to_string()),
         Some("stderr") => Ok(execution.stderr.to_string()),
-        Some("combined") => Ok(format!("{}{}", execution.stdout, execution.stderr)),
         Some(other) => Err(RenderError::Operational(format!(
             "Unsupported command output stream `{other}`"
         ))),
