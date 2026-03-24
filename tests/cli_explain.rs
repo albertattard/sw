@@ -185,6 +185,9 @@ fn explain_boundaries_between_help_example_and_explain_are_clear() {
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("Use `help` for exact flags and invocation syntax."));
+    assert!(
+        stdout.contains("Use `--version` or `version` when you need to identify the current build")
+    );
     assert!(stdout.contains("Use `explain` when the question is about behavior, defaults, or which command to call next."));
     assert!(stdout.contains("If you need JSON shape examples, use `sw example <topic>` next."));
 }

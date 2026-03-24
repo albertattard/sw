@@ -14,6 +14,7 @@ fn help_flag_prints_help() {
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("Sociable Weaver (SW)"));
+    assert!(stdout.contains("--version"));
     assert!(stdout.contains("Still weaving the nest. Features are hatching soon."));
 }
 
@@ -30,6 +31,7 @@ fn help_subcommand_prints_help() {
     assert!(stdout.contains("example"));
     assert!(stdout.contains("explain"));
     assert!(stdout.contains("help"));
+    assert!(stdout.contains("version"));
 }
 
 #[test]
@@ -72,6 +74,7 @@ fn help_all_prints_top_level_and_known_subcommand_help() {
     assert!(stdout.contains("Explain a feature contract or discovery path"));
     assert!(stdout.contains("Render a runbook to output"));
     assert!(stdout.contains("Show help for the CLI or a specific subcommand"));
+    assert!(stdout.contains("Print version/build identity"));
     assert!(stdout.contains("Validate a runbook file"));
 }
 
@@ -158,4 +161,28 @@ fn unknown_command_fails() {
     assert!(!output.status.success());
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(stderr.contains("unrecognized subcommand"));
+}
+
+#[test]
+fn version_flag_prints_version_build_identity() {
+    let output = run(&["--version"]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.starts_with(&format!("sw {}", env!("CARGO_PKG_VERSION"))));
+    if let Some(commit) = option_env!("SW_GIT_COMMIT")
+        && !commit.is_empty()
+    {
+        assert!(stdout.contains(commit));
+    }
+}
+
+#[test]
+fn version_subcommand_matches_version_flag() {
+    let flag_output = run(&["--version"]);
+    let command_output = run(&["version"]);
+
+    assert!(flag_output.status.success());
+    assert!(command_output.status.success());
+    assert_eq!(flag_output.stdout, command_output.stdout);
 }

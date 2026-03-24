@@ -1,7 +1,7 @@
 ---
 id: TASK-084
 title: Add Version Discovery Output
-status: pending
+status: done
 category: discovery
 related_features:
   - SPEC-001
@@ -37,14 +37,14 @@ which `sw` build they are running locally or remotely.
 
 ## Acceptance Criteria
 
-- [ ] `sw --version` prints version/build identity and exits with `0`.
-- [ ] `sw version` prints the same output as `sw --version` and exits with `0`.
-- [ ] The printed output includes the package version from `Cargo.toml`.
-- [ ] A build with source commit metadata includes that commit identifier in
+- [x] `sw --version` prints version/build identity and exits with `0`.
+- [x] `sw version` prints the same output as `sw --version` and exits with `0`.
+- [x] The printed output includes the package version from `Cargo.toml`.
+- [x] A build with source commit metadata includes that commit identifier in
       the output.
-- [ ] A build from a dirty working tree appends `-dirty` to the build
+- [x] A build from a dirty working tree appends `-dirty` to the build
       identity.
-- [ ] Help and discovery coverage include the new version entry points.
+- [x] Help and discovery coverage include the new version entry points.
 
 ## Notes
 

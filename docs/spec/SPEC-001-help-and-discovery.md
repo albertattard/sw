@@ -66,9 +66,9 @@ Exit codes:
 ## Acceptance Criteria
 
 - [x] `sw --help` prints top-level usage and exits with `0`.
-- [ ] `sw --version` prints version/build identity and exits with `0`.
+- [x] `sw --version` prints version/build identity and exits with `0`.
 - [x] `sw help` prints top-level usage and exits with `0`.
-- [ ] `sw version` prints the same version/build identity as `sw --version`
+- [x] `sw version` prints the same version/build identity as `sw --version`
       and exits with `0`.
 - [ ] `sw help <subcommand>` prints help for a known subcommand and exits with `0`.
 - [ ] `sw help run` documents the CLI flags for `run` and directs users to
@@ -83,9 +83,9 @@ Exit codes:
 - [ ] `sw help --all` prints top-level help plus help for each known subcommand and exits with `0`.
 - [x] `sw [command] --help` is documented as the command-level help pattern.
 - [x] Help output includes a short in-progress placeholder line.
-- [ ] The version output contains the package version from `Cargo.toml`.
-- [ ] The version output includes the source commit identifier when available.
-- [ ] A build from a dirty working tree appends `-dirty` to the build identity.
+- [x] The version output contains the package version from `Cargo.toml`.
+- [x] The version output includes the source commit identifier when available.
+- [x] A build from a dirty working tree appends `-dirty` to the build identity.
 
 ## Non-goals
 

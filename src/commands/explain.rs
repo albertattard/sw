@@ -191,25 +191,35 @@ fn explanations() -> Vec<Explanation<'static>> {
             defaults: &[
                 "Human-readable help only.",
                 "`sw help --all` prints top-level help plus each implemented subcommand.",
+                "`sw --version` and `sw version` print version/build identity for the current binary.",
             ],
             inputs: &[
                 "`sw --help`",
+                "`sw --version`",
                 "`sw help`",
                 "`sw help <subcommand>`",
                 "`sw help --all`",
                 "`sw [command] --help`",
+                "`sw version`",
             ],
-            outputs: &["Usage text is written to stdout.", "No files are changed."],
+            outputs: &[
+                "Usage text is written to stdout.",
+                "Version/build identity text is written to stdout for version entry points.",
+                "No files are changed.",
+            ],
             exit_codes: &[
                 "`0` when help prints successfully.",
+                "`0` when version/build identity prints successfully.",
                 "`1` for an unknown topic or help printing error.",
             ],
             constraints: &[
                 "Use `help` for exact flags and invocation syntax.",
+                "Use `--version` or `version` when you need to identify the current build before debugging behavior differences.",
                 "Use `explain` when the question is about behavior, defaults, or which command to call next.",
             ],
             next: &[
                 "Use this first when you need command-line syntax rather than feature guidance.",
+                "Use `sw --version` or `sw version` first when you need to confirm which binary is running.",
                 "If you need the product contract behind a command, use `sw explain <topic>` next.",
                 "If you need JSON shape examples, use `sw example <topic>` next.",
             ],

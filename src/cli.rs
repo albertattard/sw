@@ -5,7 +5,7 @@ use std::path::PathBuf;
 #[command(
     name = "sw",
     about = "Sociable Weaver (SW)",
-    disable_version_flag = true,
+    version = env!("SW_CLI_VERSION"),
     disable_help_subcommand = true,
     after_help = "Still weaving the nest. Features are hatching soon."
 )]
@@ -37,6 +37,8 @@ pub enum Commands {
     Run(RunArgs),
     /// Show help for the CLI or a specific subcommand.
     Help(HelpArgs),
+    /// Print version/build identity.
+    Version,
     /// Validate a runbook file.
     Validate(ValidateArgs),
 }
@@ -185,5 +187,7 @@ pub fn print_all_help() -> Result<(), String> {
 }
 
 fn command_topic_names() -> Vec<&'static str> {
-    vec!["check", "example", "explain", "run", "help", "validate"]
+    vec![
+        "check", "example", "explain", "run", "help", "version", "validate",
+    ]
 }
