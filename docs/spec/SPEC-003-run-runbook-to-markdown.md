@@ -53,9 +53,12 @@ in the runbook.
 - Optional output format parameter: `--output-format markdown`.
 - Optional output file parameter: `--output-file <path>`.
 - Optional progress parameter: `--verbose`.
+- Optional verbose progress mode parameter: `--verbose-mode auto|live|plain`.
 - Optional diagnostic parameter: `--debug`.
 - `--verbose` may be provided either before the subcommand as a global flag or
   after the `run` subcommand.
+- `--verbose-mode` may be provided either before the subcommand as a global
+  flag or after the `run` subcommand.
 - `--debug` may be provided either before the subcommand as a global flag or
   after the `run` subcommand.
 
@@ -76,9 +79,13 @@ in the runbook.
 - If `--output-format` is not provided, default to `markdown`.
 - If `--output-file` is not provided, default to `./README.md`.
 - If `--verbose` is not provided, progress output is suppressed.
+- If `--verbose-mode` is not provided, it defaults to `auto`.
+- If `--verbose` is not provided, `--verbose-mode` has no effect.
 - If `--debug` is not provided, diagnostic output is suppressed.
 - If `sw` is invoked without a subcommand, `sw --verbose` behaves the same as
   `sw run --verbose`.
+- If `sw` is invoked without a subcommand, `sw --verbose-mode=<mode>` behaves
+  the same as `sw run --verbose-mode=<mode>`.
 - If `sw` is invoked without a subcommand, `sw --debug` behaves the same as
   `sw run --debug`.
 - If a `Command` entry omits `timeout`, it defaults to `2 minutes`.
@@ -106,6 +113,9 @@ in the runbook.
 
 - `sw run --verbose` emits one progress line before each runbook entry begins.
 - `sw --verbose` behaves the same as `sw run --verbose`.
+- `sw run --verbose-mode=auto` is the default verbose progress mode.
+- `sw run --verbose-mode=live` forces in-place timer updates.
+- `sw run --verbose-mode=plain` forces SSH-safe line-based progress output.
 - Verbose progress output is written to stderr.
 - Verbose progress output is intended to help humans and agents follow
   long-running execution without changing the stable stdout contract.
@@ -124,6 +134,11 @@ in the runbook.
   full multi-line command blocks.
 - When stderr is a TTY, the current entry line includes a live elapsed timer
   that updates in place while that entry is running.
+- In `plain` mode, verbose output always uses line-based progress even when
+  stderr is a TTY.
+- In `plain` mode, verbose output prints a start line when an entry begins.
+- In `plain` mode, verbose output prints a completion line when an entry
+  finishes, including the elapsed time and timeout window when applicable.
 - Elapsed time is formatted for readability:
   - under one minute: seconds with one decimal place such as `12.4s`
   - one minute or more: minutes and seconds such as `1m 8s`
@@ -137,6 +152,8 @@ in the runbook.
 - When an entry finishes, the final elapsed time remains on the completed line.
 - When stderr is not a TTY, verbose progress falls back to non-live line-based
   output and does not attempt in-place timer updates.
+- `auto` mode chooses live progress only when stderr is a TTY and otherwise
+  falls back to plain line-based progress.
 
 ### Debug Diagnostic Output
 
