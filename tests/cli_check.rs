@@ -3,7 +3,7 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 #[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
@@ -330,4 +330,47 @@ fn check_missing_file_returns_operational_error() {
     assert_eq!(output.status.code(), Some(1));
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(stderr.contains("Failed to read"));
+}
+
+#[test]
+fn check_uses_five_second_default_timeout_for_command_prerequisites() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-prerequisites-timeout-default.json",
+        "sw-runbook.json",
+    );
+
+    let started_at = Instant::now();
+    let output = run_in_dir(&["check"], &dir);
+    let elapsed = started_at.elapsed();
+
+    assert_eq!(output.status.code(), Some(2));
+    assert!(
+        elapsed >= Duration::from_secs(4) && elapsed < Duration::from_secs(12),
+        "expected default prerequisite timeout near 5 seconds, got {elapsed:?}"
+    );
+    assert!(!dir.join("should-not-exist.txt").exists());
+    assert!(!dir.join("should-not-run.txt").exists());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("timed out after 5 seconds"));
+}
+
+#[test]
+fn check_allows_prerequisite_timeout_override() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-prerequisites-timeout-override.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["check"], &dir);
+
+    assert!(output.status.success());
+    assert_eq!(
+        fs::read_to_string(dir.join("override-prereq.txt")).expect("missing override-prereq.txt"),
+        "override success\n"
+    );
+    assert!(!dir.join("should-not-run.txt").exists());
 }

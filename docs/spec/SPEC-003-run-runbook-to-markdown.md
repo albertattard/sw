@@ -4,7 +4,7 @@ title: Run Runbook to Markdown
 status: in_progress
 priority: high
 owner: @aattard
-last_updated: 2026-03-22
+last_updated: 2026-03-24
 ---
 
 ## Problem
@@ -81,6 +81,7 @@ in the runbook.
   `sw run --verbose`.
 - If `sw` is invoked without a subcommand, `sw --debug` behaves the same as
   `sw run --debug`.
+- If a `Command` entry omits `timeout`, it defaults to `2 minutes`.
 
 ## Outputs
 
@@ -239,6 +240,9 @@ in the runbook.
   lines.
 - All lines within a single `command` prerequisite check execute together in
   the same shell context.
+- A `command` prerequisite check may declare `timeout`.
+- If a `command` prerequisite check omits `timeout`, it defaults to
+  `5 seconds`.
 - A `command` prerequisite check may declare `assert` using the same structure
   as `Command` assertions.
 - A `java` prerequisite check performs a built-in Java runtime validation

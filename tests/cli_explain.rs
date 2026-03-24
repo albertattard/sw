@@ -62,6 +62,9 @@ fn explain_run_prints_concise_contract_summary() {
         "Command output trims leading and trailing empty lines by default unless `output.trim_empty_lines` overrides it."
     ));
     assert!(stdout.contains(
+        "`Command` entries default to a `2 minutes` timeout unless `timeout` is provided."
+    ));
+    assert!(stdout.contains(
         "Command output can render `stdout`, `stderr`, or `combined` with `output.stream`; if omitted, rendered output defaults to `stdout`."
     ));
     assert!(stdout.contains(
@@ -91,6 +94,9 @@ fn explain_run_prints_concise_contract_summary() {
     ));
     assert!(stdout.contains(
         "Command output can trim outer empty lines with `output.trim_empty_lines` using `leading_trailing`, `leading`, `trailing`, or `none`."
+    ));
+    assert!(stdout.contains(
+        "Command-based prerequisite checks use a shorter default timeout of `5 seconds` unless they declare `timeout`."
     ));
     assert!(stdout.contains(
         "Use `sw example Command` when you need the current JSON shape for output fields such as `trim_empty_lines` and `stream`."
@@ -157,6 +163,9 @@ fn explain_check_guides_agent_to_prerequisites_and_examples() {
     assert!(stdout.contains(
         "When `--input-file=-` is used, stdin is parsed as JSON unless `--input-format=yaml` is provided."
     ));
+    assert!(stdout.contains(
+        "Command-based prerequisite checks default to `5 seconds` unless `timeout` is provided."
+    ));
     assert!(stdout.contains("`sw check --input-file=-`"));
     assert!(stdout.contains("`--input-format json|yaml` for stdin-backed input"));
     assert!(stdout.contains("`--input-file=-` reads the runbook from stdin."));
@@ -164,6 +173,9 @@ fn explain_check_guides_agent_to_prerequisites_and_examples() {
         "Without `--input-file=-`, `--input-format` keeps the existing file-backed defaults and does not override file-extension-based parsing."
     ));
     assert!(stdout.contains("Built-in prerequisite kinds include `java`"));
+    assert!(stdout.contains(
+        "Normal `Command` entries keep their separate `2 minutes` default timeout for `sw run`."
+    ));
 }
 
 #[test]

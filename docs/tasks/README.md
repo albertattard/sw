@@ -144,6 +144,7 @@ Expected task directories:
 - [TASK-080: Make Patch Application Non-Interactive](run/TASK-080-make-patch-application-non-interactive.md)
 - [TASK-081: Add Skill Frontmatter To Explain Export](explain/TASK-081-add-skill-frontmatter-to-explain-export.md)
 - [TASK-082: Minimize Skill Export To Discovery Entrypoint](explain/TASK-082-minimize-skill-export-to-discovery-entrypoint.md)
+- [TASK-083: Default Command Prerequisite Timeouts To Five Seconds](prerequisite/TASK-083-default-command-prerequisite-timeouts-to-five-seconds.md)
 
 ## Pending
 
@@ -218,6 +219,7 @@ Expected task directories:
 - [x] [TASK-057: Support Multiline Cleanup Control Structures](run/TASK-057-support-multiline-cleanup-control-structures.md)
 - [x] [TASK-058: Migrate Tasks Into Category Directories](repo-process/TASK-058-migrate-tasks-into-category-directories.md)
 - [x] [TASK-060: Improve Rewrite Capture Failure Diagnostics](rewrite/TASK-060-improve-rewrite-capture-failure-diagnostics.md)
+- [x] [TASK-083: Default Command Prerequisite Timeouts To Five Seconds](prerequisite/TASK-083-default-command-prerequisite-timeouts-to-five-seconds.md)
 - [x] [TASK-061: Add Debug Run Diagnostics](run/TASK-061-add-debug-run-diagnostics.md)
 - [x] [TASK-062: Support Command-Scoped Debug Diagnostics](run/TASK-062-support-command-scoped-debug-diagnostics.md)
 - [x] [TASK-063: Separate DisplayFile Indent And Offset](display-file/TASK-063-separate-display-file-indent-and-offset.md)

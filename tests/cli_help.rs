@@ -85,6 +85,8 @@ fn check_help_prints_help() {
     assert!(stdout.contains("Use `-` to read from stdin"));
     assert!(stdout.contains("--input-format"));
     assert!(stdout.contains("Ignored unless `--input-file=-` is used"));
+    assert!(stdout.contains("Command-based prerequisite checks default to a `5 seconds` timeout"));
+    assert!(stdout.contains("sw explain check"));
 }
 
 #[test]
@@ -130,6 +132,8 @@ fn run_help_prints_help() {
     assert!(stdout.contains("--output-file"));
     assert!(stdout.contains("trim_empty_lines"));
     assert!(stdout.contains("stream"));
+    assert!(stdout.contains("`Command` entries default to a `2 minutes` timeout"));
+    assert!(stdout.contains("prerequisite checks default to `5 seconds`"));
     assert!(stdout.contains("sw example Command"));
     assert!(stdout.contains("sw explain run"));
 }

@@ -1,0 +1,28 @@
+{
+  "entries": [
+    {
+      "type": "Prerequisite",
+      "checks": [
+        {
+          "kind": "command",
+          "name": "Slow prerequisite",
+          "contents": [
+            "- Slow environment probe"
+          ],
+          "commands": [
+            "sleep 2",
+            "printf 'override success\\n' > override-prereq.txt"
+          ],
+          "timeout": "3 seconds",
+          "help": "This prerequisite intentionally allows a longer probe window."
+        }
+      ]
+    },
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'main should not run\\n' > should-not-run.txt"
+      ]
+    }
+  ]
+}

@@ -218,8 +218,8 @@ pub(crate) fn timeout_label(entry: &Value) -> String {
     entry
         .get("timeout")
         .and_then(Value::as_str)
-        .unwrap_or("2 minutes")
-        .to_string()
+        .map(ToString::to_string)
+        .unwrap_or_else(|| default_timeout_label(entry).to_string())
 }
 
 pub(crate) fn run_cleanup_blocks(cleanups: &[Vec<String>]) -> Vec<String> {
@@ -563,12 +563,26 @@ fn format_command_stream(stream: &str) -> String {
 
 fn timeout_for_entry(entry: &Value) -> Result<Duration, RenderError> {
     let Some(timeout) = entry.get("timeout") else {
-        return Ok(Duration::from_secs(120));
+        return Ok(default_timeout_duration(entry));
     };
     let timeout = timeout
         .as_str()
         .ok_or_else(|| RenderError::Operational("Command timeout must be a string".to_string()))?;
     parse_timeout(timeout).map_err(RenderError::Operational)
+}
+
+fn default_timeout_duration(entry: &Value) -> Duration {
+    match default_timeout_label(entry) {
+        "5 seconds" => Duration::from_secs(5),
+        _ => Duration::from_secs(120),
+    }
+}
+
+fn default_timeout_label(entry: &Value) -> &'static str {
+    match entry.get("kind").and_then(Value::as_str) {
+        Some("command") => "5 seconds",
+        _ => "2 minutes",
+    }
 }
 
 fn parse_timeout(timeout: &str) -> Result<Duration, String> {
@@ -664,9 +678,14 @@ fn terminate_process_group(process_group_id: u32) -> Result<bool, RenderError> {
 
 #[cfg(test)]
 mod tests {
-    use super::{cleanup_chunks, cleanup_script, patch_text_for, run_patch_restores};
+    use super::{
+        cleanup_chunks, cleanup_script, patch_text_for, run_patch_restores, timeout_for_entry,
+        timeout_label,
+    };
+    use serde_json::json;
     use std::collections::HashMap;
     use std::fs;
+    use std::time::Duration;
 
     #[test]
     fn cleanup_chunks_keep_multiline_if_block_together() {
@@ -725,6 +744,51 @@ mod tests {
         );
 
         assert!(text.starts_with("--- ./src/main.rs\n+++ ./src/main.rs\n"));
+    }
+
+    #[test]
+    fn command_entries_default_to_two_minutes() {
+        let entry = json!({
+            "type": "Command",
+            "commands": ["echo hi"]
+        });
+
+        assert_eq!(
+            timeout_for_entry(&entry).unwrap_or_else(|_| panic!("timeout parse failed")),
+            Duration::from_secs(120)
+        );
+        assert_eq!(timeout_label(&entry), "2 minutes");
+    }
+
+    #[test]
+    fn command_prerequisite_checks_default_to_five_seconds() {
+        let entry = json!({
+            "kind": "command",
+            "name": "Demo prerequisite",
+            "commands": ["echo hi"]
+        });
+
+        assert_eq!(
+            timeout_for_entry(&entry).unwrap_or_else(|_| panic!("timeout parse failed")),
+            Duration::from_secs(5)
+        );
+        assert_eq!(timeout_label(&entry), "5 seconds");
+    }
+
+    #[test]
+    fn explicit_timeout_overrides_prerequisite_default() {
+        let entry = json!({
+            "kind": "command",
+            "name": "Demo prerequisite",
+            "commands": ["echo hi"],
+            "timeout": "9 seconds"
+        });
+
+        assert_eq!(
+            timeout_for_entry(&entry).unwrap_or_else(|_| panic!("timeout parse failed")),
+            Duration::from_secs(9)
+        );
+        assert_eq!(timeout_label(&entry), "9 seconds");
     }
 
     #[test]

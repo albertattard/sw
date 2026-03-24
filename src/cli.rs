@@ -43,7 +43,7 @@ pub enum Commands {
 
 #[derive(Debug, clap::Args)]
 #[command(
-    after_help = "Runbook-authored output fields such as `trim_empty_lines` and `stream` are configured in the runbook, not as CLI flags.\nUse `sw example Command` for a current JSON snippet and `sw explain run` for behavior and defaults."
+    after_help = "Runbook-authored output fields such as `trim_empty_lines` and `stream` are configured in the runbook, not as CLI flags.\n`Command` entries default to a `2 minutes` timeout, while command-based prerequisite checks default to `5 seconds` unless the runbook sets `timeout`.\nUse `sw example Command` for a current JSON snippet and `sw explain run` for behavior and defaults."
 )]
 pub struct RunArgs {
     #[command(flatten)]
@@ -59,6 +59,9 @@ pub struct RunArgs {
 }
 
 #[derive(Debug, clap::Args)]
+#[command(
+    after_help = "Command-based prerequisite checks default to a `5 seconds` timeout unless the runbook sets `timeout`.\nUse `sw example Prerequisite` for a current prerequisite JSON snippet and `sw explain check` for behavior and defaults."
+)]
 pub struct CheckArgs {
     #[command(flatten)]
     pub input: RunbookInputArgs,

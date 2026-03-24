@@ -1215,6 +1215,7 @@ fn validate_command_prerequisite_check(
             && key != "contents"
             && key != "commands"
             && key != "assert"
+            && key != "timeout"
             && key != "help"
         {
             push_error(
@@ -1232,6 +1233,10 @@ fn validate_command_prerequisite_check(
 
     if let Some(assertion) = object.get("assert") {
         validate_assert(assertion, &format!("{path}.assert"), errors);
+    }
+
+    if let Some(timeout) = object.get("timeout") {
+        validate_timeout(timeout, &format!("{path}.timeout"), errors);
     }
 }
 

@@ -4,7 +4,7 @@ title: Check Runbook Prerequisites
 status: proposed
 priority: medium
 owner: @aattard
-last_updated: 2026-03-22
+last_updated: 2026-03-24
 ---
 
 ## Problem
@@ -83,6 +83,8 @@ Default input behavior:
 - Prerequisite checks execute in the same order they appear in the runbook.
 - If a prerequisite check fails, `sw check` stops on that failure and reports
   the failing check.
+- Command-based prerequisite checks default to a `5 seconds` timeout unless
+  the runbook declares `timeout`.
 - `sw check` supports built-in prerequisite kinds.
 - In this increment, built-in prerequisite kinds include `java`.
 - A `java` prerequisite check validates the resolved Java runtime against the
@@ -153,6 +155,9 @@ Default input behavior:
 - Runbook contains no `Prerequisite` entries.
 - First prerequisite passes and a later prerequisite fails.
 - A prerequisite check times out.
+- A command-based prerequisite check relies on the default `5 seconds` timeout.
+- A command-based prerequisite check overrides the default timeout with an
+  explicit `timeout`.
 - A prerequisite check fails an assertion.
 - A Java prerequisite uses `version: "24+"`.
 - A Java prerequisite uses `version: "17"`.
