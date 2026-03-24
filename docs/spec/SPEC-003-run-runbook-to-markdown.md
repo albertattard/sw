@@ -525,10 +525,12 @@ in the runbook.
 - `format` and `pattern` are mutually exclusive.
 - In this increment, built-in `format` values are `rfc3339` and `rfc1123`.
 - No built-in time-only `format` names are introduced in this increment.
-- Built-in `rfc3339` matching supports timestamps with an offset and with
-  optional fractional seconds.
+- Built-in `rfc3339` matching supports timestamps with a numeric offset or a
+  `Z` suffix, and with optional fractional seconds.
 - When built-in `rfc3339` fractional seconds are present, they may use between
   1 and 9 digits.
+- If a built-in `rfc3339` match uses `Z`, the rewritten output preserves the
+  `Z` suffix.
 - If `format` is used, the original matched format is preserved in the
   rewritten output.
 - If `pattern` is used for semantic datetime shifting, `custom_format` is
@@ -916,6 +918,12 @@ in the runbook.
 - [ ] Given a `datetime_shift` rewrite rule with `format: rfc3339` and matched
       timestamps that use 1 to 9 fractional-second digits, those timestamps
       are rewritten successfully without requiring a custom pattern.
+- [ ] Given a `datetime_shift` rewrite rule with `format: rfc3339` and a
+      matched timestamp that uses `Z`, the timestamp is rewritten
+      successfully without requiring a custom pattern.
+- [ ] Given a `datetime_shift` rewrite rule with `format: rfc3339` and a
+      matched timestamp that uses fractional seconds together with `Z`, the
+      timestamp is rewritten successfully without requiring a custom pattern.
 - [ ] Given a `datetime_shift` rewrite rule with `format: rfc1123`, matched
       timestamps are rewritten and kept in RFC 1123 form.
 - [ ] Given a `datetime_shift` rewrite rule with `id`, later datetime rules may

@@ -148,6 +148,7 @@ Expected task directories:
 - [TASK-084: Add Version Discovery Output](discovery/TASK-084-add-version-discovery-output.md)
 - [TASK-085: Add Selectable Verbose Progress Modes](run/TASK-085-add-selectable-verbose-progress-modes.md)
 - [TASK-086: Make Combined The Default Command Output Stream](run/TASK-086-make-combined-the-default-command-output-stream.md)
+- [TASK-087: Support RFC3339 Zulu Datetime Shift](rewrite/TASK-087-support-rfc3339-zulu-datetime-shift.md)
 
 ## Pending
 
@@ -226,6 +227,7 @@ Expected task directories:
 - [x] [TASK-084: Add Version Discovery Output](discovery/TASK-084-add-version-discovery-output.md)
 - [x] [TASK-085: Add Selectable Verbose Progress Modes](run/TASK-085-add-selectable-verbose-progress-modes.md)
 - [x] [TASK-086: Make Combined The Default Command Output Stream](run/TASK-086-make-combined-the-default-command-output-stream.md)
+- [x] [TASK-087: Support RFC3339 Zulu Datetime Shift](rewrite/TASK-087-support-rfc3339-zulu-datetime-shift.md)
 - [x] [TASK-061: Add Debug Run Diagnostics](run/TASK-061-add-debug-run-diagnostics.md)
 - [x] [TASK-062: Support Command-Scoped Debug Diagnostics](run/TASK-062-support-command-scoped-debug-diagnostics.md)
 - [x] [TASK-063: Separate DisplayFile Indent And Offset](display-file/TASK-063-separate-display-file-indent-and-offset.md)
