@@ -1,0 +1,10 @@
+[graph]
+all-features = true
+
+[advisories]
+yanked = "deny"
+
+[bans]
+multiple-versions = "warn"
+wildcards = "allow"
+highlight = "all"

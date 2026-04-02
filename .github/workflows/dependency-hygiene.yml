@@ -1,0 +1,45 @@
+name: Dependency Hygiene
+
+on:
+  push:
+    branches:
+      - "**"
+    paths:
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "deny.toml"
+      - "rust-toolchain.toml"
+      - ".github/workflows/dependency-hygiene.yml"
+  pull_request:
+    paths:
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "deny.toml"
+      - "rust-toolchain.toml"
+      - ".github/workflows/dependency-hygiene.yml"
+  schedule:
+    - cron: "0 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cargo-deny:
+    name: cargo-deny
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.94.1
+
+      - name: Install cargo-deny
+        run: cargo install cargo-deny --locked
+
+      - name: Check dependency advisories and bans
+        run: cargo deny check advisories bans

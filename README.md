@@ -36,6 +36,22 @@ Recommended order:
 This is also the verification sequence used before the `commit changes`
 workflow creates and pushes a commit.
 
+The repository pins Rust `1.94.1` through `rust-toolchain.toml` so local
+development and CI use the same compiler, formatter, and linter versions.
+
+## Dependency Hygiene
+
+Dependency freshness is handled through weekly Dependabot updates for Cargo
+crates and GitHub Actions.
+
+Dependency advisories and duplicate-version drift are checked in CI with
+`cargo-deny`. To mirror that check locally, install it once and then run:
+
+```bash
+cargo install cargo-deny --locked
+cargo deny check advisories bans
+```
+
 ## Documentation Structure
 
 ```text
