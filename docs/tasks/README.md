@@ -150,6 +150,7 @@ Expected task directories:
 - [TASK-086: Make Combined The Default Command Output Stream](run/TASK-086-make-combined-the-default-command-output-stream.md)
 - [TASK-087: Support RFC3339 Zulu Datetime Shift](rewrite/TASK-087-support-rfc3339-zulu-datetime-shift.md)
 - [TASK-088: Add Rust Quality And Dependency Hygiene Automation](repo-process/TASK-088-add-rust-quality-and-dependency-hygiene-automation.md)
+- [TASK-089: Replace Deprecated Serde YAML Dependency](repo-process/TASK-089-replace-deprecated-serde-yaml-dependency.md)
 
 ## Pending
 
@@ -157,6 +158,7 @@ Expected task directories:
 - [ ] [TASK-033: Implement Import Command](import/TASK-033-implement-import-command.md)
 - [ ] [TASK-038: Include Release Commit History In README](release/TASK-038-include-release-commit-history-in-readme.md)
 - [ ] [TASK-059: Implement Format Command](format/TASK-059-implement-format-command.md)
+- [ ] [TASK-089: Replace Deprecated Serde YAML Dependency](repo-process/TASK-089-replace-deprecated-serde-yaml-dependency.md)
 
 ## In Progress
 
