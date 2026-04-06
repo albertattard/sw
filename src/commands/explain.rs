@@ -305,6 +305,7 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "Entries execute in runbook order.",
                 "Command execution and rendering are part of the same workflow.",
                 "Machine-readable contracts live in the runbook input, not in stdout.",
+                "`DisplayFile` fence detection recognizes `.java` as `java` and `.sql` as `sql`; other extensions fall back to `text`.",
                 "Command output can render `stdout`, `stderr`, or `combined` with `output.stream`; if omitted, rendered output defaults to `combined`.",
                 "`output.stream` changes rendered output only and does not widen capture or assertion sources.",
                 "Command output can trim outer empty lines with `output.trim_empty_lines` using `leading_trailing`, `leading`, `trailing`, or `none`.",

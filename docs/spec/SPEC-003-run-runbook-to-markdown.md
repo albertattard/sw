@@ -237,7 +237,7 @@ in the runbook.
 - `DisplayFile` fenced blocks use a detected content type when the file
   extension is recognized.
 - In this increment, recognized `DisplayFile` extensions include `.java`,
-  which renders as `java`.
+  which renders as `java`, and `.sql`, which renders as `sql`.
 - If the `DisplayFile` extension is not recognized, the generated Markdown
   uses a `text` fenced block.
 
@@ -637,6 +637,8 @@ in the runbook.
       includes the referenced file contents in a fenced block.
 - [ ] Given a `DisplayFile` entry that references a `.java` file, the
       generated Markdown uses a `java` fenced block.
+- [ ] Given a `DisplayFile` entry that references a `.sql` file, the
+      generated Markdown uses a `sql` fenced block.
 - [ ] Given a `DisplayFile` entry whose extension is not recognized, the
       generated Markdown uses a `text` fenced block.
 - [ ] Given a `DisplayFile` entry with `start_line`, rendering begins at that

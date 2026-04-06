@@ -51,7 +51,7 @@ pub enum Commands {
 
 #[derive(Debug, clap::Args)]
 #[command(
-    after_help = "Runbook-authored output fields such as `trim_empty_lines` and `stream` are configured in the runbook, not as CLI flags.\n`Command` entries default to a `2 minutes` timeout, while command-based prerequisite checks default to `5 seconds` unless the runbook sets `timeout`.\nUse `--verbose-mode=plain` for SSH-safe line-based progress output when terminal redraws are unreliable.\nUse `sw example Command` for a current JSON snippet and `sw explain run` for behavior and defaults."
+    after_help = "Runbook-authored output fields such as `trim_empty_lines` and `stream` are configured in the runbook, not as CLI flags.\n`Command` entries default to a `2 minutes` timeout, while command-based prerequisite checks default to `5 seconds` unless the runbook sets `timeout`.\n`DisplayFile` fence detection currently recognizes `.java` as `java` and `.sql` as `sql`; other extensions render as `text`.\nUse `--verbose-mode=plain` for SSH-safe line-based progress output when terminal redraws are unreliable.\nUse `sw example Command` for a current JSON snippet and `sw explain run` for behavior and defaults."
 )]
 pub struct RunArgs {
     #[command(flatten)]

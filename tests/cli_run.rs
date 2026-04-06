@@ -1933,6 +1933,28 @@ fn display_file_java_uses_java_fenced_block() {
 }
 
 #[test]
+fn display_file_sql_uses_sql_fenced_block() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-display-file-sql.json",
+        "sw-runbook.json",
+    );
+    fs::write(
+        dir.join("V1__create_database.sql"),
+        "CREATE TABLE users (\n    id BIGINT PRIMARY KEY,\n    email VARCHAR(255) NOT NULL\n);\n",
+    )
+    .expect("failed to write V1__create_database.sql");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("# Display SQL file"));
+    assert!(readme.contains("```sql\nCREATE TABLE users ("));
+}
+
+#[test]
 fn display_file_java_transform_can_collapse_a_method_body() {
     let dir = prepare_workspace();
     write_runbook(

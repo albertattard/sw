@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "type": "Heading",
+      "level": "H1",
+      "title": "Display SQL file"
+    },
+    {
+      "type": "DisplayFile",
+      "path": "./V1__create_database.sql"
+    }
+  ]
+}
