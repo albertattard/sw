@@ -32,6 +32,7 @@ fn help_subcommand_prints_help() {
     assert!(stdout.contains("check"));
     assert!(stdout.contains("example"));
     assert!(stdout.contains("explain"));
+    assert!(stdout.contains("import"));
     assert!(stdout.contains("help"));
     assert!(stdout.contains("version"));
 }
@@ -74,6 +75,7 @@ fn help_all_prints_top_level_and_known_subcommand_help() {
     assert!(stdout.contains("Check runbook prerequisites"));
     assert!(stdout.contains("Print a JSON example for a runbook topic"));
     assert!(stdout.contains("Explain a feature contract or discovery path"));
+    assert!(stdout.contains("Import a Markdown README into a starter runbook"));
     assert!(stdout.contains("Render a runbook to output"));
     assert!(stdout.contains("Show help for the CLI or a specific subcommand"));
     assert!(stdout.contains("Print version/build identity"));
@@ -119,6 +121,20 @@ fn explain_help_prints_help() {
     assert!(stdout.contains("--output-format"));
     assert!(stdout.contains("--output-file"));
     assert!(stdout.contains("--force"));
+}
+
+#[test]
+fn import_help_prints_help() {
+    let output = run(&["import", "--help"]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("--input-file"));
+    assert!(stdout.contains("--output-file"));
+    assert!(stdout.contains("--force"));
+    assert!(stdout.contains("Defaults to `./README.md` input and `./sw-runbook.json` output."));
+    assert!(stdout.contains("Headings map to `Heading` entries"));
+    assert!(stdout.contains("sw explain import"));
 }
 
 #[test]

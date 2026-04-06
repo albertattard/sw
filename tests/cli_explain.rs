@@ -185,6 +185,27 @@ fn explain_check_guides_agent_to_prerequisites_and_examples() {
 }
 
 #[test]
+fn explain_import_prints_current_import_contract() {
+    let output = run(&["explain", "import"]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("topic: import"));
+    assert!(stdout.contains("availability: implemented"));
+    assert!(stdout.contains("Default input file is `./README.md`."));
+    assert!(stdout.contains("Default output file is `./sw-runbook.json`."));
+    assert!(stdout.contains("Command: `sw import`"));
+    assert!(stdout.contains("`0` for a successful import."));
+    assert!(stdout.contains("Headings map to `Heading` entries"));
+    assert!(
+        stdout.contains(
+            "Fenced code blocks without a recognized shell language tag remain `Markdown`"
+        )
+    );
+    assert!(stdout.contains("Run `sw validate --input-file <generated-runbook>`"));
+}
+
+#[test]
 fn explain_boundaries_between_help_example_and_explain_are_clear() {
     let output = run(&["explain", "help"]);
 

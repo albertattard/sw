@@ -1,13 +1,13 @@
 ---
 id: TASK-033
 title: Implement Import Command
-status: pending
+status: done
 category: import
 related_features:
   - SPEC-006
 owner: @aattard
 created: 2026-03-13
-updated: 2026-03-13
+updated: 2026-04-02
 ---
 
 ## Summary
@@ -32,12 +32,12 @@ then refine the generated JSON with runbook-specific details.
 
 ## Acceptance Criteria
 
-- [ ] Given a README with headings, prose, and fenced shell blocks, `sw import`
+- [x] Given a README with headings, prose, and fenced shell blocks, `sw import`
       writes a valid runbook JSON file.
-- [ ] Given an existing target file without `--force`, `sw import` exits with
+- [x] Given an existing target file without `--force`, `sw import` exits with
       `1` and does not overwrite it.
-- [ ] Given `--force`, `sw import` overwrites the target file.
-- [ ] The generated runbook passes `sw validate`.
+- [x] Given `--force`, `sw import` overwrites the target file.
+- [x] The generated runbook passes `sw validate`.
 
 ## Notes
 

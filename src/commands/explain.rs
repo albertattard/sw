@@ -392,33 +392,33 @@ fn explanations() -> Vec<Explanation<'static>> {
         },
         Explanation {
             topic: "import",
-            availability: "planned",
+            availability: "implemented",
             purpose: "Import an existing Markdown README into a starter runbook JSON file.",
             defaults: &[
-                "Planned default input file is `./README.md`.",
-                "Planned default output file is `./sw-runbook.json`.",
-                "Planned default behavior is to refuse overwriting unless `--force` is provided.",
+                "Default input file is `./README.md`.",
+                "Default output file is `./sw-runbook.json`.",
+                "Existing output files are not overwritten unless `--force` is provided.",
             ],
             inputs: &[
-                "Planned command: `sw import`",
-                "Planned options: `--input-file <README.md>`, `--output-file <runbook.json>`, and `--force`",
+                "Command: `sw import`",
+                "Options: `--input-file <README.md>`, `--output-file <runbook.json>`, and `--force`",
             ],
             outputs: &[
-                "Planned output is a best-effort runbook JSON file plus a short stdout confirmation.",
+                "Writes a best-effort runbook JSON file and prints a short stdout confirmation.",
             ],
             exit_codes: &[
-                "Planned `0` for a successful import.",
-                "Planned `1` for missing input, write failures, or existing output without `--force`.",
+                "`0` for a successful import.",
+                "`1` for missing input, write failures, validation failures, or existing output without `--force`.",
             ],
             constraints: &[
                 "Import is intentionally lossy and produces an editable starting point rather than a perfect round trip.",
                 "Headings map to `Heading` entries where possible, prose to `Markdown`, and fenced shell blocks to `Command` entries.",
-                "This topic describes the documented contract even though the command is not implemented yet.",
+                "Fenced code blocks without a recognized shell language tag remain `Markdown` so the importer does not guess execution semantics.",
             ],
             next: &[
-                "Use this topic when you need to understand the planned README-to-runbook conversion path.",
-                "Use `sw example <topic>` when you need current JSON snippets for manual authoring.",
-                "Use `sw help` to confirm which commands are actually available in this build.",
+                "Use this topic when you need the current README-to-runbook conversion contract.",
+                "Run `sw validate --input-file <generated-runbook>` if you want an explicit post-import validation check.",
+                "Use `sw example <topic>` when you need current JSON snippets for manual authoring after the import.",
             ],
         },
         Explanation {

@@ -1,9 +1,9 @@
 # SPEC-006: Import README to Runbook
 
-- Status: Draft
+- Status: Implemented
 - Owner: `@aattard`
 - Created: `2026-03-13`
-- Updated: `2026-03-13`
+- Updated: `2026-04-02`
 
 ## Goal
 
@@ -68,19 +68,19 @@ It reads a Markdown document and writes a best-effort runbook JSON file.
 
 ## Acceptance Criteria
 
-- [ ] Given `sw import` with a `./README.md` present, the command writes
+- [x] Given `sw import` with a `./README.md` present, the command writes
       `./sw-runbook.json` and exits with `0`.
-- [ ] Given `sw import --input-file <path> --output-file <path>`, the command
+- [x] Given `sw import --input-file <path> --output-file <path>`, the command
       reads the provided Markdown file and writes the runbook to the provided
       output path.
-- [ ] Given `sw import` when the target output file already exists, the command
+- [x] Given `sw import` when the target output file already exists, the command
       exits with `1` and does not overwrite the file.
-- [ ] Given `sw import --force` when the target output file already exists, the
+- [x] Given `sw import --force` when the target output file already exists, the
       command overwrites the file and exits with `0`.
-- [ ] Given a README with Markdown headings, prose, and fenced shell blocks,
+- [x] Given a README with Markdown headings, prose, and fenced shell blocks,
       the generated runbook contains corresponding `Heading`, `Markdown`, and
       `Command` entries.
-- [ ] The generated runbook is valid according to `sw validate`.
+- [x] The generated runbook is valid according to `sw validate`.
 
 ## Non-goals
 

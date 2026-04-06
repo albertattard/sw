@@ -155,7 +155,6 @@ Expected task directories:
 ## Pending
 
 - [ ] [TASK-028: Implement Init Command](init/TASK-028-implement-init-command.md)
-- [ ] [TASK-033: Implement Import Command](import/TASK-033-implement-import-command.md)
 - [ ] [TASK-038: Include Release Commit History In README](release/TASK-038-include-release-commit-history-in-readme.md)
 - [ ] [TASK-059: Implement Format Command](format/TASK-059-implement-format-command.md)
 - [ ] [TASK-089: Replace Deprecated Serde YAML Dependency](repo-process/TASK-089-replace-deprecated-serde-yaml-dependency.md)
@@ -201,6 +200,7 @@ Expected task directories:
 - [x] [TASK-030: Support Keep Between Trim Markers](rewrite/TASK-030-support-keep-between-trim-markers.md)
 - [x] [TASK-031: Rename Prerequisites Entry To Singular](prerequisite/TASK-031-rename-prerequisites-entry-to-singular.md)
 - [x] [TASK-032: Implement Check Command](prerequisite/TASK-032-implement-check-command.md)
+- [x] [TASK-033: Implement Import Command](import/TASK-033-implement-import-command.md)
 - [x] [TASK-034: Expand Help Command Coverage](discovery/TASK-034-expand-help-command-coverage.md)
 - [x] [TASK-035: Publish Official Release Assets](release/TASK-035-publish-official-release-assets.md)
 - [x] [TASK-036: Include Commit Subject In Release README](release/TASK-036-include-commit-subject-in-release-readme.md)

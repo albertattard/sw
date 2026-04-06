@@ -37,6 +37,8 @@ pub enum Commands {
     Example(ExampleArgs),
     /// Explain a feature contract or discovery path.
     Explain(ExplainArgs),
+    /// Import a Markdown README into a starter runbook.
+    Import(ImportArgs),
     /// Render a runbook to output.
     Run(RunArgs),
     /// Show help for the CLI or a specific subcommand.
@@ -135,6 +137,24 @@ pub struct HelpArgs {
     pub topic: Option<String>,
 }
 
+#[derive(Debug, clap::Args)]
+#[command(
+    after_help = "Defaults to `./README.md` input and `./sw-runbook.json` output.\nHeadings map to `Heading` entries where possible, prose to `Markdown`, and fenced shell blocks to `Command` entries.\nUse `sw explain import` for the documented lossy-import contract."
+)]
+pub struct ImportArgs {
+    /// Path to the Markdown README to import.
+    #[arg(long)]
+    pub input_file: Option<PathBuf>,
+
+    /// Path to the generated runbook JSON file.
+    #[arg(long)]
+    pub output_file: Option<PathBuf>,
+
+    /// Overwrite the output file if it already exists.
+    #[arg(long)]
+    pub force: bool,
+}
+
 #[derive(Copy, Clone, Debug, Eq, PartialEq, ValueEnum)]
 pub enum RunOutputFormat {
     Markdown,
@@ -199,6 +219,6 @@ pub fn print_all_help() -> Result<(), String> {
 
 fn command_topic_names() -> Vec<&'static str> {
     vec![
-        "check", "example", "explain", "run", "help", "version", "validate",
+        "check", "example", "explain", "import", "run", "help", "version", "validate",
     ]
 }
