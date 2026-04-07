@@ -4,7 +4,7 @@ title: Validate Runbook Input
 status: in_progress
 priority: high
 owner: @aattard
-last_updated: 2026-03-22
+last_updated: 2026-04-07
 ---
 
 ## Problem
@@ -60,6 +60,11 @@ Default input behavior:
   `--input-file=-` is not used.
 - Supported input formats are JSON, YAML, and YML for files, and JSON or YAML
   for stdin.
+- `Markdown.contents` may be either a single string or an array of strings.
+- `Prerequisite.checks[*].contents` may be either a single string or an array
+  of strings.
+- When either field is provided as a string, validation accepts it as the
+  shorthand form for the existing line-array model.
 - If `--output-format` is not provided, default to `human`.
 
 Supported output formats:
@@ -119,6 +124,12 @@ Exit codes:
       exit code `1` with a clear missing-file error.
 - [ ] Given `sw validate --input-file <file.yaml>` with a valid YAML runbook,
       the command validates that file and returns exit code `0`.
+- [ ] Given a runbook whose `Markdown.contents` is a single string,
+      `sw validate --input-file <file> --output-format json` accepts that
+      shorthand and returns `valid: true`.
+- [ ] Given a runbook whose `Prerequisite.checks[*].contents` is a single
+      string, `sw validate --input-file <file> --output-format json` accepts
+      that shorthand and returns `valid: true`.
 - [ ] Given `sw validate --input-file=- --output-format json` with a valid
       JSON runbook on stdin, the command validates stdin and returns exit code
       `0`.

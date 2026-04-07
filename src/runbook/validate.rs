@@ -102,6 +102,31 @@ fn validate_string_array(value: &Value, path: &str, errors: &mut Vec<ValidationI
     }
 }
 
+fn validate_string_or_string_array(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>) {
+    match value {
+        Value::String(_) => {}
+        Value::Array(items) => {
+            for (index, item) in items.iter().enumerate() {
+                if !item.is_string() {
+                    push_error(errors, format!("{path}[{index}]"), "must be a string");
+                }
+            }
+        }
+        _ => push_error(
+            errors,
+            path.to_string(),
+            "must be a string or an array of strings",
+        ),
+    }
+}
+
+fn split_multiline_string(value: &str) -> Vec<&str> {
+    value
+        .split('\n')
+        .map(|line| line.strip_suffix('\r').unwrap_or(line))
+        .collect()
+}
+
 fn validate_output_with_context(
     value: &Value,
     path: &str,
@@ -287,25 +312,37 @@ fn validate_capture_references(
     errors: &mut Vec<ValidationIssue>,
     available_capture_names: &HashSet<String>,
 ) {
-    let Some(strings) = as_array(strings, path, errors) else {
-        return;
-    };
-
     let reference_pattern =
         Regex::new(CAPTURE_REFERENCE_PATTERN).expect("valid capture reference regex");
 
-    for (index, value) in strings.iter().enumerate() {
-        let Some(value) = value.as_str() else {
-            continue;
-        };
+    match strings {
+        Value::String(value) => {
+            for (index, line) in split_multiline_string(value).iter().enumerate() {
+                validate_capture_references_in_string(
+                    line,
+                    &format!("{path}[{index}]"),
+                    errors,
+                    available_capture_names,
+                    &reference_pattern,
+                );
+            }
+        }
+        Value::Array(strings) => {
+            for (index, value) in strings.iter().enumerate() {
+                let Some(value) = value.as_str() else {
+                    continue;
+                };
 
-        validate_capture_references_in_string(
-            value,
-            &format!("{path}[{index}]"),
-            errors,
-            available_capture_names,
-            &reference_pattern,
-        );
+                validate_capture_references_in_string(
+                    value,
+                    &format!("{path}[{index}]"),
+                    errors,
+                    available_capture_names,
+                    &reference_pattern,
+                );
+            }
+        }
+        _ => {}
     }
 }
 
@@ -857,7 +894,11 @@ fn validate_entry(
         }
         "Markdown" => match object.get("contents") {
             Some(contents) => {
-                validate_string_array(contents, &format!("{path}.contents"), &mut context.errors);
+                validate_string_or_string_array(
+                    contents,
+                    &format!("{path}.contents"),
+                    &mut context.errors,
+                );
                 validate_capture_references(
                     contents,
                     &format!("{path}.contents"),
@@ -1179,7 +1220,7 @@ fn validate_prerequisite_checks(value: &Value, path: &str, errors: &mut Vec<Vali
 
         match object.get("contents") {
             Some(contents) => {
-                validate_string_array(contents, &format!("{check_path}.contents"), errors)
+                validate_string_or_string_array(contents, &format!("{check_path}.contents"), errors)
             }
             None => push_error(errors, format!("{check_path}.contents"), "is required"),
         }

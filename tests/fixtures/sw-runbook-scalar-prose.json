@@ -1,0 +1,30 @@
+{
+  "entries": [
+    {
+      "type": "Heading",
+      "level": "H1",
+      "title": "Scalar prose"
+    },
+    {
+      "type": "Markdown",
+      "contents": "This runbook verifies scalar prose support.\n\nJSON strings should behave like the existing line-array model."
+    },
+    {
+      "type": "Prerequisite",
+      "checks": [
+        {
+          "kind": "command",
+          "name": "Environment marker",
+          "contents": "Environment marker file\nMust be available before the main workflow runs.",
+          "commands": [
+            "printf '%s\\n' prereq >> prereq-order.txt"
+          ],
+          "assert": {
+            "exit_code": 0
+          },
+          "help": "Create the environment marker before running this example."
+        }
+      ]
+    }
+  ]
+}

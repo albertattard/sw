@@ -4,7 +4,7 @@ title: Check Runbook Prerequisites
 status: proposed
 priority: medium
 owner: @aattard
-last_updated: 2026-03-24
+last_updated: 2026-04-07
 ---
 
 ## Problem
@@ -59,6 +59,11 @@ Default input behavior:
   `--input-file=-` is not used.
 - Supported input formats are JSON, YAML, and YML for files, and JSON or YAML
   for stdin.
+- `Prerequisite.checks[*].contents` may be either a single string or an array
+  of strings.
+- `Markdown.contents` may be either a single string or an array of strings,
+  and `sw check` applies the same valid-input contract before executing
+  prerequisite checks.
 
 ## Outputs
 
@@ -110,6 +115,12 @@ Default input behavior:
 - [ ] Given `sw check --input-file <file.yaml>` with a valid YAML runbook,
       `sw check` applies the same prerequisite-check contract and exit codes as
       a JSON runbook.
+- [ ] Given a valid runbook whose `Markdown.contents` is a single string,
+      `sw check` treats that runbook as valid input and continues to
+      prerequisite execution.
+- [ ] Given a valid runbook whose `Prerequisite.checks[*].contents` is a
+      single string, `sw check` treats that runbook as valid input and applies
+      the same prerequisite-check contract and exit codes.
 - [ ] Given `sw check --input-file=-` with a valid JSON runbook on stdin,
       `sw check` applies the same prerequisite-check contract and exit codes as
       a file-backed JSON runbook.

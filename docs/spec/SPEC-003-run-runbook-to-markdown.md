@@ -202,6 +202,9 @@ in the runbook.
 ### Markdown Entries
 
 - `Markdown` entries copy their `contents` into the output in order.
+- `Markdown.contents` may be either a single string or an array of strings.
+- When `Markdown.contents` is a string, it is normalized into the existing
+  line-array model by splitting on newline boundaries before rendering.
 
 ### DisplayFile Entries
 
@@ -252,7 +255,10 @@ in the runbook.
 - Each prerequisite check declares a `kind`.
 - In this increment, supported prerequisite check kinds are `command` and
   `java`.
-- Each prerequisite check declares `contents` as an array of Markdown lines.
+- Each prerequisite check declares `contents` as either a string or an array
+  of Markdown lines.
+- When prerequisite `contents` is a string, it is normalized into the existing
+  line-array model by splitting on newline boundaries before rendering.
 - `contents` is rendered into the generated Markdown in the declared order.
 - A `command` prerequisite check declares `commands` as an array of command
   lines.
@@ -625,6 +631,9 @@ in the runbook.
 
 - [ ] Given a runbook with `Markdown` entries, the generated Markdown preserves
       the entry content in order.
+- [ ] Given a runbook whose `Markdown.contents` is a single string, the
+      generated Markdown preserves that content as if the lines had been
+      declared explicitly in an array.
 - [ ] Markdown entries may interpolate `@{name}` when that variable is
       captured anywhere in the runbook.
 - [ ] `@@{name}` in Markdown content preserves the literal `@{name}`.
@@ -665,6 +674,9 @@ in the runbook.
 
 - [ ] Given a runbook with `Prerequisite` entries, the generated Markdown
       includes the declared prerequisite `contents` in order.
+- [ ] Given a prerequisite check whose `contents` is a single string, the
+      generated Markdown preserves that content as if the lines had been
+      declared explicitly in an array.
 - [ ] Given a single `Prerequisite` entry with multiple checks, all of those
       checks are evaluated from that entry's `checks` array.
 - [ ] Given a prerequisite check with multiple command lines, those lines

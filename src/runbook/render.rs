@@ -440,7 +440,7 @@ fn entry_summary(entry: &Value, runbook_path: &Path) -> String {
             .and_then(Value::as_str)
             .unwrap_or("Heading")
             .to_string(),
-        "Markdown" => first_non_empty_array_string(entry.get("contents"))
+        "Markdown" => first_non_empty_prose_string(entry.get("contents"))
             .unwrap_or_else(|| "Markdown".to_string()),
         "Command" => first_non_empty_array_string(entry.get("commands"))
             .unwrap_or_else(|| "Command".to_string()),
@@ -462,6 +462,19 @@ fn first_non_empty_array_string(value: Option<&Value>) -> Option<String> {
         }
     }
     None
+}
+
+fn first_non_empty_prose_string(value: Option<&Value>) -> Option<String> {
+    let value = value?;
+
+    match value {
+        Value::String(text) => split_multiline_string(text).into_iter().find_map(|line| {
+            let text = line.trim();
+            (!text.is_empty()).then(|| text.to_string())
+        }),
+        Value::Array(_) => first_non_empty_array_string(Some(value)),
+        _ => None,
+    }
 }
 
 fn display_file_summary(entry: &Value, runbook_path: &Path) -> String {
@@ -1133,27 +1146,15 @@ fn render_heading(entry: &Value) -> Result<String, RenderError> {
 }
 
 fn markdown_lines(entry: &Value) -> Result<Vec<String>, RenderError> {
-    let contents = entry
-        .get("contents")
-        .and_then(Value::as_array)
-        .ok_or_else(|| {
-            RenderError::Operational("Markdown entry is missing contents".to_string())
-        })?;
+    let contents = entry.get("contents").ok_or_else(|| {
+        RenderError::Operational("Markdown entry is missing contents".to_string())
+    })?;
 
-    let mut lines = Vec::new();
-    for item in contents {
-        lines.push(
-            item.as_str()
-                .ok_or_else(|| {
-                    RenderError::Operational(
-                        "Markdown contents must contain only strings".to_string(),
-                    )
-                })?
-                .to_string(),
-        );
-    }
-
-    Ok(lines)
+    prose_lines(
+        contents,
+        "Markdown contents must be a string or an array of strings",
+        "Markdown contents must contain only strings",
+    )
 }
 
 fn render_sections(
@@ -1406,28 +1407,47 @@ fn render_prerequisite_entry(entry: &Value) -> Result<String, RenderError> {
 
     let mut sections = Vec::new();
     for check in checks {
-        let contents = check
-            .get("contents")
-            .and_then(Value::as_array)
-            .ok_or_else(|| {
-                RenderError::Operational("Prerequisite contents must be an array".to_string())
-            })?;
-        let mut lines = Vec::new();
-        for item in contents {
-            lines.push(
-                item.as_str()
-                    .ok_or_else(|| {
-                        RenderError::Operational(
-                            "Prerequisite contents must contain only strings".to_string(),
-                        )
-                    })?
-                    .to_string(),
-            );
-        }
+        let contents = check.get("contents").ok_or_else(|| {
+            RenderError::Operational("Prerequisite contents are required".to_string())
+        })?;
+        let lines = prose_lines(
+            contents,
+            "Prerequisite contents must be a string or an array of strings",
+            "Prerequisite contents must contain only strings",
+        )?;
         sections.push(lines.join("\n"));
     }
 
     Ok(sections.join("\n\n"))
+}
+
+fn prose_lines(
+    value: &Value,
+    type_message: &str,
+    item_message: &str,
+) -> Result<Vec<String>, RenderError> {
+    match value {
+        Value::String(text) => Ok(split_multiline_string(text)),
+        Value::Array(items) => {
+            let mut lines = Vec::new();
+            for item in items {
+                lines.push(
+                    item.as_str()
+                        .ok_or_else(|| RenderError::Operational(item_message.to_string()))?
+                        .to_string(),
+                );
+            }
+            Ok(lines)
+        }
+        _ => Err(RenderError::Operational(type_message.to_string())),
+    }
+}
+
+fn split_multiline_string(value: &str) -> Vec<String> {
+    value
+        .split('\n')
+        .map(|line| line.strip_suffix('\r').unwrap_or(line).to_string())
+        .collect()
 }
 
 pub(crate) fn check_prerequisites(runbook: &Value) -> Result<(), RenderError> {

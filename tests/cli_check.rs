@@ -142,6 +142,23 @@ fn check_accepts_yaml_input_file() {
 }
 
 #[test]
+fn check_accepts_scalar_prose_contents_in_yaml_input_file() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-scalar-prose.yaml", "example.yaml");
+
+    let output = run_in_dir(&["check", "--input-file", "example.yaml"], &dir);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("All prerequisite checks passed"));
+    assert!(!dir.join("README.md").exists());
+    assert_eq!(
+        fs::read_to_string(dir.join("prereq-order.txt")).expect("missing prereq-order.txt"),
+        "prereq\n"
+    );
+}
+
+#[test]
 fn check_accepts_json_runbook_from_stdin() {
     let dir = prepare_workspace();
     let stdin = fs::read_to_string("tests/fixtures/sw-runbook-run-prerequisites-success.json")

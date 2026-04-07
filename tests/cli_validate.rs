@@ -101,6 +101,38 @@ fn valid_yaml_runbook_returns_success_json() {
 }
 
 #[test]
+fn validate_accepts_scalar_prose_contents_in_json() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-scalar-prose.json",
+        "--output-format",
+        "json",
+    ]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": true"));
+    assert!(stdout.contains("\"errors\": []"));
+}
+
+#[test]
+fn validate_accepts_scalar_prose_contents_in_yaml() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-scalar-prose.yaml",
+        "--output-format",
+        "json",
+    ]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": true"));
+    assert!(stdout.contains("\"errors\": []"));
+}
+
+#[test]
 fn validate_accepts_json_runbook_from_stdin() {
     let dir = prepare_workspace();
     let stdin = fs::read_to_string("tests/fixtures/sw-runbook-anonymized.json")

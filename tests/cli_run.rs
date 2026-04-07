@@ -166,6 +166,26 @@ fn run_command_accepts_yaml_input_file() {
 }
 
 #[test]
+fn run_command_accepts_scalar_prose_contents_in_yaml_input_file() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-scalar-prose.yaml", "example.yaml");
+
+    let output = run_in_dir(&["run", "--input-file", "example.yaml"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("# Scalar prose"));
+    assert!(readme.contains("This runbook verifies scalar prose support."));
+    assert!(readme.contains("YAML block scalars should not need explicit arrays."));
+    assert!(readme.contains("Environment marker file"));
+    assert!(readme.contains("Must be available before the main workflow runs."));
+    assert_eq!(
+        fs::read_to_string(dir.join("prereq-order.txt")).expect("missing prereq-order.txt"),
+        "prereq\nmain\n"
+    );
+}
+
+#[test]
 fn run_command_accepts_json_runbook_from_stdin() {
     let dir = prepare_workspace();
     let stdin = fs::read_to_string("tests/fixtures/sw-runbook-run-success.json")
