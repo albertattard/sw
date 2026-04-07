@@ -153,6 +153,7 @@ Expected task directories:
 - [TASK-089: Replace Deprecated Serde YAML Dependency](repo-process/TASK-089-replace-deprecated-serde-yaml-dependency.md)
 - [TASK-090: Recognize SQL DisplayFile Fences](display-file/TASK-090-recognize-sql-display-file-fences.md)
 - [TASK-091: Recognize XML DisplayFile Fences](display-file/TASK-091-recognize-xml-display-file-fences.md)
+- [TASK-092: Place Imported Entry Types First](import/TASK-092-place-imported-entry-types-first.md)
 
 ## Pending
 
@@ -160,6 +161,7 @@ Expected task directories:
 - [ ] [TASK-038: Include Release Commit History In README](release/TASK-038-include-release-commit-history-in-readme.md)
 - [ ] [TASK-059: Implement Format Command](format/TASK-059-implement-format-command.md)
 - [ ] [TASK-089: Replace Deprecated Serde YAML Dependency](repo-process/TASK-089-replace-deprecated-serde-yaml-dependency.md)
+- [ ] [TASK-092: Place Imported Entry Types First](import/TASK-092-place-imported-entry-types-first.md)
 
 ## In Progress
 

@@ -3,7 +3,7 @@
 - Status: Implemented
 - Owner: `@aattard`
 - Created: `2026-03-13`
-- Updated: `2026-04-02`
+- Updated: `2026-04-07`
 
 ## Goal
 
@@ -56,6 +56,12 @@ It reads a Markdown document and writes a best-effort runbook JSON file.
 - Fenced shell code blocks are imported as `Command` entries.
 - Markdown content that cannot be mapped to a richer runbook entry type is kept
   as `Markdown`.
+- Imported entry objects serialize `type` before the other entry-specific
+  fields to keep the generated runbook easier to scan and edit.
+- This ordering rule applies to all runbook entry types that `sw import`
+  emits, including future imported entry types added in later increments.
+- This field-ordering rule applies to `sw import` output only; other JSON
+  output remains governed by their own contracts.
 - Information not recoverable from the README is omitted and left to defaults
   or later manual enhancement, including:
   - `assert`
@@ -80,6 +86,8 @@ It reads a Markdown document and writes a best-effort runbook JSON file.
 - [x] Given a README with Markdown headings, prose, and fenced shell blocks,
       the generated runbook contains corresponding `Heading`, `Markdown`, and
       `Command` entries.
+- [ ] Given an imported runbook entry of any type that `sw import` emits, the
+      serialized JSON places `type` before the other entry fields.
 - [x] The generated runbook is valid according to `sw validate`.
 
 ## Non-goals
