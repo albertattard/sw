@@ -154,6 +154,7 @@ Expected task directories:
 - [TASK-090: Recognize SQL DisplayFile Fences](display-file/TASK-090-recognize-sql-display-file-fences.md)
 - [TASK-091: Recognize XML DisplayFile Fences](display-file/TASK-091-recognize-xml-display-file-fences.md)
 - [TASK-092: Place Imported Entry Types First](import/TASK-092-place-imported-entry-types-first.md)
+- [TASK-093: Declare Package License Metadata](repo-process/TASK-093-declare-package-license-metadata.md)
 
 ## Pending
 
@@ -238,6 +239,7 @@ Expected task directories:
 - [x] [TASK-089: Replace Deprecated Serde YAML Dependency](repo-process/TASK-089-replace-deprecated-serde-yaml-dependency.md)
 - [x] [TASK-090: Recognize SQL DisplayFile Fences](display-file/TASK-090-recognize-sql-display-file-fences.md)
 - [x] [TASK-091: Recognize XML DisplayFile Fences](display-file/TASK-091-recognize-xml-display-file-fences.md)
+- [x] [TASK-093: Declare Package License Metadata](repo-process/TASK-093-declare-package-license-metadata.md)
 - [x] [TASK-061: Add Debug Run Diagnostics](run/TASK-061-add-debug-run-diagnostics.md)
 - [x] [TASK-062: Support Command-Scoped Debug Diagnostics](run/TASK-062-support-command-scoped-debug-diagnostics.md)
 - [x] [TASK-063: Separate DisplayFile Indent And Offset](display-file/TASK-063-separate-display-file-indent-and-offset.md)

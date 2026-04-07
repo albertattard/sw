@@ -3,6 +3,7 @@ name = "sociable-weaver"
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.94"
+license = "MIT"
 
 [dependencies]
 clap = { version = "4.6", features = ["derive"] }
