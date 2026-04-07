@@ -1,7 +1,7 @@
 ---
 id: TASK-089
 title: Replace Deprecated Serde YAML Dependency
-status: pending
+status: done
 category: repo-process
 related_features:
   - SPEC-002
@@ -9,7 +9,7 @@ related_features:
   - SPEC-005
 owner: @aattard
 created: 2026-04-02
-updated: 2026-04-02
+updated: 2026-04-07
 ---
 
 ## Summary
@@ -40,14 +40,14 @@ agents.
 
 ## Acceptance Criteria
 
-- [ ] The repository no longer depends on the deprecated `serde_yaml` crate.
-- [ ] `sw validate` continues to accept supported YAML input from files and
+- [x] The repository no longer depends on the deprecated `serde_yaml` crate.
+- [x] `sw validate` continues to accept supported YAML input from files and
       stdin.
-- [ ] `sw run` continues to accept supported YAML input from files and stdin.
-- [ ] `sw check` continues to accept supported YAML input from files and stdin.
-- [ ] Existing automated tests continue to pass after the dependency
+- [x] `sw run` continues to accept supported YAML input from files and stdin.
+- [x] `sw check` continues to accept supported YAML input from files and stdin.
+- [x] Existing automated tests continue to pass after the dependency
       replacement.
-- [ ] Dependency hygiene checks remain green after the change.
+- [x] Dependency hygiene checks remain green after the change.
 
 ## Notes
 

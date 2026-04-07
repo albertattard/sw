@@ -75,7 +75,7 @@ pub fn read(path: &Path) -> Result<Value, String> {
         .map_err(|err| format!("Failed to read {}: {err}", path.display()))?;
 
     match path.extension().and_then(|value| value.to_str()) {
-        Some("yaml" | "yml") => serde_yaml::from_str(&contents)
+        Some("yaml" | "yml") => serde_norway::from_str(&contents)
             .map_err(|err| format!("Invalid YAML in {}: {err}", path.display())),
         _ => serde_json::from_str(&contents)
             .map_err(|err| format!("Invalid JSON in {}: {err}", path.display())),
@@ -93,7 +93,7 @@ fn read_stdin(format: InputFormat) -> Result<Value, String> {
             serde_json::from_str(&contents).map_err(|err| format!("Invalid JSON in stdin: {err}"))
         }
         InputFormat::Yaml => {
-            serde_yaml::from_str(&contents).map_err(|err| format!("Invalid YAML in stdin: {err}"))
+            serde_norway::from_str(&contents).map_err(|err| format!("Invalid YAML in stdin: {err}"))
         }
     }
 }

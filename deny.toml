@@ -8,3 +8,11 @@ yanked = "deny"
 multiple-versions = "warn"
 wildcards = "allow"
 highlight = "all"
+
+[licenses]
+allow = [
+  "Apache-2.0",
+  "MIT",
+  "Unicode-3.0",
+  "Unlicense",
+]
