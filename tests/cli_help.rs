@@ -156,7 +156,7 @@ fn run_help_prints_help() {
     assert!(stdout.contains("stream"));
     assert!(stdout.contains("`Command` entries default to a `2 minutes` timeout"));
     assert!(stdout.contains("prerequisite checks default to `5 seconds`"));
-    assert!(stdout.contains("`.java` as `java` and `.sql` as `sql`"));
+    assert!(stdout.contains("`.java` as `java`, `.sql` as `sql`, and `.xml` as `xml`"));
     assert!(stdout.contains("SSH-safe line-based progress output"));
     assert!(stdout.contains("sw example Command"));
     assert!(stdout.contains("sw explain run"));

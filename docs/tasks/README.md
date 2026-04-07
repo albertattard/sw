@@ -160,7 +160,6 @@ Expected task directories:
 - [ ] [TASK-038: Include Release Commit History In README](release/TASK-038-include-release-commit-history-in-readme.md)
 - [ ] [TASK-059: Implement Format Command](format/TASK-059-implement-format-command.md)
 - [ ] [TASK-089: Replace Deprecated Serde YAML Dependency](repo-process/TASK-089-replace-deprecated-serde-yaml-dependency.md)
-- [ ] [TASK-091: Recognize XML DisplayFile Fences](display-file/TASK-091-recognize-xml-display-file-fences.md)
 
 ## In Progress
 
@@ -236,6 +235,7 @@ Expected task directories:
 - [x] [TASK-087: Support RFC3339 Zulu Datetime Shift](rewrite/TASK-087-support-rfc3339-zulu-datetime-shift.md)
 - [x] [TASK-088: Add Rust Quality And Dependency Hygiene Automation](repo-process/TASK-088-add-rust-quality-and-dependency-hygiene-automation.md)
 - [x] [TASK-090: Recognize SQL DisplayFile Fences](display-file/TASK-090-recognize-sql-display-file-fences.md)
+- [x] [TASK-091: Recognize XML DisplayFile Fences](display-file/TASK-091-recognize-xml-display-file-fences.md)
 - [x] [TASK-061: Add Debug Run Diagnostics](run/TASK-061-add-debug-run-diagnostics.md)
 - [x] [TASK-062: Support Command-Scoped Debug Diagnostics](run/TASK-062-support-command-scoped-debug-diagnostics.md)
 - [x] [TASK-063: Separate DisplayFile Indent And Offset](display-file/TASK-063-separate-display-file-indent-and-offset.md)

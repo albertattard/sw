@@ -2700,6 +2700,7 @@ fn display_file_content_type(path: &Path) -> &'static str {
     match path.extension().and_then(|extension| extension.to_str()) {
         Some("java") => "java",
         Some("sql") => "sql",
+        Some("xml") => "xml",
         _ => "text",
     }
 }

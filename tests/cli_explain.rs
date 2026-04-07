@@ -87,7 +87,7 @@ fn explain_run_prints_concise_contract_summary() {
         "Without `--input-file=-`, `--input-format` keeps the existing file-backed defaults and does not override file-extension-based parsing."
     ));
     assert!(stdout.contains(
-        "`DisplayFile` fence detection recognizes `.java` as `java` and `.sql` as `sql`; other extensions fall back to `text`."
+        "`DisplayFile` fence detection recognizes `.java` as `java`, `.sql` as `sql`, and `.xml` as `xml`; other extensions fall back to `text`."
     ));
     assert!(stdout.contains(
         "Use `sw check` first if the question is whether prerequisites such as Java are available."

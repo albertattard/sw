@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "type": "Heading",
+      "level": "H1",
+      "title": "Display XML file"
+    },
+    {
+      "type": "DisplayFile",
+      "path": "./pom.xml"
+    }
+  ]
+}

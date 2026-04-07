@@ -1955,6 +1955,28 @@ fn display_file_sql_uses_sql_fenced_block() {
 }
 
 #[test]
+fn display_file_xml_uses_xml_fenced_block() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-display-file-xml.json",
+        "sw-runbook.json",
+    );
+    fs::write(
+        dir.join("pom.xml"),
+        "<project>\n  <modelVersion>4.0.0</modelVersion>\n  <artifactId>sw</artifactId>\n</project>\n",
+    )
+    .expect("failed to write pom.xml");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("# Display XML file"));
+    assert!(readme.contains("```xml\n<project>"));
+}
+
+#[test]
 fn display_file_java_transform_can_collapse_a_method_body() {
     let dir = prepare_workspace();
     write_runbook(

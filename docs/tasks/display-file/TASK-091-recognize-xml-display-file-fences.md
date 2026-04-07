@@ -1,7 +1,7 @@
 ---
 id: TASK-091
 title: Recognize XML DisplayFile Fences
-status: pending
+status: done
 category: display-file
 related_features:
   - SPEC-003
@@ -33,16 +33,16 @@ Recognize `.xml` files in `DisplayFile` entries so rendered snippets use an
 
 ## Acceptance Criteria
 
-- [ ] Given a `DisplayFile` entry that references a `.xml` file, `sw run`
+- [x] Given a `DisplayFile` entry that references a `.xml` file, `sw run`
       renders that snippet in an `xml` fenced block.
-- [ ] Given a `DisplayFile` entry that references a `.java` file, rendering
+- [x] Given a `DisplayFile` entry that references a `.java` file, rendering
       still uses a `java` fenced block.
-- [ ] Given a `DisplayFile` entry that references a `.sql` file, rendering
+- [x] Given a `DisplayFile` entry that references a `.sql` file, rendering
       still uses a `sql` fenced block.
-- [ ] Given an unrecognized `DisplayFile` extension, rendering still falls
+- [x] Given an unrecognized `DisplayFile` extension, rendering still falls
       back to a `text` fenced block.
-- [ ] Help or discovery text reflects the recognized XML fence behavior.
-- [ ] Automated tests pass after the change.
+- [x] Help or discovery text reflects the recognized XML fence behavior.
+- [x] Automated tests pass after the change.
 
 ## Notes
 
