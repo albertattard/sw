@@ -217,6 +217,10 @@ fn explain_import_prints_current_import_contract() {
     assert!(stdout.contains("`--output-format json|yaml`"));
     assert!(stdout.contains("`0` for a successful import."));
     assert!(stdout.contains("Headings map to `Heading` entries"));
+    assert!(stdout.contains("Imported entries serialize `type` before entry-specific fields"));
+    assert!(
+        stdout.contains("YAML import output separates adjacent `entries` items with a blank line")
+    );
     assert!(
         stdout.contains(
             "Fenced code blocks without a recognized shell language tag remain `Markdown`"

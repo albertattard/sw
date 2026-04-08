@@ -159,13 +159,13 @@ Expected task directories:
 - [TASK-095: Surface DisplayFile Indent In Example Output](example/TASK-095-surface-display-file-indent-in-example.md)
 - [TASK-096: Trim Scalar Output Caption Terminator Blank Lines](run/TASK-096-trim-scalar-output-caption-terminator-blank-lines.md)
 - [TASK-097: Add YAML Import Output Format](import/TASK-097-add-yaml-import-output-format.md)
+- [TASK-098: Format Imported YAML For Editing](import/TASK-098-format-imported-yaml-for-editing.md)
 
 ## Pending
 
 - [ ] [TASK-028: Implement Init Command](init/TASK-028-implement-init-command.md)
 - [ ] [TASK-038: Include Release Commit History In README](release/TASK-038-include-release-commit-history-in-readme.md)
 - [ ] [TASK-059: Implement Format Command](format/TASK-059-implement-format-command.md)
-- [ ] [TASK-092: Place Imported Entry Types First](import/TASK-092-place-imported-entry-types-first.md)
 
 ## In Progress
 
@@ -243,11 +243,13 @@ Expected task directories:
 - [x] [TASK-089: Replace Deprecated Serde YAML Dependency](repo-process/TASK-089-replace-deprecated-serde-yaml-dependency.md)
 - [x] [TASK-090: Recognize SQL DisplayFile Fences](display-file/TASK-090-recognize-sql-display-file-fences.md)
 - [x] [TASK-091: Recognize XML DisplayFile Fences](display-file/TASK-091-recognize-xml-display-file-fences.md)
+- [x] [TASK-092: Place Imported Entry Types First](import/TASK-092-place-imported-entry-types-first.md)
 - [x] [TASK-093: Declare Package License Metadata](repo-process/TASK-093-declare-package-license-metadata.md)
 - [x] [TASK-094: Accept Scalar Prose Contents](validate/TASK-094-accept-scalar-prose-contents.md)
 - [x] [TASK-095: Surface DisplayFile Indent In Example Output](example/TASK-095-surface-display-file-indent-in-example.md)
 - [x] [TASK-096: Trim Scalar Output Caption Terminator Blank Lines](run/TASK-096-trim-scalar-output-caption-terminator-blank-lines.md)
 - [x] [TASK-097: Add YAML Import Output Format](import/TASK-097-add-yaml-import-output-format.md)
+- [x] [TASK-098: Format Imported YAML For Editing](import/TASK-098-format-imported-yaml-for-editing.md)
 - [x] [TASK-061: Add Debug Run Diagnostics](run/TASK-061-add-debug-run-diagnostics.md)
 - [x] [TASK-062: Support Command-Scoped Debug Diagnostics](run/TASK-062-support-command-scoped-debug-diagnostics.md)
 - [x] [TASK-063: Separate DisplayFile Indent And Offset](display-file/TASK-063-separate-display-file-indent-and-offset.md)

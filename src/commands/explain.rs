@@ -422,6 +422,8 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "When `--output-format` is omitted, `sw import` infers the format from a recognized output-file extension or defaults to YAML.",
                 "If `--output-format` conflicts with a recognized output-file extension, `sw import` exits with `1` instead of writing a mismatched file.",
                 "Headings map to `Heading` entries where possible, prose to `Markdown`, and fenced shell blocks to `Command` entries.",
+                "Imported entries serialize `type` before entry-specific fields so the generated runbook is easier to scan.",
+                "YAML import output separates adjacent `entries` items with a blank line and emits imported multi-line `Markdown.contents` with `|` block scalars.",
                 "Fenced code blocks without a recognized shell language tag remain `Markdown` so the importer does not guess execution semantics.",
             ],
             next: &[

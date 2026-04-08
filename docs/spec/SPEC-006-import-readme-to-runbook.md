@@ -74,6 +74,14 @@ file.
   emits, including future imported entry types added in later increments.
 - This field-ordering rule applies to `sw import` output only; other machine-
   readable output remains governed by their own contracts.
+- YAML output from `sw import` inserts a blank line between adjacent items in
+  the top-level `entries` list so individual imported entries are easier to
+  scan and edit.
+- YAML output from `sw import` emits imported multi-line prose fields such as
+  `Markdown.contents` as literal block scalars using `|` instead of explicit
+  line arrays.
+- This YAML-friendly formatting contract applies to `sw import` output only; it
+  does not redefine how YAML is emitted by unrelated commands.
 - Information not recoverable from the README is omitted and left to defaults
   or later manual enhancement, including:
   - `assert`
@@ -106,8 +114,13 @@ file.
 - [x] Given a README with Markdown headings, prose, and fenced shell blocks,
       the generated runbook contains corresponding `Heading`, `Markdown`, and
       `Command` entries.
-- [ ] Given an imported runbook entry of any type that `sw import` emits, the
-      serialized JSON places `type` before the other entry fields.
+- [x] Given an imported runbook entry of any type that `sw import` emits, the
+      serialized output places `type` before the other entry fields.
+- [x] Given `sw import` YAML output with multiple imported entries, the
+      serialized `entries` list includes a blank line between adjacent entry
+      items.
+- [x] Given imported multi-line Markdown prose in YAML output, the serialized
+      `contents` field uses a literal block scalar introduced with `|`.
 - [x] The generated runbook is valid according to `sw validate`.
 
 ## Non-goals

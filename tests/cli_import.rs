@@ -4,6 +4,8 @@ use std::process::Command;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use serde_json::Value;
+
 static NEXT_ID: AtomicU64 = AtomicU64::new(0);
 
 fn unique_temp_dir() -> PathBuf {
@@ -38,6 +40,14 @@ fn write_fixture(dir: &Path, fixture_name: &str, target_name: &str) -> PathBuf {
     let contents = fs::read_to_string(source).expect("failed to read fixture");
     fs::write(&target, contents).expect("failed to write fixture");
     target
+}
+
+fn markdown_contents_include(entry: &Value, expected: &str) -> bool {
+    match entry.get("contents") {
+        Some(Value::Array(lines)) => lines.iter().any(|line| line == expected),
+        Some(Value::String(text)) => text.lines().any(|line| line == expected),
+        _ => false,
+    }
 }
 
 #[test]
@@ -125,6 +135,24 @@ fn import_output_format_json_changes_default_output_path() {
 }
 
 #[test]
+fn import_json_places_type_first_in_serialized_output() {
+    let dir = prepare_workspace();
+    write_fixture(&dir, "readme-import-sample.md", "README.md");
+
+    let output = run_in_dir(&["import", "--output-format", "json"], &dir);
+
+    assert!(output.status.success());
+    let runbook = fs::read_to_string(dir.join("sw-runbook.json")).expect("missing imported file");
+    let type_pos = runbook
+        .find("\"type\": \"Heading\"")
+        .expect("json output should contain heading type");
+    let level_pos = runbook
+        .find("\"level\": \"H1\"")
+        .expect("json output should contain heading level");
+    assert!(type_pos < level_pos);
+}
+
+#[test]
 fn import_rejects_mismatched_output_format_and_extension() {
     let dir = prepare_workspace();
     write_fixture(&dir, "readme-import-sample.md", "README.md");
@@ -199,11 +227,7 @@ fn import_maps_headings_prose_and_shell_blocks_into_runbook_entries() {
     assert_eq!(entries[0]["title"], "Example Workflow");
     assert!(entries.iter().any(|entry| {
         entry["type"] == "Markdown"
-            && entry["contents"]
-                .as_array()
-                .expect("markdown contents should be an array")
-                .iter()
-                .any(|line| line == "This README shows the main steps.")
+            && markdown_contents_include(entry, "This README shows the main steps.")
     }));
     assert!(entries.iter().any(|entry| {
         entry["type"] == "Command"
@@ -214,11 +238,36 @@ fn import_maps_headings_prose_and_shell_blocks_into_runbook_entries() {
                 .any(|line| line == "./mvnw clean verify")
     }));
     assert!(entries.iter().any(|entry| {
-        entry["type"] == "Markdown"
-            && entry["contents"]
-                .as_array()
-                .expect("markdown contents should be an array")
-                .iter()
-                .any(|line| line == "```yaml")
+        entry["type"] == "Markdown" && markdown_contents_include(entry, "```yaml")
     }));
+}
+
+#[test]
+fn import_yaml_places_type_first_and_separates_entries() {
+    let dir = prepare_workspace();
+    write_fixture(&dir, "readme-import-sample.md", "README.md");
+
+    let output = run_in_dir(&["import"], &dir);
+
+    assert!(output.status.success());
+    let runbook = fs::read_to_string(dir.join("sw-runbook.yaml")).expect("missing imported file");
+    assert!(
+        runbook.starts_with("entries:\n- type: Heading\n  level: H1\n  title: Example Workflow\n")
+    );
+    assert!(runbook.contains("title: Example Workflow\n\n- type: Markdown\n"));
+}
+
+#[test]
+fn import_yaml_uses_block_scalars_for_multiline_markdown_contents() {
+    let dir = prepare_workspace();
+    write_fixture(&dir, "readme-import-sample.md", "README.md");
+
+    let output = run_in_dir(&["import"], &dir);
+
+    assert!(output.status.success());
+    let runbook = fs::read_to_string(dir.join("sw-runbook.yaml")).expect("missing imported file");
+    assert!(
+        runbook
+            .contains("- type: Markdown\n  contents: |\n    ```yaml\n    kind: example\n    ```\n")
+    );
 }

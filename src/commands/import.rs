@@ -1,6 +1,7 @@
 use crate::cli::{ImportArgs, ImportOutputFormat};
 use crate::runbook;
-use serde_json::{Value, json};
+use serde::Serialize;
+use serde_json::Value;
 use std::fs;
 use std::path::PathBuf;
 use std::process::ExitCode;
@@ -39,12 +40,7 @@ pub fn run(args: ImportArgs) -> ExitCode {
     };
 
     let runbook = import_readme(&contents);
-    let Some(entries) = runbook.get("entries").and_then(Value::as_array) else {
-        eprintln!("Internal error: imported runbook is missing `entries`");
-        return ExitCode::from(1);
-    };
-
-    if entries.is_empty() {
+    if runbook.entries.is_empty() {
         eprintln!(
             "Failed to import {}: no supported content produced any runbook entries",
             input_path.display()
@@ -52,7 +48,8 @@ pub fn run(args: ImportArgs) -> ExitCode {
         return ExitCode::from(1);
     }
 
-    let validation = runbook::validate(&runbook, &output_path);
+    let runbook_value = runbook.to_value();
+    let validation = runbook::validate(&runbook_value, &output_path);
     if !validation.valid {
         eprintln!(
             "Generated runbook failed validation: {}",
@@ -119,12 +116,14 @@ fn infer_output_format_from_path(path: &std::path::Path) -> Option<ImportOutputF
     }
 }
 
-fn serialize_runbook(runbook: &Value, format: ImportOutputFormat) -> Result<String, String> {
+fn serialize_runbook(
+    runbook: &ImportedRunbook,
+    format: ImportOutputFormat,
+) -> Result<String, String> {
     let serialized = match format {
         ImportOutputFormat::Json => serde_json::to_string_pretty(runbook)
             .map_err(|err| format!("Failed to serialize imported runbook as JSON: {err}"))?,
-        ImportOutputFormat::Yaml => serde_norway::to_string(runbook)
-            .map_err(|err| format!("Failed to serialize imported runbook as YAML: {err}"))?,
+        ImportOutputFormat::Yaml => serialize_runbook_yaml(runbook)?,
     };
 
     if serialized.ends_with('\n') {
@@ -143,12 +142,13 @@ fn validation_error_summary(result: &runbook::ValidationResult) -> String {
         .join("; ")
 }
 
-fn import_readme(contents: &str) -> Value {
-    let entries = import_entries(contents);
-    json!({ "entries": entries })
+fn import_readme(contents: &str) -> ImportedRunbook {
+    ImportedRunbook {
+        entries: import_entries(contents),
+    }
 }
 
-fn import_entries(contents: &str) -> Vec<Value> {
+fn import_entries(contents: &str) -> Vec<ImportedEntry> {
     let mut entries = Vec::new();
     let mut markdown_lines = Vec::new();
     let mut fence_state: Option<FenceState> = None;
@@ -201,11 +201,7 @@ fn import_entries(contents: &str) -> Vec<Value> {
 
         if let Some((level, title)) = parse_heading(line) {
             push_markdown_entry(&mut entries, std::mem::take(&mut markdown_lines));
-            entries.push(json!({
-                "type": "Heading",
-                "level": level,
-                "title": title,
-            }));
+            entries.push(ImportedEntry::Heading { level, title });
             continue;
         }
 
@@ -226,6 +222,25 @@ fn import_entries(contents: &str) -> Vec<Value> {
     entries
 }
 
+#[derive(Debug, Clone, Serialize)]
+struct ImportedRunbook {
+    entries: Vec<ImportedEntry>,
+}
+
+impl ImportedRunbook {
+    fn to_value(&self) -> Value {
+        serde_json::to_value(self).expect("imported runbook should serialize to JSON value")
+    }
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(tag = "type")]
+enum ImportedEntry {
+    Heading { level: String, title: String },
+    Markdown { contents: Vec<String> },
+    Command { commands: Vec<String> },
+}
+
 #[derive(Clone, Copy)]
 enum FenceKind {
     Shell,
@@ -240,30 +255,123 @@ struct FenceState {
     lines: Vec<String>,
 }
 
-fn push_markdown_entry(entries: &mut Vec<Value>, lines: Vec<String>) -> bool {
+fn push_markdown_entry(entries: &mut Vec<ImportedEntry>, lines: Vec<String>) -> bool {
     let trimmed = trim_outer_blank_lines(lines);
     if trimmed.is_empty() {
         return false;
     }
 
-    entries.push(json!({
-        "type": "Markdown",
-        "contents": trimmed,
-    }));
+    entries.push(ImportedEntry::Markdown { contents: trimmed });
     true
 }
 
-fn push_command_entry(entries: &mut Vec<Value>, lines: Vec<String>) -> bool {
+fn push_command_entry(entries: &mut Vec<ImportedEntry>, lines: Vec<String>) -> bool {
     let trimmed = trim_outer_blank_lines(lines);
     if trimmed.is_empty() {
         return false;
     }
 
-    entries.push(json!({
-        "type": "Command",
-        "commands": trimmed,
-    }));
+    entries.push(ImportedEntry::Command { commands: trimmed });
     true
+}
+
+fn serialize_runbook_yaml(runbook: &ImportedRunbook) -> Result<String, String> {
+    let mut output = String::from("entries:\n");
+
+    for (index, entry) in runbook.entries.iter().enumerate() {
+        if index > 0 {
+            output.push('\n');
+        }
+        write_yaml_entry(&mut output, entry)?;
+    }
+
+    Ok(output)
+}
+
+fn write_yaml_entry(output: &mut String, entry: &ImportedEntry) -> Result<(), String> {
+    match entry {
+        ImportedEntry::Heading { level, title } => {
+            output.push_str("- type: Heading\n");
+            write_yaml_scalar_field(output, 2, "level", level)?;
+            write_yaml_scalar_field(output, 2, "title", title)?;
+        }
+        ImportedEntry::Markdown { contents } => {
+            output.push_str("- type: Markdown\n");
+            write_yaml_multiline_prose_field(output, 2, "contents", contents)?;
+        }
+        ImportedEntry::Command { commands } => {
+            output.push_str("- type: Command\n");
+            write_yaml_string_list_field(output, 2, "commands", commands)?;
+        }
+    }
+
+    Ok(())
+}
+
+fn write_yaml_scalar_field(
+    output: &mut String,
+    indent: usize,
+    key: &str,
+    value: &str,
+) -> Result<(), String> {
+    output.push_str(&" ".repeat(indent));
+    output.push_str(key);
+    output.push_str(": ");
+    output.push_str(&yaml_scalar(value)?);
+    output.push('\n');
+    Ok(())
+}
+
+fn write_yaml_multiline_prose_field(
+    output: &mut String,
+    indent: usize,
+    key: &str,
+    lines: &[String],
+) -> Result<(), String> {
+    if lines.len() <= 1 {
+        let value = lines.first().map_or("", String::as_str);
+        return write_yaml_scalar_field(output, indent, key, value);
+    }
+
+    output.push_str(&" ".repeat(indent));
+    output.push_str(key);
+    output.push_str(": |\n");
+
+    let content_indent = " ".repeat(indent + 2);
+    for line in lines {
+        output.push_str(&content_indent);
+        output.push_str(line);
+        output.push('\n');
+    }
+
+    Ok(())
+}
+
+fn write_yaml_string_list_field(
+    output: &mut String,
+    indent: usize,
+    key: &str,
+    values: &[String],
+) -> Result<(), String> {
+    output.push_str(&" ".repeat(indent));
+    output.push_str(key);
+    output.push_str(":\n");
+
+    let item_indent = " ".repeat(indent + 2);
+    for value in values {
+        output.push_str(&item_indent);
+        output.push_str("- ");
+        output.push_str(&yaml_scalar(value)?);
+        output.push('\n');
+    }
+
+    Ok(())
+}
+
+fn yaml_scalar(value: &str) -> Result<String, String> {
+    let rendered = serde_norway::to_string(value)
+        .map_err(|err| format!("Failed to serialize imported runbook as YAML: {err}"))?;
+    Ok(rendered.trim_end_matches('\n').to_string())
 }
 
 fn trim_outer_blank_lines(lines: Vec<String>) -> Vec<String> {
@@ -359,52 +467,77 @@ fn is_shell_fence(info: &str) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::import_readme;
+    use super::{ImportedEntry, import_readme, serialize_runbook_yaml};
 
     #[test]
     fn import_maps_headings_markdown_and_shell_fences() {
         let runbook = import_readme(
             "# Title\n\nIntro text.\n\n```bash\necho hello\n```\n\n## Next\n\nMore text.\n",
         );
-        let entries = runbook["entries"]
-            .as_array()
-            .expect("entries should be an array");
+        let entries = runbook.entries;
 
         assert_eq!(entries.len(), 5);
-        assert_eq!(entries[0]["type"], "Heading");
-        assert_eq!(entries[0]["level"], "H1");
-        assert_eq!(entries[0]["title"], "Title");
-        assert_eq!(entries[1]["type"], "Markdown");
-        assert_eq!(entries[2]["type"], "Command");
-        assert_eq!(entries[2]["commands"][0], "echo hello");
-        assert_eq!(entries[3]["type"], "Heading");
-        assert_eq!(entries[4]["type"], "Markdown");
+        assert!(matches!(
+            &entries[0],
+            ImportedEntry::Heading { level, title } if level == "H1" && title == "Title"
+        ));
+        assert!(matches!(&entries[1], ImportedEntry::Markdown { .. }));
+        assert!(matches!(
+            &entries[2],
+            ImportedEntry::Command { commands } if commands == &vec!["echo hello".to_string()]
+        ));
+        assert!(matches!(&entries[3], ImportedEntry::Heading { .. }));
+        assert!(matches!(&entries[4], ImportedEntry::Markdown { .. }));
     }
 
     #[test]
     fn import_keeps_non_shell_fences_as_markdown() {
         let runbook = import_readme("```yaml\nname: demo\n```\n");
-        let entries = runbook["entries"]
-            .as_array()
-            .expect("entries should be an array");
+        let entries = runbook.entries;
 
         assert_eq!(entries.len(), 1);
-        assert_eq!(entries[0]["type"], "Markdown");
-        assert_eq!(entries[0]["contents"][0], "```yaml");
-        assert_eq!(entries[0]["contents"][1], "name: demo");
-        assert_eq!(entries[0]["contents"][2], "```");
+        assert!(matches!(
+            &entries[0],
+            ImportedEntry::Markdown { contents }
+            if contents == &vec![
+                "```yaml".to_string(),
+                "name: demo".to_string(),
+                "```".to_string()
+            ]
+        ));
     }
 
     #[test]
     fn import_treats_unclosed_shell_fence_as_markdown() {
         let runbook = import_readme("```bash\necho hello\n");
-        let entries = runbook["entries"]
-            .as_array()
-            .expect("entries should be an array");
+        let entries = runbook.entries;
 
         assert_eq!(entries.len(), 1);
-        assert_eq!(entries[0]["type"], "Markdown");
-        assert_eq!(entries[0]["contents"][0], "```bash");
-        assert_eq!(entries[0]["contents"][1], "echo hello");
+        assert!(matches!(
+            &entries[0],
+            ImportedEntry::Markdown { contents }
+            if contents == &vec!["```bash".to_string(), "echo hello".to_string()]
+        ));
+    }
+
+    #[test]
+    fn serialize_yaml_puts_type_first_and_separates_entries() {
+        let runbook = import_readme("# Title\n\nBody text.\n");
+
+        let output = serialize_runbook_yaml(&runbook).expect("yaml serialization should succeed");
+
+        assert!(output.starts_with("entries:\n- type: Heading\n"));
+        assert!(output.contains("title: Title\n\n- type: Markdown\n"));
+    }
+
+    #[test]
+    fn serialize_yaml_uses_block_scalars_for_multiline_markdown() {
+        let runbook = import_readme("# Title\n\nFirst line.\nSecond line.\n");
+
+        let output = serialize_runbook_yaml(&runbook).expect("yaml serialization should succeed");
+
+        assert!(
+            output.contains("- type: Markdown\n  contents: |\n    First line.\n    Second line.\n")
+        );
     }
 }
