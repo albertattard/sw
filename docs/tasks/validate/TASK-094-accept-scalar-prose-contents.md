@@ -9,7 +9,7 @@ related_features:
   - SPEC-005
 owner: @aattard
 created: 2026-04-07
-updated: 2026-04-07
+updated: 2026-04-08
 ---
 
 ## Summary
@@ -25,6 +25,8 @@ rewriting prose into explicit line arrays.
   strings
 - Normalize the accepted scalar form into the existing internal line-array
   model
+- Drop the implicit terminal blank line that YAML literal scalars add by
+  default so scalar rendering matches the explicit array form
 - Preserve existing array-based behavior for JSON and YAML runbooks
 - Update help or discovery text for the new shorthand
 - Add or update automated tests for `validate`, `run`, and `check`
@@ -56,4 +58,6 @@ rewriting prose into explicit line arrays.
 ## Notes
 
 This change improves authoring ergonomics, especially for YAML block scalars,
-without redesigning the broader runbook schema.
+without redesigning the broader runbook schema. Scalar normalization also
+ignores the terminal line break that YAML literal scalars add by default so
+run output stays aligned with the explicit array form.

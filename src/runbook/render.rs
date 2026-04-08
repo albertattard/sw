@@ -536,7 +536,7 @@ mod tests {
     use super::{
         compact_timeout_label, entry_summary, format_elapsed_time, format_progress_line,
         progress_line_text, progress_start_line_text, resolve_progress_mode,
-        truncate_progress_summary,
+        split_multiline_string, truncate_progress_summary,
     };
     use crate::cli::VerboseMode;
     use serde_json::json;
@@ -654,6 +654,22 @@ mod tests {
         let long_text = "a".repeat(100);
         let truncated = truncate_progress_summary(&long_text, 10);
         assert_eq!(truncated, "aaaaaaaaaa...");
+    }
+
+    #[test]
+    fn split_multiline_string_drops_terminator_only_trailing_blank_line() {
+        assert_eq!(
+            split_multiline_string("first\nsecond\n"),
+            vec!["first".to_string(), "second".to_string()]
+        );
+    }
+
+    #[test]
+    fn split_multiline_string_preserves_explicit_blank_line_before_terminator() {
+        assert_eq!(
+            split_multiline_string("first\n\n"),
+            vec!["first".to_string(), "".to_string()]
+        );
     }
 }
 
@@ -1445,7 +1461,7 @@ fn prose_lines(
 
 fn split_multiline_string(value: &str) -> Vec<String> {
     value
-        .split('\n')
+        .split_terminator('\n')
         .map(|line| line.strip_suffix('\r').unwrap_or(line).to_string())
         .collect()
 }

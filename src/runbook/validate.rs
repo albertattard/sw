@@ -122,7 +122,7 @@ fn validate_string_or_string_array(value: &Value, path: &str, errors: &mut Vec<V
 
 fn split_multiline_string(value: &str) -> Vec<&str> {
     value
-        .split('\n')
+        .split_terminator('\n')
         .map(|line| line.strip_suffix('\r').unwrap_or(line))
         .collect()
 }

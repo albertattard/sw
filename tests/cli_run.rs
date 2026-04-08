@@ -186,6 +186,33 @@ fn run_command_accepts_scalar_prose_contents_in_yaml_input_file() {
 }
 
 #[test]
+fn scalar_markdown_does_not_add_blank_line_before_following_heading() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("example.yaml"),
+        r#"entries:
+  - type: Markdown
+    contents: |
+      First paragraph.
+
+      Second paragraph.
+
+  - type: Heading
+    level: H2
+    title: What you will learn
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run", "--input-file", "example.yaml"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("Second paragraph.\n\n## What you will learn"));
+    assert!(!readme.contains("Second paragraph.\n\n\n## What you will learn"));
+}
+
+#[test]
 fn run_command_accepts_json_runbook_from_stdin() {
     let dir = prepare_workspace();
     let stdin = fs::read_to_string("tests/fixtures/sw-runbook-run-success.json")

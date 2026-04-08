@@ -305,7 +305,7 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "For stdin input, JSON is the default format and piped YAML requires `--input-format=yaml`.",
                 "Without `--input-file=-`, `--input-format` keeps the existing file-backed defaults and does not override file-extension-based parsing.",
                 "`Markdown.contents` and `Prerequisite.checks[*].contents` may be a single string or an array of strings.",
-                "When those prose fields are provided as a string, `sw run` splits them on newline boundaries before rendering.",
+                "When those prose fields are provided as a string, `sw run` splits them on newline boundaries before rendering and does not turn a terminal line break into an extra blank content line.",
                 "Entries execute in runbook order.",
                 "Command execution and rendering are part of the same workflow.",
                 "Machine-readable contracts live in the runbook input, not in stdout.",

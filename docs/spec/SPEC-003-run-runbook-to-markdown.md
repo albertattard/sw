@@ -4,7 +4,7 @@ title: Run Runbook to Markdown
 status: in_progress
 priority: high
 owner: @aattard
-last_updated: 2026-03-24
+last_updated: 2026-04-08
 ---
 
 ## Problem
@@ -205,6 +205,9 @@ in the runbook.
 - `Markdown.contents` may be either a single string or an array of strings.
 - When `Markdown.contents` is a string, it is normalized into the existing
   line-array model by splitting on newline boundaries before rendering.
+- Scalar `Markdown.contents` ignores a terminal line break that exists only to
+  terminate the scalar, so YAML literal scalars do not introduce an extra
+  blank line before the next runbook entry.
 
 ### DisplayFile Entries
 
@@ -259,6 +262,9 @@ in the runbook.
   of Markdown lines.
 - When prerequisite `contents` is a string, it is normalized into the existing
   line-array model by splitting on newline boundaries before rendering.
+- Scalar prerequisite `contents` ignores a terminal line break that exists
+  only to terminate the scalar, so YAML literal scalars do not introduce an
+  extra blank line before the next runbook entry.
 - `contents` is rendered into the generated Markdown in the declared order.
 - A `command` prerequisite check declares `commands` as an array of command
   lines.
@@ -634,6 +640,9 @@ in the runbook.
 - [ ] Given a runbook whose `Markdown.contents` is a single string, the
       generated Markdown preserves that content as if the lines had been
       declared explicitly in an array.
+- [ ] Given a scalar `Markdown.contents` value that ends with a line break only
+      because of YAML literal-scalar termination, the generated Markdown does
+      not introduce an extra blank line before the following entry.
 - [ ] Markdown entries may interpolate `@{name}` when that variable is
       captured anywhere in the runbook.
 - [ ] `@@{name}` in Markdown content preserves the literal `@{name}`.
@@ -677,6 +686,9 @@ in the runbook.
 - [ ] Given a prerequisite check whose `contents` is a single string, the
       generated Markdown preserves that content as if the lines had been
       declared explicitly in an array.
+- [ ] Given a scalar prerequisite `contents` value that ends with a line break
+      only because of YAML literal-scalar termination, the generated Markdown
+      does not introduce an extra blank line before the following entry.
 - [ ] Given a single `Prerequisite` entry with multiple checks, all of those
       checks are evaluated from that entry's `checks` array.
 - [ ] Given a prerequisite check with multiple command lines, those lines

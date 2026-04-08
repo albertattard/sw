@@ -90,7 +90,7 @@ fn explain_run_prints_concise_contract_summary() {
         "`Markdown.contents` and `Prerequisite.checks[*].contents` may be a single string or an array of strings."
     ));
     assert!(stdout.contains(
-        "When those prose fields are provided as a string, `sw run` splits them on newline boundaries before rendering."
+        "When those prose fields are provided as a string, `sw run` splits them on newline boundaries before rendering and does not turn a terminal line break into an extra blank content line."
     ));
     assert!(stdout.contains(
         "`DisplayFile` fence detection recognizes `.java` as `java`, `.sql` as `sql`, and `.xml` as `xml`; other extensions fall back to `text`."
