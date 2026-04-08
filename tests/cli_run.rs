@@ -1400,6 +1400,32 @@ fn output_stream_combined_applies_trimming_after_stream_selection() {
 }
 
 #[test]
+fn scalar_output_caption_does_not_add_blank_line_before_output_block() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("example.yaml"),
+        r#"entries:
+  - type: Command
+    commands:
+      - printf 'line 1\nline 2\n'
+    output:
+      caption: |
+        This command is expected to fail for the vulnerable version in this example.
+        That is fine. The important point is that it also primes the local cache and
+        produces the HTML report.
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run", "--input-file", "example.yaml"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("produces the HTML report.\n\n```\nline 1\nline 2\n```"));
+    assert!(!readme.contains("produces the HTML report.\n\n\n```\nline 1\nline 2\n```"));
+}
+
+#[test]
 fn output_stream_does_not_change_stdout_capture_or_assertions() {
     let dir = prepare_workspace();
     write_runbook(

@@ -433,6 +433,9 @@ in the runbook.
   output after the command block.
 - If `output.caption` is present, render that caption before the captured
   command output.
+- If `output.caption` is a scalar string, ignore a terminal line break that
+  exists only to terminate the scalar so YAML literal scalars do not introduce
+  an extra blank line before the captured output fence.
 - `output` may declare `stream`.
 - `output` may declare `content_type`.
 - `output` may declare `trim_empty_lines`.
@@ -863,6 +866,9 @@ in the runbook.
       includes the captured command output.
 - [ ] Given a `Command` entry with `output.caption`, the generated Markdown
       includes the caption before the captured command output.
+- [ ] Given a scalar `output.caption` value that ends with a line break only
+      because of YAML literal-scalar termination, the generated Markdown does
+      not introduce an extra blank line before the captured output fence.
 - [ ] Given a `Command` entry with `output.content_type: json`, the generated
       Markdown uses a `json` fenced block for captured output.
 - [ ] Given a `Command` entry with `output.content_type: xml`, the generated

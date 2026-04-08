@@ -1391,7 +1391,7 @@ fn append_output(
 
 fn render_caption(caption: &Value) -> Result<String, RenderError> {
     match caption {
-        Value::String(text) => Ok(text.to_string()),
+        Value::String(text) => Ok(split_multiline_string(text).join("\n")),
         Value::Array(items) => {
             let mut lines = Vec::new();
             for item in items {
