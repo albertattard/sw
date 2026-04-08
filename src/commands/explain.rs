@@ -399,18 +399,19 @@ fn explanations() -> Vec<Explanation<'static>> {
         Explanation {
             topic: "import",
             availability: "implemented",
-            purpose: "Import an existing Markdown README into a starter runbook JSON file.",
+            purpose: "Import an existing Markdown README into a starter runbook file.",
             defaults: &[
                 "Default input file is `./README.md`.",
-                "Default output file is `./sw-runbook.json`.",
+                "Default output format is `yaml`.",
+                "Default output file is `./sw-runbook.yaml`.",
                 "Existing output files are not overwritten unless `--force` is provided.",
             ],
             inputs: &[
                 "Command: `sw import`",
-                "Options: `--input-file <README.md>`, `--output-file <runbook.json>`, and `--force`",
+                "Options: `--input-file <README.md>`, `--output-file <runbook.{yaml|yml|json}>`, `--output-format json|yaml`, and `--force`",
             ],
             outputs: &[
-                "Writes a best-effort runbook JSON file and prints a short stdout confirmation.",
+                "Writes a best-effort runbook YAML or JSON file and prints a short stdout confirmation.",
             ],
             exit_codes: &[
                 "`0` for a successful import.",
@@ -418,6 +419,8 @@ fn explanations() -> Vec<Explanation<'static>> {
             ],
             constraints: &[
                 "Import is intentionally lossy and produces an editable starting point rather than a perfect round trip.",
+                "When `--output-format` is omitted, `sw import` infers the format from a recognized output-file extension or defaults to YAML.",
+                "If `--output-format` conflicts with a recognized output-file extension, `sw import` exits with `1` instead of writing a mismatched file.",
                 "Headings map to `Heading` entries where possible, prose to `Markdown`, and fenced shell blocks to `Command` entries.",
                 "Fenced code blocks without a recognized shell language tag remain `Markdown` so the importer does not guess execution semantics.",
             ],

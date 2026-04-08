@@ -211,8 +211,10 @@ fn explain_import_prints_current_import_contract() {
     assert!(stdout.contains("topic: import"));
     assert!(stdout.contains("availability: implemented"));
     assert!(stdout.contains("Default input file is `./README.md`."));
-    assert!(stdout.contains("Default output file is `./sw-runbook.json`."));
+    assert!(stdout.contains("Default output format is `yaml`."));
+    assert!(stdout.contains("Default output file is `./sw-runbook.yaml`."));
     assert!(stdout.contains("Command: `sw import`"));
+    assert!(stdout.contains("`--output-format json|yaml`"));
     assert!(stdout.contains("`0` for a successful import."));
     assert!(stdout.contains("Headings map to `Heading` entries"));
     assert!(
@@ -220,6 +222,12 @@ fn explain_import_prints_current_import_contract() {
             "Fenced code blocks without a recognized shell language tag remain `Markdown`"
         )
     );
+    assert!(stdout.contains(
+        "When `--output-format` is omitted, `sw import` infers the format from a recognized output-file extension or defaults to YAML."
+    ));
+    assert!(stdout.contains(
+        "If `--output-format` conflicts with a recognized output-file extension, `sw import` exits with `1` instead of writing a mismatched file."
+    ));
     assert!(stdout.contains("Run `sw validate --input-file <generated-runbook>`"));
 }
 

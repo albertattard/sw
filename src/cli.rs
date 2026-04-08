@@ -139,16 +139,20 @@ pub struct HelpArgs {
 
 #[derive(Debug, clap::Args)]
 #[command(
-    after_help = "Defaults to `./README.md` input and `./sw-runbook.json` output.\nHeadings map to `Heading` entries where possible, prose to `Markdown`, and fenced shell blocks to `Command` entries.\nUse `sw explain import` for the documented lossy-import contract."
+    after_help = "Defaults to `./README.md` input and `./sw-runbook.yaml` output.\n`--output-format` accepts `yaml` or `json`; when omitted, `sw import` infers the format from a recognized output-file extension or defaults to YAML.\nHeadings map to `Heading` entries where possible, prose to `Markdown`, and fenced shell blocks to `Command` entries.\nUse `sw explain import` for the documented lossy-import contract."
 )]
 pub struct ImportArgs {
     /// Path to the Markdown README to import.
     #[arg(long)]
     pub input_file: Option<PathBuf>,
 
-    /// Path to the generated runbook JSON file.
+    /// Path to the generated runbook file.
     #[arg(long)]
     pub output_file: Option<PathBuf>,
+
+    /// Output format for the generated runbook file.
+    #[arg(long, value_enum)]
+    pub output_format: Option<ImportOutputFormat>,
 
     /// Overwrite the output file if it already exists.
     #[arg(long)]
@@ -176,6 +180,12 @@ pub enum InputFormat {
 pub enum ExplainOutputFormat {
     Text,
     Skill,
+}
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq, ValueEnum)]
+pub enum ImportOutputFormat {
+    Json,
+    Yaml,
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, ValueEnum)]

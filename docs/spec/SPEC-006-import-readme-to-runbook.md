@@ -3,12 +3,12 @@
 - Status: Implemented
 - Owner: `@aattard`
 - Created: `2026-03-13`
-- Updated: `2026-04-07`
+- Updated: `2026-04-08`
 
 ## Goal
 
 Provide a command that imports an existing Markdown README file into a starter
-`sw-runbook.json` so teams can convert existing documentation into an editable
+runbook file so teams can convert existing documentation into an editable
 runbook instead of authoring one from scratch.
 
 ## User-facing Behavior
@@ -20,22 +20,33 @@ sw import
 ```
 
 It reads a Markdown document and writes a best-effort runbook JSON file.
+It reads a Markdown document and writes a best-effort runbook YAML or JSON
+file.
 
 ## Inputs
 
 - Optional input file parameter: `--input-file <README.md>`.
-- Optional output file parameter: `--output-file <sw-runbook.json>`.
+- Optional output file parameter: `--output-file <sw-runbook.{yaml|yml|json}>`.
+- Optional output format parameter: `--output-format json|yaml`.
 - Optional force flag: `--force`.
 
 ## CLI Defaults
 
 - If `--input-file` is not provided, default to `./README.md`.
-- If `--output-file` is not provided, default to `./sw-runbook.json`.
+- If `--output-format` is not provided, default to `yaml`.
+- If `--output-file` is not provided, default to `./sw-runbook.yaml` for YAML
+  output and `./sw-runbook.json` for JSON output.
+- If `--output-file` has a `.json`, `.yaml`, or `.yml` extension and
+  `--output-format` is not provided, infer the output format from the file
+  extension.
+- If `--output-format` is provided and `--output-file` has a recognized
+  extension that conflicts with it, the command exits with `1` and reports a
+  clear mismatch error.
 - If `--force` is not provided, existing output files are not overwritten.
 
 ## Outputs
 
-- A runbook JSON file written to the target path.
+- A runbook YAML or JSON file written to the target path.
 - Human-readable status on stdout.
 
 ### Exit Codes
@@ -50,7 +61,8 @@ It reads a Markdown document and writes a best-effort runbook JSON file.
 - Import is intentionally lossy.
 - The generated runbook is a starting point for further editing, not a perfect
   round-trip reconstruction.
-- The generated runbook must be valid JSON and acceptable to `sw validate`.
+- The generated runbook must be valid YAML or JSON and acceptable to
+  `sw validate`.
 - Heading blocks are imported as `Heading` entries where possible.
 - Plain Markdown prose is imported as `Markdown` entries.
 - Fenced shell code blocks are imported as `Command` entries.
@@ -60,8 +72,8 @@ It reads a Markdown document and writes a best-effort runbook JSON file.
   fields to keep the generated runbook easier to scan and edit.
 - This ordering rule applies to all runbook entry types that `sw import`
   emits, including future imported entry types added in later increments.
-- This field-ordering rule applies to `sw import` output only; other JSON
-  output remains governed by their own contracts.
+- This field-ordering rule applies to `sw import` output only; other machine-
+  readable output remains governed by their own contracts.
 - Information not recoverable from the README is omitted and left to defaults
   or later manual enhancement, including:
   - `assert`
@@ -75,10 +87,18 @@ It reads a Markdown document and writes a best-effort runbook JSON file.
 ## Acceptance Criteria
 
 - [x] Given `sw import` with a `./README.md` present, the command writes
-      `./sw-runbook.json` and exits with `0`.
+      `./sw-runbook.yaml` and exits with `0`.
 - [x] Given `sw import --input-file <path> --output-file <path>`, the command
       reads the provided Markdown file and writes the runbook to the provided
       output path.
+- [ ] Given `sw import --output-format json`, the command writes
+      `./sw-runbook.json` and exits with `0`.
+- [ ] Given `sw import --output-file <path>.json` without `--output-format`,
+      the command writes JSON to that output path.
+- [ ] Given `sw import --output-file <path>.yaml` without `--output-format`,
+      the command writes YAML to that output path.
+- [ ] Given `sw import --output-format json --output-file <path>.yaml`, the
+      command exits with `1` and reports the format mismatch.
 - [x] Given `sw import` when the target output file already exists, the command
       exits with `1` and does not overwrite the file.
 - [x] Given `sw import --force` when the target output file already exists, the

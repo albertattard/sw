@@ -1,4 +1,4 @@
-use crate::cli::ImportArgs;
+use crate::cli::{ImportArgs, ImportOutputFormat};
 use crate::runbook;
 use serde_json::{Value, json};
 use std::fs;
@@ -6,15 +6,21 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 const DEFAULT_IMPORT_INPUT: &str = "README.md";
-const DEFAULT_IMPORT_OUTPUT: &str = "sw-runbook.json";
+const DEFAULT_IMPORT_OUTPUT_JSON: &str = "sw-runbook.json";
+const DEFAULT_IMPORT_OUTPUT_YAML: &str = "sw-runbook.yaml";
 
 pub fn run(args: ImportArgs) -> ExitCode {
     let input_path = args
         .input_file
         .unwrap_or_else(|| PathBuf::from(DEFAULT_IMPORT_INPUT));
-    let output_path = args
-        .output_file
-        .unwrap_or_else(|| PathBuf::from(DEFAULT_IMPORT_OUTPUT));
+    let (output_path, output_format) =
+        match resolve_output_target(args.output_file, args.output_format) {
+            Ok(target) => target,
+            Err(message) => {
+                eprintln!("{message}");
+                return ExitCode::from(1);
+            }
+        };
 
     if output_path.exists() && !args.force {
         eprintln!(
@@ -55,10 +61,10 @@ pub fn run(args: ImportArgs) -> ExitCode {
         return ExitCode::from(1);
     }
 
-    let output = match serde_json::to_string_pretty(&runbook) {
-        Ok(output) => format!("{output}\n"),
-        Err(err) => {
-            eprintln!("Failed to serialize imported runbook: {err}");
+    let output = match serialize_runbook(&runbook, output_format) {
+        Ok(output) => output,
+        Err(message) => {
+            eprintln!("{message}");
             return ExitCode::from(1);
         }
     };
@@ -74,6 +80,58 @@ pub fn run(args: ImportArgs) -> ExitCode {
         output_path.display()
     );
     ExitCode::SUCCESS
+}
+
+fn resolve_output_target(
+    output_file: Option<PathBuf>,
+    output_format: Option<ImportOutputFormat>,
+) -> Result<(PathBuf, ImportOutputFormat), String> {
+    let inferred_format = output_file
+        .as_ref()
+        .and_then(|path| infer_output_format_from_path(path));
+
+    if let (Some(explicit), Some(inferred), Some(path)) =
+        (output_format, inferred_format, output_file.as_ref())
+        && explicit != inferred
+    {
+        return Err(format!(
+            "Output file extension does not match --output-format: {}",
+            path.display()
+        ));
+    }
+
+    let resolved_format = output_format
+        .or(inferred_format)
+        .unwrap_or(ImportOutputFormat::Yaml);
+    let resolved_path = output_file.unwrap_or_else(|| match resolved_format {
+        ImportOutputFormat::Json => PathBuf::from(DEFAULT_IMPORT_OUTPUT_JSON),
+        ImportOutputFormat::Yaml => PathBuf::from(DEFAULT_IMPORT_OUTPUT_YAML),
+    });
+
+    Ok((resolved_path, resolved_format))
+}
+
+fn infer_output_format_from_path(path: &std::path::Path) -> Option<ImportOutputFormat> {
+    match path.extension().and_then(|value| value.to_str()) {
+        Some("json") => Some(ImportOutputFormat::Json),
+        Some("yaml" | "yml") => Some(ImportOutputFormat::Yaml),
+        _ => None,
+    }
+}
+
+fn serialize_runbook(runbook: &Value, format: ImportOutputFormat) -> Result<String, String> {
+    let serialized = match format {
+        ImportOutputFormat::Json => serde_json::to_string_pretty(runbook)
+            .map_err(|err| format!("Failed to serialize imported runbook as JSON: {err}"))?,
+        ImportOutputFormat::Yaml => serde_norway::to_string(runbook)
+            .map_err(|err| format!("Failed to serialize imported runbook as YAML: {err}"))?,
+    };
+
+    if serialized.ends_with('\n') {
+        Ok(serialized)
+    } else {
+        Ok(format!("{serialized}\n"))
+    }
 }
 
 fn validation_error_summary(result: &runbook::ValidationResult) -> String {

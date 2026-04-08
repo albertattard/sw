@@ -131,8 +131,9 @@ fn import_help_prints_help() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("--input-file"));
     assert!(stdout.contains("--output-file"));
+    assert!(stdout.contains("--output-format"));
     assert!(stdout.contains("--force"));
-    assert!(stdout.contains("Defaults to `./README.md` input and `./sw-runbook.json` output."));
+    assert!(stdout.contains("Defaults to `./README.md` input and `./sw-runbook.yaml` output."));
     assert!(stdout.contains("Headings map to `Heading` entries"));
     assert!(stdout.contains("sw explain import"));
 }

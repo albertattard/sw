@@ -49,8 +49,8 @@ fn import_defaults_to_readme_input_and_runbook_output() {
 
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(stdout.contains("Imported README.md to sw-runbook.json"));
-    assert!(dir.join("sw-runbook.json").exists());
+    assert!(stdout.contains("Imported README.md to sw-runbook.yaml"));
+    assert!(dir.join("sw-runbook.yaml").exists());
 
     let validate_output = run_in_dir(&["validate", "--output-format=json"], &dir);
     assert!(validate_output.status.success());
@@ -59,7 +59,34 @@ fn import_defaults_to_readme_input_and_runbook_output() {
 }
 
 #[test]
-fn import_accepts_explicit_input_and_output_paths() {
+fn import_infers_yaml_from_explicit_output_path() {
+    let dir = prepare_workspace();
+    write_fixture(&dir, "readme-import-sample.md", "guide.md");
+
+    let output = run_in_dir(
+        &[
+            "import",
+            "--input-file",
+            "guide.md",
+            "--output-file",
+            "generated-runbook.yaml",
+        ],
+        &dir,
+    );
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("Imported guide.md to generated-runbook.yaml"));
+    assert!(dir.join("generated-runbook.yaml").exists());
+    let runbook =
+        fs::read_to_string(dir.join("generated-runbook.yaml")).expect("missing imported file");
+    let value: serde_json::Value =
+        serde_norway::from_str(&runbook).expect("import output should be valid yaml");
+    assert!(value["entries"].is_array());
+}
+
+#[test]
+fn import_infers_json_from_explicit_output_path() {
     let dir = prepare_workspace();
     write_fixture(&dir, "readme-import-sample.md", "guide.md");
 
@@ -77,14 +104,53 @@ fn import_accepts_explicit_input_and_output_paths() {
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("Imported guide.md to generated-runbook.json"));
-    assert!(dir.join("generated-runbook.json").exists());
+    let runbook =
+        fs::read_to_string(dir.join("generated-runbook.json")).expect("missing imported file");
+    let value: serde_json::Value =
+        serde_json::from_str(&runbook).expect("import output should be valid json");
+    assert!(value["entries"].is_array());
+}
+
+#[test]
+fn import_output_format_json_changes_default_output_path() {
+    let dir = prepare_workspace();
+    write_fixture(&dir, "readme-import-sample.md", "README.md");
+
+    let output = run_in_dir(&["import", "--output-format", "json"], &dir);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("Imported README.md to sw-runbook.json"));
+    assert!(dir.join("sw-runbook.json").exists());
+}
+
+#[test]
+fn import_rejects_mismatched_output_format_and_extension() {
+    let dir = prepare_workspace();
+    write_fixture(&dir, "readme-import-sample.md", "README.md");
+
+    let output = run_in_dir(
+        &[
+            "import",
+            "--output-format",
+            "json",
+            "--output-file",
+            "generated-runbook.yaml",
+        ],
+        &dir,
+    );
+
+    assert_eq!(output.status.code(), Some(1));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("Output file extension does not match --output-format"));
+    assert!(!dir.join("generated-runbook.yaml").exists());
 }
 
 #[test]
 fn import_refuses_to_overwrite_existing_output_without_force() {
     let dir = prepare_workspace();
     write_fixture(&dir, "readme-import-sample.md", "README.md");
-    let output_path = dir.join("sw-runbook.json");
+    let output_path = dir.join("sw-runbook.yaml");
     fs::write(&output_path, "sentinel\n").expect("failed to seed output file");
 
     let output = run_in_dir(&["import"], &dir);
@@ -102,14 +168,14 @@ fn import_refuses_to_overwrite_existing_output_without_force() {
 fn import_force_overwrites_existing_output() {
     let dir = prepare_workspace();
     write_fixture(&dir, "readme-import-sample.md", "README.md");
-    let output_path = dir.join("sw-runbook.json");
+    let output_path = dir.join("sw-runbook.yaml");
     fs::write(&output_path, "sentinel\n").expect("failed to seed output file");
 
     let output = run_in_dir(&["import", "--force"], &dir);
 
     assert!(output.status.success());
     let runbook = fs::read_to_string(&output_path).expect("missing imported runbook");
-    assert!(runbook.contains("\"entries\""));
+    assert!(runbook.contains("entries:"));
     assert!(!runbook.contains("sentinel"));
 }
 
@@ -121,9 +187,9 @@ fn import_maps_headings_prose_and_shell_blocks_into_runbook_entries() {
     let output = run_in_dir(&["import"], &dir);
     assert!(output.status.success());
 
-    let runbook = fs::read_to_string(dir.join("sw-runbook.json")).expect("missing imported file");
+    let runbook = fs::read_to_string(dir.join("sw-runbook.yaml")).expect("missing imported file");
     let value: serde_json::Value =
-        serde_json::from_str(&runbook).expect("import output should be valid json");
+        serde_norway::from_str(&runbook).expect("import output should be valid yaml");
     let entries = value["entries"]
         .as_array()
         .expect("entries should be an array");

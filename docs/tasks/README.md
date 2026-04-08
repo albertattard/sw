@@ -158,6 +158,7 @@ Expected task directories:
 - [TASK-094: Accept Scalar Prose Contents](validate/TASK-094-accept-scalar-prose-contents.md)
 - [TASK-095: Surface DisplayFile Indent In Example Output](example/TASK-095-surface-display-file-indent-in-example.md)
 - [TASK-096: Trim Scalar Output Caption Terminator Blank Lines](run/TASK-096-trim-scalar-output-caption-terminator-blank-lines.md)
+- [TASK-097: Add YAML Import Output Format](import/TASK-097-add-yaml-import-output-format.md)
 
 ## Pending
 
@@ -246,6 +247,7 @@ Expected task directories:
 - [x] [TASK-094: Accept Scalar Prose Contents](validate/TASK-094-accept-scalar-prose-contents.md)
 - [x] [TASK-095: Surface DisplayFile Indent In Example Output](example/TASK-095-surface-display-file-indent-in-example.md)
 - [x] [TASK-096: Trim Scalar Output Caption Terminator Blank Lines](run/TASK-096-trim-scalar-output-caption-terminator-blank-lines.md)
+- [x] [TASK-097: Add YAML Import Output Format](import/TASK-097-add-yaml-import-output-format.md)
 - [x] [TASK-061: Add Debug Run Diagnostics](run/TASK-061-add-debug-run-diagnostics.md)
 - [x] [TASK-062: Support Command-Scoped Debug Diagnostics](run/TASK-062-support-command-scoped-debug-diagnostics.md)
 - [x] [TASK-063: Separate DisplayFile Indent And Offset](display-file/TASK-063-separate-display-file-indent-and-offset.md)
