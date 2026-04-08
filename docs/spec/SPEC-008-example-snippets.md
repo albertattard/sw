@@ -3,7 +3,7 @@
 - Status: Draft
 - Owner: `@aattard`
 - Created: `2026-03-13`
-- Updated: `2026-03-24`
+- Updated: `2026-04-08`
 
 ## Goal
 
@@ -57,6 +57,8 @@ In this increment, supported entity types include:
   behavior.
 - The `DisplayFile` example should reflect the current transform contract,
   including Java `collapse_method_body` when implemented.
+- The `DisplayFile` example should reflect the current block-indentation
+  contract by including `indent` when that field is supported.
 - Example output is documentation-oriented and does not need to be executable
   without further user editing.
 
@@ -70,6 +72,8 @@ In this increment, supported entity types include:
       `stream` output field.
 - [ ] Given `sw example DisplayFile`, the CLI prints a valid JSON example of a
       `DisplayFile` entry.
+- [ ] Given `sw example DisplayFile`, the example includes the implemented
+      `indent` field for whole-block indentation.
 - [ ] Given `sw example DisplayFile`, the example includes the implemented
       Java `collapse_method_body` transform shape.
 - [ ] Given `sw example Patch`, the CLI prints a valid JSON example of a

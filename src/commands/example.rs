@@ -82,6 +82,7 @@ fn example_for_topic(topic: &str) -> Option<&'static str> {
   "path": "./src/main/java/demo/Example.java",
   "start_line": 1,
   "line_count": 12,
+  "indent": 3,
   "transform": {
     "language": "java",
     "operations": [

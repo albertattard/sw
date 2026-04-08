@@ -49,6 +49,7 @@ fn display_file_example_prints_valid_json_entry() {
     assert_eq!(value["type"], "DisplayFile");
     assert_eq!(value["start_line"], 1);
     assert_eq!(value["line_count"], 12);
+    assert_eq!(value["indent"], 3);
     assert_eq!(value["transform"]["language"], "java");
     assert_eq!(
         value["transform"]["operations"][0]["type"],
