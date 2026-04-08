@@ -268,6 +268,12 @@ in the runbook.
 - `contents` is rendered into the generated Markdown in the declared order.
 - A `command` prerequisite check declares `commands` as an array of command
   lines.
+- `Prerequisite.checks[*].commands` may also be a single string.
+- When prerequisite `commands` is a string, it is normalized into the existing
+  line-array model by splitting on newline boundaries before execution.
+- Scalar prerequisite `commands` ignores a terminal line break that exists
+  only to terminate the scalar, so YAML literal scalars do not add an extra
+  blank command line.
 - All lines within a single `command` prerequisite check execute together in
   the same shell context.
 - A `command` prerequisite check may declare `timeout`.
@@ -339,6 +345,13 @@ in the runbook.
 ### Command Entries
 
 - `Command` entries render their `commands` as fenced shell code blocks.
+- `Command.commands` may be either a single string or an array of strings.
+- When `Command.commands` is a string, it is normalized into the existing
+  line-array model by splitting on newline boundaries before rendering and
+  execution.
+- Scalar `Command.commands` ignores a terminal line break that exists only to
+  terminate the scalar, so YAML literal scalars do not add an extra blank
+  command line.
 - A `Command` entry may declare `indent`.
 - If `indent` is present, the rendered command section is prefixed with that
   number of leading spaces on each rendered line.
@@ -692,6 +705,12 @@ in the runbook.
 - [ ] Given a scalar prerequisite `contents` value that ends with a line break
       only because of YAML literal-scalar termination, the generated Markdown
       does not introduce an extra blank line before the following entry.
+- [x] Given a prerequisite check whose `commands` is a single string, those
+      command lines execute as if they had been declared explicitly in an
+      array.
+- [x] Given scalar prerequisite `commands` that end with a line break only
+      because of YAML literal-scalar termination, execution does not introduce
+      an extra blank command line.
 - [ ] Given a single `Prerequisite` entry with multiple checks, all of those
       checks are evaluated from that entry's `checks` array.
 - [ ] Given a prerequisite check with multiple command lines, those lines
@@ -723,6 +742,17 @@ in the runbook.
       without waiting for interactive input from the patch tool.
 - [ ] Given a `Patch` entry that cannot be applied cleanly, the target file
       remains unchanged and no `.orig` or `.rej` sidecar files are left
+
+### Command Entries
+
+- [x] Given a runbook whose `Command.commands` is a single string, the
+      generated Markdown preserves that command text as if the lines had been
+      declared explicitly in an array.
+- [x] Given scalar `Command.commands` that end with a line break only because
+      of YAML literal-scalar termination, rendering and execution do not
+      introduce an extra blank command line.
+- [x] Given scalar `Command.commands`, all resulting command lines execute
+      together in the same shell context.
       behind.
 
 ### Command Execution

@@ -1059,7 +1059,7 @@ fn validate_entry(
 
             match object.get("commands") {
                 Some(commands) => {
-                    validate_string_array(
+                    validate_string_or_string_array(
                         commands,
                         &format!("{path}.commands"),
                         &mut context.errors,
@@ -1268,7 +1268,9 @@ fn validate_command_prerequisite_check(
     }
 
     match object.get("commands") {
-        Some(commands) => validate_string_array(commands, &format!("{path}.commands"), errors),
+        Some(commands) => {
+            validate_string_or_string_array(commands, &format!("{path}.commands"), errors)
+        }
         None => push_error(errors, format!("{path}.commands"), "is required"),
     }
 
@@ -1592,14 +1594,14 @@ fn maybe_warn_background_command_without_redirects(
     path: &str,
     warnings: &mut Vec<ValidationIssue>,
 ) {
-    let Some(commands) = object.get("commands").and_then(Value::as_array) else {
+    let Some(commands) = object
+        .get("commands")
+        .and_then(normalized_string_lines_for_warning)
+    else {
         return;
     };
 
     let starts_background_process_without_redirects = commands.iter().any(|command| {
-        let Some(command) = command.as_str() else {
-            return false;
-        };
         let trimmed = command.trim();
         if trimmed.is_empty() || trimmed.starts_with('#') || !trimmed.ends_with('&') {
             return false;
@@ -1615,6 +1617,25 @@ fn maybe_warn_background_command_without_redirects(
             format!("{path}.commands"),
             "appears to start a background process without redirecting stdout and stderr away from the command pipes. This may keep the entry open and make timeout or progress behavior misleading. Consider redirecting output to a file and saving `$!` to a PID file.".to_string(),
         );
+    }
+}
+
+fn normalized_string_lines_for_warning(value: &Value) -> Option<Vec<String>> {
+    match value {
+        Value::String(text) => Some(
+            split_multiline_string(text)
+                .into_iter()
+                .map(ToString::to_string)
+                .collect(),
+        ),
+        Value::Array(items) => {
+            let mut lines = Vec::new();
+            for item in items {
+                lines.push(item.as_str()?.to_string());
+            }
+            Some(lines)
+        }
+        _ => None,
     }
 }
 

@@ -87,10 +87,10 @@ fn explain_run_prints_concise_contract_summary() {
         "Without `--input-file=-`, `--input-format` keeps the existing file-backed defaults and does not override file-extension-based parsing."
     ));
     assert!(stdout.contains(
-        "`Markdown.contents` and `Prerequisite.checks[*].contents` may be a single string or an array of strings."
+        "`Markdown.contents`, `Command.commands`, `Prerequisite.checks[*].contents`, and `Prerequisite.checks[*].commands` may be a single string or an array of strings."
     ));
     assert!(stdout.contains(
-        "When those prose fields are provided as a string, `sw run` splits them on newline boundaries before rendering and does not turn a terminal line break into an extra blank content line."
+        "When those fields are provided as a string, `sw run` splits them on newline boundaries before rendering or execution and does not turn a terminal line break into an extra blank line."
     ));
     assert!(stdout.contains(
         "`DisplayFile` fence detection recognizes `.java` as `java`, `.sql` as `sql`, and `.xml` as `xml`; other extensions fall back to `text`."
@@ -137,10 +137,10 @@ fn explain_validate_prints_validation_contract_summary() {
         "Without `--input-file=-`, `--input-format` does not replace the normal file lookup or file-extension-based parsing behavior."
     ));
     assert!(stdout.contains(
-        "`Markdown.contents` and `Prerequisite.checks[*].contents` may be a single string or an array of strings."
+        "`Markdown.contents`, `Command.commands`, `Prerequisite.checks[*].contents`, and `Prerequisite.checks[*].commands` may be a single string or an array of strings."
     ));
     assert!(stdout.contains(
-        "When those prose fields are provided as a string, validation treats that as shorthand for the existing line-array model."
+        "When those fields are provided as a string, validation treats that as shorthand for the existing line-array model."
     ));
     assert!(stdout.contains("The command performs no writes."));
 }
@@ -194,7 +194,7 @@ fn explain_check_guides_agent_to_prerequisites_and_examples() {
         "Without `--input-file=-`, `--input-format` keeps the existing file-backed defaults and does not override file-extension-based parsing."
     ));
     assert!(stdout.contains(
-        "`Markdown.contents` and `Prerequisite.checks[*].contents` may be a single string or an array of strings."
+        "`Markdown.contents`, `Command.commands`, `Prerequisite.checks[*].contents`, and `Prerequisite.checks[*].commands` may be a single string or an array of strings."
     ));
     assert!(stdout.contains("Built-in prerequisite kinds include `java`"));
     assert!(stdout.contains(

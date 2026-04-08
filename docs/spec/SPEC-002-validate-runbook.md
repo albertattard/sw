@@ -4,7 +4,7 @@ title: Validate Runbook Input
 status: in_progress
 priority: high
 owner: @aattard
-last_updated: 2026-04-07
+last_updated: 2026-04-08
 ---
 
 ## Problem
@@ -61,10 +61,13 @@ Default input behavior:
 - Supported input formats are JSON, YAML, and YML for files, and JSON or YAML
   for stdin.
 - `Markdown.contents` may be either a single string or an array of strings.
+- `Command.commands` may be either a single string or an array of strings.
 - `Prerequisite.checks[*].contents` may be either a single string or an array
   of strings.
-- When either field is provided as a string, validation accepts it as the
-  shorthand form for the existing line-array model.
+- `Prerequisite.checks[*].commands` may be either a single string or an array
+  of strings.
+- When any of those fields are provided as a string, validation accepts that
+  as shorthand for the existing line-array model.
 - If `--output-format` is not provided, default to `human`.
 
 Supported output formats:
@@ -127,7 +130,13 @@ Exit codes:
 - [ ] Given a runbook whose `Markdown.contents` is a single string,
       `sw validate --input-file <file> --output-format json` accepts that
       shorthand and returns `valid: true`.
+- [x] Given a runbook whose `Command.commands` is a single string,
+      `sw validate --input-file <file> --output-format json` accepts that
+      shorthand and returns `valid: true`.
 - [ ] Given a runbook whose `Prerequisite.checks[*].contents` is a single
+      string, `sw validate --input-file <file> --output-format json` accepts
+      that shorthand and returns `valid: true`.
+- [x] Given a runbook whose `Prerequisite.checks[*].commands` is a single
       string, `sw validate --input-file <file> --output-format json` accepts
       that shorthand and returns `valid: true`.
 - [ ] Given `sw validate --input-file=- --output-format json` with a valid

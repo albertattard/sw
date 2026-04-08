@@ -440,9 +440,9 @@ fn entry_summary(entry: &Value, runbook_path: &Path) -> String {
             .and_then(Value::as_str)
             .unwrap_or("Heading")
             .to_string(),
-        "Markdown" => first_non_empty_prose_string(entry.get("contents"))
+        "Markdown" => first_non_empty_string_line(entry.get("contents"))
             .unwrap_or_else(|| "Markdown".to_string()),
-        "Command" => first_non_empty_array_string(entry.get("commands"))
+        "Command" => first_non_empty_string_line(entry.get("commands"))
             .unwrap_or_else(|| "Command".to_string()),
         "DisplayFile" => display_file_summary(entry, runbook_path),
         "Prerequisite" => prerequisite_summary(entry),
@@ -464,7 +464,7 @@ fn first_non_empty_array_string(value: Option<&Value>) -> Option<String> {
     None
 }
 
-fn first_non_empty_prose_string(value: Option<&Value>) -> Option<String> {
+fn first_non_empty_string_line(value: Option<&Value>) -> Option<String> {
     let value = value?;
 
     match value {
@@ -630,6 +630,19 @@ mod tests {
             entry_summary(&markdown, Path::new("sw-runbook.json")),
             "Markdown: 1. Start the application"
         );
+        assert_eq!(
+            entry_summary(&command, Path::new("sw-runbook.json")),
+            "Command: java -jar './target/app.jar'"
+        );
+    }
+
+    #[test]
+    fn entry_summary_uses_first_non_empty_line_for_scalar_command() {
+        let command = json!({
+            "type": "Command",
+            "commands": "\njava -jar './target/app.jar'\necho done\n"
+        });
+
         assert_eq!(
             entry_summary(&command, Path::new("sw-runbook.json")),
             "Command: java -jar './target/app.jar'"
@@ -1257,19 +1270,12 @@ fn render_patch(
 fn render_command(entry: &Value, state: &mut RenderState) -> Result<String, RenderError> {
     let commands = entry
         .get("commands")
-        .and_then(Value::as_array)
         .ok_or_else(|| RenderError::Operational("Command entry is missing commands".to_string()))?;
-
-    let mut command_lines = Vec::new();
-    for item in commands {
-        command_lines.push(
-            item.as_str()
-                .ok_or_else(|| {
-                    RenderError::Operational("Command list must contain only strings".to_string())
-                })?
-                .to_string(),
-        );
-    }
+    let command_lines = string_lines(
+        commands,
+        "Command commands must be a string or an array of strings",
+        "Command list must contain only strings",
+    )?;
 
     let resolved_command_lines = interpolate_command_lines(&command_lines, &state.captured_values)?;
     let command_text = resolved_command_lines.join("\n");
@@ -1442,6 +1448,14 @@ fn prose_lines(
     type_message: &str,
     item_message: &str,
 ) -> Result<Vec<String>, RenderError> {
+    string_lines(value, type_message, item_message)
+}
+
+fn string_lines(
+    value: &Value,
+    type_message: &str,
+    item_message: &str,
+) -> Result<Vec<String>, RenderError> {
     match value {
         Value::String(text) => Ok(split_multiline_string(text)),
         Value::Array(items) => {
@@ -1515,25 +1529,14 @@ fn run_prerequisite_check(check: &Value) -> Result<(), RenderError> {
 }
 
 fn run_command_prerequisite_check(check: &Value, name: &str) -> Result<(), RenderError> {
-    let commands = check
-        .get("commands")
-        .and_then(Value::as_array)
-        .ok_or_else(|| {
-            RenderError::Operational("Prerequisite commands must be an array".to_string())
-        })?;
-
-    let mut lines = Vec::new();
-    for item in commands {
-        lines.push(
-            item.as_str()
-                .ok_or_else(|| {
-                    RenderError::Operational(
-                        "Prerequisite commands must contain only strings".to_string(),
-                    )
-                })?
-                .to_string(),
-        );
-    }
+    let commands = check.get("commands").ok_or_else(|| {
+        RenderError::Operational("Prerequisite commands are required".to_string())
+    })?;
+    let lines = string_lines(
+        commands,
+        "Prerequisite commands must be a string or an array of strings",
+        "Prerequisite commands must contain only strings",
+    )?;
 
     let script = lines.join("\n");
     let execution = execute_command(check, &script)?;

@@ -160,6 +160,7 @@ Expected task directories:
 - [TASK-096: Trim Scalar Output Caption Terminator Blank Lines](run/TASK-096-trim-scalar-output-caption-terminator-blank-lines.md)
 - [TASK-097: Add YAML Import Output Format](import/TASK-097-add-yaml-import-output-format.md)
 - [TASK-098: Format Imported YAML For Editing](import/TASK-098-format-imported-yaml-for-editing.md)
+- [TASK-099: Accept Scalar Command Scripts](run/TASK-099-accept-scalar-command-scripts.md)
 
 ## Pending
 
@@ -250,6 +251,7 @@ Expected task directories:
 - [x] [TASK-096: Trim Scalar Output Caption Terminator Blank Lines](run/TASK-096-trim-scalar-output-caption-terminator-blank-lines.md)
 - [x] [TASK-097: Add YAML Import Output Format](import/TASK-097-add-yaml-import-output-format.md)
 - [x] [TASK-098: Format Imported YAML For Editing](import/TASK-098-format-imported-yaml-for-editing.md)
+- [x] [TASK-099: Accept Scalar Command Scripts](run/TASK-099-accept-scalar-command-scripts.md)
 - [x] [TASK-061: Add Debug Run Diagnostics](run/TASK-061-add-debug-run-diagnostics.md)
 - [x] [TASK-062: Support Command-Scoped Debug Diagnostics](run/TASK-062-support-command-scoped-debug-diagnostics.md)
 - [x] [TASK-063: Separate DisplayFile Indent And Offset](display-file/TASK-063-separate-display-file-indent-and-offset.md)

@@ -560,6 +560,24 @@ fn multiline_command_lines_share_the_same_shell_context() {
 }
 
 #[test]
+fn scalar_command_scripts_share_the_same_shell_context() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-scalar-command.yaml", "example.yaml");
+
+    let output = run_in_dir(&["run", "--input-file", "example.yaml"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("NAME='Albert Attard'\nprintf '%s\\n' \"${NAME}\""));
+    assert!(readme.contains("Name output"));
+    assert!(readme.contains("```\nAlbert Attard\n```"));
+    assert_eq!(
+        fs::read_to_string(dir.join("prereq-order.txt")).expect("missing prereq-order.txt"),
+        "prereq\n"
+    );
+}
+
+#[test]
 fn prerequisites_render_and_execute_before_main_workflow() {
     let dir = prepare_workspace();
     write_runbook(
