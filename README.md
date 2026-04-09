@@ -1,20 +1,69 @@
 # Sociable Weaver (SW)
 
-Sociable Weaver is a Rust CLI project developed with AI coding agents under a
-specification-first engineering workflow.
+Sociable Weaver (`sw`) is a Rust CLI for executable documentation. It lets
+authors define documentation examples as version-controlled runbooks in YAML or
+JSON, validate and execute those workflows, and generate README-style output
+from verified runs.
 
-Primary command name: `sw` (short name: `SW`).
+The goal is to stop example-driven documentation from silently drifting out of
+date. Instead of copying commands into Markdown and hoping they still work
+later, `sw` treats those examples as executable specifications that can be
+checked locally and in CI.
 
-## Source of Truth
+The broader product direction is described in the
+[`Product-Vision.md`](./docs/spec/Product-Vision.md).
 
-The product specification in `docs/spec/` is the authoritative source for behavior and requirements.
-Code is an implementation of those specs.
+## What You Can Do With `sw`
 
-## Working Model
+- [`sw validate`](./docs/spec/SPEC-002-validate-runbook.md) checks that a
+  runbook is structurally valid without executing it.
+- [`sw check`](./docs/spec/SPEC-005-check-prerequisites.md) validates the
+  runbook and runs only prerequisite checks.
+- [`sw run`](./docs/spec/SPEC-003-run-runbook-to-markdown.md) executes the
+  runbook and writes generated Markdown output.
+- [`sw import`](./docs/spec/SPEC-006-import-readme-to-runbook.md) turns an
+  existing `README.md` into a starter runbook.
+- [`sw help`](./docs/spec/SPEC-001-help-and-discovery.md),
+  [`sw explain`](./docs/spec/SPEC-009-explain-feature-contract.md), and
+  [`sw example`](./docs/spec/SPEC-008-example-snippets.md) support discovery
+  and authoring.
+
+## Typical Workflow
+
+1. Write or import a runbook in YAML or JSON.
+2. Run `sw validate` or `sw check`.
+3. Run `sw run` to execute the workflow and generate the documentation output.
+
+## Engineering Workflow
+
+This repository is developed with AI coding agents under a specification-first
+engineering workflow.
+
+The working model is:
 
 1. Define or update the specification first.
 2. Implement code that satisfies the spec.
 3. Mark specification status only after acceptance criteria pass.
+
+The main project records are:
+
+- [`docs/spec/README.md`](./docs/spec/README.md): executable specifications and
+  the product contract.
+- [`docs/spec/Product-Vision.md`](./docs/spec/Product-Vision.md): the product
+  thesis, problem, and long-term direction.
+- [`docs/tasks/README.md`](./docs/tasks/README.md): file-based task tracking
+  for pending, in-progress, and completed work.
+- [`docs/decisions/README.md`](./docs/decisions/README.md): architecture
+  decision records and technical tradeoffs.
+- [`ADR-0001`](./docs/decisions/ADR-0001-specification-driven-development-with-ai.md):
+  why this project uses specification-driven development with AI assistance.
+
+The main implementation areas are:
+
+- [`src/main.rs`](./src/main.rs): CLI entrypoint and command dispatch.
+- [`src/commands/`](./src/commands/): top-level command implementations.
+- [`src/runbook/`](./src/runbook/): runbook loading, validation, execution, and
+  rendering.
 
 ## Quality Checks
 
@@ -26,13 +75,6 @@ cargo clippy --all-targets --all-features -- -D warnings
 cargo test
 cargo build --release
 ```
-
-Recommended order:
-
-1. `cargo fmt --check`
-2. `cargo clippy --all-targets --all-features -- -D warnings`
-3. `cargo test`
-4. `cargo build --release`
 
 This is also the verification sequence used before the `commit changes`
 workflow creates and pushes a commit.
@@ -52,23 +94,6 @@ Dependency advisories and duplicate-version drift are checked in CI with
 cargo install cargo-deny --locked
 cargo deny check advisories bans
 ```
-
-## Documentation Structure
-
-```text
-docs/
-  spec/
-    Product-Vision.md
-    SPEC-001-*.md
-  decisions/
-    ADR-001-*.md
-  tasks/
-    TASK-001-*.md
-```
-
-- [`docs/spec/README.md`](./docs/spec/README.md): product vision and executable specifications, including expected behavior and acceptance criteria.
-- [`docs/decisions/README.md`](./docs/decisions/README.md): architecture decision records (ADRs) and technical tradeoff rationale.
-- [`docs/tasks/README.md`](./docs/tasks/README.md): file-based task tracking for pending, in-progress, blocked, and completed work.
 
 ## License
 
