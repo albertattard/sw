@@ -67,17 +67,22 @@ The main implementation areas are:
 
 ## Quality Checks
 
-Use these commands from the repository root:
+Use the repository verification tool from the repository root:
 
 ```bash
-cargo fmt --check
-cargo clippy --all-targets --all-features -- -D warnings
-cargo test
-cargo build --release
+./tools/verify.sh
 ```
 
-This is also the verification sequence used before the `commit changes`
-workflow creates and pushes a commit.
+This command is fail-fast and runs:
+
+1. `cargo fmt`
+2. `cargo clippy --all-targets --all-features -- -D warnings`
+3. `cargo test`
+4. `cargo build --release`
+
+The `commit changes` workflow uses the same command to reduce avoidable retry
+cycles during interactive agent work. Because it rewrites formatting, it can
+change modified Rust files in a dirty worktree before they are staged.
 
 The repository pins Rust `1.94.1` through `rust-toolchain.toml` so local
 development and CI use the same compiler, formatter, and linter versions.

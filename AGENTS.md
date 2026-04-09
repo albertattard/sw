@@ -2,10 +2,7 @@
 
 ## Trigger phrases
 - `commit changes`
-  - Run the formatting check
-  - Run the lint checks
-  - Run the automated tests
-  - Build the release binary
+  - Run `./tools/verify.sh`
   - Stage all staged and unstaged changes with `git add .`
   - Create a commit using the commit message format in this file
   - Push the commit to `origin` on the current branch
@@ -21,7 +18,11 @@
 ## Git workflow
 - Only create a commit when the user explicitly asks.
 - Only push when the user explicitly asks.
-- Before `commit changes`, run `cargo fmt --check`, `cargo clippy --all-targets --all-features -- -D warnings`, `cargo test`, and `cargo build --release`.
+- Before `commit changes`, run `./tools/verify.sh`.
+- `./tools/verify.sh` runs `cargo fmt` first, then the standard lint, test,
+  and release-build checks. This reduces avoidable retry cycles in interactive
+  sessions, but it may reformat modified Rust files in a dirty worktree before
+  the commit is created.
 - If formatting, linting, tests, or the release build fail, stop and report the failure instead of committing.
 - Write commit messages in this format:
   - Subject line: imperative verb + outcome
