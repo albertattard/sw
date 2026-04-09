@@ -1,6 +1,7 @@
 # Sociable Weaver (SW)
 
-Sociable Weaver is a Rust CLI project built using a specification-first workflow.
+Sociable Weaver is a Rust CLI project developed with AI coding agents under a
+specification-first engineering workflow.
 
 Primary command name: `sw` (short name: `SW`).
 
