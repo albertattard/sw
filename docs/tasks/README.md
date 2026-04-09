@@ -163,12 +163,14 @@ Expected task directories:
 - [TASK-099: Accept Scalar Command Scripts](run/TASK-099-accept-scalar-command-scripts.md)
 - [TASK-100: Add Local Verification Tool](repo-process/TASK-100-add-fail-fast-verification-script.md)
 - [TASK-101: Upgrade sha2 To 0.11](repo-process/TASK-101-upgrade-sha2-to-0-11.md)
+- [TASK-102: Review actions checkout v6 Upgrade](repo-process/TASK-102-review-actions-checkout-v6-upgrade.md)
 
 ## Pending
 
 - [ ] [TASK-028: Implement Init Command](init/TASK-028-implement-init-command.md)
 - [ ] [TASK-038: Include Release Commit History In README](release/TASK-038-include-release-commit-history-in-readme.md)
 - [ ] [TASK-059: Implement Format Command](format/TASK-059-implement-format-command.md)
+- [ ] [TASK-102: Review actions checkout v6 Upgrade](repo-process/TASK-102-review-actions-checkout-v6-upgrade.md)
 
 ## In Progress
 
