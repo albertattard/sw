@@ -165,12 +165,14 @@ Expected task directories:
 - [TASK-101: Upgrade sha2 To 0.11](repo-process/TASK-101-upgrade-sha2-to-0-11.md)
 - [TASK-102: Review actions checkout v6 Upgrade](repo-process/TASK-102-review-actions-checkout-v6-upgrade.md)
 - [TASK-103: Review upload artifact v7 Upgrade](repo-process/TASK-103-review-upload-artifact-v7-upgrade.md)
+- [TASK-104: Default Example Output To YAML](example/TASK-104-default-example-output-to-yaml.md)
 
 ## Pending
 
 - [ ] [TASK-028: Implement Init Command](init/TASK-028-implement-init-command.md)
 - [ ] [TASK-038: Include Release Commit History In README](release/TASK-038-include-release-commit-history-in-readme.md)
 - [ ] [TASK-059: Implement Format Command](format/TASK-059-implement-format-command.md)
+- [ ] [TASK-104: Default Example Output To YAML](example/TASK-104-default-example-output-to-yaml.md)
 
 ## In Progress
 
