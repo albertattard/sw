@@ -167,6 +167,7 @@ Expected task directories:
 - [TASK-103: Review upload artifact v7 Upgrade](repo-process/TASK-103-review-upload-artifact-v7-upgrade.md)
 - [TASK-104: Default Example Output To YAML](example/TASK-104-default-example-output-to-yaml.md)
 - [TASK-105: Accept Scalar Cleanup Scripts](run/TASK-105-accept-scalar-cleanup-scripts.md)
+- [TASK-106: Move Release Matrix To Tagged Releases](release/TASK-106-move-release-matrix-to-tagged-releases.md)
 
 ## Pending
 
@@ -180,6 +181,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-106: Move Release Matrix To Tagged Releases](release/TASK-106-move-release-matrix-to-tagged-releases.md)
 - [x] [TASK-105: Accept Scalar Cleanup Scripts](run/TASK-105-accept-scalar-cleanup-scripts.md)
 
 - [x] Define `SPEC-001` in `docs/spec/` (help and discovery).

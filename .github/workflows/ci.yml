@@ -17,22 +17,8 @@ permissions:
 
 jobs:
   quality:
-    name: Quality (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    continue-on-error: ${{ matrix.experimental }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: ubuntu-latest
-            experimental: false
-            binary_name: sw
-            binary_path: target/release/sw
-            artifact_name: sw-ubuntu-release
-          # - os: macos-latest
-          #   experimental: false
-          # - os: windows-latest
-          #   experimental: true
+    name: Quality
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
@@ -56,11 +42,11 @@ jobs:
       - name: Build release
         run: cargo build --release --verbose
 
-      - name: Prepare release artifact
+      - name: Prepare CI artifact
         run: |
           COMMIT_SUBJECT="$(git log -1 --pretty=%s)"
           mkdir -p dist
-          cp "${{ matrix.binary_path }}" "dist/${{ matrix.binary_name }}"
+          cp target/release/sw dist/sw
           cat <<EOF > dist/README.md
           # Sociable Weaver Build Artifact
 
@@ -68,28 +54,44 @@ jobs:
 
           ## Contents
 
-          - \`${{ matrix.binary_name }}\`: release binary built with \`cargo build --release\`
+          - \`sw\`: release binary built with \`cargo build --release\`
 
           ## Build Metadata
 
-          - OS: \`${{ matrix.os }}\`
+          - OS: \`ubuntu-latest\`
           - Commit: \`${{ github.sha }}\`
           - Summary: \`${COMMIT_SUBJECT}\`
           - Workflow run: \`${{ github.run_id }}\`
           - Profile: \`release\`
           EOF
 
-      - name: Upload release artifact
+      - name: Upload CI artifact
         uses: actions/upload-artifact@v7
         with:
-          name: ${{ matrix.artifact_name }}
+          name: sw-ci-ubuntu-latest
           path: dist/
 
-  release:
-    name: Release
+  release_build:
+    name: Release Build (${{ matrix.label }})
     needs: quality
     if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            label: linux-x86_64
+            binary_path: target/release/sw
+            asset_name: sw-linux-x86_64
+          - os: macos-latest
+            label: macos
+            binary_path: target/release/sw
+            asset_name: sw-macos
+          - os: windows-latest
+            label: windows-x86_64
+            binary_path: target/release/sw.exe
+            asset_name: sw-windows-x86_64.exe
 
     steps:
       - name: Checkout
@@ -103,11 +105,38 @@ jobs:
       - name: Build release
         run: cargo build --release --verbose
 
-      - name: Prepare official release assets
+      - name: Prepare release asset bundle
+        shell: bash
+        run: |
+          mkdir -p release
+          cp "${{ matrix.binary_path }}" "release/${{ matrix.asset_name }}"
+
+      - name: Upload release asset bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-${{ matrix.label }}
+          path: release/${{ matrix.asset_name }}
+
+  release:
+    name: Release
+    needs: release_build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Download release asset bundles
+        uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          path: release
+          merge-multiple: true
+
+      - name: Prepare official release README
         run: |
           COMMIT_SUBJECT="$(git log -1 --pretty=%s)"
-          mkdir -p release
-          cp target/release/sw release/sw-linux-x86_64
           cat <<EOF > release/README.md
           # Sociable Weaver Release Artifact
 
@@ -116,14 +145,15 @@ jobs:
           ## Contents
 
           - \`sw-linux-x86_64\`: release binary built with \`cargo build --release\`
+          - \`sw-macos\`: release binary built with \`cargo build --release\`
+          - \`sw-windows-x86_64.exe\`: release binary built with \`cargo build --release\`
 
           ## Build Metadata
 
           - Tag: \`${GITHUB_REF_NAME}\`
           - Commit: \`${GITHUB_SHA}\`
           - Summary: \`${COMMIT_SUBJECT}\`
-          - OS: \`ubuntu-latest\`
-          - Target: \`linux-x86_64\`
+          - Platforms: \`linux-x86_64\`, \`macos\`, \`windows-x86_64\`
           - Profile: \`release\`
           EOF
 
@@ -132,4 +162,6 @@ jobs:
         with:
           files: |
             release/sw-linux-x86_64
+            release/sw-macos
+            release/sw-windows-x86_64.exe
             release/README.md
