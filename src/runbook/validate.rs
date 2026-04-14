@@ -3,7 +3,7 @@ use regex::Regex;
 use serde_json::{Map, Value};
 use std::collections::HashSet;
 use std::fs;
-use std::path::Path;
+use std::path::{Component, Path, PathBuf};
 use std::time::Duration;
 
 const CAPTURE_NAME_PATTERN: &str = r"^[A-Za-z_][A-Za-z0-9_]*$";
@@ -125,6 +125,71 @@ fn split_multiline_string(value: &str) -> Vec<&str> {
         .split_terminator('\n')
         .map(|line| line.strip_suffix('\r').unwrap_or(line))
         .collect()
+}
+
+fn normalize_path(path: &Path) -> PathBuf {
+    let mut normalized = PathBuf::new();
+
+    for component in path.components() {
+        match component {
+            Component::CurDir => {}
+            Component::ParentDir => {
+                normalized.pop();
+            }
+            other => normalized.push(other.as_os_str()),
+        }
+    }
+
+    normalized
+}
+
+fn normalize_to_absolute(path: &Path) -> Option<PathBuf> {
+    if path.is_absolute() {
+        return Some(normalize_path(path));
+    }
+
+    let current_dir = std::env::current_dir().ok()?;
+    Some(normalize_path(&current_dir.join(path)))
+}
+
+fn runbook_base_dir(runbook_path: &Path) -> &Path {
+    runbook_path
+        .parent()
+        .filter(|path| !path.as_os_str().is_empty())
+        .unwrap_or_else(|| Path::new("."))
+}
+
+fn validate_command_working_dir(
+    value: &Value,
+    path: &str,
+    runbook_path: &Path,
+    errors: &mut Vec<ValidationIssue>,
+) {
+    let Some(working_dir) = value.as_str() else {
+        push_error(errors, path.to_string(), "must be a string");
+        return;
+    };
+
+    let working_dir_path = Path::new(working_dir);
+    if working_dir_path.is_absolute() {
+        push_error(errors, path.to_string(), "must be a relative path");
+        return;
+    }
+
+    let Some(base_dir) = normalize_to_absolute(runbook_base_dir(runbook_path)) else {
+        return;
+    };
+    let Some(resolved_dir) = normalize_to_absolute(&base_dir.join(working_dir_path)) else {
+        return;
+    };
+
+    if !resolved_dir.starts_with(&base_dir) {
+        push_error(
+            errors,
+            path.to_string(),
+            "must stay within the runbook directory",
+        );
+    }
 }
 
 fn validate_output_with_context(
@@ -1041,6 +1106,7 @@ fn validate_entry(
             for key in object.keys() {
                 if key != "type"
                     && key != "commands"
+                    && key != "working_dir"
                     && key != "indent"
                     && key != "debug"
                     && key != "output"
@@ -1086,6 +1152,15 @@ fn validate_entry(
                     &mut context.errors,
                     format!("{path}.indent"),
                     "must be an integer",
+                );
+            }
+
+            if let Some(working_dir) = object.get("working_dir") {
+                validate_command_working_dir(
+                    working_dir,
+                    &format!("{path}.working_dir"),
+                    runbook_path,
+                    &mut context.errors,
                 );
             }
 

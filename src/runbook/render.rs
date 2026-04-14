@@ -1,8 +1,8 @@
 use super::RenderError;
 use super::execute::{
-    CommandExecution, apply_patch_entry, cleanup_block, ensure_assertions, execute_command,
-    format_command_failure, patch_target_path, run_cleanup_blocks, run_patch_restores,
-    snapshot_patch_target, timeout_label,
+    CleanupBlock, CommandExecution, apply_patch_entry, cleanup_block, ensure_assertions,
+    execute_command, format_command_failure, patch_target_path, run_cleanup_blocks,
+    run_patch_restores, snapshot_patch_target, timeout_label,
 };
 use crate::cli::VerboseMode;
 use chrono::Timelike;
@@ -101,7 +101,7 @@ pub(crate) fn render_markdown(
         })?;
 
     let mut sections = Vec::new();
-    let mut cleanups: Vec<Vec<String>> = Vec::new();
+    let mut cleanups: Vec<CleanupBlock> = Vec::new();
     let mut patch_restore_stack = Vec::new();
     let mut patch_snapshots = HashMap::new();
     let mut failure: Option<RenderError> = None;
@@ -139,11 +139,11 @@ pub(crate) fn render_markdown(
                 }
             },
             "Command" => {
-                if let Some(cleanup) = cleanup_block(entry)? {
+                if let Some(cleanup) = cleanup_block(entry, runbook_path)? {
                     cleanups.push(cleanup);
                 }
 
-                match render_command(entry, &mut state) {
+                match render_command(entry, runbook_path, &mut state) {
                     Ok(section) => RenderSection::Ready(section),
                     Err(RenderError::Timeout {
                         message,
@@ -1267,7 +1267,11 @@ fn render_patch(
     apply_indent(entry, section, "Patch")
 }
 
-fn render_command(entry: &Value, state: &mut RenderState) -> Result<String, RenderError> {
+fn render_command(
+    entry: &Value,
+    runbook_path: &Path,
+    state: &mut RenderState,
+) -> Result<String, RenderError> {
     let commands = entry
         .get("commands")
         .ok_or_else(|| RenderError::Operational("Command entry is missing commands".to_string()))?;
@@ -1280,7 +1284,7 @@ fn render_command(entry: &Value, state: &mut RenderState) -> Result<String, Rend
     let resolved_command_lines = interpolate_command_lines(&command_lines, &state.captured_values)?;
     let command_text = resolved_command_lines.join("\n");
     let mut section = format!("```shell\n{command_text}\n```");
-    let execution = execute_command(entry, &command_text)?;
+    let execution = execute_command(entry, &command_text, runbook_path)?;
     let debug_enabled = command_debug_enabled(entry, state.debug_all_commands);
     let mut debug_lines = Vec::new();
     if debug_enabled {
@@ -1333,7 +1337,7 @@ fn render_command(entry: &Value, state: &mut RenderState) -> Result<String, Rend
         });
     }
 
-    ensure_assertions(entry, &execution)?;
+    ensure_assertions(entry, &execution, runbook_path)?;
     if let Err(err) = extract_captured_values(
         entry,
         &execution.stdout,
@@ -1539,7 +1543,7 @@ fn run_command_prerequisite_check(check: &Value, name: &str) -> Result<(), Rende
     )?;
 
     let script = lines.join("\n");
-    let execution = execute_command(check, &script)?;
+    let execution = execute_command(check, &script, Path::new("."))?;
     if execution.timed_out {
         return Err(prerequisite_failure(
             name,
@@ -1548,7 +1552,7 @@ fn run_command_prerequisite_check(check: &Value, name: &str) -> Result<(), Rende
         ));
     }
 
-    ensure_assertions(check, &execution).map_err(|err| match err {
+    ensure_assertions(check, &execution, Path::new(".")).map_err(|err| match err {
         RenderError::CommandFailed(message) => {
             prerequisite_failure(name, check.get("help").and_then(Value::as_str), &message)
         }

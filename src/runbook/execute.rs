@@ -4,7 +4,7 @@ use sha2::{Digest, Sha256};
 use std::collections::HashMap;
 use std::fs;
 use std::io::Read;
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::thread;
 use std::time::{Duration, Instant};
@@ -14,6 +14,11 @@ pub(crate) struct CommandExecution {
     pub(crate) stdout: String,
     pub(crate) stderr: String,
     pub(crate) timed_out: bool,
+}
+
+pub(crate) struct CleanupBlock {
+    pub(crate) lines: Vec<String>,
+    pub(crate) working_dir: PathBuf,
 }
 
 pub(crate) fn patch_target_path(
@@ -93,16 +98,22 @@ fn uses_automatic_process_cleanup(entry: &Value) -> bool {
     entry.get("cleanup").is_none()
 }
 
-pub(crate) fn cleanup_block(entry: &Value) -> Result<Option<Vec<String>>, RenderError> {
+pub(crate) fn cleanup_block(
+    entry: &Value,
+    runbook_path: &Path,
+) -> Result<Option<CleanupBlock>, RenderError> {
     let Some(cleanup) = entry.get("cleanup") else {
         return Ok(None);
     };
 
-    Ok(Some(string_lines(
-        cleanup,
-        "Command cleanup must be a string or an array of strings",
-        "Command cleanup must contain only strings",
-    )?))
+    Ok(Some(CleanupBlock {
+        lines: string_lines(
+            cleanup,
+            "Command cleanup must be a string or an array of strings",
+            "Command cleanup must contain only strings",
+        )?,
+        working_dir: resolve_command_working_dir(entry, runbook_path)?,
+    }))
 }
 
 fn string_lines(
@@ -137,12 +148,15 @@ fn split_multiline_string(value: &str) -> Vec<String> {
 pub(crate) fn execute_command(
     entry: &Value,
     command: &str,
+    runbook_path: &Path,
 ) -> Result<CommandExecution, RenderError> {
     let timeout = timeout_for_entry(entry)?;
     let auto_cleanup_processes = uses_automatic_process_cleanup(entry);
+    let working_dir = resolve_command_working_dir(entry, runbook_path)?;
 
     let mut process = Command::new("sh");
     process.arg("-lc").arg(command);
+    process.current_dir(&working_dir);
     process.stdout(Stdio::piped()).stderr(Stdio::piped());
     #[cfg(unix)]
     {
@@ -224,9 +238,10 @@ pub(crate) fn execute_command(
 pub(crate) fn ensure_assertions(
     entry: &Value,
     execution: &CommandExecution,
+    runbook_path: &Path,
 ) -> Result<(), RenderError> {
     ensure_expected_exit_code(entry, execution)?;
-    ensure_assert_checks(entry, execution)?;
+    ensure_assert_checks(entry, execution, runbook_path)?;
     Ok(())
 }
 
@@ -238,7 +253,7 @@ pub(crate) fn timeout_label(entry: &Value) -> String {
         .unwrap_or_else(|| default_timeout_label(entry).to_string())
 }
 
-pub(crate) fn run_cleanup_blocks(cleanups: &[Vec<String>]) -> Vec<String> {
+pub(crate) fn run_cleanup_blocks(cleanups: &[CleanupBlock]) -> Vec<String> {
     let mut failures = Vec::new();
 
     for cleanup in cleanups.iter().rev() {
@@ -276,11 +291,12 @@ pub(crate) fn run_patch_restores(
     failures
 }
 
-fn run_cleanup_block(cleanup: &[String]) -> Result<(), String> {
-    let script = cleanup_script(cleanup);
+fn run_cleanup_block(cleanup: &CleanupBlock) -> Result<(), String> {
+    let script = cleanup_script(&cleanup.lines);
     let output = Command::new("sh")
         .arg("-lc")
         .arg(script)
+        .current_dir(&cleanup.working_dir)
         .output()
         .map_err(|err| format!("Failed to execute cleanup: {err}"))?;
 
@@ -416,7 +432,11 @@ fn expected_exit_code(entry: &Value) -> Result<i32, RenderError> {
     })
 }
 
-fn ensure_assert_checks(entry: &Value, execution: &CommandExecution) -> Result<(), RenderError> {
+fn ensure_assert_checks(
+    entry: &Value,
+    execution: &CommandExecution,
+    runbook_path: &Path,
+) -> Result<(), RenderError> {
     let Some(assertion) = entry.get("assert") else {
         return Ok(());
     };
@@ -428,7 +448,7 @@ fn ensure_assert_checks(entry: &Value, execution: &CommandExecution) -> Result<(
     })?;
 
     for check in checks {
-        ensure_assert_check(entry, check, execution)?;
+        ensure_assert_check(entry, check, execution, runbook_path)?;
     }
 
     Ok(())
@@ -438,6 +458,7 @@ fn ensure_assert_check(
     entry: &Value,
     check: &Value,
     execution: &CommandExecution,
+    runbook_path: &Path,
 ) -> Result<(), RenderError> {
     let source = check.get("source").and_then(Value::as_str).ok_or_else(|| {
         RenderError::Operational("Assertion check source must be a string".to_string())
@@ -445,7 +466,7 @@ fn ensure_assert_check(
 
     match source {
         "stdout" => ensure_stdout_assert_check(entry, check, execution),
-        "file" => ensure_file_assert_check(entry, check, execution),
+        "file" => ensure_file_assert_check(entry, check, execution, runbook_path),
         _ => Err(RenderError::Operational(format!(
             "Unsupported assertion check source `{source}`"
         ))),
@@ -480,22 +501,23 @@ fn ensure_file_assert_check(
     entry: &Value,
     check: &Value,
     execution: &CommandExecution,
+    runbook_path: &Path,
 ) -> Result<(), RenderError> {
     let path = check.get("path").and_then(Value::as_str).ok_or_else(|| {
         RenderError::Operational("Assertion check path must be a string".to_string())
     })?;
 
-    let assertion_path = Path::new(path);
+    let assertion_path = resolve_assertion_path(entry, runbook_path, path)?;
 
     if check.get("exists").is_some() {
-        return ensure_file_exists_assertion(entry, execution, assertion_path, path);
+        return ensure_file_exists_assertion(entry, execution, &assertion_path, path);
     }
 
     let expected = check.get("sha256").and_then(Value::as_str).ok_or_else(|| {
         RenderError::Operational("Assertion check sha256 must be a string".to_string())
     })?;
 
-    ensure_file_sha256_assertion(entry, execution, assertion_path, path, expected)
+    ensure_file_sha256_assertion(entry, execution, &assertion_path, path, expected)
 }
 
 fn ensure_file_exists_assertion(
@@ -599,6 +621,86 @@ fn default_timeout_label(entry: &Value) -> &'static str {
         Some("command") => "5 seconds",
         _ => "2 minutes",
     }
+}
+
+fn normalize_path(path: &Path) -> PathBuf {
+    let mut normalized = PathBuf::new();
+
+    for component in path.components() {
+        match component {
+            Component::CurDir => {}
+            Component::ParentDir => {
+                normalized.pop();
+            }
+            other => normalized.push(other.as_os_str()),
+        }
+    }
+
+    normalized
+}
+
+fn normalize_to_absolute(path: &Path) -> Result<PathBuf, RenderError> {
+    if path.is_absolute() {
+        return Ok(normalize_path(path));
+    }
+
+    let current_dir = std::env::current_dir().map_err(|err| {
+        RenderError::Operational(format!("Failed to resolve current directory: {err}"))
+    })?;
+    Ok(normalize_path(&current_dir.join(path)))
+}
+
+fn resolve_command_working_dir(entry: &Value, runbook_path: &Path) -> Result<PathBuf, RenderError> {
+    let base_dir = normalize_to_absolute(runbook_base_dir(runbook_path))?;
+
+    let Some(working_dir) = entry.get("working_dir") else {
+        return Ok(base_dir);
+    };
+
+    let working_dir = working_dir.as_str().ok_or_else(|| {
+        RenderError::Operational("Command working_dir must be a string".to_string())
+    })?;
+    let working_dir_path = Path::new(working_dir);
+
+    if working_dir_path.is_absolute() {
+        return Err(RenderError::Operational(
+            "Command working_dir must be a relative path".to_string(),
+        ));
+    }
+
+    let resolved_dir = normalize_to_absolute(&base_dir.join(working_dir_path))?;
+    if !resolved_dir.starts_with(&base_dir) {
+        return Err(RenderError::Operational(
+            "Command working_dir must stay within the runbook directory".to_string(),
+        ));
+    }
+
+    if !resolved_dir.exists() {
+        return Err(RenderError::Operational(format!(
+            "Command working_dir `{working_dir}` did not exist"
+        )));
+    }
+
+    if !resolved_dir.is_dir() {
+        return Err(RenderError::Operational(format!(
+            "Command working_dir `{working_dir}` was not a directory"
+        )));
+    }
+
+    Ok(resolved_dir)
+}
+
+fn resolve_assertion_path(
+    entry: &Value,
+    runbook_path: &Path,
+    assertion_path: &str,
+) -> Result<PathBuf, RenderError> {
+    let path = Path::new(assertion_path);
+    if path.is_absolute() {
+        return Ok(path.to_path_buf());
+    }
+
+    Ok(resolve_command_working_dir(entry, runbook_path)?.join(path))
 }
 
 fn parse_timeout(timeout: &str) -> Result<Duration, String> {
@@ -707,12 +809,14 @@ fn terminate_process_group(process_group_id: u32) -> Result<bool, RenderError> {
 #[cfg(test)]
 mod tests {
     use super::{
-        cleanup_block, cleanup_chunks, cleanup_script, patch_text_for, run_patch_restores,
-        split_multiline_string, timeout_for_entry, timeout_label,
+        cleanup_block, cleanup_chunks, cleanup_script, patch_text_for, resolve_assertion_path,
+        resolve_command_working_dir, run_patch_restores, split_multiline_string, timeout_for_entry,
+        timeout_label,
     };
     use serde_json::json;
     use std::collections::HashMap;
     use std::fs;
+    use std::path::Path;
     use std::time::Duration;
 
     #[test]
@@ -767,12 +871,58 @@ mod tests {
             "cleanup": "first\n\n"
         });
 
-        let cleanup = match cleanup_block(&entry) {
+        let cleanup = match cleanup_block(&entry, Path::new("sw-runbook.json")) {
             Ok(cleanup) => cleanup,
             Err(_) => panic!("cleanup block should parse"),
         };
 
-        assert_eq!(cleanup, Some(vec!["first".to_string(), "".to_string()]));
+        assert_eq!(
+            cleanup.map(|cleanup| cleanup.lines),
+            Some(vec!["first".to_string(), "".to_string()])
+        );
+    }
+
+    #[test]
+    fn resolve_command_working_dir_uses_runbook_relative_directory() {
+        let dir = std::env::temp_dir().join(format!("sw-working-dir-{}", std::process::id()));
+        let nested = dir.join("nested/demo");
+        let _ = fs::remove_dir_all(&dir);
+        fs::create_dir_all(&nested).expect("create nested dir");
+
+        let entry = json!({
+            "type": "Command",
+            "working_dir": "nested/demo"
+        });
+
+        let resolved = match resolve_command_working_dir(&entry, &dir.join("sw-runbook.yaml")) {
+            Ok(path) => path,
+            Err(_) => panic!("resolve dir"),
+        };
+        assert_eq!(resolved, nested);
+
+        let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn resolve_assertion_path_uses_command_working_dir_for_relative_paths() {
+        let dir = std::env::temp_dir().join(format!("sw-assert-path-{}", std::process::id()));
+        let nested = dir.join("nested/demo");
+        let _ = fs::remove_dir_all(&dir);
+        fs::create_dir_all(&nested).expect("create nested dir");
+
+        let entry = json!({
+            "type": "Command",
+            "working_dir": "nested/demo"
+        });
+
+        let resolved = match resolve_assertion_path(&entry, &dir.join("sw-runbook.yaml"), "out.txt")
+        {
+            Ok(path) => path,
+            Err(_) => panic!("resolve assertion path"),
+        };
+        assert_eq!(resolved, nested.join("out.txt"));
+
+        let _ = fs::remove_dir_all(&dir);
     }
 
     #[test]

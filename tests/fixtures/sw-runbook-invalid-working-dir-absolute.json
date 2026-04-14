@@ -1,0 +1,11 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "echo 'hello'"
+      ],
+      "working_dir": "/tmp"
+    }
+  ]
+}

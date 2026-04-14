@@ -1,0 +1,17 @@
+entries:
+  - type: Command
+    working_dir: reverse-proxy
+    commands: |
+      printf 'main\n' > main.txt
+    cleanup: |
+      printf 'cleanup\n' >> main.txt
+
+  - type: Command
+    working_dir: reverse-proxy
+    commands:
+      - printf 'assert\n' > assert.txt
+    assert:
+      checks:
+        - source: file
+          path: assert.txt
+          exists: true

@@ -1075,6 +1075,25 @@ fn cleanup_accepts_scalar_script_in_yaml() {
 }
 
 #[test]
+fn command_working_dir_applies_to_commands_cleanup_and_file_assertions() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-working-dir.yaml", "sw-runbook.yaml");
+    fs::create_dir_all(dir.join("reverse-proxy")).expect("failed to create working directory");
+
+    let output = run_in_dir(&["run", "--input-file", "sw-runbook.yaml"], &dir);
+
+    assert!(output.status.success());
+    assert_eq!(
+        fs::read_to_string(dir.join("reverse-proxy/main.txt")).expect("missing main.txt"),
+        "main\ncleanup\n"
+    );
+    assert_eq!(
+        fs::read_to_string(dir.join("reverse-proxy/assert.txt")).expect("missing assert.txt"),
+        "assert\n"
+    );
+}
+
+#[test]
 fn cleanup_failures_do_not_stop_remaining_cleanup_and_fail_the_run() {
     let dir = prepare_workspace();
     write_runbook(

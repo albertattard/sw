@@ -1,7 +1,7 @@
 ---
 id: TASK-108
 title: Support Command Working Directory
-status: pending
+status: done
 category: run
 related_features:
   - SPEC-003
@@ -35,14 +35,14 @@ from a subdirectory relative to the runbook file.
 
 ## Acceptance Criteria
 
-- [ ] Given `working_dir: reverse-proxy`, `sw run` executes that command entry
+- [x] Given `working_dir: reverse-proxy`, `sw run` executes that command entry
       from the runbook-relative `reverse-proxy/` directory.
-- [ ] If `cleanup` is present on that command entry, cleanup runs from the same
+- [x] If `cleanup` is present on that command entry, cleanup runs from the same
       resolved working directory.
-- [ ] File assertions for that command entry resolve relative paths from the
+- [x] File assertions for that command entry resolve relative paths from the
       same working directory.
-- [ ] Absolute `working_dir` values are rejected by validation.
-- [ ] `working_dir` values that normalize outside the runbook directory are
+- [x] Absolute `working_dir` values are rejected by validation.
+- [x] `working_dir` values that normalize outside the runbook directory are
       rejected by validation.
 
 ## Notes
