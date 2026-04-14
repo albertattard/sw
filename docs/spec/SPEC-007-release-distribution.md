@@ -3,7 +3,7 @@
 - Status: Draft
 - Owner: `@aattard`
 - Created: `2026-03-13`
-- Updated: `2026-04-14`
+- Updated: `2026-04-15`
 
 ## Goal
 
@@ -40,12 +40,23 @@ In this increment, the release README includes:
 - target platform
 - version or tag
 - commit SHA
-- commit summaries since the previous release
+- release-history context
 - build profile
 
-The release README should describe the change history between the previous
-release tag and the current release tag so a downloaded artifact can explain
-what changed without requiring the user to inspect the repository history.
+For releases after the first published release, the release README should
+describe the change history between the previous release tag and the current
+release tag so a downloaded artifact can explain what changed without requiring
+the user to inspect the repository history.
+
+For release-history generation, the "previous release tag" means the nearest
+earlier reachable tag matching `v*` in the current commit history. It is not
+defined by tag creation time or any global repository ordering that ignores the
+released commit's ancestry.
+
+For the first published release, there is no previous reachable release tag.
+In that case the release README should include a curated "Supported Features"
+section sourced from a maintained repository file instead of a raw commit
+history dump.
 
 ## Download Paths
 
@@ -97,8 +108,12 @@ release binary and release README.
 - [ ] The published release includes the binary asset and a release README.
 - [ ] Given a tagged release build, the pipeline builds official assets for all
       supported release platforms.
-- [ ] The published release README includes the commit subjects between the
-      previous release tag and the current release tag.
+- [ ] For non-initial releases, the published release README includes the
+      commit subjects between the nearest previous reachable `v*` tag and the
+      current release tag.
+- [ ] For the first published release, the release README includes a curated
+      supported-features summary from a maintained repository file instead of a
+      raw full-history commit list.
 - [ ] A user can download a specific version from the versioned release path.
 - [ ] A user can navigate to the latest release path and obtain the newest
       published build.
@@ -118,4 +133,7 @@ release binary and release README.
 - Different platforms require different asset names.
 - Release README content drifts from what the pipeline actually publishes.
 - There is no previous release tag to compare against.
+- A newer tag exists elsewhere in the repository but is not reachable from the
+  released commit.
+- The maintained first-release supported-features summary becomes stale.
 - The commit list between releases is empty or cannot be resolved.

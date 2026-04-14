@@ -126,6 +126,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Download release asset bundles
         uses: actions/download-artifact@v4
@@ -135,27 +137,10 @@ jobs:
           merge-multiple: true
 
       - name: Prepare official release README
-        run: |
-          COMMIT_SUBJECT="$(git log -1 --pretty=%s)"
-          cat <<EOF > release/README.md
-          # Sociable Weaver Release Artifact
-
-          This release contains the official downloadable build published from a tagged GitHub Release.
-
-          ## Contents
-
-          - \`sw-linux-x86_64\`: release binary built with \`cargo build --release\`
-          - \`sw-macos\`: release binary built with \`cargo build --release\`
-          - \`sw-windows-x86_64.exe\`: release binary built with \`cargo build --release\`
-
-          ## Build Metadata
-
-          - Tag: \`${GITHUB_REF_NAME}\`
-          - Commit: \`${GITHUB_SHA}\`
-          - Summary: \`${COMMIT_SUBJECT}\`
-          - Platforms: \`linux-x86_64\`, \`macos\`, \`windows-x86_64\`
-          - Profile: \`release\`
-          EOF
+        run: ./tools/render-release-readme.sh release/README.md
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+          COMMIT_SHA: ${{ github.sha }}
 
       - name: Publish GitHub Release assets
         uses: softprops/action-gh-release@v2
