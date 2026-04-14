@@ -352,6 +352,16 @@ in the runbook.
 - Scalar `Command.commands` ignores a terminal line break that exists only to
   terminate the scalar, so YAML literal scalars do not add an extra blank
   command line.
+- A `Command` entry may declare `working_dir`.
+- If `working_dir` is present, it must be a string.
+- `working_dir` is resolved relative to the runbook file's directory.
+- `working_dir` applies to command execution, that command entry's explicit
+  cleanup block, and file assertions for that command entry.
+- If `working_dir` is omitted, command execution uses the runbook file's
+  directory.
+- `working_dir` must remain within the runbook file's directory tree after
+  normalization.
+- Absolute `working_dir` paths are not supported in this increment.
 - A `Command` entry may declare `indent`.
 - If `indent` is present, the rendered command section is prefixed with that
   number of leading spaces on each rendered line.
@@ -1162,6 +1172,9 @@ in the runbook.
 - Output content type uses a supported rendering value such as `json` or `xml`.
 - Output content type uses an unsupported value.
 - Command output is large.
+- `working_dir` points outside the runbook directory via `..`.
+- `working_dir` resolves to a path that does not exist.
+- `working_dir` resolves to a file rather than a directory.
 
 ## Notes for Reimplementation
 
@@ -1188,3 +1201,8 @@ lines should be attempted before the run reports cleanup failures. Output
 rendering should remain extensible so captured command output can be tagged
 with a content type such as `json` or `xml` without changing the surrounding
 output contract.
+Command working-directory behavior should remain explicit at the process level
+rather than being simulated by prepending `cd ... &&` to shell scripts. That
+keeps command execution, cleanup, timeout handling, and file assertions aligned
+to the same directory contract without making shell composition responsible for
+path semantics.

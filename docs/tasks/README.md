@@ -169,11 +169,13 @@ Expected task directories:
 - [TASK-105: Accept Scalar Cleanup Scripts](run/TASK-105-accept-scalar-cleanup-scripts.md)
 - [TASK-106: Move Release Matrix To Tagged Releases](release/TASK-106-move-release-matrix-to-tagged-releases.md)
 - [TASK-107: Add Supported Features To First Release README](release/TASK-107-add-supported-features-to-first-release-readme.md)
+- [TASK-108: Support Command Working Directory](run/TASK-108-support-command-working-directory.md)
 
 ## Pending
 
 - [ ] [TASK-028: Implement Init Command](init/TASK-028-implement-init-command.md)
 - [ ] [TASK-059: Implement Format Command](format/TASK-059-implement-format-command.md)
+- [ ] [TASK-108: Support Command Working Directory](run/TASK-108-support-command-working-directory.md)
 
 ## In Progress
 
