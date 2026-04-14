@@ -361,7 +361,12 @@ in the runbook.
 - All lines within a single `Command` entry execute together in the same shell
   context.
 - A `Command` entry may declare `cleanup`.
-- `cleanup` is a list of command lines, matching the shape of `commands`.
+- `cleanup` may be either a single string or an array of strings, matching the
+  accepted shape of `commands`.
+- When `cleanup` is a string, it is normalized into the existing line-array
+  model by splitting on newline boundaries before execution.
+- Scalar `cleanup` ignores a terminal line break that exists only to terminate
+  the scalar, so YAML literal scalars do not add an extra blank cleanup line.
 - All lines within a single `cleanup` block execute together in the same shell
   context.
 - A `Command` entry may declare `debug`.
@@ -814,6 +819,10 @@ in the runbook.
       order after the run completes.
 - [ ] Given a `cleanup` block with multiple command lines, those lines execute
       in the declared order and in the same shell context.
+- [ ] Given a command whose `cleanup` is a single string, cleanup executes with
+      the same behavior as the existing line-array cleanup model.
+- [ ] Given a command whose `cleanup` is a YAML literal scalar with a terminal
+      line break, the implicit terminator blank line is ignored.
 - [ ] Given a `cleanup` block that expresses a shell control structure across
       multiple lines, that structure executes correctly during cleanup.
 - [ ] Given a command with `cleanup`, the explicit cleanup block is used

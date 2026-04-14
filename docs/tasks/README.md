@@ -166,12 +166,14 @@ Expected task directories:
 - [TASK-102: Review actions checkout v6 Upgrade](repo-process/TASK-102-review-actions-checkout-v6-upgrade.md)
 - [TASK-103: Review upload artifact v7 Upgrade](repo-process/TASK-103-review-upload-artifact-v7-upgrade.md)
 - [TASK-104: Default Example Output To YAML](example/TASK-104-default-example-output-to-yaml.md)
+- [TASK-105: Accept Scalar Cleanup Scripts](run/TASK-105-accept-scalar-cleanup-scripts.md)
 
 ## Pending
 
 - [ ] [TASK-028: Implement Init Command](init/TASK-028-implement-init-command.md)
 - [ ] [TASK-038: Include Release Commit History In README](release/TASK-038-include-release-commit-history-in-readme.md)
 - [ ] [TASK-059: Implement Format Command](format/TASK-059-implement-format-command.md)
+- [ ] [TASK-105: Accept Scalar Cleanup Scripts](run/TASK-105-accept-scalar-cleanup-scripts.md)
 
 ## In Progress
 
