@@ -170,6 +170,7 @@ Expected task directories:
 - [TASK-106: Move Release Matrix To Tagged Releases](release/TASK-106-move-release-matrix-to-tagged-releases.md)
 - [TASK-107: Add Supported Features To First Release README](release/TASK-107-add-supported-features-to-first-release-readme.md)
 - [TASK-108: Support Command Working Directory](run/TASK-108-support-command-working-directory.md)
+- [TASK-109: Support HTML Command Output Content Type](run/TASK-109-support-html-command-output-content-type.md)
 
 ## Pending
 
@@ -182,6 +183,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-109: Support HTML Command Output Content Type](run/TASK-109-support-html-command-output-content-type.md)
 - [x] [TASK-108: Support Command Working Directory](run/TASK-108-support-command-working-directory.md)
 - [x] [TASK-107: Add Supported Features To First Release README](release/TASK-107-add-supported-features-to-first-release-readme.md)
 - [x] [TASK-038: Include Release Commit History In README](release/TASK-038-include-release-commit-history-in-readme.md)

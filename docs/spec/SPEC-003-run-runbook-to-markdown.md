@@ -492,7 +492,7 @@ in the runbook.
 - If `output.content_type` is present, the generated Markdown fenced block uses
   the declared content type.
 - In this increment, supported `output.content_type` values are `text`, `json`,
-  `xml`, and `java`.
+  `xml`, `html`, and `java`.
 - If `output.trim_empty_lines` is omitted, the captured output trims leading
   and trailing empty lines.
 - `output.trim_empty_lines` accepts `leading_trailing`, `leading`, `trailing`,
@@ -922,6 +922,8 @@ in the runbook.
       Markdown uses a `json` fenced block for captured output.
 - [ ] Given a `Command` entry with `output.content_type: xml`, the generated
       Markdown uses an `xml` fenced block for captured output.
+- [ ] Given a `Command` entry with `output.content_type: html`, the generated
+      Markdown uses an `html` fenced block for captured output.
 - [ ] Given a `Command` entry with `output.content_type: java`, the generated
       Markdown uses a `java` fenced block for captured output.
 - [ ] Given a `Command` entry with `output` but no `content_type`, the
@@ -1169,7 +1171,8 @@ in the runbook.
 - Command writes to stderr but exits successfully.
 - Command caption supplied as a string or array of strings.
 - Output content type omitted and defaults to `text`.
-- Output content type uses a supported rendering value such as `json` or `xml`.
+- Output content type uses a supported rendering value such as `json`, `xml`,
+  or `html`.
 - Output content type uses an unsupported value.
 - Command output is large.
 - `working_dir` points outside the runbook directory via `..`.
@@ -1199,8 +1202,8 @@ are reliably released even when the run stops early. Cleanup should be best
 effort rather than fail-fast: all registered cleanup blocks and all cleanup
 lines should be attempted before the run reports cleanup failures. Output
 rendering should remain extensible so captured command output can be tagged
-with a content type such as `json` or `xml` without changing the surrounding
-output contract.
+with a content type such as `json`, `xml`, or `html` without changing the
+surrounding output contract.
 Command working-directory behavior should remain explicit at the process level
 rather than being simulated by prepending `cd ... &&` to shell scripts. That
 keeps command execution, cleanup, timeout handling, and file assertions aligned

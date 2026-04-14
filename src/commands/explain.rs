@@ -311,6 +311,7 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "Machine-readable contracts live in the runbook input, not in stdout.",
                 "`DisplayFile` fence detection recognizes `.java` as `java`, `.sql` as `sql`, and `.xml` as `xml`; other extensions fall back to `text`.",
                 "Command output can render `stdout`, `stderr`, or `combined` with `output.stream`; if omitted, rendered output defaults to `combined`.",
+                "Command output content types currently support `text`, `json`, `xml`, `html`, and `java`.",
                 "`output.stream` changes rendered output only and does not widen capture or assertion sources.",
                 "Command output can trim outer empty lines with `output.trim_empty_lines` using `leading_trailing`, `leading`, `trailing`, or `none`.",
                 "Command-based prerequisite checks use a shorter default timeout of `5 seconds` unless they declare `timeout`.",

@@ -1264,6 +1264,18 @@ fn java_output_content_type_uses_java_fenced_block() {
 }
 
 #[test]
+fn html_output_content_type_uses_html_fenced_block() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-run-output-html.json", "sw-runbook.json");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```html\n<h1>Hello</h1>\n```"));
+}
+
+#[test]
 fn output_without_content_type_uses_text_fenced_block() {
     let dir = prepare_workspace();
     write_runbook(&dir, "sw-runbook-run-success.json", "sw-runbook.json");
