@@ -33,7 +33,7 @@ pub struct Cli {
 pub enum Commands {
     /// Check runbook prerequisites.
     Check(CheckArgs),
-    /// Print a JSON example for a runbook topic.
+    /// Print a runbook example for a topic.
     Example(ExampleArgs),
     /// Explain a feature contract or discovery path.
     Explain(ExplainArgs),
@@ -51,7 +51,7 @@ pub enum Commands {
 
 #[derive(Debug, clap::Args)]
 #[command(
-    after_help = "Runbook-authored output fields such as `trim_empty_lines` and `stream` are configured in the runbook, not as CLI flags.\n`Command` entries default to a `2 minutes` timeout, while command-based prerequisite checks default to `5 seconds` unless the runbook sets `timeout`.\n`DisplayFile` fence detection currently recognizes `.java` as `java`, `.sql` as `sql`, and `.xml` as `xml`; other extensions render as `text`.\nUse `--verbose-mode=plain` for SSH-safe line-based progress output when terminal redraws are unreliable.\nUse `sw example Command` for a current JSON snippet and `sw explain run` for behavior and defaults."
+    after_help = "Runbook-authored output fields such as `trim_empty_lines` and `stream` are configured in the runbook, not as CLI flags.\n`Command` entries default to a `2 minutes` timeout, while command-based prerequisite checks default to `5 seconds` unless the runbook sets `timeout`.\n`DisplayFile` fence detection currently recognizes `.java` as `java`, `.sql` as `sql`, and `.xml` as `xml`; other extensions render as `text`.\nUse `--verbose-mode=plain` for SSH-safe line-based progress output when terminal redraws are unreliable.\nUse `sw example Command` for a current YAML snippet and `sw example Command --output-format json` when you need the JSON shape.\nUse `sw explain run` for behavior and defaults."
 )]
 pub struct RunArgs {
     #[command(flatten)]
@@ -68,7 +68,7 @@ pub struct RunArgs {
 
 #[derive(Debug, clap::Args)]
 #[command(
-    after_help = "Command-based prerequisite checks default to a `5 seconds` timeout unless the runbook sets `timeout`.\nUse `sw example Prerequisite` for a current prerequisite JSON snippet and `sw explain check` for behavior and defaults."
+    after_help = "Command-based prerequisite checks default to a `5 seconds` timeout unless the runbook sets `timeout`.\nUse `sw example Prerequisite` for a current prerequisite YAML snippet and `sw example Prerequisite --output-format json` when you need the JSON shape.\nUse `sw explain check` for behavior and defaults."
 )]
 pub struct CheckArgs {
     #[command(flatten)]
@@ -98,11 +98,15 @@ pub struct RunbookInputArgs {
 
 #[derive(Debug, clap::Args)]
 #[command(
-    after_help = "The `Command` example includes current nested output fields such as `trim_empty_lines` and `stream`, along with rewrite, capture, and cleanup examples.\nUse `sw example DisplayFile` when you need the Java `collapse_method_body` transform for collapsing method bodies."
+    after_help = "Defaults to YAML output.\nUse `--output-format yaml|json` to choose the example format explicitly.\nThe `Command` example includes current nested output fields such as `trim_empty_lines` and `stream`, along with rewrite, capture, and cleanup examples.\nUse `sw example DisplayFile` when you need the Java `collapse_method_body` transform for collapsing method bodies."
 )]
 pub struct ExampleArgs {
     /// Example topic such as `Command`, `DisplayFile`, or `rewrite.keep_between`.
     pub topic: String,
+
+    /// Output format: `yaml` or `json`. Defaults to `yaml`.
+    #[arg(long, value_name = "FORMAT")]
+    pub output_format: Option<String>,
 }
 
 #[derive(Debug, clap::Args)]

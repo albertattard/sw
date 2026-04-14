@@ -1,7 +1,7 @@
 ---
 id: TASK-104
 title: Default Example Output To YAML
-status: pending
+status: done
 category: example
 related_features:
   - SPEC-008
@@ -32,14 +32,14 @@ agents to request JSON explicitly when they need the machine-oriented shape.
 
 ## Acceptance Criteria
 
-- [ ] Given `sw example Command`, the CLI exits with `0` and prints valid YAML.
-- [ ] Given `sw example Command --output-format yaml`, the CLI exits with `0`
+- [x] Given `sw example Command`, the CLI exits with `0` and prints valid YAML.
+- [x] Given `sw example Command --output-format yaml`, the CLI exits with `0`
       and prints the same YAML shape as the default mode.
-- [ ] Given `sw example Command --output-format json`, the CLI exits with `0`
+- [x] Given `sw example Command --output-format json`, the CLI exits with `0`
       and prints valid JSON.
-- [ ] Given `sw example DisplayFile`, the CLI exits with `0` and prints valid
+- [x] Given `sw example DisplayFile`, the CLI exits with `0` and prints valid
       YAML, including supported fields such as `indent` and transforms.
-- [ ] Help output documents `--output-format yaml|json` and YAML as the
+- [x] Help output documents `--output-format yaml|json` and YAML as the
       default.
 
 ## Notes

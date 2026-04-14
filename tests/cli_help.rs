@@ -73,7 +73,7 @@ fn help_all_prints_top_level_and_known_subcommand_help() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("Sociable Weaver (SW)"));
     assert!(stdout.contains("Check runbook prerequisites"));
-    assert!(stdout.contains("Print a JSON example for a runbook topic"));
+    assert!(stdout.contains("Print a runbook example for a topic"));
     assert!(stdout.contains("Explain a feature contract or discovery path"));
     assert!(stdout.contains("Import a Markdown README into a starter runbook"));
     assert!(stdout.contains("Render a runbook to output"));
@@ -103,6 +103,8 @@ fn example_help_prints_help() {
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("Example topic"));
+    assert!(stdout.contains("--output-format"));
+    assert!(stdout.contains("Defaults to YAML output."));
     assert!(stdout.contains("trim_empty_lines"));
     assert!(stdout.contains("stream"));
     assert!(stdout.contains("The `Command` example includes current nested output fields"));
@@ -160,6 +162,7 @@ fn run_help_prints_help() {
     assert!(stdout.contains("`.java` as `java`, `.sql` as `sql`, and `.xml` as `xml`"));
     assert!(stdout.contains("SSH-safe line-based progress output"));
     assert!(stdout.contains("sw example Command"));
+    assert!(stdout.contains("--output-format json"));
     assert!(stdout.contains("sw explain run"));
 }
 
