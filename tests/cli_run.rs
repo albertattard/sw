@@ -1094,6 +1094,61 @@ fn command_working_dir_applies_to_commands_cleanup_and_file_assertions() {
 }
 
 #[test]
+fn command_working_dir_renders_as_copyable_subshell_wrapper() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-working-dir.yaml", "sw-runbook.yaml");
+    fs::create_dir_all(dir.join("reverse-proxy")).expect("failed to create working directory");
+
+    let output = run_in_dir(&["run", "--input-file", "sw-runbook.yaml"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(
+        readme.contains("```shell\n(\n  cd 'reverse-proxy' &&\n  printf 'main\\n' > main.txt\n)")
+    );
+    assert!(
+        readme
+            .contains("```shell\n(\n  cd 'reverse-proxy' &&\n  printf 'assert\\n' > assert.txt\n)")
+    );
+}
+
+#[test]
+fn command_without_working_dir_keeps_existing_rendered_shape() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-run-success.json", "sw-runbook.json");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```shell\nprintf 'Hello there\\n'\n```"));
+    assert!(!readme.contains("\n(\n  cd "));
+}
+
+#[test]
+fn command_working_dir_renders_shell_safe_quotes() {
+    let dir = prepare_workspace();
+    fs::create_dir_all(dir.join("dir'with-quote"))
+        .expect("failed to create quoted working directory");
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Command
+    working_dir: dir'with-quote
+    commands: |
+      printf 'quoted\n' > output.txt
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run", "--input-file", "sw-runbook.yaml"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("cd 'dir'\"'\"'with-quote' &&"));
+}
+
+#[test]
 fn cleanup_failures_do_not_stop_remaining_cleanup_and_fail_the_run() {
     let dir = prepare_workspace();
     write_runbook(

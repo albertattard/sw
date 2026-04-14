@@ -362,6 +362,12 @@ in the runbook.
 - `working_dir` must remain within the runbook file's directory tree after
   normalization.
 - Absolute `working_dir` paths are not supported in this increment.
+- If `working_dir` is present, the rendered command block wraps the displayed
+  command in a subshell that changes into that directory before executing the
+  command text.
+- The rendered wrapper must be copy-pasteable as shell input.
+- The rendered wrapper should use `cd '<working_dir>' &&` so the displayed
+  command fails safely if the directory change fails.
 - A `Command` entry may declare `indent`.
 - If `indent` is present, the rendered command section is prefixed with that
   number of leading spaces on each rendered line.
@@ -1178,6 +1184,8 @@ in the runbook.
 - `working_dir` points outside the runbook directory via `..`.
 - `working_dir` resolves to a path that does not exist.
 - `working_dir` resolves to a file rather than a directory.
+- `working_dir` includes shell-sensitive characters that require quoting in the
+  rendered command block.
 
 ## Notes for Reimplementation
 

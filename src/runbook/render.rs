@@ -1283,7 +1283,8 @@ fn render_command(
 
     let resolved_command_lines = interpolate_command_lines(&command_lines, &state.captured_values)?;
     let command_text = resolved_command_lines.join("\n");
-    let mut section = format!("```shell\n{command_text}\n```");
+    let rendered_command_text = render_command_text(entry, &command_text)?;
+    let mut section = format!("```shell\n{rendered_command_text}\n```");
     let execution = execute_command(entry, &command_text, runbook_path)?;
     let debug_enabled = command_debug_enabled(entry, state.debug_all_commands);
     let mut debug_lines = Vec::new();
@@ -1364,6 +1365,30 @@ fn render_command(
     emit_debug_lines(debug_enabled, &debug_lines);
     append_output(entry, &rendered_output, &mut section)?;
     apply_indent(entry, section, "Command")
+}
+
+fn render_command_text(entry: &Value, command_text: &str) -> Result<String, RenderError> {
+    let Some(working_dir) = entry.get("working_dir") else {
+        return Ok(command_text.to_string());
+    };
+
+    let working_dir = working_dir.as_str().ok_or_else(|| {
+        RenderError::Operational("Command working_dir must be a string".to_string())
+    })?;
+    let quoted_working_dir = shell_single_quote(working_dir);
+    let indented_command = command_text
+        .lines()
+        .map(|line| format!("  {line}"))
+        .collect::<Vec<_>>()
+        .join("\n");
+
+    Ok(format!(
+        "(\n  cd {quoted_working_dir} &&\n{indented_command}\n)"
+    ))
+}
+
+fn shell_single_quote(value: &str) -> String {
+    format!("'{}'", value.replace('\'', r#"'"'"'"#))
 }
 
 fn command_debug_enabled(entry: &Value, debug_all_commands: bool) -> bool {
