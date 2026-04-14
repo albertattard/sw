@@ -51,6 +51,7 @@ fn help_subcommand_for_known_topic_prints_targeted_help() {
     assert!(stdout.contains("--output-file"));
     assert!(stdout.contains("trim_empty_lines"));
     assert!(stdout.contains("stream"));
+    assert!(stdout.contains("cleanup"));
     assert!(stdout.contains("sw example Command"));
     assert!(stdout.contains("sw explain run"));
     assert!(!stdout.contains("Check runbook prerequisites"));
@@ -157,6 +158,7 @@ fn run_help_prints_help() {
     assert!(stdout.contains("--output-file"));
     assert!(stdout.contains("trim_empty_lines"));
     assert!(stdout.contains("stream"));
+    assert!(stdout.contains("cleanup"));
     assert!(stdout.contains("`Command` entries default to a `2 minutes` timeout"));
     assert!(stdout.contains("prerequisite checks default to `5 seconds`"));
     assert!(stdout.contains("`.java` as `java`, `.sql` as `sql`, and `.xml` as `xml`"));

@@ -95,6 +95,9 @@ fn explain_run_prints_concise_contract_summary() {
         "If more than one default runbook file exists, run fails with an operational error and requires `--input-file`."
     ));
     assert!(stdout.contains(
+        "`Command.cleanup` supports manual teardown as either a string or an array, and explicit `cleanup` replaces automatic process cleanup for that command entry."
+    ));
+    assert!(stdout.contains(
         "`Markdown.contents`, `Command.commands`, `Prerequisite.checks[*].contents`, and `Prerequisite.checks[*].commands` may be a single string or an array of strings."
     ));
     assert!(stdout.contains(
@@ -270,13 +273,13 @@ fn explain_boundaries_between_help_example_and_explain_are_clear() {
 }
 
 #[test]
-fn explain_example_mentions_trim_empty_lines_in_command_example() {
+fn explain_example_mentions_command_fields_in_example() {
     let output = run(&["explain", "example"]);
 
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains(
-        "The `Command` example includes current nested output fields such as `trim_empty_lines` and `stream`."
+        "The `Command` example includes current nested fields such as `trim_empty_lines`, `stream`, and `cleanup`."
     ));
     assert!(stdout.contains(
         "The `DisplayFile` example includes the Java `collapse_method_body` transform for collapsing method bodies."

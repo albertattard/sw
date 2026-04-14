@@ -173,6 +173,7 @@ Expected task directories:
 - [TASK-109: Support HTML Command Output Content Type](run/TASK-109-support-html-command-output-content-type.md)
 - [TASK-110: Render Working Dir As Copyable Subshell](run/TASK-110-render-working-dir-as-copyable-subshell.md)
 - [TASK-111: Reject Ambiguous Default Runbook Selection](discovery/TASK-111-reject-ambiguous-default-runbook-selection.md)
+- [TASK-112: Surface Cleanup Discovery In Help And Explain](discovery/TASK-112-surface-cleanup-discovery-in-help-and-explain.md)
 
 ## Pending
 
@@ -185,6 +186,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-112: Surface Cleanup Discovery In Help And Explain](discovery/TASK-112-surface-cleanup-discovery-in-help-and-explain.md)
 - [x] [TASK-111: Reject Ambiguous Default Runbook Selection](discovery/TASK-111-reject-ambiguous-default-runbook-selection.md)
 - [x] [TASK-110: Render Working Dir As Copyable Subshell](run/TASK-110-render-working-dir-as-copyable-subshell.md)
 - [x] [TASK-109: Support HTML Command Output Content Type](run/TASK-109-support-html-command-output-content-type.md)

@@ -308,6 +308,7 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "If more than one default runbook file exists, run fails with an operational error and requires `--input-file`.",
                 "`Markdown.contents`, `Command.commands`, `Prerequisite.checks[*].contents`, and `Prerequisite.checks[*].commands` may be a single string or an array of strings.",
                 "When those fields are provided as a string, `sw run` splits them on newline boundaries before rendering or execution and does not turn a terminal line break into an extra blank line.",
+                "`Command.cleanup` supports manual teardown as either a string or an array, and explicit `cleanup` replaces automatic process cleanup for that command entry.",
                 "Entries execute in runbook order.",
                 "Command execution and rendering are part of the same workflow.",
                 "Machine-readable contracts live in the runbook input, not in stdout.",
@@ -459,7 +460,7 @@ fn explanations() -> Vec<Explanation<'static>> {
             constraints: &[
                 "Example output is documentation-oriented and may need editing before use.",
                 "Use `example` for JSON shape, not for command behavior or defaults.",
-                "The `Command` example includes current nested output fields such as `trim_empty_lines` and `stream`.",
+                "The `Command` example includes current nested fields such as `trim_empty_lines`, `stream`, and `cleanup`.",
                 "The `DisplayFile` example includes the Java `collapse_method_body` transform for collapsing method bodies.",
                 "The printed snippet is intended to remain a stable starting point for users and agents.",
             ],

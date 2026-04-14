@@ -3,7 +3,7 @@
 - Status: Proposed
 - Owner: @aattard
 - Created: 2026-03-13
-- Last updated: 2026-03-24
+- Last updated: 2026-04-14
 
 ## Problem
 
@@ -132,6 +132,11 @@ When a topic covers runbook output cleanup behavior, the explanation should
 describe current first-class output fields such as `trim_empty_lines` and make
 their allowed values and intent discoverable without requiring the raw spec.
 
+When a topic covers command teardown behavior, the explanation should describe
+manual `cleanup` as a first-class `Command` field, explain that it may be
+authored as a string or array, and make it clear that explicit `cleanup`
+replaces the automatic process-cleanup fallback for that command entry.
+
 When a topic covers runbook output stream selection, the explanation should
 describe `output.stream`, its supported values, and the boundary between
 rendered output selection versus the narrower existing `capture.source` and
@@ -172,6 +177,9 @@ When `--output-format=skill` is selected:
 - [ ] Given `sw explain run`, the CLI documents `output.trim_empty_lines` and
       its supported values for trimming leading and trailing empty output
       lines.
+- [ ] Given `sw explain run`, the CLI documents `cleanup` as a `Command`
+      field for manual teardown and makes it clear that explicit `cleanup`
+      replaces automatic process cleanup for that entry.
 - [ ] Given `sw explain run`, the CLI documents `output.stream` and its
       supported values `stdout`, `stderr`, and `combined`.
 - [ ] Given `sw explain run`, the CLI documents that omitted `output.stream`
@@ -193,8 +201,8 @@ When `--output-format=skill` is selected:
       documented `explain` contract makes it clear when the next step should be
       `sw example <topic>`.
 - [ ] Given `sw explain example`, the CLI makes it clear that the `Command`
-      example includes current nested output fields such as `trim_empty_lines`
-      and `stream`.
+      example includes current nested fields such as `trim_empty_lines`,
+      `stream`, and `cleanup`.
 - [ ] Given `sw explain example`, the CLI makes it clear that the `DisplayFile`
       example includes the Java `collapse_method_body` transform for
       collapsing method bodies.
