@@ -4,7 +4,7 @@ title: Validate Runbook Input
 status: in_progress
 priority: high
 owner: @aattard
-last_updated: 2026-04-08
+last_updated: 2026-04-14
 ---
 
 ## Problem
@@ -21,8 +21,8 @@ sw validate --input-file <sw-runbook.yaml> --output-format json
 sw validate --input-file=- --output-format json
 ```
 
-If no input file is provided, the command uses the first existing default
-runbook file in this order:
+If no input file is provided, the command uses the implicit default runbook
+only when exactly one of these files exists:
 
 - `./sw-runbook.json`
 - `./sw-runbook.yaml`
@@ -51,12 +51,17 @@ Default input behavior:
   as JSON.
 - If `--input-file=-` is provided and `--input-format=yaml`, parse stdin as
   YAML.
-- If `--input-file` is provided with a path, use that path. When no file path
-  is provided, use the first existing path from `sw-runbook.json`,
-  `sw-runbook.yaml`, and `sw-runbook.yml` in the current directory.
+- If `--input-file` is provided with a path, use that path.
+- When no file path is provided and exactly one of `sw-runbook.json`,
+  `sw-runbook.yaml`, or `sw-runbook.yml` exists in the current directory, use
+  that file.
+- When no file path is provided and more than one of `sw-runbook.json`,
+  `sw-runbook.yaml`, or `sw-runbook.yml` exists in the current directory,
+  return exit code `1` with a clear error that the default input is ambiguous
+  and `--input-file` must be specified.
 - When reading from a file path or from the default file lookup, infer the
   input format from the file extension or default file name.
-- `--input-format` does not change the existing file lookup order when
+- `--input-format` does not bypass this default file ambiguity check when
   `--input-file=-` is not used.
 - Supported input formats are JSON, YAML, and YML for files, and JSON or YAML
   for stdin.
@@ -112,16 +117,21 @@ Exit codes:
       returns `valid: false`, at least one structured error, and exit code `2`.
 - [ ] Given a missing input file, command returns exit code `1` with a clear
       error message.
-- [ ] Given no input file argument and a valid `./sw-runbook.json`,
+- [ ] Given no input file argument and a valid `./sw-runbook.json`, with no
+      other default runbook file present, `sw validate --output-format json`
+      validates that file and returns exit code `0`.
+- [ ] Given no input file argument, no `./sw-runbook.json`, and a valid
+      `./sw-runbook.yaml`, with no other default runbook file present,
       `sw validate --output-format json` validates that file and returns exit
       code `0`.
-- [ ] Given no input file argument, no `./sw-runbook.json`, and a valid
-      `./sw-runbook.yaml`, `sw validate --output-format json` validates that
-      file and returns exit code `0`.
 - [ ] Given no input file argument, no `./sw-runbook.json` or
       `./sw-runbook.yaml`, and a valid `./sw-runbook.yml`,
       `sw validate --output-format json` validates that file and returns exit
       code `0`.
+- [ ] Given no input file argument and more than one of `./sw-runbook.json`,
+      `./sw-runbook.yaml`, or `./sw-runbook.yml` present,
+      `sw validate --output-format json` returns exit code `1` with a clear
+      ambiguity error that requires `--input-file`.
 - [ ] Given no input file argument and none of `./sw-runbook.json`,
       `./sw-runbook.yaml`, or `./sw-runbook.yml` present, the command returns
       exit code `1` with a clear missing-file error.
@@ -150,7 +160,8 @@ Exit codes:
       reports a clear parsing error.
 - [ ] Given `--input-format=json` or `--input-format=yaml` without
       `--input-file=-`, the command still uses the existing default file lookup
-      behavior.
+      behavior, including ambiguity failures when multiple default runbooks
+      exist.
 - [ ] Given no `--output-format` option, command uses `human` output by
       default.
 - [ ] Given a human-readable validation failure for `entries[N]`, the output

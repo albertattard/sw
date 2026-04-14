@@ -344,6 +344,23 @@ fn validate_uses_yml_default_when_json_and_yaml_are_missing() {
 }
 
 #[test]
+fn validate_fails_when_multiple_default_runbooks_exist() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-anonymized.json", "sw-runbook.json");
+    write_runbook(&dir, "sw-runbook-run-success.yaml", "sw-runbook.yaml");
+
+    let output = run_in_dir(&["validate", "--output-format", "json"], &dir);
+
+    assert_eq!(output.status.code(), Some(1));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\":false"));
+    assert!(stdout.contains("Multiple default runbooks found"));
+    assert!(stdout.contains("sw-runbook.json"));
+    assert!(stdout.contains("sw-runbook.yaml"));
+    assert!(stdout.contains("Specify --input-file explicitly"));
+}
+
+#[test]
 fn validate_input_format_without_stdin_keeps_default_file_lookup() {
     let dir = prepare_workspace();
     write_runbook(&dir, "sw-runbook-anonymized.json", "sw-runbook.json");

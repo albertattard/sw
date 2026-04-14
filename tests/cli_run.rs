@@ -298,6 +298,23 @@ fn run_uses_yml_default_when_json_and_yaml_are_missing() {
 }
 
 #[test]
+fn run_fails_when_multiple_default_runbooks_exist() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-run-success.json", "sw-runbook.json");
+    write_runbook(&dir, "sw-runbook-run-success.yaml", "sw-runbook.yaml");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert_eq!(output.status.code(), Some(1));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("Multiple default runbooks found"));
+    assert!(stderr.contains("sw-runbook.json"));
+    assert!(stderr.contains("sw-runbook.yaml"));
+    assert!(stderr.contains("Specify --input-file explicitly"));
+    assert!(!dir.join("README.md").exists());
+}
+
+#[test]
 fn verbose_run_reports_entry_progress_to_stderr() {
     let dir = prepare_workspace();
     write_runbook(&dir, "sw-runbook-run-success.json", "sw-runbook.json");

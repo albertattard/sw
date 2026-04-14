@@ -4,7 +4,7 @@ title: Run Runbook to Markdown
 status: in_progress
 priority: high
 owner: @aattard
-last_updated: 2026-04-08
+last_updated: 2026-04-14
 ---
 
 ## Problem
@@ -35,8 +35,11 @@ sw run --input-file=- --input-format=yaml
 ```
 
 Initial version behavior:
-- Read the first existing default runbook file from the current directory in
-  this order: `sw-runbook.json`, `sw-runbook.yaml`, then `sw-runbook.yml`.
+- Use the implicit default runbook only when exactly one of
+  `sw-runbook.json`, `sw-runbook.yaml`, or `sw-runbook.yml` exists in the
+  current directory.
+- If more than one default runbook file exists in the current directory, fail
+  with an operational error and require `--input-file`.
 - Render the runbook entries in order.
 - Execute command entries in order.
 - Produce Markdown output.
@@ -69,11 +72,15 @@ in the runbook.
   as JSON.
 - If `--input-file=-` is provided and `--input-format=yaml`, parse stdin as
   YAML.
-- If `--input-file` is provided with a path, use that path. Otherwise use the
-  first existing path from `./sw-runbook.json`, `./sw-runbook.yaml`, and
-  `./sw-runbook.yml`.
-- If `--input-file` is omitted, `--input-format` does not change the existing
-  default file lookup behavior.
+- If `--input-file` is provided with a path, use that path.
+- If `--input-file` is omitted and exactly one of `./sw-runbook.json`,
+  `./sw-runbook.yaml`, or `./sw-runbook.yml` exists, use that file.
+- If `--input-file` is omitted and more than one of `./sw-runbook.json`,
+  `./sw-runbook.yaml`, or `./sw-runbook.yml` exists, return exit code `1` with
+  a clear error that the default input is ambiguous and `--input-file` must be
+  specified.
+- If `--input-file` is omitted, `--input-format` does not bypass this default
+  file ambiguity check.
 - When reading from a file path or from the default file lookup, infer the
   input format from the file extension or default file name.
 - If `--output-format` is not provided, default to `markdown`.
@@ -618,8 +625,9 @@ in the runbook.
 ### Command Invocation And Files
 
 - [ ] `sw` with no subcommand behaves the same as `sw run`.
-- [ ] Given no input file argument and a valid `./sw-runbook.json`, `sw`
-      renders the file and writes `./README.md`.
+- [ ] Given no input file argument and a valid `./sw-runbook.json`, with no
+      other default runbook file present, `sw` renders the file and writes
+      `./README.md`.
 - [ ] Given `sw run --input-file <file>` with a valid runbook, the command
       renders entries in order and exits with `0`.
 - [ ] Given `sw run --input-file=-` with a valid JSON runbook on stdin, the
@@ -634,7 +642,11 @@ in the runbook.
       parsing error.
 - [ ] Given `--input-format=json` or `--input-format=yaml` without
       `--input-file=-`, the command still uses the existing default file lookup
-      behavior.
+      behavior, including ambiguity failures when multiple default runbooks
+      exist.
+- [ ] Given no input file argument and more than one of `./sw-runbook.json`,
+      `./sw-runbook.yaml`, or `./sw-runbook.yml` present, `sw run` returns exit
+      code `1` with a clear ambiguity error that requires `--input-file`.
 - [ ] Given `--output-file <path>`, the command writes the output to the
       provided path.
 - [ ] Given `sw run --verbose`, progress lines are written to stderr without

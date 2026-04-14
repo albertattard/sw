@@ -50,12 +50,14 @@ enum InputSource {
 }
 
 const STDIN_INPUT_PATH: &str = "-";
+const DEFAULT_RUNBOOK_CANDIDATES: [&str; 3] =
+    ["sw-runbook.json", "sw-runbook.yaml", "sw-runbook.yml"];
 
 pub fn load(
     input_file: Option<PathBuf>,
     input_format: Option<InputFormat>,
 ) -> Result<LoadedRunbook, String> {
-    match resolve_input_source(input_file, input_format) {
+    match resolve_input_source(input_file, input_format)? {
         InputSource::File(path) => {
             let document = read(&path)?;
             Ok(LoadedRunbook { path, document })
@@ -101,30 +103,39 @@ fn read_stdin(format: InputFormat) -> Result<Value, String> {
 fn resolve_input_source(
     input_file: Option<PathBuf>,
     input_format: Option<InputFormat>,
-) -> InputSource {
+) -> Result<InputSource, String> {
     let Some(path) = input_file else {
-        return InputSource::File(resolve_default_input_path());
+        return Ok(InputSource::File(resolve_default_input_path()?));
     };
 
     if path == Path::new(STDIN_INPUT_PATH) {
-        return InputSource::Stdin(input_format.unwrap_or(InputFormat::Json));
+        return Ok(InputSource::Stdin(
+            input_format.unwrap_or(InputFormat::Json),
+        ));
     }
 
-    InputSource::File(path)
+    Ok(InputSource::File(path))
 }
 
-fn resolve_default_input_path() -> PathBuf {
-    for candidate in [
-        PathBuf::from("sw-runbook.json"),
-        PathBuf::from("sw-runbook.yaml"),
-        PathBuf::from("sw-runbook.yml"),
-    ] {
-        if candidate.exists() {
-            return candidate;
-        }
-    }
+fn resolve_default_input_path() -> Result<PathBuf, String> {
+    let existing_candidates = DEFAULT_RUNBOOK_CANDIDATES
+        .iter()
+        .map(PathBuf::from)
+        .filter(|candidate| candidate.exists())
+        .collect::<Vec<_>>();
 
-    PathBuf::from("sw-runbook.json")
+    match existing_candidates.as_slice() {
+        [path] => Ok(path.clone()),
+        [] => Ok(PathBuf::from(DEFAULT_RUNBOOK_CANDIDATES[0])),
+        _ => Err(format!(
+            "Multiple default runbooks found: {}. Specify --input-file explicitly.",
+            existing_candidates
+                .iter()
+                .map(|path| path.display().to_string())
+                .collect::<Vec<_>>()
+                .join(", ")
+        )),
+    }
 }
 
 pub fn print_human_with_runbook(result: &ValidationResult, path: &Path, runbook: Option<&Value>) {

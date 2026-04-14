@@ -4,7 +4,7 @@ title: Check Runbook Prerequisites
 status: proposed
 priority: medium
 owner: @aattard
-last_updated: 2026-04-08
+last_updated: 2026-04-14
 ---
 
 ## Problem
@@ -22,8 +22,8 @@ sw check --input-file <sw-runbook.yaml>
 sw check --input-file=-
 ```
 
-If no input file is provided, the command uses the first existing default
-runbook file in this order:
+If no input file is provided, the command uses the implicit default runbook
+only when exactly one of these files exists:
 
 - `./sw-runbook.json`
 - `./sw-runbook.yaml`
@@ -51,11 +51,15 @@ Default input behavior:
 - If `--input-file=-` is provided and `--input-format=yaml`, parse stdin as
   YAML.
 - If `--input-file` is provided with a path, use that path.
-- If no file path is provided, use the first existing path from
-  `./sw-runbook.json`, `./sw-runbook.yaml`, and `./sw-runbook.yml`.
+- If no file path is provided and exactly one of `./sw-runbook.json`,
+  `./sw-runbook.yaml`, or `./sw-runbook.yml` exists, use that file.
+- If no file path is provided and more than one of `./sw-runbook.json`,
+  `./sw-runbook.yaml`, or `./sw-runbook.yml` exists, return exit code `1` with
+  a clear error that the default input is ambiguous and `--input-file` must be
+  specified.
 - When reading from a file path or from the default file lookup, infer the
   input format from the file extension or default file name.
-- `--input-format` does not change the existing file lookup order when
+- `--input-format` does not bypass this default file ambiguity check when
   `--input-file=-` is not used.
 - Supported input formats are JSON, YAML, and YML for files, and JSON or YAML
   for stdin.
@@ -105,13 +109,18 @@ Default input behavior:
 
 - [ ] Given a valid runbook whose prerequisite checks all pass, `sw check`
       exits with `0`.
-- [ ] Given no `--input-file` and a valid `./sw-runbook.json`, `sw check`
-      checks that file.
+- [ ] Given no `--input-file` and a valid `./sw-runbook.json`, with no other
+      default runbook file present, `sw check` checks that file.
 - [ ] Given no `--input-file`, no `./sw-runbook.json`, and a valid
-      `./sw-runbook.yaml`, `sw check` checks that file.
+      `./sw-runbook.yaml`, with no other default runbook file present,
+      `sw check` checks that file.
 - [ ] Given no `--input-file`, no `./sw-runbook.json` or
       `./sw-runbook.yaml`, and a valid `./sw-runbook.yml`, `sw check` checks
       that file.
+- [ ] Given no `--input-file` and more than one of `./sw-runbook.json`,
+      `./sw-runbook.yaml`, or `./sw-runbook.yml` present, `sw check` exits
+      with `1` and reports a clear ambiguity error that requires
+      `--input-file`.
 - [ ] Given a missing input file, `sw check` exits with `1` and reports a
       clear file error.
 - [ ] Given `sw check --input-file <file.yaml>` with a valid YAML runbook,
@@ -137,7 +146,8 @@ Default input behavior:
       parsing error.
 - [ ] Given `--input-format=json` or `--input-format=yaml` without
       `--input-file=-`, the command still uses the existing default file lookup
-      behavior.
+      behavior, including ambiguity failures when multiple default runbooks
+      exist.
 - [ ] Given an invalid runbook, `sw check` exits with `1` and reports that the
       runbook is invalid, including a nearby offending block for
       entry-scoped validation errors.

@@ -260,6 +260,31 @@ fn check_uses_yaml_default_when_json_is_missing() {
 }
 
 #[test]
+fn check_fails_when_multiple_default_runbooks_exist() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-prerequisites-success.json",
+        "sw-runbook.json",
+    );
+    write_runbook(
+        &dir,
+        "sw-runbook-run-prerequisites-success.yaml",
+        "sw-runbook.yaml",
+    );
+
+    let output = run_in_dir(&["check"], &dir);
+
+    assert_eq!(output.status.code(), Some(1));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("Multiple default runbooks found"));
+    assert!(stderr.contains("sw-runbook.json"));
+    assert!(stderr.contains("sw-runbook.yaml"));
+    assert!(stderr.contains("Specify --input-file explicitly"));
+    assert!(!dir.join("README.md").exists());
+}
+
+#[test]
 fn check_succeeds_when_java_prerequisites_pass() {
     let dir = prepare_workspace();
     let java_17_home = create_fake_java_home(&dir, "jdk-17", "17");

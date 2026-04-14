@@ -53,7 +53,9 @@ fn explain_run_prints_concise_contract_summary() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("topic: run"));
     assert!(stdout.contains("availability: implemented"));
-    assert!(stdout.contains("Default input file lookup order is `./sw-runbook.json`, `./sw-runbook.yaml`, then `./sw-runbook.yml`."));
+    assert!(stdout.contains(
+        "Default input candidates are `./sw-runbook.json`, `./sw-runbook.yaml`, and `./sw-runbook.yml`."
+    ));
     assert!(stdout.contains(
         "When `--input-file=-` is used, stdin is parsed as JSON unless `--input-format=yaml` is provided."
     ));
@@ -88,6 +90,9 @@ fn explain_run_prints_concise_contract_summary() {
     ));
     assert!(stdout.contains(
         "Without `--input-file=-`, `--input-format` keeps the existing file-backed defaults and does not override file-extension-based parsing."
+    ));
+    assert!(stdout.contains(
+        "If more than one default runbook file exists, run fails with an operational error and requires `--input-file`."
     ));
     assert!(stdout.contains(
         "`Markdown.contents`, `Command.commands`, `Prerequisite.checks[*].contents`, and `Prerequisite.checks[*].commands` may be a single string or an array of strings."
@@ -130,6 +135,9 @@ fn explain_validate_prints_validation_contract_summary() {
     assert!(stdout.contains("topic: validate"));
     assert!(stdout.contains("Default output format is `human`."));
     assert!(stdout.contains(
+        "Default input candidates are `./sw-runbook.json`, `./sw-runbook.yaml`, and `./sw-runbook.yml`."
+    ));
+    assert!(stdout.contains(
         "When `--input-file=-` is used, stdin is parsed as JSON unless `--input-format=yaml` is provided."
     ));
     assert!(stdout.contains("`sw validate --input-file=-`"));
@@ -138,6 +146,9 @@ fn explain_validate_prints_validation_contract_summary() {
     assert!(stdout.contains("`--input-file=-` reads the runbook from stdin."));
     assert!(stdout.contains(
         "Without `--input-file=-`, `--input-format` does not replace the normal file lookup or file-extension-based parsing behavior."
+    ));
+    assert!(stdout.contains(
+        "If more than one default runbook file exists, validation fails with an operational error and requires `--input-file`."
     ));
     assert!(stdout.contains(
         "`Markdown.contents`, `Command.commands`, `Prerequisite.checks[*].contents`, and `Prerequisite.checks[*].commands` may be a single string or an array of strings."
@@ -188,6 +199,9 @@ fn explain_check_guides_agent_to_prerequisites_and_examples() {
         "When `--input-file=-` is used, stdin is parsed as JSON unless `--input-format=yaml` is provided."
     ));
     assert!(stdout.contains(
+        "Default input candidates are `./sw-runbook.json`, `./sw-runbook.yaml`, and `./sw-runbook.yml`."
+    ));
+    assert!(stdout.contains(
         "Command-based prerequisite checks default to `5 seconds` unless `timeout` is provided."
     ));
     assert!(stdout.contains("`sw check --input-file=-`"));
@@ -195,6 +209,9 @@ fn explain_check_guides_agent_to_prerequisites_and_examples() {
     assert!(stdout.contains("`--input-file=-` reads the runbook from stdin."));
     assert!(stdout.contains(
         "Without `--input-file=-`, `--input-format` keeps the existing file-backed defaults and does not override file-extension-based parsing."
+    ));
+    assert!(stdout.contains(
+        "If more than one default runbook file exists, check fails with an operational error and requires `--input-file`."
     ));
     assert!(stdout.contains(
         "`Markdown.contents`, `Command.commands`, `Prerequisite.checks[*].contents`, and `Prerequisite.checks[*].commands` may be a single string or an array of strings."
