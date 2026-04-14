@@ -5,7 +5,7 @@
       "commands": [
         "echo 'hello'"
       ],
-      "cleanup": "echo 'bye'"
+      "cleanup": 1
     }
   ]
 }

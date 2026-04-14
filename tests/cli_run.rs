@@ -1061,6 +1061,20 @@ fn cleanup_supports_multiline_control_structures() {
 }
 
 #[test]
+fn cleanup_accepts_scalar_script_in_yaml() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-scalar-cleanup.yaml", "sw-runbook.yaml");
+
+    let output = run_in_dir(&["run", "--input-file", "sw-runbook.yaml"], &dir);
+
+    assert!(output.status.success());
+    assert_eq!(
+        fs::read_to_string(dir.join("cleanup-scalar.txt")).expect("missing cleanup scalar file"),
+        "main\ncleanup context\n"
+    );
+}
+
+#[test]
 fn cleanup_failures_do_not_stop_remaining_cleanup_and_fail_the_run() {
     let dir = prepare_workspace();
     write_runbook(

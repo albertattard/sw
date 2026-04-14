@@ -1,7 +1,7 @@
 ---
 id: TASK-105
 title: Accept Scalar Cleanup Scripts
-status: pending
+status: done
 category: run
 related_features:
   - SPEC-003
@@ -35,13 +35,13 @@ already can for `commands`.
 
 ## Acceptance Criteria
 
-- [ ] Given a runbook whose `Command.cleanup` is a single string, `sw validate`
+- [x] Given a runbook whose `Command.cleanup` is a single string, `sw validate`
       accepts that runbook as valid input.
-- [ ] Given `sw run` with scalar `Command.cleanup`, cleanup execution matches
+- [x] Given `sw run` with scalar `Command.cleanup`, cleanup execution matches
       the existing line-array contract.
-- [ ] Given scalar cleanup expressed as a YAML literal block with a terminal
+- [x] Given scalar cleanup expressed as a YAML literal block with a terminal
       line break, no extra blank cleanup line is executed.
-- [ ] Existing array-based cleanup runbooks continue to pass automated tests.
+- [x] Existing array-based cleanup runbooks continue to pass automated tests.
 
 ## Notes
 

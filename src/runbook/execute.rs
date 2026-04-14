@@ -98,24 +98,40 @@ pub(crate) fn cleanup_block(entry: &Value) -> Result<Option<Vec<String>>, Render
         return Ok(None);
     };
 
-    let cleanup_lines = cleanup
-        .as_array()
-        .ok_or_else(|| RenderError::Operational("Command cleanup must be an array".to_string()))?;
+    Ok(Some(string_lines(
+        cleanup,
+        "Command cleanup must be a string or an array of strings",
+        "Command cleanup must contain only strings",
+    )?))
+}
 
-    let mut lines = Vec::new();
-    for item in cleanup_lines {
-        lines.push(
-            item.as_str()
-                .ok_or_else(|| {
-                    RenderError::Operational(
-                        "Command cleanup must contain only strings".to_string(),
-                    )
-                })?
-                .to_string(),
-        );
+fn string_lines(
+    value: &Value,
+    type_message: &str,
+    item_message: &str,
+) -> Result<Vec<String>, RenderError> {
+    match value {
+        Value::String(text) => Ok(split_multiline_string(text)),
+        Value::Array(items) => {
+            let mut lines = Vec::new();
+            for item in items {
+                lines.push(
+                    item.as_str()
+                        .ok_or_else(|| RenderError::Operational(item_message.to_string()))?
+                        .to_string(),
+                );
+            }
+            Ok(lines)
+        }
+        _ => Err(RenderError::Operational(type_message.to_string())),
     }
+}
 
-    Ok(Some(lines))
+fn split_multiline_string(value: &str) -> Vec<String> {
+    value
+        .split_terminator('\n')
+        .map(|line| line.strip_suffix('\r').unwrap_or(line).to_string())
+        .collect()
 }
 
 pub(crate) fn execute_command(
@@ -691,8 +707,8 @@ fn terminate_process_group(process_group_id: u32) -> Result<bool, RenderError> {
 #[cfg(test)]
 mod tests {
     use super::{
-        cleanup_chunks, cleanup_script, patch_text_for, run_patch_restores, timeout_for_entry,
-        timeout_label,
+        cleanup_block, cleanup_chunks, cleanup_script, patch_text_for, run_patch_restores,
+        split_multiline_string, timeout_for_entry, timeout_label,
     };
     use serde_json::json;
     use std::collections::HashMap;
@@ -742,6 +758,21 @@ mod tests {
         assert!(script.contains(
             "{\nif [ -f cleanup.txt ]; then\n  printf 'cleanup\\n' >> cleanup.txt\nfi\n} || status=$?\n"
         ));
+    }
+
+    #[test]
+    fn cleanup_block_accepts_scalar_script_and_drops_only_terminator_blank_line() {
+        let entry = json!({
+            "type": "Command",
+            "cleanup": "first\n\n"
+        });
+
+        let cleanup = match cleanup_block(&entry) {
+            Ok(cleanup) => cleanup,
+            Err(_) => panic!("cleanup block should parse"),
+        };
+
+        assert_eq!(cleanup, Some(vec!["first".to_string(), "".to_string()]));
     }
 
     #[test]
@@ -828,5 +859,21 @@ mod tests {
         );
 
         let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn split_multiline_string_drops_terminator_only_trailing_blank_line() {
+        assert_eq!(
+            split_multiline_string("first\nsecond\n"),
+            vec!["first".to_string(), "second".to_string()]
+        );
+    }
+
+    #[test]
+    fn split_multiline_string_preserves_explicit_blank_line_before_terminator() {
+        assert_eq!(
+            split_multiline_string("first\n\n"),
+            vec!["first".to_string(), "".to_string()]
+        );
     }
 }

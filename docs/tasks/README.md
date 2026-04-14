@@ -173,13 +173,14 @@ Expected task directories:
 - [ ] [TASK-028: Implement Init Command](init/TASK-028-implement-init-command.md)
 - [ ] [TASK-038: Include Release Commit History In README](release/TASK-038-include-release-commit-history-in-readme.md)
 - [ ] [TASK-059: Implement Format Command](format/TASK-059-implement-format-command.md)
-- [ ] [TASK-105: Accept Scalar Cleanup Scripts](run/TASK-105-accept-scalar-cleanup-scripts.md)
 
 ## In Progress
 
 - (none)
 
 ## Done
+
+- [x] [TASK-105: Accept Scalar Cleanup Scripts](run/TASK-105-accept-scalar-cleanup-scripts.md)
 
 - [x] Define `SPEC-001` in `docs/spec/` (help and discovery).
 - [x] Define `SPEC-002` in `docs/spec/` (validate runbook input).

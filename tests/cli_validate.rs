@@ -149,6 +149,22 @@ fn validate_accepts_scalar_command_scripts_in_yaml() {
 }
 
 #[test]
+fn validate_accepts_scalar_cleanup_scripts_in_yaml() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-scalar-cleanup.yaml",
+        "--output-format",
+        "json",
+    ]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": true"));
+    assert!(stdout.contains("\"errors\": []"));
+}
+
+#[test]
 fn validate_accepts_json_runbook_from_stdin() {
     let dir = prepare_workspace();
     let stdin = fs::read_to_string("tests/fixtures/sw-runbook-anonymized.json")

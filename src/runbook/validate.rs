@@ -1123,7 +1123,11 @@ fn validate_entry(
             }
 
             if let Some(cleanup) = object.get("cleanup") {
-                validate_string_array(cleanup, &format!("{path}.cleanup"), &mut context.errors);
+                validate_string_or_string_array(
+                    cleanup,
+                    &format!("{path}.cleanup"),
+                    &mut context.errors,
+                );
             }
 
             if let Some(capture) = object.get("capture") {
