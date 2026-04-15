@@ -32,6 +32,7 @@ fn help_subcommand_prints_help() {
     assert!(stdout.contains("check"));
     assert!(stdout.contains("example"));
     assert!(stdout.contains("explain"));
+    assert!(stdout.contains("format"));
     assert!(stdout.contains("init"));
     assert!(stdout.contains("import"));
     assert!(stdout.contains("help"));
@@ -78,6 +79,7 @@ fn help_all_prints_top_level_and_known_subcommand_help() {
     assert!(stdout.contains("Check runbook prerequisites"));
     assert!(stdout.contains("Print a runbook example for a topic"));
     assert!(stdout.contains("Explain a feature contract or discovery path"));
+    assert!(stdout.contains("Format a runbook file in place"));
     assert!(stdout.contains("Generate a starter runbook file"));
     assert!(stdout.contains("Import a Markdown README into a starter runbook"));
     assert!(stdout.contains("Render a runbook to output"));
@@ -128,6 +130,18 @@ fn explain_help_prints_help() {
     assert!(stdout.contains("--output-format"));
     assert!(stdout.contains("--output-file"));
     assert!(stdout.contains("--force"));
+}
+
+#[test]
+fn format_help_prints_help() {
+    let output = run(&["format", "--help"]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("--input-file"));
+    assert!(stdout.contains("Formats JSON and YAML runbooks in place"));
+    assert!(stdout.contains("Default input candidates are `./sw-runbook.json`, `./sw-runbook.yaml`, and `./sw-runbook.yml`."));
+    assert!(stdout.contains("does not accept `--input-file=-`"));
 }
 
 #[test]

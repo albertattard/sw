@@ -1,7 +1,7 @@
 ---
 id: SPEC-010
 title: Format Runbook Files
-status: proposed
+status: implemented
 priority: medium
 owner: @aattard
 last_updated: 2026-04-15
@@ -93,34 +93,34 @@ Output:
 
 ## Acceptance Criteria
 
-- [ ] Given a valid runbook file,
+- [x] Given a valid runbook file,
       `sw format --input-file <file>` rewrites the file in place using the
       canonical formatting style for that file’s format and exits with `0`.
-- [ ] Given no `--input-file` option and a valid `./sw-runbook.yaml`, with no
+- [x] Given no `--input-file` option and a valid `./sw-runbook.yaml`, with no
       other default runbook file present, `sw format` formats that file in
       place and exits with `0`.
-- [ ] Given no `--input-file` option, no `./sw-runbook.yaml`, and a valid
+- [x] Given no `--input-file` option, no `./sw-runbook.yaml`, and a valid
       `./sw-runbook.json`, with no other default runbook file present,
       `sw format` formats that file in place and exits with `0`.
-- [ ] Given no `--input-file` option and more than one of
+- [x] Given no `--input-file` option and more than one of
       `./sw-runbook.json`, `./sw-runbook.yaml`, or `./sw-runbook.yml` present,
       `sw format` exits with `1` and reports a clear ambiguity error that
       requires `--input-file`.
-- [ ] Given an input file with valid JSON or YAML but invalid runbook
+- [x] Given an input file with valid JSON or YAML but invalid runbook
       structure,
       `sw format --input-file <file>` exits with `2` and does not rewrite the
       file.
-- [ ] Given invalid JSON syntax,
+- [x] Given invalid JSON syntax,
       `sw format --input-file <file>` exits with `1` and does not rewrite the
       file.
-- [ ] Given invalid YAML syntax,
+- [x] Given invalid YAML syntax,
       `sw format --input-file <file>` exits with `1` and does not rewrite the
       file.
-- [ ] Given a file that is already formatted canonically, running `sw format`
+- [x] Given a file that is already formatted canonically, running `sw format`
       keeps the semantic content unchanged and leaves the file in the same
       canonical layout.
-- [ ] Formatting preserves object property order from the input file.
-- [ ] Formatting preserves mapping property order from the input YAML file.
+- [x] Formatting preserves object property order from the input file.
+- [x] Formatting preserves mapping property order from the input YAML file.
 
 ## Non-goals
 

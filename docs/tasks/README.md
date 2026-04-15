@@ -179,7 +179,7 @@ Expected task directories:
 
 ## Pending
 
-- [ ] [TASK-059: Implement Format Command](format/TASK-059-implement-format-command.md)
+- (none)
 
 ## In Progress
 
@@ -187,6 +187,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-059: Implement Format Command](format/TASK-059-implement-format-command.md)
 - [x] [TASK-114: Clarify Format Defaults By Workflow](discovery/TASK-114-clarify-format-defaults-by-workflow.md)
 - [x] [TASK-113: Default Init Output To YAML](init/TASK-113-default-init-output-to-yaml.md)
 - [x] [TASK-028: Implement Init Command](init/TASK-028-implement-init-command.md)

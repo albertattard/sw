@@ -1,7 +1,7 @@
 ---
 id: TASK-059
 title: Implement Format Command
-status: open
+status: done
 category: format
 related_features:
   - SPEC-010
@@ -42,28 +42,28 @@ canonical repository formatting style for their existing format.
 
 ## Acceptance Criteria
 
-- [ ] Given a valid runbook file,
+- [x] Given a valid runbook file,
       `sw format --input-file <file>` rewrites the file in place in canonical
       format for that file’s existing JSON or YAML syntax and exits with `0`.
-- [ ] Given no `--input-file` argument and a valid `./sw-runbook.yaml`, with
+- [x] Given no `--input-file` argument and a valid `./sw-runbook.yaml`, with
       no other default runbook file present, `sw format` rewrites that file in
       place and exits with `0`.
-- [ ] Given no `--input-file` argument, no `./sw-runbook.yaml`, and a valid
+- [x] Given no `--input-file` argument, no `./sw-runbook.yaml`, and a valid
       `./sw-runbook.json`, with no other default runbook file present,
       `sw format` rewrites that file in place and exits with `0`.
-- [ ] Given no `--input-file` argument and more than one of
+- [x] Given no `--input-file` argument and more than one of
       `./sw-runbook.json`, `./sw-runbook.yaml`, or `./sw-runbook.yml` present,
       `sw format` exits with `1` and requires `--input-file`.
-- [ ] Given invalid JSON syntax,
+- [x] Given invalid JSON syntax,
       `sw format --input-file <file>` exits with `1` and does not modify the
       file.
-- [ ] Given invalid YAML syntax,
+- [x] Given invalid YAML syntax,
       `sw format --input-file <file>` exits with `1` and does not modify the
       file.
-- [ ] Given valid JSON or YAML that fails runbook validation,
+- [x] Given valid JSON or YAML that fails runbook validation,
       `sw format --input-file <file>` exits with `2` and does not modify the
       file.
-- [ ] Help output documents the `format` command and its options.
+- [x] Help output documents the `format` command and its options.
 
 ## Notes
 

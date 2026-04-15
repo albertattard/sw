@@ -37,6 +37,8 @@ pub enum Commands {
     Example(ExampleArgs),
     /// Explain a feature contract or discovery path.
     Explain(ExplainArgs),
+    /// Format a runbook file in place.
+    Format(FormatArgs),
     /// Generate a starter runbook file.
     Init(InitArgs),
     /// Import a Markdown README into a starter runbook.
@@ -49,6 +51,16 @@ pub enum Commands {
     Version,
     /// Validate a runbook file.
     Validate(ValidateArgs),
+}
+
+#[derive(Debug, clap::Args)]
+#[command(
+    after_help = "Formats JSON and YAML runbooks in place while preserving the existing file format.\nDefault input candidates are `./sw-runbook.json`, `./sw-runbook.yaml`, and `./sw-runbook.yml`.\nIf more than one default runbook file exists, `sw format` requires `--input-file`.\n`sw format` is file-based only and does not accept `--input-file=-`.\nUse `sw help validate` and `sw explain validate` when the question is about runbook correctness rather than formatting."
+)]
+pub struct FormatArgs {
+    /// Path to the input runbook file.
+    #[arg(long)]
+    pub input_file: Option<PathBuf>,
 }
 
 #[derive(Debug, clap::Args)]
@@ -252,6 +264,7 @@ pub fn print_all_help() -> Result<(), String> {
 
 fn command_topic_names() -> Vec<&'static str> {
     vec![
-        "check", "example", "explain", "init", "import", "run", "help", "version", "validate",
+        "check", "example", "explain", "format", "init", "import", "run", "help", "version",
+        "validate",
     ]
 }

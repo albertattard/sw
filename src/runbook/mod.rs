@@ -44,6 +44,12 @@ pub struct LoadedRunbook {
     pub document: Value,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum RunbookFormat {
+    Json,
+    Yaml,
+}
+
 enum InputSource {
     File(PathBuf),
     Stdin(InputFormat),
@@ -72,15 +78,47 @@ pub fn load(
     }
 }
 
+pub fn load_file_only(input_file: Option<PathBuf>) -> Result<LoadedRunbook, String> {
+    let path = resolve_file_input_path(input_file)?;
+    let document = read(&path)?;
+    Ok(LoadedRunbook { path, document })
+}
+
 pub fn read(path: &Path) -> Result<Value, String> {
     let contents = fs::read_to_string(path)
         .map_err(|err| format!("Failed to read {}: {err}", path.display()))?;
 
-    match path.extension().and_then(|value| value.to_str()) {
-        Some("yaml" | "yml") => serde_norway::from_str(&contents)
+    match infer_format_from_path(path) {
+        RunbookFormat::Yaml => serde_norway::from_str(&contents)
             .map_err(|err| format!("Invalid YAML in {}: {err}", path.display())),
-        _ => serde_json::from_str(&contents)
+        RunbookFormat::Json => serde_json::from_str(&contents)
             .map_err(|err| format!("Invalid JSON in {}: {err}", path.display())),
+    }
+}
+
+pub fn infer_supported_format(path: &Path) -> Result<RunbookFormat, String> {
+    match path.extension().and_then(|value| value.to_str()) {
+        Some("json") => Ok(RunbookFormat::Json),
+        Some("yaml" | "yml") => Ok(RunbookFormat::Yaml),
+        _ => Err(format!(
+            "Unsupported runbook format for {}. Use a .json, .yaml, or .yml file name.",
+            path.display()
+        )),
+    }
+}
+
+pub fn serialize(document: &Value, format: RunbookFormat) -> Result<String, String> {
+    let serialized = match format {
+        RunbookFormat::Json => serde_json::to_string_pretty(document)
+            .map_err(|err| format!("Failed to serialize runbook as JSON: {err}"))?,
+        RunbookFormat::Yaml => serde_norway::to_string(document)
+            .map_err(|err| format!("Failed to serialize runbook as YAML: {err}"))?,
+    };
+
+    if serialized.ends_with('\n') {
+        Ok(serialized)
+    } else {
+        Ok(format!("{serialized}\n"))
     }
 }
 
@@ -117,6 +155,21 @@ fn resolve_input_source(
     Ok(InputSource::File(path))
 }
 
+fn resolve_file_input_path(input_file: Option<PathBuf>) -> Result<PathBuf, String> {
+    let Some(path) = input_file else {
+        return resolve_default_input_path();
+    };
+
+    if path == Path::new(STDIN_INPUT_PATH) {
+        return Err(
+            "The format command does not accept --input-file=-. Provide a .json, .yaml, or .yml file path."
+                .to_string(),
+        );
+    }
+
+    Ok(path)
+}
+
 fn resolve_default_input_path() -> Result<PathBuf, String> {
     let existing_candidates = DEFAULT_RUNBOOK_CANDIDATES
         .iter()
@@ -135,6 +188,13 @@ fn resolve_default_input_path() -> Result<PathBuf, String> {
                 .collect::<Vec<_>>()
                 .join(", ")
         )),
+    }
+}
+
+fn infer_format_from_path(path: &Path) -> RunbookFormat {
+    match path.extension().and_then(|value| value.to_str()) {
+        Some("yaml" | "yml") => RunbookFormat::Yaml,
+        _ => RunbookFormat::Json,
     }
 }
 
