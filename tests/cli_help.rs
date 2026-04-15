@@ -32,6 +32,7 @@ fn help_subcommand_prints_help() {
     assert!(stdout.contains("check"));
     assert!(stdout.contains("example"));
     assert!(stdout.contains("explain"));
+    assert!(stdout.contains("init"));
     assert!(stdout.contains("import"));
     assert!(stdout.contains("help"));
     assert!(stdout.contains("version"));
@@ -76,6 +77,7 @@ fn help_all_prints_top_level_and_known_subcommand_help() {
     assert!(stdout.contains("Check runbook prerequisites"));
     assert!(stdout.contains("Print a runbook example for a topic"));
     assert!(stdout.contains("Explain a feature contract or discovery path"));
+    assert!(stdout.contains("Generate a starter runbook file"));
     assert!(stdout.contains("Import a Markdown README into a starter runbook"));
     assert!(stdout.contains("Render a runbook to output"));
     assert!(stdout.contains("Show help for the CLI or a specific subcommand"));
@@ -139,6 +141,21 @@ fn import_help_prints_help() {
     assert!(stdout.contains("Defaults to `./README.md` input and `./sw-runbook.yaml` output."));
     assert!(stdout.contains("Headings map to `Heading` entries"));
     assert!(stdout.contains("sw explain import"));
+}
+
+#[test]
+fn init_help_prints_help() {
+    let output = run(&["init", "--help"]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("--output-file"));
+    assert!(stdout.contains("--force"));
+    assert!(stdout.contains("Defaults to `./sw-runbook.yaml`."));
+    assert!(stdout.contains("`.yaml`, `.yml`, and `.json`"));
+    assert!(stdout.contains("Heading"));
+    assert!(stdout.contains("Prerequisite"));
+    assert!(stdout.contains("sw explain init"));
 }
 
 #[test]

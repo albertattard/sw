@@ -174,10 +174,10 @@ Expected task directories:
 - [TASK-110: Render Working Dir As Copyable Subshell](run/TASK-110-render-working-dir-as-copyable-subshell.md)
 - [TASK-111: Reject Ambiguous Default Runbook Selection](discovery/TASK-111-reject-ambiguous-default-runbook-selection.md)
 - [TASK-112: Surface Cleanup Discovery In Help And Explain](discovery/TASK-112-surface-cleanup-discovery-in-help-and-explain.md)
+- [TASK-113: Default Init Output To YAML](init/TASK-113-default-init-output-to-yaml.md)
 
 ## Pending
 
-- [ ] [TASK-028: Implement Init Command](init/TASK-028-implement-init-command.md)
 - [ ] [TASK-059: Implement Format Command](format/TASK-059-implement-format-command.md)
 
 ## In Progress
@@ -186,6 +186,8 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-113: Default Init Output To YAML](init/TASK-113-default-init-output-to-yaml.md)
+- [x] [TASK-028: Implement Init Command](init/TASK-028-implement-init-command.md)
 - [x] [TASK-112: Surface Cleanup Discovery In Help And Explain](discovery/TASK-112-surface-cleanup-discovery-in-help-and-explain.md)
 - [x] [TASK-111: Reject Ambiguous Default Runbook Selection](discovery/TASK-111-reject-ambiguous-default-runbook-selection.md)
 - [x] [TASK-110: Render Working Dir As Copyable Subshell](run/TASK-110-render-working-dir-as-copyable-subshell.md)

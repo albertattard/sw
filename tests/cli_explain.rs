@@ -259,6 +259,31 @@ fn explain_import_prints_current_import_contract() {
 }
 
 #[test]
+fn explain_init_prints_current_init_contract() {
+    let output = run(&["explain", "init"]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("topic: init"));
+    assert!(stdout.contains("availability: implemented"));
+    assert!(stdout.contains("Default output file is `./sw-runbook.yaml`."));
+    assert!(
+        stdout.contains("Existing output files are not overwritten unless `--force` is provided.")
+    );
+    assert!(stdout.contains("Command: `sw init`"));
+    assert!(stdout.contains("`1` for write failures or existing files without `--force`."));
+    assert!(stdout.contains("When `--output-file` is omitted, init defaults to YAML."));
+    assert!(stdout.contains("Init infers JSON or YAML from a recognized output-file extension."));
+    assert!(
+        stdout.contains(
+            "Init rejects unsupported output-file extensions instead of guessing a format."
+        )
+    );
+    assert!(stdout.contains("The sample includes `Heading`, `Markdown`, `DisplayFile`, `Prerequisite`, and `Command` entries."));
+    assert!(stdout.contains("Run `sw validate --input-file <generated-runbook>` if you want an explicit post-generation validation check."));
+}
+
+#[test]
 fn explain_boundaries_between_help_example_and_explain_are_clear() {
     let output = run(&["explain", "help"]);
 

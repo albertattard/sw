@@ -37,6 +37,8 @@ pub enum Commands {
     Example(ExampleArgs),
     /// Explain a feature contract or discovery path.
     Explain(ExplainArgs),
+    /// Generate a starter runbook file.
+    Init(InitArgs),
     /// Import a Markdown README into a starter runbook.
     Import(ImportArgs),
     /// Render a runbook to output.
@@ -107,6 +109,20 @@ pub struct ExampleArgs {
     /// Output format: `yaml` or `json`. Defaults to `yaml`.
     #[arg(long, value_name = "FORMAT")]
     pub output_format: Option<String>,
+}
+
+#[derive(Debug, clap::Args)]
+#[command(
+    after_help = "Defaults to `./sw-runbook.yaml`.\nThe generated sample includes `Heading`, `Markdown`, `DisplayFile`, `Prerequisite`, and `Command` entries.\nRecognized output-file extensions are `.yaml`, `.yml`, and `.json`.\nUse `--force` to overwrite an existing target file.\nUse `sw explain init` for behavior and defaults."
+)]
+pub struct InitArgs {
+    /// Path to the generated starter runbook file.
+    #[arg(long)]
+    pub output_file: Option<PathBuf>,
+
+    /// Overwrite the output file if it already exists.
+    #[arg(long)]
+    pub force: bool,
 }
 
 #[derive(Debug, clap::Args)]
@@ -233,6 +249,6 @@ pub fn print_all_help() -> Result<(), String> {
 
 fn command_topic_names() -> Vec<&'static str> {
     vec![
-        "check", "example", "explain", "import", "run", "help", "version", "validate",
+        "check", "example", "explain", "init", "import", "run", "help", "version", "validate",
     ]
 }

@@ -2,6 +2,7 @@ pub mod check;
 pub mod example;
 pub mod explain;
 pub mod import;
+pub mod init;
 pub mod run;
 pub mod validate;
 pub mod version;
@@ -33,6 +34,7 @@ pub fn run(cli: Cli) -> ExitCode {
         Some(Commands::Check(args)) => check::run(args),
         Some(Commands::Example(args)) => example::run(args),
         Some(Commands::Explain(args)) => run_explain(args),
+        Some(Commands::Init(args)) => init::run(args),
         Some(Commands::Import(args)) => run_import(args),
         Some(Commands::Run(args)) => run::run(args, verbose, verbose_mode, debug),
         Some(Commands::Version) => version::run(),
