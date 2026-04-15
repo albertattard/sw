@@ -970,6 +970,18 @@ fn validate_entry(
                     &mut context.errors,
                     &context.all_capture_names,
                 );
+
+                if let Some(indent) = object.get("indent") {
+                    match (indent.as_u64(), indent.as_i64()) {
+                        (Some(_), _) => {}
+                        (None, Some(value)) if value >= 0 => {}
+                        _ => push_error(
+                            &mut context.errors,
+                            format!("{path}.indent"),
+                            "must be a non-negative integer",
+                        ),
+                    }
+                }
             }
             None => push_error(
                 &mut context.errors,

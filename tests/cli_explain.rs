@@ -107,6 +107,9 @@ fn explain_run_prints_concise_contract_summary() {
         "When those fields are provided as a string, `sw run` splits them on newline boundaries before rendering or execution and does not turn a terminal line break into an extra blank line."
     ));
     assert!(stdout.contains(
+        "`Markdown`, `DisplayFile`, `Patch`, and `Command` entries may declare `indent` to prefix each non-empty rendered line and keep nested Markdown structures readable."
+    ));
+    assert!(stdout.contains(
         "`DisplayFile` fence detection recognizes `.java` as `java`, `.sql` as `sql`, and `.xml` as `xml`; other extensions fall back to `text`."
     ));
     assert!(stdout.contains(

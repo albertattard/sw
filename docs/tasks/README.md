@@ -176,6 +176,7 @@ Expected task directories:
 - [TASK-112: Surface Cleanup Discovery In Help And Explain](discovery/TASK-112-surface-cleanup-discovery-in-help-and-explain.md)
 - [TASK-113: Default Init Output To YAML](init/TASK-113-default-init-output-to-yaml.md)
 - [TASK-114: Clarify Format Defaults By Workflow](discovery/TASK-114-clarify-format-defaults-by-workflow.md)
+- [TASK-115: Support Markdown Indent](run/TASK-115-support-markdown-indent.md)
 
 ## Pending
 
@@ -187,6 +188,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-115: Support Markdown Indent](run/TASK-115-support-markdown-indent.md)
 - [x] [TASK-059: Implement Format Command](format/TASK-059-implement-format-command.md)
 - [x] [TASK-114: Clarify Format Defaults By Workflow](discovery/TASK-114-clarify-format-defaults-by-workflow.md)
 - [x] [TASK-113: Default Init Output To YAML](init/TASK-113-default-init-output-to-yaml.md)

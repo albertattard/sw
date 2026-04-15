@@ -217,6 +217,11 @@ in the runbook.
 - Scalar `Markdown.contents` ignores a terminal line break that exists only to
   terminate the scalar, so YAML literal scalars do not introduce an extra
   blank line before the next runbook entry.
+- `Markdown` may declare `indent`.
+- If `indent` is present, it is a non-negative integer.
+- `indent` applies to the whole rendered Markdown section after interpolation.
+- Each non-empty rendered Markdown line is prefixed with that many spaces.
+- Empty lines remain empty.
 
 ### DisplayFile Entries
 
@@ -694,6 +699,10 @@ in the runbook.
 - [ ] Given a scalar `Markdown.contents` value that ends with a line break only
       because of YAML literal-scalar termination, the generated Markdown does
       not introduce an extra blank line before the following entry.
+- [x] Given a `Markdown` entry with `indent`, each non-empty rendered Markdown
+      line is prefixed with that many spaces.
+- [x] Given a `Markdown` entry with `indent` and blank lines, blank lines
+      remain empty in the rendered output.
 - [ ] Markdown entries may interpolate `@{name}` when that variable is
       captured anywhere in the runbook.
 - [ ] `@@{name}` in Markdown content preserves the literal `@{name}`.

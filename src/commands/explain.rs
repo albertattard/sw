@@ -314,6 +314,7 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "Entries execute in runbook order.",
                 "Command execution and rendering are part of the same workflow.",
                 "Machine-readable contracts live in the runbook input, not in stdout.",
+                "`Markdown`, `DisplayFile`, `Patch`, and `Command` entries may declare `indent` to prefix each non-empty rendered line and keep nested Markdown structures readable.",
                 "`DisplayFile` fence detection recognizes `.java` as `java`, `.sql` as `sql`, and `.xml` as `xml`; other extensions fall back to `text`.",
                 "Command output can render `stdout`, `stderr`, or `combined` with `output.stream`; if omitted, rendered output defaults to `combined`.",
                 "Command output content types currently support `text`, `json`, `xml`, `html`, and `java`.",

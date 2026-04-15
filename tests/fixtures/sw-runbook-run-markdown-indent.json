@@ -1,0 +1,18 @@
+{
+  "entries": [
+    {
+      "type": "Heading",
+      "level": "H1",
+      "title": "Markdown Indent"
+    },
+    {
+      "type": "Markdown",
+      "contents": [
+        "(*Optional*) List the application and the dependencies",
+        "",
+        "Include transitive dependencies when relevant."
+      ],
+      "indent": 3
+    }
+  ]
+}

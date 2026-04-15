@@ -52,7 +52,7 @@ struct RewriteResult {
 
 enum RenderSection {
     Ready(String),
-    DeferredMarkdown(Vec<String>),
+    DeferredMarkdown { entry: Value, lines: Vec<String> },
 }
 
 #[derive(Clone, Copy)]
@@ -122,7 +122,10 @@ pub(crate) fn render_markdown(
 
         let rendered = match entry_type {
             "Heading" => RenderSection::Ready(render_heading(entry)?),
-            "Markdown" => RenderSection::DeferredMarkdown(markdown_lines(entry)?),
+            "Markdown" => RenderSection::DeferredMarkdown {
+                entry: entry.clone(),
+                lines: markdown_lines(entry)?,
+            },
             "DisplayFile" => RenderSection::Ready(render_display_file(entry, runbook_path)?),
             "Prerequisite" => RenderSection::Ready(render_prerequisite_entry(entry)?),
             "Patch" => match render_patch(
@@ -1201,20 +1204,22 @@ fn render_sections(
         .iter()
         .map(|section| match section {
             RenderSection::Ready(rendered) => Ok(rendered.clone()),
-            RenderSection::DeferredMarkdown(lines) => {
-                render_markdown_lines(lines, captured_values, missing_behavior)
+            RenderSection::DeferredMarkdown { entry, lines } => {
+                render_markdown_lines(entry, lines, captured_values, missing_behavior)
             }
         })
         .collect()
 }
 
 fn render_markdown_lines(
+    entry: &Value,
     lines: &[String],
     captured_values: &HashMap<String, String>,
     missing_behavior: MissingCaptureBehavior,
 ) -> Result<String, RenderError> {
     interpolate_lines(lines, captured_values, "Markdown", missing_behavior)
         .map(|lines| lines.join("\n"))
+        .and_then(|section| apply_indent(entry, section, "Markdown"))
 }
 
 fn interpolate_command_lines(

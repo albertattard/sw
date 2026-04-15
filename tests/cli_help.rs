@@ -50,6 +50,9 @@ fn help_subcommand_for_known_topic_prints_targeted_help() {
     assert!(stdout.contains("Use `-` to read from stdin"));
     assert!(stdout.contains("--input-format"));
     assert!(stdout.contains("Ignored unless `--input-file=-` is used"));
+    assert!(stdout.contains(
+        "`Markdown`, `DisplayFile`, `Patch`, and `Command` entries may declare `indent`"
+    ));
     assert!(stdout.contains("File-based runbooks default to YAML"));
     assert!(stdout.contains("--output-file"));
     assert!(stdout.contains("trim_empty_lines"));

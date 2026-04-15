@@ -682,6 +682,25 @@ fn command_indent_applies_to_shell_caption_and_output() {
 }
 
 #[test]
+fn markdown_indent_prefixes_each_non_empty_rendered_line() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-markdown-indent.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("   (*Optional*) List the application and the dependencies"));
+    assert!(readme.contains(
+        "   (*Optional*) List the application and the dependencies\n\n   Include transitive dependencies when relevant."
+    ));
+}
+
+#[test]
 fn output_trailing_whitespace_is_trimmed_by_default() {
     let dir = prepare_workspace();
     write_runbook(
