@@ -29,6 +29,7 @@ It creates a sample runbook in the current directory.
 ## CLI Defaults
 
 - If `--output-file` is not provided, default to `./sw-runbook.yaml`.
+- `sw init` establishes YAML as the default file-based starter format.
 - If `--force` is not provided, existing files are not overwritten.
 - If `--output-file` ends with `.json`, generate JSON output.
 - If `--output-file` ends with `.yaml` or `.yml`, generate YAML output.

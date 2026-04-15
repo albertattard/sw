@@ -3,13 +3,14 @@
 - Status: Draft
 - Owner: `@aattard`
 - Created: `2026-03-13`
-- Updated: `2026-04-13`
+- Updated: `2026-04-15`
 
 ## Goal
 
 Provide a simple way for users to request focused examples for supported
-runbook entry types without generating a full starter runbook, while aligning
-the default example format with the repository's shift toward YAML runbooks.
+runbook entry types without generating a full starter runbook, while making
+YAML the default snippet format for file-based authoring and preserving JSON as
+an explicit machine-oriented option.
 
 ## User-facing Behavior
 
@@ -54,7 +55,7 @@ In this increment, supported entity types include:
 - `--output-format yaml` should produce valid YAML and behave the same as the
   default output mode.
 - Entity-type matching is case-insensitive.
-- Entry-type examples should print a single JSON object representing that
+- Entry-type examples should print a single runbook entry representing that
   entry and should include the commonly used nested properties for that entry
   type so users can remove what they do not need.
 - YAML example output should remain hand-editable and should prefer the same

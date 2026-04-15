@@ -4,7 +4,7 @@ title: Check Runbook Prerequisites
 status: proposed
 priority: medium
 owner: @aattard
-last_updated: 2026-04-14
+last_updated: 2026-04-15
 ---
 
 ## Problem
@@ -45,6 +45,9 @@ entries and reports whether the current environment is ready for `sw run`.
 - Optional input format parameter: `--input-format json|yaml`.
 
 Default input behavior:
+- File-backed workflows elsewhere in the CLI default to YAML authoring, but
+  stdin-backed prerequisite checks keep JSON as the default machine-oriented
+  format.
 - If `--input-file=-` is provided, read the runbook from stdin.
 - If `--input-file=-` is provided and `--input-format` is omitted, parse stdin
   as JSON.

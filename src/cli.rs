@@ -53,7 +53,7 @@ pub enum Commands {
 
 #[derive(Debug, clap::Args)]
 #[command(
-    after_help = "Runbook-authored `Command` fields such as `trim_empty_lines`, `stream`, and `cleanup` are configured in the runbook, not as CLI flags.\n`Command` entries default to a `2 minutes` timeout, while command-based prerequisite checks default to `5 seconds` unless the runbook sets `timeout`.\n`DisplayFile` fence detection currently recognizes `.java` as `java`, `.sql` as `sql`, and `.xml` as `xml`; other extensions render as `text`.\nUse `--verbose-mode=plain` for SSH-safe line-based progress output when terminal redraws are unreliable.\nUse `sw example Command` for a current YAML snippet and `sw example Command --output-format json` when you need the JSON shape.\nUse `sw explain run` for behavior and defaults."
+    after_help = "Runbook-authored `Command` fields such as `trim_empty_lines`, `stream`, and `cleanup` are configured in the runbook, not as CLI flags.\nFile-based runbooks default to YAML, while `--input-file=-` defaults to JSON unless you set `--input-format=yaml`.\n`Command` entries default to a `2 minutes` timeout, while command-based prerequisite checks default to `5 seconds` unless the runbook sets `timeout`.\n`DisplayFile` fence detection currently recognizes `.java` as `java`, `.sql` as `sql`, and `.xml` as `xml`; other extensions render as `text`.\nUse `--verbose-mode=plain` for SSH-safe line-based progress output when terminal redraws are unreliable.\nUse `sw example Command` for a current YAML snippet and `sw example Command --output-format json` when you need the JSON shape.\nUse `sw explain run` for behavior and defaults."
 )]
 pub struct RunArgs {
     #[command(flatten)]
@@ -70,7 +70,7 @@ pub struct RunArgs {
 
 #[derive(Debug, clap::Args)]
 #[command(
-    after_help = "Command-based prerequisite checks default to a `5 seconds` timeout unless the runbook sets `timeout`.\nUse `sw example Prerequisite` for a current prerequisite YAML snippet and `sw example Prerequisite --output-format json` when you need the JSON shape.\nUse `sw explain check` for behavior and defaults."
+    after_help = "File-based runbooks default to YAML, while `--input-file=-` defaults to JSON unless you set `--input-format=yaml`.\nCommand-based prerequisite checks default to a `5 seconds` timeout unless the runbook sets `timeout`.\nUse `sw example Prerequisite` for a current prerequisite YAML snippet and `sw example Prerequisite --output-format json` when you need the JSON shape.\nUse `sw explain check` for behavior and defaults."
 )]
 pub struct CheckArgs {
     #[command(flatten)]
@@ -78,6 +78,9 @@ pub struct CheckArgs {
 }
 
 #[derive(Debug, clap::Args)]
+#[command(
+    after_help = "Validation accepts JSON, YAML, and YML files.\nFile-based runbooks default to YAML elsewhere in the CLI, while `--input-file=-` defaults to JSON unless you set `--input-format=yaml`.\nUse `sw explain validate` for behavior and defaults."
+)]
 pub struct ValidateArgs {
     #[command(flatten)]
     pub input: RunbookInputArgs,
@@ -100,7 +103,7 @@ pub struct RunbookInputArgs {
 
 #[derive(Debug, clap::Args)]
 #[command(
-    after_help = "Defaults to YAML output.\nUse `--output-format yaml|json` to choose the example format explicitly.\nThe `Command` example includes current nested output fields such as `trim_empty_lines` and `stream`, along with rewrite, capture, and cleanup examples.\nUse `sw example DisplayFile` when you need the Java `collapse_method_body` transform for collapsing method bodies."
+    after_help = "Defaults to YAML output for file-based authoring.\nUse `--output-format yaml|json` to choose the example format explicitly.\nThe `Command` example includes current nested output fields such as `trim_empty_lines` and `stream`, along with rewrite, capture, and cleanup examples.\nUse `sw example DisplayFile` when you need the Java `collapse_method_body` transform for collapsing method bodies."
 )]
 pub struct ExampleArgs {
     /// Example topic such as `Command`, `DisplayFile`, or `rewrite.keep_between`.
@@ -113,7 +116,7 @@ pub struct ExampleArgs {
 
 #[derive(Debug, clap::Args)]
 #[command(
-    after_help = "Defaults to `./sw-runbook.yaml`.\nThe generated sample includes `Heading`, `Markdown`, `DisplayFile`, `Prerequisite`, and `Command` entries.\nRecognized output-file extensions are `.yaml`, `.yml`, and `.json`.\nUse `--force` to overwrite an existing target file.\nUse `sw explain init` for behavior and defaults."
+    after_help = "Defaults to `./sw-runbook.yaml`.\nYAML is the default file-based starter format.\nThe generated sample includes `Heading`, `Markdown`, `DisplayFile`, `Prerequisite`, and `Command` entries.\nRecognized output-file extensions are `.yaml`, `.yml`, and `.json`.\nUse `--force` to overwrite an existing target file.\nUse `sw explain init` for behavior and defaults."
 )]
 pub struct InitArgs {
     /// Path to the generated starter runbook file.
@@ -159,7 +162,7 @@ pub struct HelpArgs {
 
 #[derive(Debug, clap::Args)]
 #[command(
-    after_help = "Defaults to `./README.md` input and `./sw-runbook.yaml` output.\n`--output-format` accepts `yaml` or `json`; when omitted, `sw import` infers the format from a recognized output-file extension or defaults to YAML.\nHeadings map to `Heading` entries where possible, prose to `Markdown`, and fenced shell blocks to `Command` entries.\nUse `sw explain import` for the documented lossy-import contract."
+    after_help = "Defaults to `./README.md` input and `./sw-runbook.yaml` output.\nYAML is the default file-based import format.\n`--output-format` accepts `yaml` or `json`; when omitted, `sw import` infers the format from a recognized output-file extension or defaults to YAML.\nHeadings map to `Heading` entries where possible, prose to `Markdown`, and fenced shell blocks to `Command` entries.\nUse `sw explain import` for the documented lossy-import contract."
 )]
 pub struct ImportArgs {
     /// Path to the Markdown README to import.

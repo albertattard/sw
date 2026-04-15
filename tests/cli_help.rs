@@ -49,6 +49,7 @@ fn help_subcommand_for_known_topic_prints_targeted_help() {
     assert!(stdout.contains("Use `-` to read from stdin"));
     assert!(stdout.contains("--input-format"));
     assert!(stdout.contains("Ignored unless `--input-file=-` is used"));
+    assert!(stdout.contains("File-based runbooks default to YAML"));
     assert!(stdout.contains("--output-file"));
     assert!(stdout.contains("trim_empty_lines"));
     assert!(stdout.contains("stream"));
@@ -95,6 +96,7 @@ fn check_help_prints_help() {
     assert!(stdout.contains("Use `-` to read from stdin"));
     assert!(stdout.contains("--input-format"));
     assert!(stdout.contains("Ignored unless `--input-file=-` is used"));
+    assert!(stdout.contains("File-based runbooks default to YAML"));
     assert!(stdout.contains("Command-based prerequisite checks default to a `5 seconds` timeout"));
     assert!(stdout.contains("sw explain check"));
 }
@@ -107,7 +109,7 @@ fn example_help_prints_help() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("Example topic"));
     assert!(stdout.contains("--output-format"));
-    assert!(stdout.contains("Defaults to YAML output."));
+    assert!(stdout.contains("Defaults to YAML output for file-based authoring."));
     assert!(stdout.contains("trim_empty_lines"));
     assert!(stdout.contains("stream"));
     assert!(stdout.contains("The `Command` example includes current nested output fields"));
@@ -139,6 +141,7 @@ fn import_help_prints_help() {
     assert!(stdout.contains("--output-format"));
     assert!(stdout.contains("--force"));
     assert!(stdout.contains("Defaults to `./README.md` input and `./sw-runbook.yaml` output."));
+    assert!(stdout.contains("YAML is the default file-based import format."));
     assert!(stdout.contains("Headings map to `Heading` entries"));
     assert!(stdout.contains("sw explain import"));
 }
@@ -152,6 +155,7 @@ fn init_help_prints_help() {
     assert!(stdout.contains("--output-file"));
     assert!(stdout.contains("--force"));
     assert!(stdout.contains("Defaults to `./sw-runbook.yaml`."));
+    assert!(stdout.contains("YAML is the default file-based starter format."));
     assert!(stdout.contains("`.yaml`, `.yml`, and `.json`"));
     assert!(stdout.contains("Heading"));
     assert!(stdout.contains("Prerequisite"));
@@ -171,6 +175,7 @@ fn run_help_prints_help() {
     assert!(stdout.contains("Use `-` to read from stdin"));
     assert!(stdout.contains("--input-format"));
     assert!(stdout.contains("Ignored unless `--input-file=-` is used"));
+    assert!(stdout.contains("File-based runbooks default to YAML"));
     assert!(stdout.contains("--output-format"));
     assert!(stdout.contains("--output-file"));
     assert!(stdout.contains("trim_empty_lines"));
@@ -195,6 +200,7 @@ fn validate_help_prints_help() {
     assert!(stdout.contains("Use `-` to read from stdin"));
     assert!(stdout.contains("--input-format"));
     assert!(stdout.contains("Ignored unless `--input-file=-` is used"));
+    assert!(stdout.contains("File-based runbooks default to YAML elsewhere in the CLI"));
     assert!(stdout.contains("--output-format"));
 }
 

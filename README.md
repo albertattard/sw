@@ -30,9 +30,19 @@ The broader product direction is described in the
 
 ## Typical Workflow
 
-1. Write or import a runbook in YAML or JSON.
+1. Write or import a file-based runbook in YAML.
 2. Run `sw validate` or `sw check`.
 3. Run `sw run` to execute the workflow and generate the documentation output.
+
+## Format Defaults
+
+- File-based workflows default to YAML. This includes `sw init`, `sw import`,
+  and `sw example`.
+- Stdin-backed runbook input defaults to JSON when `--input-file=-` is used.
+  Pass `--input-format yaml` when piping YAML into `sw`.
+- File discovery for `sw run`, `sw validate`, and `sw check` accepts JSON,
+  YAML, and YML. If more than one default runbook file exists, `sw` fails and
+  requires `--input-file`.
 
 ## Engineering Workflow
 

@@ -3,12 +3,12 @@
 - Status: Proposed
 - Owner: @aattard
 - Created: 2026-03-13
-- Last updated: 2026-04-14
+- Last updated: 2026-04-15
 
 ## Problem
 
 Users, agents, and other models can discover CLI usage through `sw help` and
-request JSON snippets through `sw example`, but there is no command that
+request runbook snippets through `sw example`, but there is no command that
 explains the documented product contract itself. A caller without repository
 access cannot easily ask `sw` how a feature works, what defaults apply, or
 which major constraints and exit codes matter.
@@ -58,7 +58,8 @@ which major constraints and exit codes matter.
 - An agent should be able to use `explain` to decide how to interact with `sw`
   for common user questions.
 - `help` remains the command-reference surface.
-- `example` remains the JSON-snippet surface.
+- `example` remains the runbook-snippet surface, with YAML as the default and
+  JSON available explicitly.
 - `explain` should make those boundaries clear enough that an agent can choose
   the next command reliably.
 
@@ -121,6 +122,10 @@ When a topic supports stdin-backed runbook input, the output should explain
 When a topic uses file-backed runbook input by default, the output should make
 it clear that `--input-format` does not replace the existing default file
 lookup behavior unless stdin is explicitly selected with `--input-file=-`.
+
+When a topic is part of a file-based authoring workflow, the output should make
+it clear that YAML is the default format for that workflow and that JSON is an
+explicit opt-in when a machine-oriented shape is needed.
 
 When a topic includes authoring guidance for structured runbook fields, the
 output should prefer the most semantic documented mechanism over brittle text

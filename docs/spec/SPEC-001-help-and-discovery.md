@@ -4,7 +4,7 @@ title: Help and Discovery Contract
 status: in_progress
 priority: high
 owner: @aattard
-last_updated: 2026-04-14
+last_updated: 2026-04-15
 ---
 
 ## Problem
@@ -58,6 +58,13 @@ Output:
 - Subcommand help should document `--input-file=-` as the stdin convention for
   runbook input where supported, and should explain when `--input-format` is
   needed for piped YAML input.
+- Subcommand help should make the format split explicit where relevant:
+  file-based runbook workflows default to YAML, while stdin-backed runbook
+  input via `--input-file=-` defaults to JSON unless the caller provides
+  `--input-format=yaml`.
+- Subcommand help for file-generating or snippet-printing commands should make
+  the default YAML output clear and should point to explicit JSON flags when
+  users or agents need the machine-oriented shape instead.
 
 Exit codes:
 - `0`: help printed successfully.
@@ -77,8 +84,13 @@ Exit codes:
 - [ ] `sw help run`, `sw help check`, and `sw help validate` document
       `--input-file=-` for stdin-backed runbook input and `--input-format` for
       explicit YAML stdin input.
+- [ ] `sw help run`, `sw help check`, and `sw help validate` make it clear
+      that stdin defaults to JSON while file-based authoring elsewhere in the
+      CLI defaults to YAML.
 - [ ] `sw help example` makes it clear that `sw example DisplayFile` includes
       the Java `collapse_method_body` transform for collapsing method bodies.
+- [ ] `sw help example`, `sw help init`, and `sw help import` make it clear
+      that file-based snippet and starter-runbook workflows default to YAML.
 - [ ] `sw help <subcommand>` with an unknown subcommand exits with `1` and reports a clear error.
 - [ ] `sw help --all` prints top-level help plus help for each known subcommand and exits with `0`.
 - [x] `sw [command] --help` is documented as the command-level help pattern.

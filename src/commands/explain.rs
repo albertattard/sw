@@ -221,7 +221,7 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "Use this first when you need command-line syntax rather than feature guidance.",
                 "Use `sw --version` or `sw version` first when you need to confirm which binary is running.",
                 "If you need the product contract behind a command, use `sw explain <topic>` next.",
-                "If you need JSON shape examples, use `sw example <topic>` next.",
+                "If you need runbook snippets, use `sw example <topic>` next. Examples default to YAML; use `--output-format json` when you need the JSON shape.",
             ],
         },
         Explanation {
@@ -231,6 +231,7 @@ fn explanations() -> Vec<Explanation<'static>> {
             defaults: &[
                 "Default input candidates are `./sw-runbook.json`, `./sw-runbook.yaml`, and `./sw-runbook.yml`.",
                 "Default output format is `human`.",
+                "File-based authoring workflows default to YAML, while stdin input via `--input-file=-` defaults to JSON unless `--input-format=yaml` is provided.",
                 "When `--input-file=-` is used, stdin is parsed as JSON unless `--input-format=yaml` is provided.",
             ],
             inputs: &[
@@ -276,6 +277,7 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "Default input candidates are `./sw-runbook.json`, `./sw-runbook.yaml`, and `./sw-runbook.yml`.",
                 "Default output format is `markdown`.",
                 "Default output file is `./README.md`.",
+                "File-based authoring workflows default to YAML, while stdin input via `--input-file=-` defaults to JSON unless `--input-format=yaml` is provided.",
                 "When `--input-file=-` is used, stdin is parsed as JSON unless `--input-format=yaml` is provided.",
                 "Command output trims leading and trailing empty lines by default unless `output.trim_empty_lines` overrides it.",
                 "`Command` entries default to a `2 minutes` timeout unless `timeout` is provided.",
@@ -326,7 +328,7 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "Use this when you want the workflow executed and the README-style output generated.",
                 "Use `sw validate` first if the question is whether the runbook shape is valid.",
                 "Use `sw check` first if the question is whether prerequisites such as Java are available.",
-                "Use `sw example Command` when you need the current JSON shape for output fields such as `trim_empty_lines` and `stream`.",
+                "Use `sw example Command` when you need a current YAML snippet for output fields such as `trim_empty_lines` and `stream`, or add `--output-format json` when the JSON shape is what you need.",
             ],
         },
         Explanation {
@@ -335,6 +337,7 @@ fn explanations() -> Vec<Explanation<'static>> {
             purpose: "Validate the runbook and execute only prerequisite checks to confirm the environment is ready.",
             defaults: &[
                 "Default input candidates are `./sw-runbook.json`, `./sw-runbook.yaml`, and `./sw-runbook.yml`.",
+                "File-based authoring workflows default to YAML, while stdin input via `--input-file=-` defaults to JSON unless `--input-format=yaml` is provided.",
                 "When `--input-file=-` is used, stdin is parsed as JSON unless `--input-format=yaml` is provided.",
                 "Command-based prerequisite checks default to `5 seconds` unless `timeout` is provided.",
             ],
@@ -368,7 +371,7 @@ fn explanations() -> Vec<Explanation<'static>> {
             next: &[
                 "Use this when the question is about execution readiness, such as \"how do I check for Java 21?\"",
                 "Use `sw help check` for exact flags and invocation syntax.",
-                "Use `sw example Prerequisite` when you need the runbook JSON shape for prerequisite checks.",
+                "Use `sw example Prerequisite` when you need a current YAML snippet for prerequisite checks, or add `--output-format json` when the JSON shape is what you need.",
             ],
         },
         Explanation {
@@ -377,6 +380,7 @@ fn explanations() -> Vec<Explanation<'static>> {
             purpose: "Generate a starter runbook file from a realistic sample.",
             defaults: &[
                 "Default output file is `./sw-runbook.yaml`.",
+                "YAML is the default file-based starter format.",
                 "Existing output files are not overwritten unless `--force` is provided.",
             ],
             inputs: &[
@@ -412,6 +416,7 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "Default input file is `./README.md`.",
                 "Default output format is `yaml`.",
                 "Default output file is `./sw-runbook.yaml`.",
+                "YAML is the default file-based import format.",
                 "Existing output files are not overwritten unless `--force` is provided.",
             ],
             inputs: &[
@@ -437,23 +442,26 @@ fn explanations() -> Vec<Explanation<'static>> {
             next: &[
                 "Use this topic when you need the current README-to-runbook conversion contract.",
                 "Run `sw validate --input-file <generated-runbook>` if you want an explicit post-import validation check.",
-                "Use `sw example <topic>` when you need current JSON snippets for manual authoring after the import.",
+                "Use `sw example <topic>` when you need current YAML snippets for manual authoring after the import, or add `--output-format json` when the JSON shape is what you need.",
             ],
         },
         Explanation {
             topic: "example",
             availability: "implemented",
-            purpose: "Print a focused JSON snippet for a supported runbook topic.",
+            purpose: "Print a focused runbook snippet for a supported runbook topic.",
             defaults: &[
+                "Default output format is `yaml`.",
                 "Entity-type matching is case-insensitive.",
                 "There is no aggregate mode in this increment.",
             ],
             inputs: &[
                 "`sw example <entity-type>`",
+                "`--output-format yaml|json`",
                 "Supported topics currently include `Command`, `DisplayFile`, `Patch`, and `Prerequisite`.",
             ],
             outputs: &[
-                "Writes a single JSON snippet to stdout.",
+                "Writes a single YAML snippet to stdout by default.",
+                "Writes JSON when `--output-format json` is selected.",
                 "Writes a human-readable error to stderr for unsupported topics.",
             ],
             exit_codes: &[
@@ -462,13 +470,13 @@ fn explanations() -> Vec<Explanation<'static>> {
             ],
             constraints: &[
                 "Example output is documentation-oriented and may need editing before use.",
-                "Use `example` for JSON shape, not for command behavior or defaults.",
+                "Use `example` for snippet shape, not for command behavior or defaults.",
                 "The `Command` example includes current nested fields such as `trim_empty_lines`, `stream`, and `cleanup`.",
                 "The `DisplayFile` example includes the Java `collapse_method_body` transform for collapsing method bodies.",
                 "The printed snippet is intended to remain a stable starting point for users and agents.",
             ],
             next: &[
-                "Use this when the question is \"what JSON should I write?\"",
+                "Use this when the question is \"what runbook snippet should I write?\"",
                 "Use `sw example DisplayFile` when you need the Java `collapse_method_body` transform shape.",
                 "Use `sw explain <topic>` when the question is about behavior, defaults, or command boundaries.",
                 "Use `sw help example` for exact invocation syntax.",

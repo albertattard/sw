@@ -175,6 +175,7 @@ Expected task directories:
 - [TASK-111: Reject Ambiguous Default Runbook Selection](discovery/TASK-111-reject-ambiguous-default-runbook-selection.md)
 - [TASK-112: Surface Cleanup Discovery In Help And Explain](discovery/TASK-112-surface-cleanup-discovery-in-help-and-explain.md)
 - [TASK-113: Default Init Output To YAML](init/TASK-113-default-init-output-to-yaml.md)
+- [TASK-114: Clarify Format Defaults By Workflow](discovery/TASK-114-clarify-format-defaults-by-workflow.md)
 
 ## Pending
 
@@ -186,6 +187,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-114: Clarify Format Defaults By Workflow](discovery/TASK-114-clarify-format-defaults-by-workflow.md)
 - [x] [TASK-113: Default Init Output To YAML](init/TASK-113-default-init-output-to-yaml.md)
 - [x] [TASK-028: Implement Init Command](init/TASK-028-implement-init-command.md)
 - [x] [TASK-112: Surface Cleanup Discovery In Help And Explain](discovery/TASK-112-surface-cleanup-discovery-in-help-and-explain.md)

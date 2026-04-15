@@ -57,6 +57,9 @@ fn explain_run_prints_concise_contract_summary() {
         "Default input candidates are `./sw-runbook.json`, `./sw-runbook.yaml`, and `./sw-runbook.yml`."
     ));
     assert!(stdout.contains(
+        "File-based authoring workflows default to YAML, while stdin input via `--input-file=-` defaults to JSON unless `--input-format=yaml` is provided."
+    ));
+    assert!(stdout.contains(
         "When `--input-file=-` is used, stdin is parsed as JSON unless `--input-format=yaml` is provided."
     ));
     assert!(stdout.contains("Default output file is `./README.md`."));
@@ -125,7 +128,7 @@ fn explain_run_prints_concise_contract_summary() {
         "`--verbose-mode=plain` is useful for SSH and wrapper-driven execution where in-place redraws are fragile."
     ));
     assert!(stdout.contains(
-        "Use `sw example Command` when you need the current JSON shape for output fields such as `trim_empty_lines` and `stream`."
+        "Use `sw example Command` when you need a current YAML snippet for output fields such as `trim_empty_lines` and `stream`, or add `--output-format json` when the JSON shape is what you need."
     ));
 }
 
@@ -139,6 +142,9 @@ fn explain_validate_prints_validation_contract_summary() {
     assert!(stdout.contains("Default output format is `human`."));
     assert!(stdout.contains(
         "Default input candidates are `./sw-runbook.json`, `./sw-runbook.yaml`, and `./sw-runbook.yml`."
+    ));
+    assert!(stdout.contains(
+        "File-based authoring workflows default to YAML, while stdin input via `--input-file=-` defaults to JSON unless `--input-format=yaml` is provided."
     ));
     assert!(stdout.contains(
         "When `--input-file=-` is used, stdin is parsed as JSON unless `--input-format=yaml` is provided."
@@ -199,6 +205,9 @@ fn explain_check_guides_agent_to_prerequisites_and_examples() {
     assert!(stdout.contains("Use `sw example Prerequisite`"));
     assert!(stdout.contains("Check accepts JSON, YAML, and YML runbooks."));
     assert!(stdout.contains(
+        "File-based authoring workflows default to YAML, while stdin input via `--input-file=-` defaults to JSON unless `--input-format=yaml` is provided."
+    ));
+    assert!(stdout.contains(
         "When `--input-file=-` is used, stdin is parsed as JSON unless `--input-format=yaml` is provided."
     ));
     assert!(stdout.contains(
@@ -236,6 +245,7 @@ fn explain_import_prints_current_import_contract() {
     assert!(stdout.contains("Default input file is `./README.md`."));
     assert!(stdout.contains("Default output format is `yaml`."));
     assert!(stdout.contains("Default output file is `./sw-runbook.yaml`."));
+    assert!(stdout.contains("YAML is the default file-based import format."));
     assert!(stdout.contains("Command: `sw import`"));
     assert!(stdout.contains("`--output-format json|yaml`"));
     assert!(stdout.contains("`0` for a successful import."));
@@ -267,6 +277,7 @@ fn explain_init_prints_current_init_contract() {
     assert!(stdout.contains("topic: init"));
     assert!(stdout.contains("availability: implemented"));
     assert!(stdout.contains("Default output file is `./sw-runbook.yaml`."));
+    assert!(stdout.contains("YAML is the default file-based starter format."));
     assert!(
         stdout.contains("Existing output files are not overwritten unless `--force` is provided.")
     );
@@ -294,7 +305,9 @@ fn explain_boundaries_between_help_example_and_explain_are_clear() {
         stdout.contains("Use `--version` or `version` when you need to identify the current build")
     );
     assert!(stdout.contains("Use `explain` when the question is about behavior, defaults, or which command to call next."));
-    assert!(stdout.contains("If you need JSON shape examples, use `sw example <topic>` next."));
+    assert!(stdout.contains(
+        "If you need runbook snippets, use `sw example <topic>` next. Examples default to YAML; use `--output-format json` when you need the JSON shape."
+    ));
 }
 
 #[test]
@@ -303,6 +316,10 @@ fn explain_example_mentions_command_fields_in_example() {
 
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("Default output format is `yaml`."));
+    assert!(stdout.contains("`--output-format yaml|json`"));
+    assert!(stdout.contains("Writes a single YAML snippet to stdout by default."));
+    assert!(stdout.contains("Writes JSON when `--output-format json` is selected."));
     assert!(stdout.contains(
         "The `Command` example includes current nested fields such as `trim_empty_lines`, `stream`, and `cleanup`."
     ));
@@ -312,6 +329,9 @@ fn explain_example_mentions_command_fields_in_example() {
     assert!(stdout.contains(
         "Use `sw example DisplayFile` when you need the Java `collapse_method_body` transform shape."
     ));
+    assert!(
+        stdout.contains("Use this when the question is \"what runbook snippet should I write?\"")
+    );
 }
 
 #[test]

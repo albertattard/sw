@@ -4,7 +4,7 @@ title: Validate Runbook Input
 status: in_progress
 priority: high
 owner: @aattard
-last_updated: 2026-04-14
+last_updated: 2026-04-15
 ---
 
 ## Problem
@@ -46,6 +46,8 @@ Input:
 - Optional output format (`json` or `human`) via `--output-format`.
 
 Default input behavior:
+- File-backed workflows elsewhere in the CLI default to YAML authoring, but
+  stdin-backed validation keeps JSON as the default machine-oriented format.
 - If `--input-file=-` is provided, read the runbook from stdin.
 - If `--input-file=-` is provided and `--input-format` is omitted, parse stdin
   as JSON.

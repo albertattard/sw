@@ -4,7 +4,7 @@ title: Run Runbook to Markdown
 status: in_progress
 priority: high
 owner: @aattard
-last_updated: 2026-04-14
+last_updated: 2026-04-15
 ---
 
 ## Problem
@@ -67,6 +67,8 @@ in the runbook.
 
 ### CLI Defaults
 
+- File-based runbook creation flows default to YAML, but stdin-backed runbook
+  input keeps JSON as the default machine-oriented format.
 - If `--input-file=-` is provided, read the runbook from stdin.
 - If `--input-file=-` is provided and `--input-format` is omitted, parse stdin
   as JSON.

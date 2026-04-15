@@ -3,7 +3,7 @@
 - Status: Implemented
 - Owner: `@aattard`
 - Created: `2026-03-13`
-- Updated: `2026-04-08`
+- Updated: `2026-04-15`
 
 ## Goal
 
@@ -19,7 +19,6 @@ The new command is:
 sw import
 ```
 
-It reads a Markdown document and writes a best-effort runbook JSON file.
 It reads a Markdown document and writes a best-effort runbook YAML or JSON
 file.
 
@@ -34,6 +33,7 @@ file.
 
 - If `--input-file` is not provided, default to `./README.md`.
 - If `--output-format` is not provided, default to `yaml`.
+- `sw import` establishes YAML as the default file-based import format.
 - If `--output-file` is not provided, default to `./sw-runbook.yaml` for YAML
   output and `./sw-runbook.json` for JSON output.
 - If `--output-file` has a `.json`, `.yaml`, or `.yml` extension and
