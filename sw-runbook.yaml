@@ -1,0 +1,150 @@
+entries:
+  - type: Heading
+    level: H1
+    title: Sociable Weaver (SW)
+
+  - type: Markdown
+    contents: |
+      Sociable Weaver (`sw`) is a Rust CLI for executable documentation. It lets
+      authors define documentation examples as version-controlled runbooks in YAML or
+      JSON, validate and execute those workflows, and generate README-style output
+      from verified runs.
+
+      The goal is to stop example-driven documentation from silently drifting out of
+      date. Instead of copying commands into Markdown and hoping they still work
+      later, `sw` treats those examples as executable specifications that can be
+      checked locally and in CI.
+
+      The broader product direction is described in the
+      [`Product-Vision.md`](./docs/spec/Product-Vision.md).
+
+  - type: Heading
+    level: H2
+    title: What You Can Do With `sw`
+
+  - type: Markdown
+    contents: |
+      - [`sw validate`](./docs/spec/SPEC-002-validate-runbook.md) checks that a
+        runbook is structurally valid without executing it.
+      - [`sw check`](./docs/spec/SPEC-005-check-prerequisites.md) validates the
+        runbook and runs only prerequisite checks.
+      - [`sw run`](./docs/spec/SPEC-003-run-runbook-to-markdown.md) executes the
+        runbook and writes generated Markdown output.
+      - [`sw import`](./docs/spec/SPEC-006-import-readme-to-runbook.md) turns an
+        existing `README.md` into a starter runbook.
+      - [`sw help`](./docs/spec/SPEC-001-help-and-discovery.md),
+        [`sw explain`](./docs/spec/SPEC-009-explain-feature-contract.md), and
+        [`sw example`](./docs/spec/SPEC-008-example-snippets.md) support discovery
+        and authoring.
+
+  - type: Heading
+    level: H2
+    title: Typical Workflow
+
+  - type: Markdown
+    contents: |
+      1. Write or import a file-based runbook in YAML.
+      2. Run `sw validate` or `sw check`.
+      3. Run `sw run` to execute the workflow and generate the documentation output.
+
+  - type: Heading
+    level: H2
+    title: Format Defaults
+
+  - type: Markdown
+    contents: |
+      - File-based workflows default to YAML. This includes `sw init`, `sw import`,
+        and `sw example`.
+      - Stdin-backed runbook input defaults to JSON when `--input-file=-` is used.
+        Pass `--input-format yaml` when piping YAML into `sw`.
+      - File discovery for `sw run`, `sw validate`, and `sw check` accepts JSON,
+        YAML, and YML. If more than one default runbook file exists, `sw` fails and
+        requires `--input-file`.
+
+  - type: Heading
+    level: H2
+    title: Engineering Workflow
+
+  - type: Markdown
+    contents: |
+      This repository is developed with AI coding agents under a specification-first
+      engineering workflow.
+
+      The working model is:
+
+      1. Define or update the specification first.
+      2. Implement code that satisfies the spec.
+      3. Mark specification status only after acceptance criteria pass.
+
+      The main project records are:
+
+      - [`docs/spec/README.md`](./docs/spec/README.md): executable specifications and
+        the product contract.
+      - [`docs/spec/Product-Vision.md`](./docs/spec/Product-Vision.md): the product
+        thesis, problem, and long-term direction.
+      - [`docs/tasks/README.md`](./docs/tasks/README.md): file-based task tracking
+        for pending, in-progress, and completed work.
+      - [`docs/decisions/README.md`](./docs/decisions/README.md): architecture
+        decision records and technical tradeoffs.
+      - [`ADR-0001`](./docs/decisions/ADR-0001-specification-driven-development-with-ai.md):
+        why this project uses specification-driven development with AI assistance.
+
+      The main implementation areas are:
+
+      - [`src/main.rs`](./src/main.rs): CLI entrypoint and command dispatch.
+      - [`src/commands/`](./src/commands/): top-level command implementations.
+      - [`src/runbook/`](./src/runbook/): runbook loading, validation, execution, and
+        rendering.
+
+  - type: Heading
+    level: H2
+    title: Quality Checks
+
+  - type: Markdown
+    contents: |
+      Use the repository verification tool from the repository root:
+
+  - type: Command
+    commands: |
+      ./tools/verify.sh
+
+  - type: Markdown
+    contents: |
+      This command is fail-fast and runs:
+
+      1. `cargo fmt`
+      2. `cargo clippy --all-targets --all-features -- -D warnings`
+      3. `cargo test`
+      4. `cargo build --release`
+
+      The `commit changes` workflow uses the same command to reduce avoidable retry
+      cycles during interactive agent work. Because it rewrites formatting, it can
+      change modified Rust files in a dirty worktree before they are staged.
+
+      The repository pins Rust `1.94.1` through `rust-toolchain.toml` so local
+      development and CI use the same compiler, formatter, and linter versions.
+
+  - type: Heading
+    level: H2
+    title: Dependency Hygiene
+
+  - type: Markdown
+    contents: |
+      Dependency freshness is handled through weekly Dependabot updates for Cargo
+      crates and GitHub Actions.
+
+      Dependency advisories and duplicate-version drift are checked in CI with
+      `cargo-deny`. To mirror that check locally, install it once and then run:
+
+  - type: Command
+    commands: |
+      cargo install cargo-deny --locked
+      cargo deny check advisories bans
+
+  - type: Heading
+    level: H2
+    title: License
+
+  - type: Markdown
+    contents: |
+      This project is licensed under the MIT License. See the `LICENSE` file for details.
