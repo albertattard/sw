@@ -122,80 +122,234 @@ pub fn serialize(document: &Value, format: RunbookFormat) -> Result<String, Stri
 }
 
 fn serialize_yaml(document: &Value) -> Result<String, String> {
-    let Some(root) = document.as_object() else {
-        return serde_norway::to_string(document)
-            .map_err(|err| format!("Failed to serialize runbook as YAML: {err}"));
-    };
-
     let mut output = String::new();
-
-    for (key, value) in root {
-        if key == "entries" {
-            write_yaml_entries_field(&mut output, value)?;
-            continue;
-        }
-
-        output.push_str(&serialize_yaml_mapping_field(key, value)?);
-        output.push('\n');
-    }
+    write_yaml_document(&mut output, document, 0)?;
 
     Ok(output)
 }
 
-fn write_yaml_entries_field(output: &mut String, value: &Value) -> Result<(), String> {
-    let Some(entries) = value.as_array() else {
-        output.push_str(&serialize_yaml_mapping_field("entries", value)?);
-        output.push('\n');
-        return Ok(());
-    };
-
-    if entries.is_empty() {
-        output.push_str("entries: []\n");
-        return Ok(());
+fn write_yaml_document(output: &mut String, value: &Value, indent: usize) -> Result<(), String> {
+    if let Some(map) = value.as_object() {
+        return write_yaml_mapping(output, map, indent);
     }
 
-    output.push_str("entries:\n");
+    if let Some(array) = value.as_array() {
+        return write_yaml_array(output, array, indent, false);
+    }
 
-    for (index, entry) in entries.iter().enumerate() {
-        if index > 0 {
-            output.push('\n');
-        }
-        write_yaml_sequence_item(output, entry)?;
+    write_yaml_scalar_lines(output, indent, None, &yaml_scalar_value(value)?)
+}
+
+fn write_yaml_mapping(
+    output: &mut String,
+    map: &serde_json::Map<String, Value>,
+    indent: usize,
+) -> Result<(), String> {
+    for (key, value) in map {
+        write_yaml_field(output, indent, key, value)?;
     }
 
     Ok(())
 }
 
-fn serialize_yaml_mapping_field(key: &str, value: &Value) -> Result<String, String> {
-    let mut field = serde_json::Map::new();
-    field.insert(key.to_string(), value.clone());
+fn write_yaml_field(
+    output: &mut String,
+    indent: usize,
+    key: &str,
+    value: &Value,
+) -> Result<(), String> {
+    if let Some(array) = value.as_array() {
+        if array.is_empty() {
+            output.push_str(&" ".repeat(indent));
+            output.push_str(key);
+            output.push_str(": []\n");
+            return Ok(());
+        }
 
-    let serialized = serde_norway::to_string(&Value::Object(field))
-        .map_err(|err| format!("Failed to serialize runbook as YAML: {err}"))?;
+        output.push_str(&" ".repeat(indent));
+        output.push_str(key);
+        output.push_str(":\n");
+        let separate_entries = indent == 0 && key == "entries";
+        return write_yaml_array(output, array, indent + 2, separate_entries);
+    }
 
-    Ok(serialized.trim_end_matches('\n').to_string())
+    if let Some(map) = value.as_object() {
+        if map.is_empty() {
+            output.push_str(&" ".repeat(indent));
+            output.push_str(key);
+            output.push_str(": {}\n");
+            return Ok(());
+        }
+
+        output.push_str(&" ".repeat(indent));
+        output.push_str(key);
+        output.push_str(":\n");
+        return write_yaml_mapping(output, map, indent + 2);
+    }
+
+    write_yaml_scalar_lines(output, indent, Some(key), &yaml_scalar_value(value)?)
 }
 
-fn write_yaml_sequence_item(output: &mut String, value: &Value) -> Result<(), String> {
-    let serialized = serde_norway::to_string(value)
-        .map_err(|err| format!("Failed to serialize runbook as YAML: {err}"))?;
+fn write_yaml_array(
+    output: &mut String,
+    array: &[Value],
+    indent: usize,
+    separate_items: bool,
+) -> Result<(), String> {
+    for (index, value) in array.iter().enumerate() {
+        if separate_items && index > 0 {
+            output.push('\n');
+        }
+        write_yaml_array_item(output, indent, value)?;
+    }
 
-    for (index, line) in serialized.trim_end_matches('\n').lines().enumerate() {
+    Ok(())
+}
+
+fn write_yaml_array_item(output: &mut String, indent: usize, value: &Value) -> Result<(), String> {
+    if let Some(map) = value.as_object() {
+        if map.is_empty() {
+            output.push_str(&" ".repeat(indent));
+            output.push_str("- {}\n");
+            return Ok(());
+        }
+
+        let mut fields = map.iter();
+        let Some((first_key, first_value)) = fields.next() else {
+            output.push_str(&" ".repeat(indent));
+            output.push_str("- {}\n");
+            return Ok(());
+        };
+
+        if can_inline_array_mapping_field(first_value) {
+            write_yaml_inline_array_mapping_field(output, indent, first_key, first_value)?;
+            for (key, field_value) in fields {
+                write_yaml_field(output, indent + 2, key, field_value)?;
+            }
+            return Ok(());
+        }
+
+        output.push_str(&" ".repeat(indent));
+        output.push_str("-\n");
+        return write_yaml_mapping(output, map, indent + 2);
+    }
+
+    if let Some(array) = value.as_array() {
+        if array.is_empty() {
+            output.push_str(&" ".repeat(indent));
+            output.push_str("- []\n");
+            return Ok(());
+        }
+
+        output.push_str(&" ".repeat(indent));
+        output.push_str("-\n");
+        return write_yaml_array(output, array, indent + 2, false);
+    }
+
+    write_yaml_scalar_lines(output, indent, None, &yaml_scalar_value(value)?)
+}
+
+fn write_yaml_inline_array_mapping_field(
+    output: &mut String,
+    indent: usize,
+    key: &str,
+    value: &Value,
+) -> Result<(), String> {
+    output.push_str(&" ".repeat(indent));
+    output.push_str("- ");
+    output.push_str(key);
+
+    if matches!(value, Value::Array(array) if array.is_empty()) {
+        output.push_str(": []\n");
+        return Ok(());
+    }
+
+    if matches!(value, Value::Object(map) if map.is_empty()) {
+        output.push_str(": {}\n");
+        return Ok(());
+    }
+
+    output.push_str(": ");
+    let rendered = yaml_scalar_value(value)?;
+    let mut lines = rendered.lines();
+    let Some(first_line) = lines.next() else {
+        output.push('\n');
+        return Ok(());
+    };
+    output.push_str(first_line);
+    output.push('\n');
+
+    for line in lines {
         if line.is_empty() {
             output.push('\n');
             continue;
         }
-
-        if index == 0 {
-            output.push_str("- ");
-        } else {
-            output.push_str("  ");
-        }
+        output.push_str(&" ".repeat(indent + 2));
         output.push_str(line);
         output.push('\n');
     }
 
     Ok(())
+}
+
+fn write_yaml_scalar_lines(
+    output: &mut String,
+    indent: usize,
+    key: Option<&str>,
+    rendered: &str,
+) -> Result<(), String> {
+    let mut lines = rendered.lines();
+    let Some(first_line) = lines.next() else {
+        if let Some(key) = key {
+            output.push_str(&" ".repeat(indent));
+            output.push_str(key);
+            output.push_str(": ''\n");
+        } else {
+            output.push_str(&" ".repeat(indent));
+            output.push_str("- ''\n");
+        }
+        return Ok(());
+    };
+
+    output.push_str(&" ".repeat(indent));
+    match key {
+        Some(key) => {
+            output.push_str(key);
+            output.push_str(": ");
+        }
+        None => output.push_str("- "),
+    }
+    output.push_str(first_line);
+    output.push('\n');
+
+    for line in lines {
+        if line.is_empty() {
+            output.push('\n');
+            continue;
+        }
+
+        output.push_str(&" ".repeat(indent));
+        output.push_str(line);
+        output.push('\n');
+    }
+
+    Ok(())
+}
+
+fn can_inline_array_mapping_field(value: &Value) -> bool {
+    match value {
+        Value::Array(array) => array.is_empty(),
+        Value::Object(map) => map.is_empty(),
+        Value::String(value) => !value.contains('\n'),
+        _ => true,
+    }
+}
+
+fn yaml_scalar_value(value: &Value) -> Result<String, String> {
+    let rendered = serde_norway::to_string(value)
+        .map_err(|err| format!("Failed to serialize runbook as YAML: {err}"))?;
+
+    Ok(rendered.trim_end_matches('\n').to_string())
 }
 
 fn read_stdin(format: InputFormat) -> Result<Value, String> {

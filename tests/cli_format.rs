@@ -101,8 +101,27 @@ fn format_inserts_blank_lines_between_yaml_entries() {
     let contents = fs::read_to_string(path).expect("missing formatted file");
     assert_eq!(
         contents,
-        "entries:\n- type: Heading\n  level: H1\n  title: Order Approval\n\n- type: Markdown\n  contents: |-\n    First paragraph.\n\n    Second paragraph.\n"
+        "entries:\n  - type: Heading\n    level: H1\n    title: Order Approval\n\n  - type: Markdown\n    contents: |-\n      First paragraph.\n\n      Second paragraph.\n"
     );
+}
+
+#[test]
+fn format_indents_nested_yaml_sequences_under_keys() {
+    let dir = prepare_workspace();
+    let path = write_file(
+        &dir,
+        "sw-runbook.yaml",
+        "entries:\n- type: Command\n  commands:\n  - echo hello\n  output:\n    caption:\n    - Observed output\n",
+    );
+
+    let output = run_in_dir(&["format"], &dir);
+
+    assert!(output.status.success());
+
+    let contents = fs::read_to_string(path).expect("missing formatted file");
+    assert!(contents.contains("entries:\n  - type: Command\n"));
+    assert!(contents.contains("commands:\n      - echo hello\n"));
+    assert!(contents.contains("caption:\n        - Observed output\n"));
 }
 
 #[test]

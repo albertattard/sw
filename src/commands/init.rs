@@ -37,7 +37,7 @@ pub fn run(args: InitArgs) -> ExitCode {
         InitOutputFormat::Json => serde_json::to_string_pretty(&runbook)
             .map(|s| format!("{s}\n"))
             .map_err(|err| err.to_string()),
-        InitOutputFormat::Yaml => serde_norway::to_string(&runbook).map_err(|err| err.to_string()),
+        InitOutputFormat::Yaml => runbook::serialize(&runbook, runbook::RunbookFormat::Yaml),
     };
     let rendered = match rendered {
         Ok(rendered) => rendered,

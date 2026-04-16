@@ -3,7 +3,7 @@
 - Status: Draft
 - Owner: `@aattard`
 - Created: `2026-03-12`
-- Updated: `2026-04-15`
+- Updated: `2026-04-16`
 
 ## Goal
 
@@ -53,6 +53,11 @@ It creates a sample runbook in the current directory.
   path.
 - The generated file is intended as a realistic authoring example, not as the
   smallest possible document.
+- When YAML output is selected, sequences nested under mapping keys are
+  indented by two spaces beneath the owning key, including the top-level
+  `entries` list.
+- When YAML output is selected, adjacent top-level `entries` are separated by a
+  single blank line so the starter runbook is easier to edit.
 - The generated file includes one example of each supported entry type in this
   increment:
   - `Heading`
@@ -87,6 +92,9 @@ It creates a sample runbook in the current directory.
       to `starter.json`.
 - [ ] Given `sw init --output-file starter.yaml`, the command writes valid YAML
       to `starter.yaml`.
+- [x] Given YAML output from `sw init`, the serialized top-level `entries` list
+      uses `entries:\n  - ...` indentation and separates adjacent entries with a
+      single blank line.
 - [ ] Given `sw init --output-file starter.txt`, the command exits with `1`
       and reports a clear unsupported-format error.
 

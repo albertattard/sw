@@ -83,6 +83,9 @@ Output:
 - JSON output uses pretty-printed JSON with two-space indentation.
 - YAML output uses deterministic YAML formatting suitable for repository
   editing, with stable indentation and line breaks.
+- YAML sequences nested under mapping keys are indented by two spaces beneath
+  the owning key, including the top-level `entries` list as
+  `entries:\n  - ...`.
 - YAML output inserts a single blank line between adjacent items in the
   top-level `entries` list.
 - Property order is preserved exactly as it appears in the input file.
@@ -126,6 +129,9 @@ Output:
 - [x] Given a YAML runbook with two or more adjacent top-level `entries`,
       `sw format` rewrites the file so those adjacent entry items are
       separated by a single blank line.
+- [x] Given a YAML runbook with sequences nested under mapping keys, `sw format`
+      rewrites the file so those sequence item markers are indented by two
+      spaces beneath their owning keys.
 
 ## Non-goals
 

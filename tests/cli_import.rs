@@ -252,9 +252,11 @@ fn import_yaml_places_type_first_and_separates_entries() {
     assert!(output.status.success());
     let runbook = fs::read_to_string(dir.join("sw-runbook.yaml")).expect("missing imported file");
     assert!(
-        runbook.starts_with("entries:\n- type: Heading\n  level: H1\n  title: Example Workflow\n")
+        runbook.starts_with(
+            "entries:\n  - type: Heading\n    level: H1\n    title: Example Workflow\n"
+        )
     );
-    assert!(runbook.contains("title: Example Workflow\n\n- type: Markdown\n"));
+    assert!(runbook.contains("title: Example Workflow\n\n  - type: Markdown\n"));
 }
 
 #[test]
@@ -266,8 +268,7 @@ fn import_yaml_uses_block_scalars_for_multiline_markdown_contents() {
 
     assert!(output.status.success());
     let runbook = fs::read_to_string(dir.join("sw-runbook.yaml")).expect("missing imported file");
-    assert!(
-        runbook
-            .contains("- type: Markdown\n  contents: |\n    ```yaml\n    kind: example\n    ```\n")
-    );
+    assert!(runbook.contains(
+        "  - type: Markdown\n    contents: |\n      ```yaml\n      kind: example\n      ```\n"
+    ));
 }

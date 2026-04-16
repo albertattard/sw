@@ -50,7 +50,11 @@ fn init_writes_requested_yaml_output_file() {
     assert!(output.status.success());
     let contents =
         fs::read_to_string(dir.join("starter.yaml")).expect("missing generated yaml file");
-    assert!(contents.contains("type: Heading"));
+    assert!(contents.starts_with("entries:\n  - type: Heading\n"));
+    assert!(contents.contains("\n\n  - type: Markdown\n"));
+    assert!(contents.contains("checks:\n      - kind: command\n"));
+    assert!(contents.contains("commands:\n      - "));
+    assert!(contents.contains("caption:\n        - Observed output\n"));
 }
 
 #[test]

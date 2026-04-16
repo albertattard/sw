@@ -282,26 +282,33 @@ fn serialize_runbook_yaml(runbook: &ImportedRunbook) -> Result<String, String> {
         if index > 0 {
             output.push('\n');
         }
-        write_yaml_entry(&mut output, entry)?;
+        write_yaml_entry(&mut output, 2, entry)?;
     }
 
     Ok(output)
 }
 
-fn write_yaml_entry(output: &mut String, entry: &ImportedEntry) -> Result<(), String> {
+fn write_yaml_entry(
+    output: &mut String,
+    indent: usize,
+    entry: &ImportedEntry,
+) -> Result<(), String> {
     match entry {
         ImportedEntry::Heading { level, title } => {
+            output.push_str(&" ".repeat(indent));
             output.push_str("- type: Heading\n");
-            write_yaml_scalar_field(output, 2, "level", level)?;
-            write_yaml_scalar_field(output, 2, "title", title)?;
+            write_yaml_scalar_field(output, indent + 2, "level", level)?;
+            write_yaml_scalar_field(output, indent + 2, "title", title)?;
         }
         ImportedEntry::Markdown { contents } => {
+            output.push_str(&" ".repeat(indent));
             output.push_str("- type: Markdown\n");
-            write_yaml_multiline_prose_field(output, 2, "contents", contents)?;
+            write_yaml_multiline_prose_field(output, indent + 2, "contents", contents)?;
         }
         ImportedEntry::Command { commands } => {
+            output.push_str(&" ".repeat(indent));
             output.push_str("- type: Command\n");
-            write_yaml_string_list_field(output, 2, "commands", commands)?;
+            write_yaml_string_list_field(output, indent + 2, "commands", commands)?;
         }
     }
 
@@ -526,8 +533,8 @@ mod tests {
 
         let output = serialize_runbook_yaml(&runbook).expect("yaml serialization should succeed");
 
-        assert!(output.starts_with("entries:\n- type: Heading\n"));
-        assert!(output.contains("title: Title\n\n- type: Markdown\n"));
+        assert!(output.starts_with("entries:\n  - type: Heading\n"));
+        assert!(output.contains("title: Title\n\n  - type: Markdown\n"));
     }
 
     #[test]
@@ -536,8 +543,8 @@ mod tests {
 
         let output = serialize_runbook_yaml(&runbook).expect("yaml serialization should succeed");
 
-        assert!(
-            output.contains("- type: Markdown\n  contents: |\n    First line.\n    Second line.\n")
-        );
+        assert!(output.contains(
+            "  - type: Markdown\n    contents: |\n      First line.\n      Second line.\n"
+        ));
     }
 }
