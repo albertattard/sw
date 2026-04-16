@@ -111,8 +111,7 @@ pub fn serialize(document: &Value, format: RunbookFormat) -> Result<String, Stri
     let serialized = match format {
         RunbookFormat::Json => serde_json::to_string_pretty(document)
             .map_err(|err| format!("Failed to serialize runbook as JSON: {err}"))?,
-        RunbookFormat::Yaml => serde_norway::to_string(document)
-            .map_err(|err| format!("Failed to serialize runbook as YAML: {err}"))?,
+        RunbookFormat::Yaml => serialize_yaml(document)?,
     };
 
     if serialized.ends_with('\n') {
@@ -120,6 +119,83 @@ pub fn serialize(document: &Value, format: RunbookFormat) -> Result<String, Stri
     } else {
         Ok(format!("{serialized}\n"))
     }
+}
+
+fn serialize_yaml(document: &Value) -> Result<String, String> {
+    let Some(root) = document.as_object() else {
+        return serde_norway::to_string(document)
+            .map_err(|err| format!("Failed to serialize runbook as YAML: {err}"));
+    };
+
+    let mut output = String::new();
+
+    for (key, value) in root {
+        if key == "entries" {
+            write_yaml_entries_field(&mut output, value)?;
+            continue;
+        }
+
+        output.push_str(&serialize_yaml_mapping_field(key, value)?);
+        output.push('\n');
+    }
+
+    Ok(output)
+}
+
+fn write_yaml_entries_field(output: &mut String, value: &Value) -> Result<(), String> {
+    let Some(entries) = value.as_array() else {
+        output.push_str(&serialize_yaml_mapping_field("entries", value)?);
+        output.push('\n');
+        return Ok(());
+    };
+
+    if entries.is_empty() {
+        output.push_str("entries: []\n");
+        return Ok(());
+    }
+
+    output.push_str("entries:\n");
+
+    for (index, entry) in entries.iter().enumerate() {
+        if index > 0 {
+            output.push('\n');
+        }
+        write_yaml_sequence_item(output, entry)?;
+    }
+
+    Ok(())
+}
+
+fn serialize_yaml_mapping_field(key: &str, value: &Value) -> Result<String, String> {
+    let mut field = serde_json::Map::new();
+    field.insert(key.to_string(), value.clone());
+
+    let serialized = serde_norway::to_string(&Value::Object(field))
+        .map_err(|err| format!("Failed to serialize runbook as YAML: {err}"))?;
+
+    Ok(serialized.trim_end_matches('\n').to_string())
+}
+
+fn write_yaml_sequence_item(output: &mut String, value: &Value) -> Result<(), String> {
+    let serialized = serde_norway::to_string(value)
+        .map_err(|err| format!("Failed to serialize runbook as YAML: {err}"))?;
+
+    for (index, line) in serialized.trim_end_matches('\n').lines().enumerate() {
+        if line.is_empty() {
+            output.push('\n');
+            continue;
+        }
+
+        if index == 0 {
+            output.push_str("- ");
+        } else {
+            output.push_str("  ");
+        }
+        output.push_str(line);
+        output.push('\n');
+    }
+
+    Ok(())
 }
 
 fn read_stdin(format: InputFormat) -> Result<Value, String> {

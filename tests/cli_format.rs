@@ -86,6 +86,26 @@ fn format_rewrites_valid_yaml_in_place() {
 }
 
 #[test]
+fn format_inserts_blank_lines_between_yaml_entries() {
+    let dir = prepare_workspace();
+    let path = write_file(
+        &dir,
+        "sw-runbook.yaml",
+        "entries:\n  - {type: Heading, level: H1, title: Order Approval}\n  - {type: Markdown, contents: \"First paragraph.\\n\\nSecond paragraph.\"}\n",
+    );
+
+    let output = run_in_dir(&["format"], &dir);
+
+    assert!(output.status.success());
+
+    let contents = fs::read_to_string(path).expect("missing formatted file");
+    assert_eq!(
+        contents,
+        "entries:\n- type: Heading\n  level: H1\n  title: Order Approval\n\n- type: Markdown\n  contents: |-\n    First paragraph.\n\n    Second paragraph.\n"
+    );
+}
+
+#[test]
 fn format_uses_yaml_default_when_json_is_missing() {
     let dir = prepare_workspace();
     write_file(

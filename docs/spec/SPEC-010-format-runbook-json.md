@@ -4,7 +4,7 @@ title: Format Runbook Files
 status: implemented
 priority: medium
 owner: @aattard
-last_updated: 2026-04-15
+last_updated: 2026-04-16
 ---
 
 ## Problem
@@ -83,6 +83,8 @@ Output:
 - JSON output uses pretty-printed JSON with two-space indentation.
 - YAML output uses deterministic YAML formatting suitable for repository
   editing, with stable indentation and line breaks.
+- YAML output inserts a single blank line between adjacent items in the
+  top-level `entries` list.
 - Property order is preserved exactly as it appears in the input file.
 - String contents are preserved semantically, aside from format-specific
   escaping or block-scalar representation required by serialization.
@@ -121,6 +123,9 @@ Output:
       canonical layout.
 - [x] Formatting preserves object property order from the input file.
 - [x] Formatting preserves mapping property order from the input YAML file.
+- [x] Given a YAML runbook with two or more adjacent top-level `entries`,
+      `sw format` rewrites the file so those adjacent entry items are
+      separated by a single blank line.
 
 ## Non-goals
 

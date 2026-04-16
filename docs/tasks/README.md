@@ -177,6 +177,7 @@ Expected task directories:
 - [TASK-113: Default Init Output To YAML](init/TASK-113-default-init-output-to-yaml.md)
 - [TASK-114: Clarify Format Defaults By Workflow](discovery/TASK-114-clarify-format-defaults-by-workflow.md)
 - [TASK-115: Support Markdown Indent](run/TASK-115-support-markdown-indent.md)
+- [TASK-116: Add Blank Lines Between Formatted YAML Entries](format/TASK-116-add-blank-lines-between-formatted-yaml-entries.md)
 
 ## Pending
 
@@ -188,6 +189,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-116: Add Blank Lines Between Formatted YAML Entries](format/TASK-116-add-blank-lines-between-formatted-yaml-entries.md)
 - [x] [TASK-115: Support Markdown Indent](run/TASK-115-support-markdown-indent.md)
 - [x] [TASK-059: Implement Format Command](format/TASK-059-implement-format-command.md)
 - [x] [TASK-114: Clarify Format Defaults By Workflow](discovery/TASK-114-clarify-format-defaults-by-workflow.md)
