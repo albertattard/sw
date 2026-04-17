@@ -16,3 +16,4 @@ acceptance criteria.
 - [SPEC-009: Explain Feature Contract](./SPEC-009-explain-feature-contract.md)
 - [SPEC-010: Format Runbook Files](./SPEC-010-format-runbook-json.md)
 - [SPEC-011: DisplayFile Transformations](./SPEC-011-display-file-transformations.md)
+- [SPEC-012: Convert Runbook Formats](./SPEC-012-convert-runbook-formats.md)
