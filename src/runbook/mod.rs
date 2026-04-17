@@ -84,6 +84,27 @@ pub fn load_file_only(input_file: Option<PathBuf>) -> Result<LoadedRunbook, Stri
     Ok(LoadedRunbook { path, document })
 }
 
+pub fn resolve_single_existing_default_input_path() -> Result<PathBuf, String> {
+    let existing_candidates = DEFAULT_RUNBOOK_CANDIDATES
+        .iter()
+        .map(PathBuf::from)
+        .filter(|candidate| candidate.exists())
+        .collect::<Vec<_>>();
+
+    match existing_candidates.as_slice() {
+        [path] => Ok(path.clone()),
+        [] => Err("No default runbook found. Specify --input-file explicitly.".to_string()),
+        _ => Err(format!(
+            "Multiple default runbooks found: {}. Specify --input-file explicitly.",
+            existing_candidates
+                .iter()
+                .map(|path| path.display().to_string())
+                .collect::<Vec<_>>()
+                .join(", ")
+        )),
+    }
+}
+
 pub fn read(path: &Path) -> Result<Value, String> {
     let contents = fs::read_to_string(path)
         .map_err(|err| format!("Failed to read {}: {err}", path.display()))?;
@@ -401,24 +422,12 @@ fn resolve_file_input_path(input_file: Option<PathBuf>) -> Result<PathBuf, Strin
 }
 
 fn resolve_default_input_path() -> Result<PathBuf, String> {
-    let existing_candidates = DEFAULT_RUNBOOK_CANDIDATES
-        .iter()
-        .map(PathBuf::from)
-        .filter(|candidate| candidate.exists())
-        .collect::<Vec<_>>();
-
-    match existing_candidates.as_slice() {
-        [path] => Ok(path.clone()),
-        [] => Ok(PathBuf::from(DEFAULT_RUNBOOK_CANDIDATES[0])),
-        _ => Err(format!(
-            "Multiple default runbooks found: {}. Specify --input-file explicitly.",
-            existing_candidates
-                .iter()
-                .map(|path| path.display().to_string())
-                .collect::<Vec<_>>()
-                .join(", ")
-        )),
-    }
+    resolve_single_existing_default_input_path().or_else(|message| match message.as_str() {
+        "No default runbook found. Specify --input-file explicitly." => {
+            Ok(PathBuf::from(DEFAULT_RUNBOOK_CANDIDATES[0]))
+        }
+        _ => Err(message),
+    })
 }
 
 fn infer_format_from_path(path: &Path) -> RunbookFormat {

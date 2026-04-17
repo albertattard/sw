@@ -1,7 +1,7 @@
 ---
 id: SPEC-012
 title: Convert Runbook Formats
-status: proposed
+status: implemented
 priority: medium
 owner: @aattard
 last_updated: 2026-04-17
@@ -129,42 +129,42 @@ Output:
 
 ## Acceptance Criteria
 
-- [ ] Given only `./sw-runbook.json` present, `sw convert` writes
+- [x] Given only `./sw-runbook.json` present, `sw convert` writes
       `./sw-runbook.yaml` and exits with `0`.
-- [ ] Given only `./sw-runbook.yaml` present, `sw convert` writes
+- [x] Given only `./sw-runbook.yaml` present, `sw convert` writes
       `./sw-runbook.json` and exits with `0`.
-- [ ] Given only `./sw-runbook.yml` present, `sw convert` writes
+- [x] Given only `./sw-runbook.yml` present, `sw convert` writes
       `./sw-runbook.json` and exits with `0`.
-- [ ] Given `sw convert --input-file example.json`, the command writes
+- [x] Given `sw convert --input-file example.json`, the command writes
       `example.yaml` and exits with `0`.
-- [ ] Given `sw convert --input-file example.yaml`, the command writes
+- [x] Given `sw convert --input-file example.yaml`, the command writes
       `example.json` and exits with `0`.
-- [ ] Given `sw convert --input-file example.yml`, the command writes
+- [x] Given `sw convert --input-file example.yml`, the command writes
       `example.json` and exits with `0`.
-- [ ] Given `sw convert --input-file example.json --output-file converted.yaml`,
+- [x] Given `sw convert --input-file example.json --output-file converted.yaml`,
       the command writes YAML to `converted.yaml` and exits with `0`.
-- [ ] Given `sw convert --input-file example.yaml --output-file converted.json`,
+- [x] Given `sw convert --input-file example.yaml --output-file converted.json`,
       the command writes JSON to `converted.json` and exits with `0`.
-- [ ] Given no `--input-file` and more than one default runbook file present,
+- [x] Given no `--input-file` and more than one default runbook file present,
       `sw convert` exits with `1` and requires `--input-file`.
-- [ ] Given no `--input-file` and no default runbook file present, `sw convert`
+- [x] Given no `--input-file` and no default runbook file present, `sw convert`
       exits with `1` and reports that no input runbook was found.
-- [ ] Given `--output-file` and `--output-format` that disagree, `sw convert`
+- [x] Given `--output-file` and `--output-format` that disagree, `sw convert`
       exits with `1` and reports the mismatch.
-- [ ] Given an existing output file without `--force`, `sw convert` exits with
+- [x] Given an existing output file without `--force`, `sw convert` exits with
       `1` and does not overwrite the file.
-- [ ] Given an existing output file with `--force`, `sw convert` overwrites the
+- [x] Given an existing output file with `--force`, `sw convert` overwrites the
       file and exits with `0`.
-- [ ] Given an invalid JSON or YAML input file, `sw convert` exits with `1` and
+- [x] Given an invalid JSON or YAML input file, `sw convert` exits with `1` and
       does not write the output file.
-- [ ] Given a structurally invalid runbook input file, `sw convert` exits with
+- [x] Given a structurally invalid runbook input file, `sw convert` exits with
       `2` and does not write the output file.
-- [ ] Given a requested target format that matches the source format,
+- [x] Given a requested target format that matches the source format,
       `sw convert` exits with `1` and reports that the opposite format is
       required.
-- [ ] Given an output path equal to the input path, `sw convert` exits with `1`
+- [x] Given an output path equal to the input path, `sw convert` exits with `1`
       and reports that in-place conversion is not supported.
-- [ ] Help output documents the `convert` command and its options.
+- [x] Help output documents the `convert` command and its options.
 
 ## Non-goals
 

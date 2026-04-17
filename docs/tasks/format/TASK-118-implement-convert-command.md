@@ -1,7 +1,7 @@
 ---
 id: TASK-118
 title: Implement Convert Command
-status: pending
+status: done
 category: format
 related_features:
   - SPEC-012
@@ -47,27 +47,27 @@ paths.
 
 ## Acceptance Criteria
 
-- [ ] Given only `./sw-runbook.json`, `sw convert` writes `./sw-runbook.yaml`
+- [x] Given only `./sw-runbook.json`, `sw convert` writes `./sw-runbook.yaml`
       and exits with `0`.
-- [ ] Given only `./sw-runbook.yaml`, `sw convert` writes `./sw-runbook.json`
+- [x] Given only `./sw-runbook.yaml`, `sw convert` writes `./sw-runbook.json`
       and exits with `0`.
-- [ ] Given `sw convert --input-file example.json`, the command writes
+- [x] Given `sw convert --input-file example.json`, the command writes
       `example.yaml` and exits with `0`.
-- [ ] Given `sw convert --input-file example.yaml`, the command writes
+- [x] Given `sw convert --input-file example.yaml`, the command writes
       `example.json` and exits with `0`.
-- [ ] Given an explicit output path, the command writes the converted runbook
+- [x] Given an explicit output path, the command writes the converted runbook
       to that path.
-- [ ] Given conflicting `--output-file` and `--output-format`, the command
+- [x] Given conflicting `--output-file` and `--output-format`, the command
       exits with `1`.
-- [ ] Given an existing output path without `--force`, the command exits with
+- [x] Given an existing output path without `--force`, the command exits with
       `1` and does not overwrite the file.
-- [ ] Given invalid syntax in the source file, the command exits with `1` and
+- [x] Given invalid syntax in the source file, the command exits with `1` and
       does not write the output file.
-- [ ] Given valid syntax but invalid runbook structure, the command exits with
+- [x] Given valid syntax but invalid runbook structure, the command exits with
       `2` and does not write the output file.
-- [ ] Given a requested target format equal to the source format, the command
+- [x] Given a requested target format equal to the source format, the command
       exits with `1`.
-- [ ] Help output documents the `convert` command and its options.
+- [x] Help output documents the `convert` command and its options.
 
 ## Notes
 

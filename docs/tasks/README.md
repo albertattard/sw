@@ -183,7 +183,7 @@ Expected task directories:
 
 ## Pending
 
-- [ ] [TASK-118: Implement Convert Command](format/TASK-118-implement-convert-command.md)
+- (none)
 
 ## In Progress
 
@@ -191,6 +191,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-118: Implement Convert Command](format/TASK-118-implement-convert-command.md)
 - [x] [TASK-117: Standardize Indented YAML Sequences](format/TASK-117-standardize-indented-yaml-sequences.md)
 - [x] [TASK-116: Add Blank Lines Between Formatted YAML Entries](format/TASK-116-add-blank-lines-between-formatted-yaml-entries.md)
 - [x] [TASK-115: Support Markdown Indent](run/TASK-115-support-markdown-indent.md)

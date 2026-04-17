@@ -33,6 +33,8 @@ pub struct Cli {
 pub enum Commands {
     /// Check runbook prerequisites.
     Check(CheckArgs),
+    /// Convert a runbook file to the opposite supported format.
+    Convert(ConvertArgs),
     /// Print a runbook example for a topic.
     Example(ExampleArgs),
     /// Explain a feature contract or discovery path.
@@ -51,6 +53,28 @@ pub enum Commands {
     Version,
     /// Validate a runbook file.
     Validate(ValidateArgs),
+}
+
+#[derive(Debug, clap::Args)]
+#[command(
+    after_help = "Converts a runbook file from JSON to YAML or from YAML/YML to JSON.\nDefault input candidates are `./sw-runbook.json`, `./sw-runbook.yaml`, and `./sw-runbook.yml`.\nIf exactly one default runbook exists, `sw convert` uses it and writes the opposite format by default.\nIf more than one default runbook file exists, `sw convert` requires `--input-file`.\n`sw convert` is file-based only and does not accept `--input-file=-`.\nUse `--force` to overwrite an existing output file."
+)]
+pub struct ConvertArgs {
+    /// Path to the input runbook file.
+    #[arg(long)]
+    pub input_file: Option<PathBuf>,
+
+    /// Path to the converted output file.
+    #[arg(long)]
+    pub output_file: Option<PathBuf>,
+
+    /// Output format for the converted runbook file.
+    #[arg(long, value_enum)]
+    pub output_format: Option<ConvertOutputFormat>,
+
+    /// Overwrite the output file if it already exists.
+    #[arg(long)]
+    pub force: bool,
 }
 
 #[derive(Debug, clap::Args)]
@@ -224,6 +248,12 @@ pub enum ImportOutputFormat {
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, ValueEnum)]
+pub enum ConvertOutputFormat {
+    Json,
+    Yaml,
+}
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq, ValueEnum)]
 pub enum VerboseMode {
     Auto,
     Live,
@@ -264,7 +294,7 @@ pub fn print_all_help() -> Result<(), String> {
 
 fn command_topic_names() -> Vec<&'static str> {
     vec![
-        "check", "example", "explain", "format", "init", "import", "run", "help", "version",
-        "validate",
+        "check", "convert", "example", "explain", "format", "init", "import", "run", "help",
+        "version", "validate",
     ]
 }

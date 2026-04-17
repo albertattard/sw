@@ -30,6 +30,7 @@ fn help_subcommand_prints_help() {
     assert!(stdout.contains("--verbose-mode"));
     assert!(stdout.contains("--debug"));
     assert!(stdout.contains("check"));
+    assert!(stdout.contains("convert"));
     assert!(stdout.contains("example"));
     assert!(stdout.contains("explain"));
     assert!(stdout.contains("format"));
@@ -80,6 +81,7 @@ fn help_all_prints_top_level_and_known_subcommand_help() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("Sociable Weaver (SW)"));
     assert!(stdout.contains("Check runbook prerequisites"));
+    assert!(stdout.contains("Convert a runbook file to the opposite supported format"));
     assert!(stdout.contains("Print a runbook example for a topic"));
     assert!(stdout.contains("Explain a feature contract or discovery path"));
     assert!(stdout.contains("Format a runbook file in place"));
@@ -120,6 +122,21 @@ fn example_help_prints_help() {
     assert!(stdout.contains("The `Command` example includes current nested output fields"));
     assert!(stdout.contains("sw example DisplayFile"));
     assert!(stdout.contains("collapse_method_body"));
+}
+
+#[test]
+fn convert_help_prints_help() {
+    let output = run(&["convert", "--help"]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("--input-file"));
+    assert!(stdout.contains("--output-file"));
+    assert!(stdout.contains("--output-format"));
+    assert!(stdout.contains("--force"));
+    assert!(stdout.contains("Converts a runbook file from JSON to YAML"));
+    assert!(stdout.contains("If exactly one default runbook exists"));
+    assert!(stdout.contains("does not accept `--input-file=-`"));
 }
 
 #[test]
