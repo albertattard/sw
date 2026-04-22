@@ -280,7 +280,7 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "File-based authoring workflows default to YAML, while stdin input via `--input-file=-` defaults to JSON unless `--input-format=yaml` is provided.",
                 "When `--input-file=-` is used, stdin is parsed as JSON unless `--input-format=yaml` is provided.",
                 "Command output trims leading and trailing empty lines by default unless `output.trim_empty_lines` overrides it.",
-                "`Command` entries default to a `2 minutes` timeout unless `timeout` is provided.",
+                "`Command` entries default to a `30 seconds` timeout unless `timeout` is provided.",
             ],
             inputs: &[
                 "`sw run --input-file <runbook.{json|yaml|yml}>`",
@@ -367,7 +367,7 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "The runbook is validated before prerequisite execution begins.",
                 "Checks run in runbook order and stop on the first failing prerequisite.",
                 "Built-in prerequisite kinds include `java`, including version rules such as `21` or `21+`.",
-                "Normal `Command` entries keep their separate `2 minutes` default timeout for `sw run`.",
+                "Normal `Command` entries keep their separate `30 seconds` default timeout for `sw run`.",
             ],
             next: &[
                 "Use this when the question is about execution readiness, such as \"how do I check for Java 21?\"",

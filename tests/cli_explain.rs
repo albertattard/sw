@@ -67,7 +67,7 @@ fn explain_run_prints_concise_contract_summary() {
         "Command output trims leading and trailing empty lines by default unless `output.trim_empty_lines` overrides it."
     ));
     assert!(stdout.contains(
-        "`Command` entries default to a `2 minutes` timeout unless `timeout` is provided."
+        "`Command` entries default to a `30 seconds` timeout unless `timeout` is provided."
     ));
     assert!(stdout.contains(
         "Command output can render `stdout`, `stderr`, or `combined` with `output.stream`; if omitted, rendered output defaults to `combined`."
@@ -233,7 +233,7 @@ fn explain_check_guides_agent_to_prerequisites_and_examples() {
     ));
     assert!(stdout.contains("Built-in prerequisite kinds include `java`"));
     assert!(stdout.contains(
-        "Normal `Command` entries keep their separate `2 minutes` default timeout for `sw run`."
+        "Normal `Command` entries keep their separate `30 seconds` default timeout for `sw run`."
     ));
 }
 

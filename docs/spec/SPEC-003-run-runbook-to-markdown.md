@@ -97,7 +97,7 @@ in the runbook.
   the same as `sw run --verbose-mode=<mode>`.
 - If `sw` is invoked without a subcommand, `sw --debug` behaves the same as
   `sw run --debug`.
-- If a `Command` entry omits `timeout`, it defaults to `2 minutes`.
+- If a `Command` entry omits `timeout`, it defaults to `30 seconds`.
 
 ## Outputs
 
@@ -431,7 +431,7 @@ in the runbook.
 - Cleanup failures are reported after cleanup execution completes.
 - A run with one or more cleanup failures is considered failed.
 - A `Command` entry may declare a `timeout`.
-- If `timeout` is omitted, the default timeout is `2 minutes`.
+- If `timeout` is omitted, the default timeout is `30 seconds`.
 - `timeout` is expressed in human-readable form as a number followed by a unit.
 - In this increment, supported units are `seconds`, `minutes`, and their common
   singular or abbreviated forms.
@@ -910,7 +910,7 @@ in the runbook.
 ### Command Timeouts
 
 - [ ] Given a command without a declared timeout, the default timeout of
-      `2 minutes` is used.
+      `30 seconds` is used.
 - [ ] Given a command with a declared timeout such as `30 seconds`,
       `1 minute`, or `5 minutes`, that timeout is used for the command.
 - [ ] Given a command that finishes within its timeout, the run continues.

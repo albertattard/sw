@@ -612,14 +612,14 @@ fn timeout_for_entry(entry: &Value) -> Result<Duration, RenderError> {
 fn default_timeout_duration(entry: &Value) -> Duration {
     match default_timeout_label(entry) {
         "5 seconds" => Duration::from_secs(5),
-        _ => Duration::from_secs(120),
+        _ => Duration::from_secs(30),
     }
 }
 
 fn default_timeout_label(entry: &Value) -> &'static str {
     match entry.get("kind").and_then(Value::as_str) {
         Some("command") => "5 seconds",
-        _ => "2 minutes",
+        _ => "30 seconds",
     }
 }
 
@@ -940,7 +940,7 @@ mod tests {
     }
 
     #[test]
-    fn command_entries_default_to_two_minutes() {
+    fn command_entries_default_to_thirty_seconds() {
         let entry = json!({
             "type": "Command",
             "commands": ["echo hi"]
@@ -948,9 +948,9 @@ mod tests {
 
         assert_eq!(
             timeout_for_entry(&entry).unwrap_or_else(|_| panic!("timeout parse failed")),
-            Duration::from_secs(120)
+            Duration::from_secs(30)
         );
-        assert_eq!(timeout_label(&entry), "2 minutes");
+        assert_eq!(timeout_label(&entry), "30 seconds");
     }
 
     #[test]

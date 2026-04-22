@@ -331,7 +331,7 @@ fn verbose_run_reports_entry_progress_to_stderr() {
         stderr.contains("[2/5] Markdown: This runbook verifies command execution and rendering. (")
     );
     assert!(stderr.contains("[3/5] Command: printf 'first\\n' > sequence.txt ("));
-    assert!(stderr.contains(" / 2m)"));
+    assert!(stderr.contains(" / 30s)"));
     assert!(!stderr.contains("...)"));
 }
 
@@ -362,9 +362,9 @@ fn verbose_plain_mode_reports_start_and_completion_lines() {
     assert!(stderr.contains(
         "[2/5] Markdown: This runbook verifies command execution and rendering. (starting)"
     ));
-    assert!(stderr.contains("[3/5] Command: printf 'first\\n' > sequence.txt (starting / 2m)"));
+    assert!(stderr.contains("[3/5] Command: printf 'first\\n' > sequence.txt (starting / 30s)"));
     assert!(stderr.contains("[3/5] Command: printf 'first\\n' > sequence.txt ("));
-    assert!(stderr.contains(" / 2m)"));
+    assert!(stderr.contains(" / 30s)"));
 }
 
 #[test]
@@ -377,7 +377,7 @@ fn verbose_plain_mode_before_subcommand_uses_default_run_behavior() {
     assert!(output.status.success());
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(stderr.contains("[1/5] Heading: Runbook execution (starting)"));
-    assert!(stderr.contains("[5/5] Command: printf 'Hello there\\n' (starting / 2m)"));
+    assert!(stderr.contains("[5/5] Command: printf 'Hello there\\n' (starting / 30s)"));
 }
 
 #[test]
