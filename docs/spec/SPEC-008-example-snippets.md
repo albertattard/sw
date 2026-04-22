@@ -71,6 +71,13 @@ In this increment, supported entity types include:
   including Java `collapse_method_body` when implemented.
 - The `DisplayFile` example should reflect the current block-indentation
   contract by including `indent` when that field is supported.
+- The `Prerequisite` example should prefer the built-in `java` prerequisite
+  kind over a shell-based `java --version` probe when demonstrating Java
+  version checks.
+- The `Prerequisite` example should reflect the current built-in Java
+  prerequisite contract by showing a version rule and optional guidance
+  content, without implying that vendor identity is verified when the engine
+  only checks the Java major version.
 - Example output is documentation-oriented and does not need to be executable
   without further user editing.
 
@@ -90,6 +97,13 @@ In this increment, supported entity types include:
       Java `collapse_method_body` transform shape.
 - [ ] Given `sw example Patch`, the CLI prints a valid YAML example of a
       `Patch` entry that reflects the current automatic-restore contract.
+- [ ] Given `sw example Prerequisite`, the CLI prints a valid YAML example of a
+      `Prerequisite` entry.
+- [ ] Given `sw example Prerequisite`, the example uses the built-in
+      `kind: java` check instead of a command-based Java version probe.
+- [ ] Given `sw example Prerequisite`, the example declares a Java version
+      rule and does not imply vendor verification that the built-in check does
+      not perform.
 - [ ] Given `sw example Command --output-format yaml`, the CLI prints the same
       YAML shape as the default mode.
 - [ ] Given `sw example Command --output-format json`, the CLI prints a valid

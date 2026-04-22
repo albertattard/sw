@@ -110,6 +110,44 @@ fn patch_example_prints_valid_yaml_entry() {
 }
 
 #[test]
+fn prerequisite_example_prints_valid_yaml_entry() {
+    let output = run(&["example", "Prerequisite"]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let value: serde_json::Value =
+        serde_norway::from_str(&stdout).expect("example output should be valid yaml");
+    assert_eq!(value["type"], "Prerequisite");
+    assert_eq!(value["checks"][0]["kind"], "java");
+    assert_eq!(value["checks"][0]["name"], "Java 25+");
+    assert_eq!(value["checks"][0]["version"], "25+");
+    assert!(value["checks"][0].get("commands").is_none());
+    assert!(value["checks"][0].get("assert").is_none());
+    assert!(
+        value["checks"][0]["help"]
+            .as_str()
+            .expect("help should be a string")
+            .contains("Java 25 or newer")
+    );
+}
+
+#[test]
+fn prerequisite_example_prints_valid_json_entry_when_requested() {
+    let output = run(&["example", "Prerequisite", "--output-format", "json"]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let value: serde_json::Value =
+        serde_json::from_str(&stdout).expect("example output should be valid json");
+    assert_eq!(value["type"], "Prerequisite");
+    assert_eq!(value["checks"][0]["kind"], "java");
+    assert_eq!(value["checks"][0]["name"], "Java 25+");
+    assert_eq!(value["checks"][0]["version"], "25+");
+    assert!(value["checks"][0].get("commands").is_none());
+    assert!(value["checks"][0].get("assert").is_none());
+}
+
+#[test]
 fn unknown_example_topic_returns_operational_error() {
     let output = run(&["example", "unknown.topic"]);
 

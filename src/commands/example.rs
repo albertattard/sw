@@ -221,39 +221,22 @@ const PREREQUISITE_EXAMPLE_JSON: &str = r#"{
   "type": "Prerequisite",
   "checks": [
     {
-      "kind": "command",
-      "name": "Oracle Java 25",
+      "kind": "java",
+      "name": "Java 25+",
+      "version": "25+",
       "contents": [
-        "- [Oracle Java 25](https://www.oracle.com/java/technologies/downloads/#java25)"
+        "- [Java 25 downloads](https://www.oracle.com/java/technologies/downloads/#java25)"
       ],
-      "commands": [
-        "java --version"
-      ],
-      "assert": {
-        "exit_code": 0,
-        "checks": [
-          {
-            "source": "stdout",
-            "contains": "Java 25"
-          }
-        ]
-      },
-      "help": "Install Java 25 and make sure `java` is available on the PATH before running this example."
+      "help": "Install Java 25 or newer and make sure `java` is available on the PATH before running this example."
     }
   ]
 }"#;
 
 const PREREQUISITE_EXAMPLE_YAML: &str = r#"type: Prerequisite
 checks:
-  - kind: command
-    name: Oracle Java 25
+  - kind: java
+    name: Java 25+
+    version: '25+'
     contents:
-      - '- [Oracle Java 25](https://www.oracle.com/java/technologies/downloads/#java25)'
-    commands:
-      - java --version
-    assert:
-      exit_code: 0
-      checks:
-        - source: stdout
-          contains: Java 25
-    help: Install Java 25 and make sure `java` is available on the PATH before running this example."#;
+      - '- [Java 25 downloads](https://www.oracle.com/java/technologies/downloads/#java25)'
+    help: Install Java 25 or newer and make sure `java` is available on the PATH before running this example."#;
