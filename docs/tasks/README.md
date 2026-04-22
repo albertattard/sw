@@ -182,10 +182,11 @@ Expected task directories:
 - [TASK-118: Implement Convert Command](format/TASK-118-implement-convert-command.md)
 - [TASK-119: Modernize Prerequisite Example Snippet](example/TASK-119-modernize-prerequisite-example-snippet.md)
 - [TASK-120: Link Generated Marker To Project Repository](run/TASK-120-link-generated-marker-to-project-repository.md)
+- [TASK-121: Support Command Preconditions And Port Checks](run/TASK-121-support-command-preconditions-and-port-checks.md)
 
 ## Pending
 
-- (none)
+- [ ] [TASK-121: Support Command Preconditions And Port Checks](run/TASK-121-support-command-preconditions-and-port-checks.md)
 
 ## In Progress
 

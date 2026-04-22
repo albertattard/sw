@@ -4,7 +4,7 @@ title: Run Runbook to Markdown
 status: in_progress
 priority: high
 owner: @aattard
-last_updated: 2026-04-15
+last_updated: 2026-04-22
 ---
 
 ## Problem
@@ -435,6 +435,24 @@ in the runbook.
 - `timeout` is expressed in human-readable form as a number followed by a unit.
 - In this increment, supported units are `seconds`, `minutes`, and their common
   singular or abbreviated forms.
+- A `Command` entry may include a `preconditions` section.
+- `preconditions.checks` is an array of precondition checks.
+- Each precondition check declares a `source` so the contract can support
+  different command-start readiness checks over time.
+- Preconditions execute before the command starts.
+- If any precondition check fails, the command body does not execute and the
+  run fails.
+- `preconditions` supports `checks` only in this increment; it does not
+  support an `exit_code` field.
+- In this increment, supported precondition check sources are `port`.
+- A `port` check declares a single integer `port`.
+- A `port` check declares `free: true`.
+- A `port` check targets TCP listener availability on the local machine.
+- A `port` `free` check passes when no process is listening on that TCP port
+  on any local interface.
+- A `port` value must be within the inclusive range `1` through `65535`.
+- To check more than one port, declare multiple checks rather than an array of
+  ports inside one check.
 - If a command does not finish within its timeout, the command process is
   terminated and the run fails.
 - A `Command` entry without an `assert` section must exit with code `0` for the
@@ -447,7 +465,8 @@ in the runbook.
 - `assert.checks` is an array of assertion checks.
 - Each assertion check declares a `source` so the contract can support
   different targets such as command output and files.
-- In this increment, supported assertion check sources are `stdout` and `file`.
+- In this increment, supported assertion check sources are `stdout`, `file`,
+  and `port`.
 - A `stdout` check declares `contains`.
 - A `stdout` `contains` check passes when the command stdout includes the
   expected text.
@@ -460,6 +479,15 @@ in the runbook.
 - A `file` `sha256` check passes when the referenced file exists and its
   SHA-256 hash matches the expected lowercase hexadecimal digest.
 - A `file` check must declare exactly one operator: `exists` or `sha256`.
+- A `port` assertion check declares a single integer `port`.
+- A `port` assertion check declares `free: true`.
+- A `port` assertion check targets TCP listener availability on the local
+  machine.
+- A `port` `free` assertion passes when no process is listening on that TCP
+  port on any local interface after the command body completes.
+- `assert.checks` execute before deferred cleanup for that command entry.
+- A `port` assertion therefore does not verify port state after explicit
+  `cleanup` or automatic process cleanup completes.
 - A `Command` entry may include a `capture` section.
 - `capture` is an array of named extraction rules.
 - Each capture rule declares a variable `name`.
@@ -908,15 +936,30 @@ in the runbook.
 - [ ] Given a command with a `stdout` `contains` check that fails, the run
       exits with `2`, does not write a partial output file, and reports the
       failing `Command` entry together with the captured stdout and stderr.
+- [ ] Given a command with `preconditions.checks` using `source: port`,
+      `port: 8080`, and `free: true`, the command body executes only when TCP
+      port `8080` is not listening locally.
+- [ ] Given a failing `port` precondition check, the run exits with `2`,
+      does not execute the command body, does not write a partial output file,
+      and reports the failing `Command` entry.
 - [ ] Given a command with `assert.checks` using `source: file`, `path`, and
       `exists: true`, the command is considered successful only when the file
       exists after command execution.
 - [ ] Given a command with `assert.checks` using `source: file`, `path`, and
       `sha256`, the command is considered successful only when the file exists
       and its SHA-256 matches the expected digest.
+- [ ] Given a command with `assert.checks` using `source: port`, `port: 8080`,
+      and `free: true`, the command is considered successful only when TCP
+      port `8080` is not listening locally after the command body completes.
 - [ ] Given a failing `file` assertion, the run exits with `2`, does not write
       a partial output file, and reports the failing `Command` entry together
       with the captured stdout and stderr.
+- [ ] Given a failing `port` assertion, the run exits with `2`, does not write
+      a partial output file, and reports the failing `Command` entry together
+      with the captured stdout and stderr.
+- [ ] Given a command with `cleanup` that releases a port, a same-entry
+      `source: port` assertion still evaluates before deferred cleanup and does
+      not treat post-cleanup port state as part of that assertion.
 - [ ] Given multiple assertion checks, all checks must pass for the command to
       be considered successful.
 
@@ -1219,11 +1262,17 @@ the CLI perspective: execution order, failure handling, and output capture
 rules should be explicit and stable. Assertion structure should remain
 extensible: `assert.exit_code` handles process-level expectations, while
 `assert.checks` supports source-specific checks. In this increment,
-`assert.checks` supports `source: stdout` with the `contains` operator and
-`source: file` with `exists` and `sha256`, while leaving room for future
-operators such as regular-expression or equality checks. Command execution must
-also enforce a bounded runtime so runaway processes do not remain after a
-failed run. First-class patch execution should snapshot original target files
+`assert.checks` supports `source: stdout` with the `contains` operator,
+`source: file` with `exists` and `sha256`, and `source: port` with
+`free: true`, while leaving room for future operators such as regular-
+expression or equality checks. `preconditions.checks` uses the same general
+check model for command-start readiness, but remains separate from `assert`
+because it runs before the command body and does not support process-result
+fields such as `exit_code`. Port checks intentionally target one TCP port per
+check so multiple failures can be reported against explicit entries rather than
+being grouped into one ambiguous array assertion. Command execution must also
+enforce a bounded runtime so runaway processes do not remain after a failed
+run. First-class patch execution should snapshot original target files
 before the first patch touches them so stacked patches can be restored safely
 without requiring authors to hand-write reverse patches. Patch restoration
 should unwind in reverse registration order and restore files to their
