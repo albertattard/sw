@@ -24,18 +24,31 @@ entries:
 
   - type: Markdown
     contents: |
+      `sw` currently supports these subcommands:
+
+      - [`sw init`](./docs/spec/SPEC-004-init-runbook-sample.md) generates a
+        starter runbook file in YAML by default.
+      - [`sw import`](./docs/spec/SPEC-006-import-readme-to-runbook.md) turns an
+        existing `README.md` into a starter runbook.
       - [`sw validate`](./docs/spec/SPEC-002-validate-runbook.md) checks that a
         runbook is structurally valid without executing it.
       - [`sw check`](./docs/spec/SPEC-005-check-prerequisites.md) validates the
         runbook and runs only prerequisite checks.
       - [`sw run`](./docs/spec/SPEC-003-run-runbook-to-markdown.md) executes the
         runbook and writes generated Markdown output.
-      - [`sw import`](./docs/spec/SPEC-006-import-readme-to-runbook.md) turns an
-        existing `README.md` into a starter runbook.
-      - [`sw help`](./docs/spec/SPEC-001-help-and-discovery.md),
-        [`sw explain`](./docs/spec/SPEC-009-explain-feature-contract.md), and
-        [`sw example`](./docs/spec/SPEC-008-example-snippets.md) support discovery
-        and authoring.
+      - [`sw format`](./docs/spec/SPEC-010-format-runbook-json.md) rewrites a
+        runbook file in place using the canonical formatting for its current
+        format.
+      - [`sw convert`](./docs/spec/SPEC-012-convert-runbook-formats.md) converts
+        a runbook file between YAML and JSON.
+      - [`sw example`](./docs/spec/SPEC-008-example-snippets.md) prints focused
+        runbook snippets for supported topics.
+      - [`sw explain`](./docs/spec/SPEC-009-explain-feature-contract.md) describes
+        feature contracts, defaults, and discovery paths.
+      - [`sw help`](./docs/spec/SPEC-001-help-and-discovery.md) shows command-line
+        syntax and subcommand help.
+      - [`sw version`](./docs/spec/SPEC-001-help-and-discovery.md) prints the
+        current build identity.
 
   - type: Heading
     level: H2
