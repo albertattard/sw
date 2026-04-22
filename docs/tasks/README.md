@@ -181,6 +181,7 @@ Expected task directories:
 - [TASK-117: Standardize Indented YAML Sequences](format/TASK-117-standardize-indented-yaml-sequences.md)
 - [TASK-118: Implement Convert Command](format/TASK-118-implement-convert-command.md)
 - [TASK-119: Modernize Prerequisite Example Snippet](example/TASK-119-modernize-prerequisite-example-snippet.md)
+- [TASK-120: Link Generated Marker To Project Repository](run/TASK-120-link-generated-marker-to-project-repository.md)
 
 ## Pending
 
@@ -192,6 +193,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-120: Link Generated Marker To Project Repository](run/TASK-120-link-generated-marker-to-project-repository.md)
 - [x] [TASK-119: Modernize Prerequisite Example Snippet](example/TASK-119-modernize-prerequisite-example-snippet.md)
 - [x] [TASK-118: Implement Convert Command](format/TASK-118-implement-convert-command.md)
 - [x] [TASK-117: Standardize Indented YAML Sequences](format/TASK-117-standardize-indented-yaml-sequences.md)
