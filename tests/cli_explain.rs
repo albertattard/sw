@@ -78,6 +78,12 @@ fn explain_run_prints_concise_contract_summary() {
     assert!(stdout.contains(
         "`output.stream` changes rendered output only and does not widen capture or assertion sources."
     ));
+    assert!(stdout.contains(
+        "Markdown may interpolate captured variables with `@{name}` and preserve the literal syntax with `@@{name}`."
+    ));
+    assert!(stdout.contains(
+        "Markdown interpolation may reference values captured earlier or later in the runbook."
+    ));
     assert!(
         stdout.contains(
             "`sw --input-file=-` or `sw run --input-file=-` for stdin-backed JSON runbooks"

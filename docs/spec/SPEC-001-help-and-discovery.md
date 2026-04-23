@@ -4,7 +4,7 @@ title: Help and Discovery Contract
 status: in_progress
 priority: high
 owner: @aattard
-last_updated: 2026-04-15
+last_updated: 2026-04-23
 ---
 
 ## Problem
@@ -81,6 +81,10 @@ Exit codes:
 - [ ] `sw help run` documents the CLI flags for `run` and directs users to
       `sw example Command` and `sw explain run` for runbook-authored output
       fields such as `trim_empty_lines`, `stream`, and `cleanup`.
+- [ ] `sw help run` makes it clear that captured variables can be referenced
+      from Markdown using `@{name}` and escaped with `@@{name}`, while
+      directing users to `sw explain run` for the wider interpolation
+      contract.
 - [ ] `sw help run`, `sw help check`, and `sw help validate` document
       `--input-file=-` for stdin-backed runbook input and `--input-format` for
       explicit YAML stdin input.

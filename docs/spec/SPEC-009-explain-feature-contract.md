@@ -3,7 +3,7 @@
 - Status: Proposed
 - Owner: @aattard
 - Created: 2026-03-13
-- Last updated: 2026-04-15
+- Last updated: 2026-04-23
 
 ## Problem
 
@@ -142,6 +142,11 @@ manual `cleanup` as a first-class `Command` field, explain that it may be
 authored as a string or array, and make it clear that explicit `cleanup`
 replaces the automatic process-cleanup fallback for that command entry.
 
+When a topic covers captured variables and Markdown authoring, the explanation
+should describe the `@{name}` interpolation syntax, the `@@{name}` escape
+syntax, and the current boundary that Markdown may interpolate values captured
+earlier or later in the runbook.
+
 When a topic covers runbook output stream selection, the explanation should
 describe `output.stream`, its supported values, and the boundary between
 rendered output selection versus the narrower existing `capture.source` and
@@ -185,6 +190,10 @@ When `--output-format=skill` is selected:
 - [ ] Given `sw explain run`, the CLI documents `cleanup` as a `Command`
       field for manual teardown and makes it clear that explicit `cleanup`
       replaces automatic process cleanup for that entry.
+- [ ] Given `sw explain run`, the CLI documents Markdown interpolation with
+      `@{name}` and the `@@{name}` escape syntax for captured variables.
+- [ ] Given `sw explain run`, the CLI makes it clear that Markdown entries may
+      interpolate values captured earlier or later in the runbook.
 - [ ] Given `sw explain run`, the CLI documents `output.stream` and its
       supported values `stdout`, `stderr`, and `combined`.
 - [ ] Given `sw explain run`, the CLI documents that omitted `output.stream`

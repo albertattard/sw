@@ -320,6 +320,8 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "Command output content types currently support `text`, `json`, `xml`, `html`, and `java`.",
                 "`output.stream` changes rendered output only and does not widen capture or assertion sources.",
                 "Command output can trim outer empty lines with `output.trim_empty_lines` using `leading_trailing`, `leading`, `trailing`, or `none`.",
+                "Markdown may interpolate captured variables with `@{name}` and preserve the literal syntax with `@@{name}`.",
+                "Markdown interpolation may reference values captured earlier or later in the runbook.",
                 "Command-based prerequisite checks use a shorter default timeout of `5 seconds` unless they declare `timeout`.",
                 "`--verbose-mode=plain` is useful for SSH and wrapper-driven execution where in-place redraws are fragile.",
                 "Prefer `output.rewrite` with `type: datetime_shift` over `replace` for semantic dates and times so relative timing stays intact.",
