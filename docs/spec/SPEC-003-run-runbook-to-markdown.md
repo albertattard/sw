@@ -4,7 +4,7 @@ title: Run Runbook to Markdown
 status: in_progress
 priority: high
 owner: @aattard
-last_updated: 2026-04-22
+last_updated: 2026-04-23
 ---
 
 ## Problem
@@ -510,10 +510,45 @@ in the runbook.
 - `rewritten` captures from stdout after `output.rewrite` has been applied.
 - Each capture rule declares a regex `pattern`.
 - A capture rule succeeds when its pattern matches exactly one value to store.
+- A capture rule may declare `parse_as`.
+- In this increment, the only supported `parse_as.type` is `number`.
+- `parse_as.type: number` without any further parsing options uses the
+  canonical parser: decimal separator `.`, no grouping separator.
+- `parse_as.locale: system` explicitly opts into parsing numbers using the
+  locale under which `sw` is running.
+- `parse_as.locale: "<tag>"` parses numbers using the explicitly declared
+  locale, for example `en`, `de`, or `en-US`.
+- `parse_as.decimal_separator` and `parse_as.grouping_separator` may be used
+  to parse numbers with explicitly declared symbols instead of locale rules.
+- `parse_as.locale` is mutually exclusive with
+  `parse_as.decimal_separator` and `parse_as.grouping_separator`.
+- `parse_as.grouping_separator: none` declares that grouping separators are
+  not present in the captured numeric text.
+- Numeric parsing augments the capture with a parsed numeric value for
+  arithmetic expression interpolation and does not replace the original
+  captured string value used by plain `@{name}` interpolation.
+- If a capture declares `parse_as.type: number` and the matched text cannot be
+  parsed according to the declared parsing rules, the run fails.
 - Captured variables may be interpolated into later command lines using
   `@{name}` syntax.
 - `@@{name}` escapes that syntax and leaves a literal `@{name}` in the command
   or Markdown content.
+- Markdown entries may interpolate arithmetic expressions using
+  `@{= expression }` syntax.
+- `expression` may reference captured variables by name without the `@{...}`
+  wrapper.
+- In this increment, expression interpolation is supported only in Markdown
+  content.
+- In this increment, supported arithmetic operators are `+`, `-`, `*`, and
+  `/`, together with parentheses.
+- Arithmetic expressions operate only on variables that were successfully
+  parsed as numbers.
+- Plain `@{name}` interpolation continues to use the original captured string
+  value even when that capture also has numeric parsing metadata.
+- Arithmetic expression rendering is numeric only in this increment and does
+  not add grouping separators or locale-specific output formatting.
+- If an arithmetic expression references a variable that is missing, not
+  numeric, or failed numeric parsing, the run fails.
 - A command that references `@{name}` must use a variable captured earlier in
   the runbook.
 - If a `Command` entry contains an `output` property, render captured command
@@ -748,6 +783,14 @@ in the runbook.
 - [ ] Markdown entries may interpolate values captured later in the runbook.
 - [ ] A Markdown entry that references a variable that is never captured
       anywhere in the runbook causes the run to fail.
+- [ ] Markdown entries may interpolate arithmetic expressions using
+      `@{= variable_a * variable_b }`.
+- [ ] Markdown arithmetic expressions support `+`, `-`, `*`, `/`, and
+      parentheses.
+- [ ] Markdown arithmetic expressions render canonical numeric output without
+      locale-specific grouping separators.
+- [ ] A Markdown arithmetic expression that references a variable without a
+      parsed numeric value causes the run to fail.
 
 ### DisplayFile Entries
 
@@ -986,17 +1029,34 @@ in the runbook.
 
 - [ ] Given a `Command` entry with `capture`, matching values are stored under
       the declared variable names.
+- [ ] Given a capture rule with `parse_as.type: number` and no locale or
+      explicit separators, the captured value is parsed using the canonical
+      number parser with decimal `.` and no grouping.
+- [ ] Given a capture rule with `parse_as.locale: system`, the captured value
+      is parsed using the locale under which `sw` is running.
+- [ ] Given a capture rule with `parse_as.locale: "en"` or another explicit
+      locale, the captured value is parsed using that locale instead of the
+      system locale.
+- [ ] Given a capture rule with explicit `decimal_separator` and
+      `grouping_separator`, the captured value is parsed using those symbols
+      instead of locale rules.
+- [ ] Given a capture rule with `parse_as.locale` together with explicit
+      separators, validation rejects the runbook.
 - [ ] Given `stage: raw`, capture uses stdout before rewrite rules are applied.
 - [ ] Given `stage: rewritten`, capture uses stdout after rewrite rules are
       applied.
 - [ ] Given a later command that uses `@{name}`, the captured value is
       interpolated into the command before execution.
+- [ ] Given a capture rule with `parse_as.type: number`, plain `@{name}`
+      interpolation still uses the original captured string value.
 - [ ] Given a command that references `@{name}` before that variable is
       captured earlier in the runbook, validation rejects the runbook.
 - [ ] Given duplicate capture variable names anywhere in the runbook,
       validation rejects the runbook.
 - [ ] Given a capture rule whose pattern does not resolve to exactly one value,
       the run fails.
+- [ ] Given a capture rule with `parse_as.type: number` whose matched text
+      cannot be parsed under the declared parsing rules, the run fails.
 - [ ] Given `@@{name}` in command or Markdown content, the literal `@{name}`
       is preserved without interpolation.
 
