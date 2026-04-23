@@ -186,9 +186,11 @@ Expected task directories:
 - [TASK-122: Shorten Default Command Timeout](run/TASK-122-shorten-default-command-timeout.md)
 - [TASK-123: Surface Markdown Capture Interpolation In Help And Explain](discovery/TASK-123-surface-markdown-capture-interpolation-in-help-and-explain.md)
 - [TASK-124: Apply Command Timeout To Full Entry Lifecycle](run/TASK-124-apply-command-timeout-to-full-entry-lifecycle.md)
+- [TASK-125: Normalize Scalar-Capable Arrays During JSON To YAML Convert](format/TASK-125-normalize-scalar-capable-arrays-during-json-to-yaml-convert.md)
 
 ## Pending
 
+- [ ] [TASK-125: Normalize Scalar-Capable Arrays During JSON To YAML Convert](format/TASK-125-normalize-scalar-capable-arrays-during-json-to-yaml-convert.md)
 - [ ] [TASK-121: Support Command Preconditions And Port Checks](run/TASK-121-support-command-preconditions-and-port-checks.md)
 
 ## In Progress

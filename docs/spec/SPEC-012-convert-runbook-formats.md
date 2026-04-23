@@ -4,7 +4,7 @@ title: Convert Runbook Formats
 status: implemented
 priority: medium
 owner: @aattard
-last_updated: 2026-04-17
+last_updated: 2026-04-23
 ---
 
 ## Problem
@@ -119,6 +119,20 @@ Output:
 - YAML output uses the same canonical YAML formatting contract as `sw format`,
   including indented sequences under mapping keys and a single blank line
   between adjacent top-level `entries`.
+- When converting to YAML, fields whose documented input contract already
+  allows either a single string or an array of strings may be normalized from
+  a line-array representation into a YAML literal block scalar introduced with
+  `|`.
+- In this increment, that scalar-capable normalization applies only to fields
+  already documented as accepting either a string or an array of strings, such
+  as `Markdown.contents`, `Command.commands`, `Command.cleanup`,
+  `Prerequisite.checks[*].contents`, and
+  `Prerequisite.checks[*].commands`.
+- This normalization is semantic rather than presentation-preserving: it may
+  change the serialized YAML shape for those scalar-capable fields while
+  keeping the documented runbook meaning unchanged.
+- YAML conversion must not collapse arbitrary string arrays into block scalars
+  unless that field is already documented as accepting the scalar form.
 - Property order is preserved exactly as it appears in the parsed input
   document.
 - The written output ends with a trailing newline.
@@ -165,11 +179,28 @@ Output:
 - [x] Given an output path equal to the input path, `sw convert` exits with `1`
       and reports that in-place conversion is not supported.
 - [x] Help output documents the `convert` command and its options.
+- [ ] Given JSON input whose `Markdown.contents` is an array of strings and the
+      target format is YAML, `sw convert` may serialize that field as a YAML
+      literal block scalar instead of a YAML sequence.
+- [ ] Given JSON input whose `Command.commands` is an array of strings and the
+      target format is YAML, `sw convert` may serialize that field as a YAML
+      literal block scalar instead of a YAML sequence.
+- [ ] Given JSON input whose `Command.cleanup` is an array of strings and the
+      target format is YAML, `sw convert` may serialize that field as a YAML
+      literal block scalar instead of a YAML sequence.
+- [ ] Given JSON input whose `Prerequisite.checks[*].contents` or
+      `Prerequisite.checks[*].commands` is an array of strings and the target
+      format is YAML, `sw convert` may serialize that field as a YAML literal
+      block scalar instead of a YAML sequence.
+- [ ] Given JSON input with a string array in a field that is not documented as
+      scalar-capable, `sw convert` keeps that field as a YAML sequence.
 
 ## Non-goals
 
 - In-place format conversion.
 - Preserving YAML comments, anchors, aliases, or original scalar styling.
+- Rewriting arbitrary YAML sequences as block scalars outside the documented
+  scalar-capable fields.
 - Supporting stdin-to-stdout or stdin-to-file conversion in this increment.
 - Supporting output formats beyond JSON and YAML.
 
