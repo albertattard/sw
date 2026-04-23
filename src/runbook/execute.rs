@@ -185,7 +185,7 @@ pub(crate) fn execute_command(
 
     let start = Instant::now();
     let mut timed_out = false;
-    let process_group_id = child.id();
+    let process_group_id = process_group_id_for_child(&child)?;
     let mut exit_status: Option<ExitStatus> = None;
     let mut auto_cleanup_applied = false;
     let mut timeout_cleanup_failure = None;
@@ -847,6 +847,36 @@ fn patch_text_for(relative_path: &str, patch_lines: &[String]) -> String {
     }
 }
 
+#[cfg(unix)]
+fn process_group_id_for_child(child: &std::process::Child) -> Result<u32, RenderError> {
+    let child_pid = child.id();
+    let desired_process_group_id = child_pid as libc::pid_t;
+
+    for _ in 0..20 {
+        let process_group_id = unsafe { libc::getpgid(desired_process_group_id) };
+        if process_group_id == desired_process_group_id {
+            return u32::try_from(process_group_id).map_err(|_| {
+                RenderError::Operational(
+                    "Command process group is outside the supported range".to_string(),
+                )
+            });
+        }
+
+        if process_group_id < 0 {
+            return Ok(child_pid);
+        }
+
+        thread::sleep(Duration::from_millis(5));
+    }
+
+    Ok(child_pid)
+}
+
+#[cfg(not(unix))]
+fn process_group_id_for_child(child: &std::process::Child) -> Result<u32, RenderError> {
+    Ok(child.id())
+}
+
 fn patch_starts_with_headers(patch_body: &str) -> bool {
     patch_body.starts_with("--- ") || patch_body.starts_with("diff ")
 }
@@ -884,20 +914,21 @@ fn terminate_child(child: &mut std::process::Child) -> Result<(), RenderError> {
 
 #[cfg(unix)]
 fn terminate_process_group(process_group_id: u32) -> Result<bool, RenderError> {
-    let output = Command::new("kill")
-        .arg("-9")
-        .arg(format!("-{process_group_id}"))
-        .output()
-        .map_err(|err| {
-            RenderError::Operational(format!("Failed to terminate command processes: {err}"))
-        })?;
-
-    if output.status.success() {
-        return Ok(true);
+    let process_group_id = process_group_id as libc::pid_t;
+    let signal_result = unsafe { libc::kill(-process_group_id, libc::SIGKILL) };
+    if signal_result == 0 {
+        for _ in 0..20 {
+            let probe_result = unsafe { libc::kill(-process_group_id, 0) };
+            if probe_result != 0 {
+                return Ok(true);
+            }
+            thread::sleep(Duration::from_millis(10));
+        }
+        return Ok(false);
     }
 
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    if stderr.contains("No such process") {
+    let error = std::io::Error::last_os_error();
+    if error.raw_os_error() == Some(libc::ESRCH) {
         return Ok(true);
     }
 

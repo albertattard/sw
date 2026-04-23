@@ -13,7 +13,8 @@
       "type": "Command",
       "commands": [
         "PID=$(cat auto-cleanup-success.pid)",
-        "if kill -0 \"$PID\" 2>/dev/null; then printf 'alive\\n' > auto-cleanup-success-state.txt; else printf 'dead\\n' > auto-cleanup-success-state.txt; fi"
+        "STATE=$(ps -o stat= -p \"$PID\" 2>/dev/null | tr -d '[:space:]')",
+        "if [ -n \"$STATE\" ] && [ \"${STATE#Z}\" = \"$STATE\" ]; then printf 'alive\\n' > auto-cleanup-success-state.txt; else printf 'dead\\n' > auto-cleanup-success-state.txt; fi"
       ]
     }
   ]

@@ -130,6 +130,18 @@ fn write_text_file(dir: &Path, relative_path: &str, contents: &str) {
     fs::write(path, contents).expect("failed to write text file");
 }
 
+fn process_is_running(dir: &Path, pid: &str) -> bool {
+    let output = Command::new("sh")
+        .arg("-lc")
+        .arg(format!("ps -o stat= -p \"{pid}\" 2>/dev/null || true"))
+        .current_dir(dir)
+        .output()
+        .expect("failed to probe process state");
+
+    let state = String::from_utf8_lossy(&output.stdout).trim().to_string();
+    !state.is_empty() && !state.starts_with('Z')
+}
+
 #[test]
 fn no_args_defaults_to_run_and_writes_readme() {
     let dir = prepare_workspace();
@@ -1315,13 +1327,7 @@ fn command_without_cleanup_automatically_terminates_started_processes_after_fail
         .expect("missing auto cleanup failure pid")
         .trim()
         .to_string();
-    let probe = std::process::Command::new("sh")
-        .arg("-lc")
-        .arg(format!("kill -0 \"{pid}\" 2>/dev/null"))
-        .current_dir(&dir)
-        .status()
-        .expect("failed to probe auto cleanup failure pid");
-    assert!(!probe.success());
+    assert!(!process_is_running(&dir, &pid));
 }
 
 #[test]
@@ -1340,13 +1346,7 @@ fn command_without_cleanup_automatically_terminates_started_processes_after_time
         .expect("missing auto cleanup timeout pid")
         .trim()
         .to_string();
-    let probe = std::process::Command::new("sh")
-        .arg("-lc")
-        .arg(format!("kill -0 \"{pid}\" 2>/dev/null"))
-        .current_dir(&dir)
-        .status()
-        .expect("failed to probe auto cleanup timeout pid");
-    assert!(!probe.success());
+    assert!(!process_is_running(&dir, &pid));
 }
 
 #[test]
