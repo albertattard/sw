@@ -6,7 +6,7 @@ use std::fs;
 use std::io::Read;
 use std::path::{Component, Path, PathBuf};
 use std::process::{Command, ExitStatus, Stdio};
-use std::sync::mpsc::{self, Receiver, TryRecvError};
+use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
 
@@ -15,6 +15,7 @@ pub(crate) struct CommandExecution {
     pub(crate) stdout: String,
     pub(crate) stderr: String,
     pub(crate) timed_out: bool,
+    pub(crate) timeout_cleanup_failure: Option<String>,
 }
 
 pub(crate) struct CleanupBlock {
@@ -150,6 +151,7 @@ pub(crate) fn execute_command(
     entry: &Value,
     command: &str,
     runbook_path: &Path,
+    timeout_cleanup: Option<&CleanupBlock>,
 ) -> Result<CommandExecution, RenderError> {
     let timeout = timeout_for_entry(entry)?;
     let auto_cleanup_processes = uses_automatic_process_cleanup(entry);
@@ -178,16 +180,16 @@ pub(crate) fn execute_command(
         .take()
         .ok_or_else(|| RenderError::Operational("Failed to capture command stderr".to_string()))?;
 
-    let (stdout_rx, stdout_handle) = spawn_stream_reader(stdout);
-    let (stderr_rx, stderr_handle) = spawn_stream_reader(stderr);
+    let (stdout_capture, stdout_handle) = spawn_stream_reader(stdout);
+    let (stderr_capture, stderr_handle) = spawn_stream_reader(stderr);
 
     let start = Instant::now();
     let mut timed_out = false;
     let process_group_id = child.id();
     let mut exit_status: Option<ExitStatus> = None;
-    let mut stdout = None;
-    let mut stderr = None;
     let mut auto_cleanup_applied = false;
+    let mut timeout_cleanup_failure = None;
+    let mut forced_return_deadline = None;
 
     loop {
         if exit_status.is_none() {
@@ -207,17 +209,11 @@ pub(crate) fn execute_command(
             auto_cleanup_applied = true;
         }
 
-        if stdout.is_none() {
-            stdout = receive_stream_output(&stdout_rx, "stdout")?;
-        }
-        if stderr.is_none() {
-            stderr = receive_stream_output(&stderr_rx, "stderr")?;
-        }
+        let (stdout, stdout_complete) = snapshot_stream_output(&stdout_capture, "stdout")?;
+        let (stderr, stderr_complete) = snapshot_stream_output(&stderr_capture, "stderr")?;
 
-        if exit_status.is_some() && stdout.is_some() && stderr.is_some() {
+        if exit_status.is_some() && stdout_complete && stderr_complete {
             let exit_status = exit_status.take().expect("missing exit status");
-            let stdout = stdout.take().expect("missing stdout");
-            let stderr = stderr.take().expect("missing stderr");
 
             stdout_handle.join().map_err(|_| {
                 RenderError::Operational("Failed to collect command stdout".to_string())
@@ -231,44 +227,94 @@ pub(crate) fn execute_command(
                 stdout,
                 stderr,
                 timed_out,
+                timeout_cleanup_failure,
             });
         }
 
         if !timed_out && start.elapsed() >= timeout {
             timed_out = true;
             terminate_timed_out_command(&mut child, process_group_id, exit_status.is_some())?;
+            if let Some(cleanup) = timeout_cleanup
+                && let Err(message) = run_cleanup_block(cleanup)
+            {
+                timeout_cleanup_failure = Some(message);
+            }
+            forced_return_deadline = Some(Instant::now() + Duration::from_millis(500));
+        }
+
+        if timed_out && forced_return_deadline.is_some_and(|deadline| Instant::now() >= deadline) {
+            return Ok(CommandExecution {
+                exit_code: exit_status
+                    .as_ref()
+                    .and_then(ExitStatus::code)
+                    .unwrap_or(-1),
+                stdout,
+                stderr,
+                timed_out,
+                timeout_cleanup_failure,
+            });
         }
 
         thread::sleep(Duration::from_millis(25));
     }
 }
 
-fn spawn_stream_reader<T>(stream: T) -> (Receiver<String>, thread::JoinHandle<()>)
+struct StreamCapture {
+    buffer: String,
+    completed: bool,
+}
+
+fn spawn_stream_reader<T>(stream: T) -> (Arc<Mutex<StreamCapture>>, thread::JoinHandle<()>)
 where
     T: Read + Send + 'static,
 {
-    let (tx, rx) = mpsc::channel();
+    let capture = Arc::new(Mutex::new(StreamCapture {
+        buffer: String::new(),
+        completed: false,
+    }));
+    let thread_capture = Arc::clone(&capture);
     let handle = thread::spawn(move || {
         let mut reader = stream;
-        let mut buffer = String::new();
-        let _ = reader.read_to_string(&mut buffer);
-        let _ = tx.send(buffer);
+        let mut buffer = [0u8; 4096];
+
+        loop {
+            match reader.read(&mut buffer) {
+                Ok(0) => {
+                    if let Ok(mut capture) = thread_capture.lock() {
+                        capture.completed = true;
+                    }
+                    break;
+                }
+                Ok(count) => {
+                    let chunk = String::from_utf8_lossy(&buffer[..count]);
+                    if let Ok(mut capture) = thread_capture.lock() {
+                        capture.buffer.push_str(&chunk);
+                    } else {
+                        break;
+                    }
+                }
+                Err(_) => {
+                    if let Ok(mut capture) = thread_capture.lock() {
+                        capture.completed = true;
+                    }
+                    break;
+                }
+            }
+        }
     });
 
-    (rx, handle)
+    (capture, handle)
 }
 
-fn receive_stream_output(
-    receiver: &Receiver<String>,
+fn snapshot_stream_output(
+    capture: &Arc<Mutex<StreamCapture>>,
     stream_name: &str,
-) -> Result<Option<String>, RenderError> {
-    match receiver.try_recv() {
-        Ok(output) => Ok(Some(output)),
-        Err(TryRecvError::Empty) => Ok(None),
-        Err(TryRecvError::Disconnected) => Err(RenderError::Operational(format!(
-            "Failed to collect command {stream_name}"
-        ))),
-    }
+) -> Result<(String, bool), RenderError> {
+    let capture = capture.lock().map_err(|_| {
+        RenderError::Operational(format!("Failed to collect command {stream_name}"))
+    })?;
+
+    Ok((capture.buffer.clone(), capture.completed))
 }
 
 fn terminate_timed_out_command(

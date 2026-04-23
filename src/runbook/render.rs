@@ -141,12 +141,15 @@ pub(crate) fn render_markdown(
                 }
             },
             "Command" => {
-                if let Some(cleanup) = cleanup_block(entry, runbook_path)? {
-                    cleanups.push(cleanup);
-                }
+                let cleanup = cleanup_block(entry, runbook_path)?;
 
-                match render_command(entry, runbook_path, &mut state) {
-                    Ok(section) => RenderSection::Ready(section),
+                match render_command(entry, runbook_path, &mut state, cleanup.as_ref()) {
+                    Ok(section) => {
+                        if let Some(cleanup) = cleanup {
+                            cleanups.push(cleanup);
+                        }
+                        RenderSection::Ready(section)
+                    }
                     Err(RenderError::Timeout {
                         message,
                         partial_markdown,
@@ -160,6 +163,9 @@ pub(crate) fn render_markdown(
                         break;
                     }
                     Err(err) => {
+                        if let Some(cleanup) = cleanup {
+                            cleanups.push(cleanup);
+                        }
                         progress.finish_entry(progress_line);
                         failure = Some(err);
                         break;
@@ -1275,6 +1281,7 @@ fn render_command(
     entry: &Value,
     runbook_path: &Path,
     state: &mut RenderState,
+    timeout_cleanup: Option<&CleanupBlock>,
 ) -> Result<String, RenderError> {
     let commands = entry
         .get("commands")
@@ -1289,7 +1296,7 @@ fn render_command(
     let command_text = resolved_command_lines.join("\n");
     let rendered_command_text = render_command_text(entry, &command_text)?;
     let mut section = format!("```shell\n{rendered_command_text}\n```");
-    let execution = execute_command(entry, &command_text, runbook_path)?;
+    let execution = execute_command(entry, &command_text, runbook_path, timeout_cleanup)?;
     let debug_enabled = command_debug_enabled(entry, state.debug_all_commands);
     let mut debug_lines = Vec::new();
     if debug_enabled {
@@ -1337,7 +1344,10 @@ fn render_command(
         emit_debug_lines(debug_enabled, &debug_lines);
         append_output(entry, &rendered_output, &mut section)?;
         return Err(RenderError::Timeout {
-            message: format!("Command timed out after {}", timeout_label(entry)),
+            message: combine_messages(
+                &format!("Command timed out after {}", timeout_label(entry)),
+                execution.timeout_cleanup_failure.as_deref(),
+            ),
             partial_markdown: apply_indent(entry, section, "Command")?,
         });
     }
@@ -1572,7 +1582,7 @@ fn run_command_prerequisite_check(check: &Value, name: &str) -> Result<(), Rende
     )?;
 
     let script = lines.join("\n");
-    let execution = execute_command(check, &script, Path::new("."))?;
+    let execution = execute_command(check, &script, Path::new("."), None)?;
     if execution.timed_out {
         return Err(prerequisite_failure(
             name,
