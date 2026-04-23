@@ -142,6 +142,11 @@ manual `cleanup` as a first-class `Command` field, explain that it may be
 authored as a string or array, and make it clear that explicit `cleanup`
 replaces the automatic process-cleanup fallback for that command entry.
 
+When a topic covers command troubleshooting behavior, the explanation should
+describe both global `--debug` and command-scoped `debug: true`, and should
+make it clear that command-scoped debug enables diagnostics for only that
+entry when global debug is not enabled.
+
 When a topic covers captured variables and Markdown authoring, the explanation
 should describe the `@{name}` interpolation syntax, the `@@{name}` escape
 syntax, and the current boundary that Markdown may interpolate values captured
@@ -190,6 +195,9 @@ When `--output-format=skill` is selected:
 - [ ] Given `sw explain run`, the CLI documents `cleanup` as a `Command`
       field for manual teardown and makes it clear that explicit `cleanup`
       replaces automatic process cleanup for that entry.
+- [ ] Given `sw explain run`, the CLI documents command-scoped `debug: true`
+      as a `Command` field and explains the boundary between that setting and
+      global `--debug`.
 - [ ] Given `sw explain run`, the CLI documents Markdown interpolation with
       `@{name}` and the `@@{name}` escape syntax for captured variables.
 - [ ] Given `sw explain run`, the CLI makes it clear that Markdown entries may
@@ -216,7 +224,7 @@ When `--output-format=skill` is selected:
       `sw example <topic>`.
 - [ ] Given `sw explain example`, the CLI makes it clear that the `Command`
       example includes current nested fields such as `trim_empty_lines`,
-      `stream`, and `cleanup`.
+      `stream`, `cleanup`, and `debug`.
 - [ ] Given `sw explain example`, the CLI makes it clear that the `DisplayFile`
       example includes the Java `collapse_method_body` transform for
       collapsing method bodies.

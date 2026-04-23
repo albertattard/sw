@@ -64,6 +64,8 @@ In this increment, supported entity types include:
 - The `Command` example should reflect the current output contract, including
   supported output fields such as `stream` and `trim_empty_lines` when
   available.
+- The `Command` example should reflect the current troubleshooting contract by
+  including `debug` when command-scoped debug diagnostics are supported.
 - When the `Command` example includes `output.stream`, it should use the
   current default value so users and agents can start from the default
   behavior.
@@ -89,6 +91,8 @@ In this increment, supported entity types include:
       `trim_empty_lines` output field.
 - [ ] Given `sw example Command`, the example includes the implemented
       `stream` output field.
+- [ ] Given `sw example Command`, the example includes the implemented
+      `debug` field for command-scoped diagnostics.
 - [ ] Given `sw example DisplayFile`, the CLI prints a valid YAML example of a
       `DisplayFile` entry.
 - [ ] Given `sw example DisplayFile`, the example includes the implemented

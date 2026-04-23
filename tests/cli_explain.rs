@@ -107,6 +107,9 @@ fn explain_run_prints_concise_contract_summary() {
         "`Command.cleanup` supports manual teardown as either a string or an array, and explicit `cleanup` replaces automatic process cleanup for that command entry."
     ));
     assert!(stdout.contains(
+        "`Command.debug` enables diagnostics for one command entry, while global `--debug` enables diagnostics for all command entries."
+    ));
+    assert!(stdout.contains(
         "A command entry remains active until the command shell has exited and the captured stdout and stderr streams have both closed, so background processes that inherit those pipes can keep the entry open until they exit or the timeout is reached."
     ));
     assert!(stdout.contains(
@@ -333,7 +336,7 @@ fn explain_example_mentions_command_fields_in_example() {
     assert!(stdout.contains("Writes a single YAML snippet to stdout by default."));
     assert!(stdout.contains("Writes JSON when `--output-format json` is selected."));
     assert!(stdout.contains(
-        "The `Command` example includes current nested fields such as `trim_empty_lines`, `stream`, and `cleanup`."
+        "The `Command` example includes current nested fields such as `trim_empty_lines`, `stream`, `cleanup`, and `debug`."
     ));
     assert!(stdout.contains(
         "The `DisplayFile` example includes the Java `collapse_method_body` transform for collapsing method bodies."

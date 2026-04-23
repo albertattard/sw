@@ -69,6 +69,7 @@ fn example_for_topic(topic: &str) -> Option<ExampleSnippet> {
 
 const COMMAND_EXAMPLE_JSON: &str = r#"{
   "type": "Command",
+  "debug": true,
   "commands": [
     "echo 'Hello there'"
   ],
@@ -130,6 +131,7 @@ const COMMAND_EXAMPLE_JSON: &str = r#"{
 }"#;
 
 const COMMAND_EXAMPLE_YAML: &str = r#"type: Command
+debug: true
 commands:
   - "echo 'Hello there'"
 timeout: 30 seconds
