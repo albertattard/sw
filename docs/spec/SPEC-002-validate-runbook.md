@@ -202,8 +202,9 @@ Exit codes:
 - In this increment, validation warns when a `Command` entry appears to start
   a background process with `&` without redirecting stdout and stderr away
   from the command pipes.
-- This warning explains that the background process may keep the entry open and
-  make timeout or progress behavior misleading.
+- This warning explains that the background process may keep the entry open
+  until it exits or the timeout is reached, which can make progress behavior
+  confusing.
 - The warning recommends redirecting output to a file and saving `$!` to a PID
   file when the process needs to keep running across later steps.
 - In this increment, validation also warns when a `DisplayFile` entry uses a

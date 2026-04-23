@@ -1706,7 +1706,7 @@ fn maybe_warn_background_command_without_redirects(
         push_warning(
             warnings,
             format!("{path}.commands"),
-            "appears to start a background process without redirecting stdout and stderr away from the command pipes. This may keep the entry open and make timeout or progress behavior misleading. Consider redirecting output to a file and saving `$!` to a PID file.".to_string(),
+            "appears to start a background process without redirecting stdout and stderr away from the command pipes. This may keep the entry open until the background process exits or the timeout is reached, which can make progress behavior confusing. Consider redirecting output to a file and saving `$!` to a PID file.".to_string(),
         );
     }
 }

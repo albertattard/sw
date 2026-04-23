@@ -435,6 +435,17 @@ in the runbook.
 - `timeout` is expressed in human-readable form as a number followed by a unit.
 - In this increment, supported units are `seconds`, `minutes`, and their common
   singular or abbreviated forms.
+- A command entry remains active until both the command shell has exited and
+  the captured stdout and stderr streams for that entry have closed.
+- Timeout applies to the full command-entry lifecycle, including waiting for
+  captured stdout and stderr streams to close after the shell process exits.
+- Background processes that inherit the command pipes may therefore keep the
+  entry open until they exit or the timeout is reached.
+- If a command reaches its timeout while captured output streams are still
+  open, the remaining processes started by that command entry are terminated
+  and the run fails.
+- Timeout-driven termination still applies even when the command entry also
+  declares explicit `cleanup`.
 - A `Command` entry may include a `preconditions` section.
 - `preconditions.checks` is an array of precondition checks.
 - Each precondition check declares a `source` so the contract can support
@@ -914,9 +925,17 @@ in the runbook.
 - [ ] Given a command with a declared timeout such as `30 seconds`,
       `1 minute`, or `5 minutes`, that timeout is used for the command.
 - [ ] Given a command that finishes within its timeout, the run continues.
+- [ ] Given a command whose shell exits but whose inherited stdout or stderr
+      pipe remains open, the command entry remains active until the pipe
+      closes or the timeout is reached.
 - [ ] Given a command that exceeds its timeout, the command process is
       terminated, the run exits with `2`, and any captured output produced
       before termination is preserved to aid debugging.
+- [ ] Given a command with explicit `cleanup` that starts a background process
+      without redirecting stdout and stderr away from the captured command
+      pipes, the timeout still applies to the full entry lifecycle and
+      terminates the remaining command processes when that lifecycle exceeds
+      the timeout.
 
 ### Command Assertions
 

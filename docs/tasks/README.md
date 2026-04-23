@@ -185,6 +185,7 @@ Expected task directories:
 - [TASK-121: Support Command Preconditions And Port Checks](run/TASK-121-support-command-preconditions-and-port-checks.md)
 - [TASK-122: Shorten Default Command Timeout](run/TASK-122-shorten-default-command-timeout.md)
 - [TASK-123: Surface Markdown Capture Interpolation In Help And Explain](discovery/TASK-123-surface-markdown-capture-interpolation-in-help-and-explain.md)
+- [TASK-124: Apply Command Timeout To Full Entry Lifecycle](run/TASK-124-apply-command-timeout-to-full-entry-lifecycle.md)
 
 ## Pending
 
@@ -196,6 +197,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-124: Apply Command Timeout To Full Entry Lifecycle](run/TASK-124-apply-command-timeout-to-full-entry-lifecycle.md)
 - [x] [TASK-123: Surface Markdown Capture Interpolation In Help And Explain](discovery/TASK-123-surface-markdown-capture-interpolation-in-help-and-explain.md)
 - [x] [TASK-122: Shorten Default Command Timeout](run/TASK-122-shorten-default-command-timeout.md)
 - [x] [TASK-120: Link Generated Marker To Project Repository](run/TASK-120-link-generated-marker-to-project-repository.md)

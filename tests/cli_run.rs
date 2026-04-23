@@ -3,7 +3,8 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::thread;
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 #[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
@@ -51,6 +52,36 @@ fn run_in_dir_with_stdin(args: &[&str], dir: &Path, stdin: &str) -> std::process
         .expect("failed to write stdin");
 
     child.wait_with_output().expect("failed to read sw output")
+}
+
+fn run_in_dir_with_process_timeout(
+    args: &[&str],
+    dir: &Path,
+    timeout: Duration,
+) -> std::process::Output {
+    let mut child = Command::new(env!("CARGO_BIN_EXE_sw"))
+        .args(args)
+        .current_dir(dir)
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .expect("failed to execute sw");
+
+    let deadline = Instant::now() + timeout;
+    loop {
+        if let Some(_status) = child.try_wait().expect("failed to poll sw child") {
+            return child.wait_with_output().expect("failed to read sw output");
+        }
+
+        if Instant::now() >= deadline {
+            let _ = child.kill();
+            let _ = child.wait_with_output();
+            panic!("sw did not exit within {}", timeout.as_secs_f32());
+        }
+
+        thread::sleep(Duration::from_millis(25));
+    }
 }
 
 fn run_in_dir_with_env(args: &[&str], dir: &Path, envs: &[(&str, &Path)]) -> std::process::Output {
@@ -1017,6 +1048,48 @@ fn timed_out_command_is_terminated_and_preserves_partial_output() {
 
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(stderr.contains("Command timed out after 1 second"));
+}
+
+#[test]
+fn timeout_still_applies_while_background_process_holds_command_pipes_open() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Heading
+    level: H1
+    title: Timeout lifecycle
+
+  - type: Command
+    timeout: 1 second
+    commands: |
+      sleep 999 &
+      echo "$!" > sleeper.pid
+      printf 'started\n'
+    cleanup: |
+      if [ -f sleeper.pid ]; then
+        kill "$(cat sleeper.pid)" 2>/dev/null || true
+      fi
+    output:
+      caption: Repro output
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir_with_process_timeout(
+        &["run", "--input-file", "sw-runbook.yaml"],
+        &dir,
+        Duration::from_secs(4),
+    );
+
+    assert_eq!(output.status.code(), Some(2));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("Command timed out after 1 second"));
+
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("# Timeout lifecycle"));
+    assert!(readme.contains("Repro output"));
+    assert!(readme.contains("```\nstarted\n```"));
 }
 
 #[test]

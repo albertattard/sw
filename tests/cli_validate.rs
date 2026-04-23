@@ -1029,7 +1029,7 @@ fn background_command_warning_keeps_runbook_valid_in_json_output() {
     assert!(stdout.contains("\"warnings\": ["));
     assert!(stdout.contains("\"path\": \"entries[0].commands\""));
     assert!(stdout.contains("background process"));
-    assert!(stdout.contains("timeout or progress behavior misleading"));
+    assert!(stdout.contains("timeout is reached"));
 }
 
 #[test]

@@ -5,7 +5,8 @@ use std::collections::HashMap;
 use std::fs;
 use std::io::Read;
 use std::path::{Component, Path, PathBuf};
-use std::process::{Command, Stdio};
+use std::process::{Command, ExitStatus, Stdio};
+use std::sync::mpsc::{self, Receiver, TryRecvError};
 use std::thread;
 use std::time::{Duration, Instant};
 
@@ -177,62 +178,113 @@ pub(crate) fn execute_command(
         .take()
         .ok_or_else(|| RenderError::Operational("Failed to capture command stderr".to_string()))?;
 
-    let stdout_handle = thread::spawn(move || {
-        let mut reader = stdout;
-        let mut buffer = String::new();
-        let _ = reader.read_to_string(&mut buffer);
-        buffer
-    });
-    let stderr_handle = thread::spawn(move || {
-        let mut reader = stderr;
-        let mut buffer = String::new();
-        let _ = reader.read_to_string(&mut buffer);
-        buffer
-    });
+    let (stdout_rx, stdout_handle) = spawn_stream_reader(stdout);
+    let (stderr_rx, stderr_handle) = spawn_stream_reader(stderr);
 
     let start = Instant::now();
     let mut timed_out = false;
     let process_group_id = child.id();
-    let exit_status = loop {
-        match child.try_wait() {
-            Ok(Some(status)) => break status,
-            Ok(None) => {
-                if start.elapsed() >= timeout {
-                    timed_out = true;
-                    terminate_child(&mut child)?;
-                    break child.wait().map_err(|err| {
-                        RenderError::Operational(format!(
-                            "Failed to wait for timed out command: {err}"
-                        ))
-                    })?;
+    let mut exit_status: Option<ExitStatus> = None;
+    let mut stdout = None;
+    let mut stderr = None;
+    let mut auto_cleanup_applied = false;
+
+    loop {
+        if exit_status.is_none() {
+            match child.try_wait() {
+                Ok(Some(status)) => exit_status = Some(status),
+                Ok(None) => {}
+                Err(err) => {
+                    return Err(RenderError::Operational(format!(
+                        "Failed while waiting for command: {err}"
+                    )));
                 }
-                thread::sleep(Duration::from_millis(25));
-            }
-            Err(err) => {
-                return Err(RenderError::Operational(format!(
-                    "Failed while waiting for command: {err}"
-                )));
             }
         }
-    };
 
-    if auto_cleanup_processes && !timed_out {
-        terminate_process_group(process_group_id)?;
+        if exit_status.is_some() && auto_cleanup_processes && !timed_out && !auto_cleanup_applied {
+            terminate_process_group(process_group_id)?;
+            auto_cleanup_applied = true;
+        }
+
+        if stdout.is_none() {
+            stdout = receive_stream_output(&stdout_rx, "stdout")?;
+        }
+        if stderr.is_none() {
+            stderr = receive_stream_output(&stderr_rx, "stderr")?;
+        }
+
+        if exit_status.is_some() && stdout.is_some() && stderr.is_some() {
+            let exit_status = exit_status.take().expect("missing exit status");
+            let stdout = stdout.take().expect("missing stdout");
+            let stderr = stderr.take().expect("missing stderr");
+
+            stdout_handle.join().map_err(|_| {
+                RenderError::Operational("Failed to collect command stdout".to_string())
+            })?;
+            stderr_handle.join().map_err(|_| {
+                RenderError::Operational("Failed to collect command stderr".to_string())
+            })?;
+
+            return Ok(CommandExecution {
+                exit_code: exit_status.code().unwrap_or(-1),
+                stdout,
+                stderr,
+                timed_out,
+            });
+        }
+
+        if !timed_out && start.elapsed() >= timeout {
+            timed_out = true;
+            terminate_timed_out_command(&mut child, process_group_id, exit_status.is_some())?;
+        }
+
+        thread::sleep(Duration::from_millis(25));
+    }
+}
+
+fn spawn_stream_reader<T>(stream: T) -> (Receiver<String>, thread::JoinHandle<()>)
+where
+    T: Read + Send + 'static,
+{
+    let (tx, rx) = mpsc::channel();
+    let handle = thread::spawn(move || {
+        let mut reader = stream;
+        let mut buffer = String::new();
+        let _ = reader.read_to_string(&mut buffer);
+        let _ = tx.send(buffer);
+    });
+
+    (rx, handle)
+}
+
+fn receive_stream_output(
+    receiver: &Receiver<String>,
+    stream_name: &str,
+) -> Result<Option<String>, RenderError> {
+    match receiver.try_recv() {
+        Ok(output) => Ok(Some(output)),
+        Err(TryRecvError::Empty) => Ok(None),
+        Err(TryRecvError::Disconnected) => Err(RenderError::Operational(format!(
+            "Failed to collect command {stream_name}"
+        ))),
+    }
+}
+
+fn terminate_timed_out_command(
+    child: &mut std::process::Child,
+    process_group_id: u32,
+    child_exited: bool,
+) -> Result<(), RenderError> {
+    #[cfg(unix)]
+    {
+        if child_exited {
+            terminate_process_group(process_group_id)?;
+            return Ok(());
+        }
     }
 
-    let stdout = stdout_handle
-        .join()
-        .map_err(|_| RenderError::Operational("Failed to collect command stdout".to_string()))?;
-    let stderr = stderr_handle
-        .join()
-        .map_err(|_| RenderError::Operational("Failed to collect command stderr".to_string()))?;
-
-    Ok(CommandExecution {
-        exit_code: exit_status.code().unwrap_or(-1),
-        stdout,
-        stderr,
-        timed_out,
-    })
+    terminate_child(child)
 }
 
 pub(crate) fn ensure_assertions(
