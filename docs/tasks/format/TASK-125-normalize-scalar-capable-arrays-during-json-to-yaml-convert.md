@@ -1,7 +1,7 @@
 ---
 id: TASK-125
 title: Normalize Scalar-Capable Arrays During JSON To YAML Convert
-status: pending
+status: done
 category: format
 related_features:
   - SPEC-012
@@ -39,21 +39,21 @@ serializing scalar-capable line arrays as YAML literal block scalars.
 
 ## Acceptance Criteria
 
-- [ ] Given JSON input whose `Markdown.contents` is an array of strings,
+- [x] Given JSON input whose `Markdown.contents` is an array of strings,
       `sw convert` to YAML emits `contents: |` with the equivalent multiline
       content.
-- [ ] Given JSON input whose `Command.commands` is an array of strings,
+- [x] Given JSON input whose `Command.commands` is an array of strings,
       `sw convert` to YAML emits `commands: |` with the equivalent multiline
       script.
-- [ ] Given JSON input whose `Command.cleanup` is an array of strings,
+- [x] Given JSON input whose `Command.cleanup` is an array of strings,
       `sw convert` to YAML emits `cleanup: |` with the equivalent multiline
       script.
-- [ ] Given JSON input whose `Prerequisite.checks[*].contents` or
+- [x] Given JSON input whose `Prerequisite.checks[*].contents` or
       `Prerequisite.checks[*].commands` is an array of strings, `sw convert`
       to YAML emits that field as `|` with equivalent multiline content.
-- [ ] Given JSON input with a string array in a field that is not documented as
+- [x] Given JSON input with a string array in a field that is not documented as
       scalar-capable, `sw convert` preserves that field as a YAML sequence.
-- [ ] The converted YAML still passes `sw validate`.
+- [x] The converted YAML still passes `sw validate`.
 
 ## Notes
 

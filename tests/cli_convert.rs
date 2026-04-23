@@ -341,3 +341,161 @@ fn convert_invalid_runbook_does_not_write_output() {
     assert!(stdout.contains("Runbook is invalid"));
     assert!(!dir.join("example.yaml").exists());
 }
+
+#[test]
+fn convert_json_markdown_contents_array_to_yaml_block_scalar() {
+    let dir = prepare_workspace();
+    write_file(
+        &dir,
+        "example.json",
+        r#"{
+  "entries": [
+    {
+      "type": "Markdown",
+      "contents": [
+        "First paragraph.",
+        "",
+        "Second paragraph."
+      ]
+    }
+  ]
+}
+"#,
+    );
+
+    let output = run_in_dir(&["convert", "--input-file", "example.json"], &dir);
+
+    assert!(output.status.success());
+    let converted = fs::read_to_string(dir.join("example.yaml")).expect("missing yaml output");
+    assert!(converted.contains("contents: |-"));
+    assert!(converted.contains("First paragraph.\n\n      Second paragraph."));
+
+    let value: serde_json::Value =
+        serde_norway::from_str(&converted).expect("converted output should be valid yaml");
+    assert_eq!(
+        value["entries"][0]["contents"],
+        "First paragraph.\n\nSecond paragraph."
+    );
+}
+
+#[test]
+fn convert_json_command_fields_to_yaml_block_scalars() {
+    let dir = prepare_workspace();
+    write_file(
+        &dir,
+        "example.json",
+        r#"{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "echo first",
+        "echo second"
+      ],
+      "cleanup": [
+        "echo cleanup",
+        "rm -f temp.txt"
+      ]
+    }
+  ]
+}
+"#,
+    );
+
+    let output = run_in_dir(&["convert", "--input-file", "example.json"], &dir);
+
+    assert!(output.status.success());
+    let converted = fs::read_to_string(dir.join("example.yaml")).expect("missing yaml output");
+    assert!(converted.contains("commands: |-"));
+    assert!(converted.contains("echo first\n      echo second"));
+    assert!(converted.contains("cleanup: |-"));
+    assert!(converted.contains("echo cleanup\n      rm -f temp.txt"));
+
+    let value: serde_json::Value =
+        serde_norway::from_str(&converted).expect("converted output should be valid yaml");
+    assert_eq!(value["entries"][0]["commands"], "echo first\necho second");
+    assert_eq!(
+        value["entries"][0]["cleanup"],
+        "echo cleanup\nrm -f temp.txt"
+    );
+}
+
+#[test]
+fn convert_json_prerequisite_fields_to_yaml_block_scalars_and_validate() {
+    let dir = prepare_workspace();
+    write_file(
+        &dir,
+        "example.json",
+        r#"{
+  "entries": [
+    {
+      "type": "Prerequisite",
+      "checks": [
+        {
+          "kind": "command",
+          "name": "Tooling",
+          "contents": [
+            "- Install tooling",
+            "- Confirm setup"
+          ],
+          "commands": [
+            "echo ready",
+            "exit 0"
+          ],
+          "assert": {
+            "exit_code": 0
+          },
+          "help": "Install the required tooling."
+        }
+      ]
+    }
+  ]
+}
+"#,
+    );
+
+    let output = run_in_dir(&["convert", "--input-file", "example.json"], &dir);
+
+    assert!(output.status.success());
+    let converted = fs::read_to_string(dir.join("example.yaml")).expect("missing yaml output");
+    assert!(converted.contains("contents: |-"));
+    assert!(converted.contains("- Install tooling\n          - Confirm setup"));
+    assert!(converted.contains("commands: |-"));
+    assert!(converted.contains("echo ready\n          exit 0"));
+
+    let validate_output = run_in_dir(&["validate", "--input-file", "example.yaml"], &dir);
+    assert!(validate_output.status.success());
+}
+
+#[test]
+fn convert_keeps_non_scalar_capable_string_arrays_as_yaml_sequences() {
+    let dir = prepare_workspace();
+    write_file(
+        &dir,
+        "example.json",
+        r#"{
+  "entries": [
+    {
+      "type": "Patch",
+      "path": "README.md",
+      "patch": [
+        "@@ -1 +1 @@",
+        "-before",
+        "+after"
+      ]
+    }
+  ]
+}
+"#,
+    );
+
+    let output = run_in_dir(&["convert", "--input-file", "example.json"], &dir);
+
+    assert!(output.status.success());
+    let converted = fs::read_to_string(dir.join("example.yaml")).expect("missing yaml output");
+    assert!(converted.contains("patch:\n      - '@@ -1 +1 @@'\n      - -before\n      - +after\n"));
+
+    let value: serde_json::Value =
+        serde_norway::from_str(&converted).expect("converted output should be valid yaml");
+    assert!(value["entries"][0]["patch"].is_array());
+}

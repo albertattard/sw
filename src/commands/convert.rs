@@ -1,5 +1,6 @@
 use crate::cli::{ConvertArgs, ConvertOutputFormat};
 use crate::runbook::{self, RunbookFormat};
+use serde_json::{Map, Value};
 use std::env;
 use std::fs;
 use std::path::{Component, Path, PathBuf};
@@ -59,7 +60,16 @@ pub fn run(args: ConvertArgs) -> ExitCode {
         return ExitCode::from(2);
     }
 
-    let rendered = match runbook::serialize(&document, output_format) {
+    let normalized_document;
+    let render_input =
+        if input_format == RunbookFormat::Json && output_format == RunbookFormat::Yaml {
+            normalized_document = normalize_document_for_yaml_convert(&document);
+            &normalized_document
+        } else {
+            &document
+        };
+
+    let rendered = match runbook::serialize(render_input, output_format) {
         Ok(rendered) => rendered,
         Err(message) => {
             eprintln!("{message}");
@@ -207,4 +217,88 @@ fn normalize_path_for_comparison(path: &Path) -> Result<PathBuf, String> {
             }
             normalized
         }))
+}
+
+fn normalize_document_for_yaml_convert(document: &Value) -> Value {
+    let mut normalized = document.clone();
+    normalize_scalar_capable_fields(&mut normalized);
+    normalized
+}
+
+fn normalize_scalar_capable_fields(value: &mut Value) {
+    match value {
+        Value::Object(map) => normalize_scalar_capable_fields_in_object(map),
+        Value::Array(items) => {
+            for item in items {
+                normalize_scalar_capable_fields(item);
+            }
+        }
+        _ => {}
+    }
+}
+
+fn normalize_scalar_capable_fields_in_object(map: &mut Map<String, Value>) {
+    let entry_type = map
+        .get("type")
+        .and_then(Value::as_str)
+        .map(ToString::to_string);
+
+    if let Some(entry_type) = entry_type.as_deref() {
+        match entry_type {
+            "Markdown" => normalize_string_array_field(map, "contents"),
+            "Command" => {
+                normalize_string_array_field(map, "commands");
+                normalize_string_array_field(map, "cleanup");
+            }
+            "Prerequisite" => {
+                if let Some(Value::Array(checks)) = map.get_mut("checks") {
+                    for check in checks {
+                        normalize_prerequisite_check(check);
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+
+    for (key, child) in map.iter_mut() {
+        if entry_type.as_deref() == Some("Prerequisite") && key == "checks" {
+            continue;
+        }
+        normalize_scalar_capable_fields(child);
+    }
+}
+
+fn normalize_prerequisite_check(value: &mut Value) {
+    let Value::Object(map) = value else {
+        return;
+    };
+
+    normalize_string_array_field(map, "contents");
+    normalize_string_array_field(map, "commands");
+
+    for child in map.values_mut() {
+        normalize_scalar_capable_fields(child);
+    }
+}
+
+fn normalize_string_array_field(map: &mut Map<String, Value>, key: &str) {
+    let Some(value) = map.get_mut(key) else {
+        return;
+    };
+
+    let Value::Array(lines) = value else {
+        return;
+    };
+
+    if lines.is_empty() || !lines.iter().all(|line| line.is_string()) {
+        return;
+    }
+
+    let scalar = lines
+        .iter()
+        .map(|line| line.as_str().unwrap_or_default())
+        .collect::<Vec<_>>()
+        .join("\n");
+    *value = Value::String(scalar);
 }
