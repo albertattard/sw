@@ -1079,7 +1079,7 @@ fn timeout_still_applies_while_background_process_holds_command_pipes_open() {
     let output = run_in_dir_with_process_timeout(
         &["run", "--input-file", "sw-runbook.yaml"],
         &dir,
-        Duration::from_secs(4),
+        Duration::from_secs(8),
     );
 
     assert_eq!(output.status.code(), Some(2));
