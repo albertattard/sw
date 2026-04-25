@@ -30,6 +30,13 @@ fn command_example_defaults_to_valid_yaml_entry() {
             .iter()
             .any(|rule| rule["custom_format"] == "%H:%M:%S%.3f")
     );
+    assert!(
+        value["output"]["rewrite"]
+            .as_array()
+            .expect("rewrite should be an array")
+            .iter()
+            .any(|rule| rule["capture_as"] == "started_at")
+    );
     assert_eq!(value["output"]["trim_trailing_whitespace"], true);
     assert!(value["capture"].is_array());
     assert!(value["cleanup"].is_array());
@@ -71,6 +78,13 @@ fn command_example_prints_valid_json_entry_when_requested() {
             .expect("rewrite should be an array")
             .iter()
             .any(|rule| rule["custom_format"] == "%H:%M:%S%.3f")
+    );
+    assert!(
+        value["output"]["rewrite"]
+            .as_array()
+            .expect("rewrite should be an array")
+            .iter()
+            .any(|rule| rule["capture_as"] == "started_at")
     );
     assert_eq!(value["output"]["trim_trailing_whitespace"], true);
     assert!(value["capture"].is_array());

@@ -99,7 +99,8 @@ const COMMAND_EXAMPLE_JSON: &str = r#"{
       {
         "type": "datetime_shift",
         "format": "rfc3339",
-        "id": "main_timeline"
+        "id": "main_timeline",
+        "capture_as": "started_at"
       },
       {
         "type": "datetime_shift",
@@ -154,6 +155,7 @@ output:
     - type: datetime_shift
       format: rfc3339
       id: main_timeline
+      capture_as: started_at
     - type: datetime_shift
       use: main_timeline
       pattern: '\b\d{2}:\d{2}:\d{2}\.\d{3}\b'

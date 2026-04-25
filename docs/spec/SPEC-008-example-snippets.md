@@ -3,7 +3,7 @@
 - Status: Draft
 - Owner: `@aattard`
 - Created: `2026-03-13`
-- Updated: `2026-04-15`
+- Updated: `2026-04-25`
 
 ## Goal
 
@@ -66,6 +66,9 @@ In this increment, supported entity types include:
   available.
 - The `Command` example should reflect the current troubleshooting contract by
   including `debug` when command-scoped debug diagnostics are supported.
+- The `Command` example should make rewrite value capture discoverable by
+  including `capture_as` on a rewrite rule when rewrite-generated captures are
+  supported.
 - When the `Command` example includes `output.stream`, it should use the
   current default value so users and agents can start from the default
   behavior.
@@ -93,6 +96,9 @@ In this increment, supported entity types include:
       `stream` output field.
 - [ ] Given `sw example Command`, the example includes the implemented
       `debug` field for command-scoped diagnostics.
+- [ ] Given `sw example Command`, the example includes `capture_as` on an
+      output rewrite rule so users and agents can discover
+      `@{<capture_as>_original}` and `@{<capture_as>_rewritten}` variables.
 - [ ] Given `sw example DisplayFile`, the CLI prints a valid YAML example of a
       `DisplayFile` entry.
 - [ ] Given `sw example DisplayFile`, the example includes the implemented

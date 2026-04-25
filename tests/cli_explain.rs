@@ -79,6 +79,15 @@ fn explain_run_prints_concise_contract_summary() {
         "`output.stream` changes rendered output only and does not widen capture or assertion sources."
     ));
     assert!(stdout.contains(
+        "`datetime_shift.id` establishes a shared shift anchor, and `datetime_shift.use` reuses an earlier anchor so later rewrite rules follow the same synthetic timeline."
+    ));
+    assert!(stdout.contains(
+        "Rewrite `capture_as` creates `@{<capture_as>_original}` and `@{<capture_as>_rewritten}` variables so later entries can reuse the matched original and rewritten values."
+    ));
+    assert!(stdout.contains(
+        "Use `datetime_shift.id`/`use` when you need timeline reuse; use rewrite `capture_as` when you need to reuse the rewritten timestamp text."
+    ));
+    assert!(stdout.contains(
         "Markdown may interpolate captured variables with `@{name}` and preserve the literal syntax with `@@{name}`."
     ));
     assert!(stdout.contains(

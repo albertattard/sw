@@ -189,6 +189,7 @@ Expected task directories:
 - [TASK-125: Normalize Scalar-Capable Arrays During JSON To YAML Convert](format/TASK-125-normalize-scalar-capable-arrays-during-json-to-yaml-convert.md)
 - [TASK-126: Surface Command Debug Discovery In Explain And Example](discovery/TASK-126-surface-command-debug-discovery-in-explain-and-example.md)
 - [TASK-127: Support Numeric Captures And Markdown Arithmetic](run/TASK-127-support-numeric-captures-and-markdown-arithmetic.md)
+- [TASK-128: Surface Datetime Rewrite Reuse Discovery](discovery/TASK-128-surface-datetime-rewrite-reuse-discovery.md)
 
 ## Pending
 
@@ -201,6 +202,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-128: Surface Datetime Rewrite Reuse Discovery](discovery/TASK-128-surface-datetime-rewrite-reuse-discovery.md)
 - [x] [TASK-126: Surface Command Debug Discovery In Explain And Example](discovery/TASK-126-surface-command-debug-discovery-in-explain-and-example.md)
 - [x] [TASK-125: Normalize Scalar-Capable Arrays During JSON To YAML Convert](format/TASK-125-normalize-scalar-capable-arrays-during-json-to-yaml-convert.md)
 - [x] [TASK-124: Apply Command Timeout To Full Entry Lifecycle](run/TASK-124-apply-command-timeout-to-full-entry-lifecycle.md)

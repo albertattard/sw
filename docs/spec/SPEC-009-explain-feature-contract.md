@@ -3,7 +3,7 @@
 - Status: Proposed
 - Owner: @aattard
 - Created: 2026-03-13
-- Last updated: 2026-04-23
+- Last updated: 2026-04-25
 
 ## Problem
 
@@ -133,6 +133,13 @@ substitution. For example, run-oriented guidance should tell agents to prefer
 `output.rewrite` with `type: datetime_shift` for real dates and times, and to
 use `replace` only for non-semantic text or unsupported formats.
 
+When a topic covers command output rewrite behavior, the output should make
+shared datetime timelines discoverable by explaining that `datetime_shift.id`
+establishes a reusable shift anchor and `datetime_shift.use` reuses an earlier
+anchor. The explanation should also distinguish timeline reuse from value
+reuse by documenting rewrite `capture_as`, which creates
+`@{<capture_as>_original}` and `@{<capture_as>_rewritten}` variables.
+
 When a topic covers runbook output cleanup behavior, the explanation should
 describe current first-class output fields such as `trim_empty_lines` and make
 their allowed values and intent discoverable without requiring the raw spec.
@@ -189,6 +196,12 @@ When `--output-format=skill` is selected:
 - [ ] Given `sw explain run`, the CLI tells agents to prefer
       `datetime_shift` over `replace` for semantic dates and times, using
       `replace` only for non-semantic text or unsupported formats.
+- [ ] Given `sw explain run`, the CLI documents that `datetime_shift.id`
+      establishes a shared shift anchor and `datetime_shift.use` reuses an
+      earlier anchor.
+- [ ] Given `sw explain run`, the CLI documents rewrite `capture_as` generated
+      variables and makes it clear that this reuses rewritten values rather
+      than a shared timeline.
 - [ ] Given `sw explain run`, the CLI documents `output.trim_empty_lines` and
       its supported values for trimming leading and trailing empty output
       lines.
