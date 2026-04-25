@@ -91,6 +91,12 @@ fn explain_run_prints_concise_contract_summary() {
         "Use `datetime_shift.id`/`use` when you need timeline reuse; use rewrite `capture_as` when you need to reuse the rewritten timestamp text."
     ));
     assert!(stdout.contains(
+        "`Command.capture` rules currently use `source: stdout`; `stage: raw` captures before `output.rewrite`, and `stage: rewritten` captures after `output.rewrite`."
+    ));
+    assert!(stdout.contains(
+        "`Command.capture.pattern` stores the first regex capture group when present, otherwise it stores the full regex match."
+    ));
+    assert!(stdout.contains(
         "Markdown may interpolate captured variables with `@{name}` and preserve the literal syntax with `@@{name}`."
     ));
     assert!(stdout.contains(

@@ -194,6 +194,7 @@ Expected task directories:
 - [TASK-130: Add Runbook Entity Editing Guide](discovery/TASK-130-add-runbook-entity-editing-guide.md)
 - [TASK-131: Accept Scalar Patch Text](run/TASK-131-accept-scalar-patch-text.md)
 - [TASK-132: Support Limit Lines Output Rewrite](rewrite/TASK-132-support-limit-lines-output-rewrite.md)
+- [TASK-133: Surface Command Capture Stage Discovery](discovery/TASK-133-surface-command-capture-stage-discovery.md)
 
 ## Pending
 
@@ -206,6 +207,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-133: Surface Command Capture Stage Discovery](discovery/TASK-133-surface-command-capture-stage-discovery.md)
 - [x] [TASK-132: Support Limit Lines Output Rewrite](rewrite/TASK-132-support-limit-lines-output-rewrite.md)
 - [x] [TASK-131: Accept Scalar Patch Text](run/TASK-131-accept-scalar-patch-text.md)
 - [x] [TASK-130: Add Runbook Entity Editing Guide](discovery/TASK-130-add-runbook-entity-editing-guide.md)

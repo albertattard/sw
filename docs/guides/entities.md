@@ -230,6 +230,29 @@ Use `capture` when later entries need a value from command output:
       pattern: 'image=(.+)'
 ```
 
+`capture.source` is currently limited to `stdout`. Use `stage: raw` to match
+the original stdout before `output.rewrite`, or `stage: rewritten` to match the
+stdout after rewrite rules have been applied. When `pattern` contains a regex
+capture group, `sw` stores the first captured group; otherwise it stores the
+full match.
+
+For example, this captures `109` from `Computed in 109 ms`:
+
+```yaml
+- type: Command
+  commands: |
+    echo 'Computed in 109 ms'
+  capture:
+    - name: elapsed_ms
+      source: stdout
+      stage: raw
+      pattern: 'Computed in (\d+) ms'
+
+- type: Markdown
+  contents: |
+    The command took @{elapsed_ms} ms.
+```
+
 Use `output.rewrite` for stable generated output. For dates and times, prefer
 `datetime_shift` over literal replacement:
 

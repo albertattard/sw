@@ -159,6 +159,13 @@ should describe the `@{name}` interpolation syntax, the `@@{name}` escape
 syntax, and the current boundary that Markdown may interpolate values captured
 earlier or later in the runbook.
 
+When a topic covers command capture behavior, the explanation should document
+the `capture` rule shape enough for agents to author a valid rule without
+guessing enum names. In particular, `run` should explain that `capture.source`
+is currently `stdout`, `capture.stage` is either `raw` or `rewritten`, `raw`
+captures before `output.rewrite`, `rewritten` captures after `output.rewrite`,
+and the first regex capture group is stored when present.
+
 When a topic covers runbook output stream selection, the explanation should
 describe `output.stream`, its supported values, and the boundary between
 rendered output selection versus the narrower existing `capture.source` and
@@ -215,6 +222,12 @@ When `--output-format=skill` is selected:
       `@{name}` and the `@@{name}` escape syntax for captured variables.
 - [ ] Given `sw explain run`, the CLI makes it clear that Markdown entries may
       interpolate values captured earlier or later in the runbook.
+- [ ] Given `sw explain run`, the CLI documents the supported `capture.stage`
+      values `raw` and `rewritten`.
+- [ ] Given `sw explain run`, the CLI documents that `capture.source` is
+      currently limited to `stdout`.
+- [ ] Given `sw explain run`, the CLI documents that capture stores the first
+      regex capture group when present, otherwise the full regex match.
 - [ ] Given `sw explain run`, the CLI documents `output.stream` and its
       supported values `stdout`, `stderr`, and `combined`.
 - [ ] Given `sw explain run`, the CLI documents that omitted `output.stream`

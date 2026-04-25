@@ -325,6 +325,8 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "Command output can be shortened with `output.rewrite` rule `type: limit_lines`, using `first`, `last`, and optional `show_trim_marker`.",
                 "Rewrite `capture_as` creates `@{<capture_as>_original}` and `@{<capture_as>_rewritten}` variables so later entries can reuse the matched original and rewritten values.",
                 "Use `datetime_shift.id`/`use` when you need timeline reuse; use rewrite `capture_as` when you need to reuse the rewritten timestamp text.",
+                "`Command.capture` rules currently use `source: stdout`; `stage: raw` captures before `output.rewrite`, and `stage: rewritten` captures after `output.rewrite`.",
+                "`Command.capture.pattern` stores the first regex capture group when present, otherwise it stores the full regex match.",
                 "Command output can trim outer empty lines with `output.trim_empty_lines` using `leading_trailing`, `leading`, `trailing`, or `none`.",
                 "Markdown may interpolate captured variables with `@{name}` and preserve the literal syntax with `@@{name}`.",
                 "Markdown interpolation may reference values captured earlier or later in the runbook.",
