@@ -23,6 +23,11 @@ pub(crate) struct CleanupBlock {
     pub(crate) working_dir: PathBuf,
 }
 
+pub(crate) struct PatchApplication {
+    pub(crate) stdout: String,
+    pub(crate) stderr: String,
+}
+
 pub(crate) fn patch_target_path(
     entry: &Value,
     runbook_path: &Path,
@@ -45,7 +50,7 @@ pub(crate) fn apply_patch_entry(
     runbook_path: &Path,
     relative_path: &str,
     patch_lines: &[String],
-) -> Result<(), RenderError> {
+) -> Result<PatchApplication, RenderError> {
     let base_dir = runbook_base_dir(runbook_path);
     let patch_text = patch_text_for(relative_path, patch_lines);
     let mut child = Command::new("patch")
@@ -74,12 +79,13 @@ pub(crate) fn apply_patch_entry(
         RenderError::Operational(format!("Failed to wait for patch command: {err}"))
     })?;
 
-    if output.status.success() {
-        return Ok(());
-    }
-
     let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
     let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
+
+    if output.status.success() {
+        return Ok(PatchApplication { stdout, stderr });
+    }
+
     let detail = if !stderr.is_empty() {
         stderr
     } else if !stdout.is_empty() {
@@ -827,14 +833,14 @@ fn parse_timeout(timeout: &str) -> Result<Duration, String> {
     Ok(Duration::from_secs(seconds))
 }
 
-fn runbook_base_dir(runbook_path: &Path) -> &Path {
+pub(crate) fn runbook_base_dir(runbook_path: &Path) -> &Path {
     runbook_path
         .parent()
         .filter(|path| !path.as_os_str().is_empty())
         .unwrap_or_else(|| Path::new("."))
 }
 
-fn patch_text_for(relative_path: &str, patch_lines: &[String]) -> String {
+pub(crate) fn patch_text_for(relative_path: &str, patch_lines: &[String]) -> String {
     let patch_body = patch_lines.join("\n");
     if patch_starts_with_headers(&patch_body) {
         if patch_body.ends_with('\n') {

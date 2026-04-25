@@ -543,6 +543,60 @@ fn patch_entry_applies_during_run_and_restores_after_success() {
 }
 
 #[test]
+fn patch_entry_debug_emits_patch_diagnostics_to_stderr() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Patch
+    debug: true
+    path: ./demo.txt
+    patch: |
+      @@ -1 +1 @@
+      -before
+      +after
+"#,
+    )
+    .expect("failed to write runbook");
+    write_text_file(&dir, "demo.txt", "before\n");
+
+    let output = run_in_dir(&["run", "--input-file", "sw-runbook.yaml"], &dir);
+
+    assert!(output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("[debug] Patch entry:"));
+    assert!(stderr.contains("[debug] Patch target path:"));
+    assert!(stderr.contains("demo.txt"));
+    assert!(stderr.contains("[debug] Patch working directory:"));
+    assert!(stderr.contains("[debug] Normalized patch text:"));
+    assert!(stderr.contains("--- ./demo.txt"));
+    assert!(stderr.contains("+++ ./demo.txt"));
+    assert!(stderr.contains("@@ -1 +1 @@"));
+    assert!(stderr.contains("[debug] Patch command stdout:"));
+    assert!(stderr.contains("[debug] Patch command stderr:"));
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme");
+    assert!(readme.contains("```diff\n@@ -1 +1 @@\n-before\n+after\n```"));
+    assert_eq!(
+        fs::read_to_string(dir.join("demo.txt")).expect("missing restored file"),
+        "before\n"
+    );
+}
+
+#[test]
+fn global_debug_emits_patch_diagnostics_without_patch_debug_field() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-run-patch-success.json", "sw-runbook.json");
+    write_text_file(&dir, "demo.txt", "before\n");
+
+    let output = run_in_dir(&["run", "--debug"], &dir);
+
+    assert!(output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("[debug] Patch entry:"));
+    assert!(stderr.contains("[debug] Normalized patch text:"));
+}
+
+#[test]
 fn scalar_patch_entry_applies_during_run_and_restores_after_success() {
     let dir = prepare_workspace();
     write_runbook(&dir, "sw-runbook-run-patch-scalar.yaml", "sw-runbook.yaml");

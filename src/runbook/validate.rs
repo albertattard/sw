@@ -1102,6 +1102,7 @@ fn validate_entry(
                     && key != "path"
                     && key != "patch"
                     && key != "indent"
+                    && key != "debug"
                     && key != "restore"
                 {
                     push_error(
@@ -1134,6 +1135,16 @@ fn validate_entry(
                         "must be a non-negative integer",
                     ),
                 }
+            }
+
+            if let Some(debug) = object.get("debug")
+                && !debug.is_boolean()
+            {
+                push_error(
+                    &mut context.errors,
+                    format!("{path}.debug"),
+                    "must be a boolean",
+                );
             }
 
             if let Some(restore) = object.get("restore").and_then(Value::as_str) {

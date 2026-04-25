@@ -1,8 +1,8 @@
 use super::RenderError;
 use super::execute::{
     CleanupBlock, CommandExecution, apply_patch_entry, cleanup_block, ensure_assertions,
-    execute_command, format_command_failure, patch_target_path, run_cleanup_blocks,
-    run_patch_restores, snapshot_patch_target, timeout_label,
+    execute_command, format_command_failure, patch_target_path, patch_text_for, run_cleanup_blocks,
+    run_patch_restores, runbook_base_dir, snapshot_patch_target, timeout_label,
 };
 use crate::cli::VerboseMode;
 use chrono::Timelike;
@@ -33,7 +33,7 @@ const CAPTURE_INTERPOLATION_PATTERN: &str =
 struct RenderState {
     datetime_anchors: HashMap<String, DatetimeShiftAnchor>,
     captured_values: HashMap<String, String>,
-    debug_all_commands: bool,
+    debug_all_entries: bool,
 }
 
 struct RewriteCapturePair {
@@ -107,7 +107,7 @@ pub(crate) fn render_markdown(
     let mut state = RenderState {
         datetime_anchors: HashMap::new(),
         captured_values: HashMap::new(),
-        debug_all_commands: debug,
+        debug_all_entries: debug,
     };
     let mut progress = ProgressReporter::new(entries.len(), verbose, verbose_mode);
 
@@ -132,6 +132,7 @@ pub(crate) fn render_markdown(
                 runbook_path,
                 &mut patch_restore_stack,
                 &mut patch_snapshots,
+                state.debug_all_entries,
             ) {
                 Ok(section) => RenderSection::Ready(section),
                 Err(err) => {
@@ -1244,6 +1245,7 @@ fn render_patch(
     runbook_path: &Path,
     patch_restore_stack: &mut Vec<std::path::PathBuf>,
     patch_snapshots: &mut HashMap<std::path::PathBuf, Vec<u8>>,
+    debug_all_entries: bool,
 ) -> Result<String, RenderError> {
     let lines = entry
         .get("patch")
@@ -1258,11 +1260,37 @@ fn render_patch(
         .ok_or_else(|| RenderError::Operational("Patch entry is missing patch".to_string()))?;
 
     let (target_path, relative_path) = patch_target_path(entry, runbook_path)?;
+    let debug_enabled = entry_debug_enabled(entry, debug_all_entries);
+    let mut debug_lines = Vec::new();
+    if debug_enabled {
+        debug_lines.push("[debug] Patch entry:".to_string());
+        debug_lines.push(format_entry_for_debug(entry));
+        debug_lines.push(format!(
+            "[debug] Patch target path: {}",
+            target_path.display()
+        ));
+        debug_lines.push(format!(
+            "[debug] Patch working directory: {}",
+            runbook_base_dir(runbook_path).display()
+        ));
+        debug_lines.push("[debug] Normalized patch text:".to_string());
+        debug_lines.push(patch_text_for(&relative_path, &lines));
+        emit_debug_lines(true, &debug_lines);
+        debug_lines.clear();
+    }
+
     patch_snapshots
         .entry(target_path.clone())
         .or_insert(snapshot_patch_target(&target_path)?);
     patch_restore_stack.push(target_path);
-    apply_patch_entry(runbook_path, &relative_path, &lines)?;
+    let application = apply_patch_entry(runbook_path, &relative_path, &lines)?;
+    if debug_enabled {
+        debug_lines.push("[debug] Patch command stdout:".to_string());
+        debug_lines.push(format_command_stream_for_debug(&application.stdout));
+        debug_lines.push("[debug] Patch command stderr:".to_string());
+        debug_lines.push(format_command_stream_for_debug(&application.stderr));
+        emit_debug_lines(true, &debug_lines);
+    }
 
     let mut section = String::from("```diff\n");
     section.push_str(&lines.join("\n"));
@@ -1293,11 +1321,11 @@ fn render_command(
     let rendered_command_text = render_command_text(entry, &command_text)?;
     let mut section = format!("```shell\n{rendered_command_text}\n```");
     let execution = execute_command(entry, &command_text, runbook_path, timeout_cleanup)?;
-    let debug_enabled = command_debug_enabled(entry, state.debug_all_commands);
+    let debug_enabled = entry_debug_enabled(entry, state.debug_all_entries);
     let mut debug_lines = Vec::new();
     if debug_enabled {
         debug_lines.push("[debug] Command entry:".to_string());
-        debug_lines.push(format_command_entry_for_debug(entry));
+        debug_lines.push(format_entry_for_debug(entry));
         debug_lines.push("[debug] Raw stdout:".to_string());
         debug_lines.push(format_command_stream_for_debug(&execution.stdout));
         debug_lines.push("[debug] Raw stderr:".to_string());
@@ -1401,8 +1429,8 @@ fn shell_single_quote(value: &str) -> String {
     format!("'{}'", value.replace('\'', r#"'"'"'"#))
 }
 
-fn command_debug_enabled(entry: &Value, debug_all_commands: bool) -> bool {
-    if debug_all_commands {
+fn entry_debug_enabled(entry: &Value, debug_all_entries: bool) -> bool {
+    if debug_all_entries {
         return true;
     }
 
@@ -1765,9 +1793,9 @@ fn output_fence_open(output: &Value) -> Result<&'static str, RenderError> {
     }
 }
 
-fn format_command_entry_for_debug(entry: &Value) -> String {
+fn format_entry_for_debug(entry: &Value) -> String {
     serde_json::to_string_pretty(entry)
-        .unwrap_or_else(|_| "<failed to serialize command entry>".to_string())
+        .unwrap_or_else(|_| "<failed to serialize runbook entry>".to_string())
 }
 
 fn format_command_stream_for_debug(stream: &str) -> String {

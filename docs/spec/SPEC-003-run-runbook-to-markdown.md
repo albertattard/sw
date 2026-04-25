@@ -172,15 +172,15 @@ in the runbook.
 - Debug output may be used together with `--verbose`.
 - When both flags are enabled, both progress and debug diagnostics are written
   to stderr.
-- `Command` entries may declare `debug`.
-- `Command.debug` is a boolean.
-- If `Command.debug` is omitted, it defaults to `false`.
-- When global `--debug` is enabled, all `Command` entries emit debug
-  diagnostics regardless of `Command.debug`.
-- When global `--debug` is not enabled, only `Command` entries with
-  `debug: true` emit debug diagnostics.
-- `Command.debug` applies only to the command entry where it is declared and
-  does not enable diagnostics for other entries.
+- `Command` and `Patch` entries may declare `debug`.
+- `Command.debug` and `Patch.debug` are booleans.
+- If an entry-level `debug` field is omitted, it defaults to `false`.
+- When global `--debug` is enabled, all supported debuggable entries emit
+  debug diagnostics regardless of their entry-level `debug` value.
+- When global `--debug` is not enabled, only entries with `debug: true` emit
+  debug diagnostics.
+- Entry-level `debug` applies only to the entry where it is declared and does
+  not enable diagnostics for other entries.
 - Debug output is intended to help humans and agents troubleshoot runbook
   authoring issues such as rewrite matching, generated captures, and command
   output interpolation.
@@ -193,6 +193,9 @@ in the runbook.
   - generated `capture_as` values
 - Debug output should identify which command entry and which rewrite or capture
   rule produced the diagnostic information.
+- For `Patch` entries, debug output may include the entry, resolved target
+  path, patch working directory, normalized patch text, and patch command
+  stdout or stderr.
 - Debug output is for troubleshooting and does not need to be a stable
   machine-readable contract.
 
@@ -340,6 +343,10 @@ in the runbook.
 - A `Patch` entry may declare `indent`.
 - If `indent` is present, the rendered patch section is prefixed with that
   number of leading spaces on each rendered line.
+- A `Patch` entry may declare `debug`.
+- If `debug: true` is present, that patch entry emits patch diagnostics to
+  stderr without requiring global `--debug`.
+- Global `sw run --debug` emits diagnostics for all `Patch` entries.
 - `Patch` entries are executed in order with other runbook entries.
 - `Patch` entries default to `restore: auto`.
 - `restore: auto` snapshots the original target file contents before the first
@@ -765,6 +772,10 @@ in the runbook.
       debug diagnostics unless global `--debug` is enabled.
 - [ ] Given global `--debug`, all command entries emit debug diagnostics
       regardless of command-level `debug`.
+- [ ] Given a `Patch` entry with `debug: true`, that entry emits patch
+      diagnostics without requiring global `--debug`.
+- [ ] Given global `--debug`, all patch entries emit debug diagnostics
+      regardless of patch-level `debug`.
 - [ ] Given `sw run --verbose`, entry numbers are padded so summaries align to
       the same starting column.
 - [ ] Given `sw run --verbose`, elapsed time is shown as seconds with one
@@ -890,6 +901,8 @@ in the runbook.
       without waiting for interactive input from the patch tool.
 - [ ] Given a `Patch` entry that cannot be applied cleanly, the target file
       remains unchanged and no `.orig` or `.rej` sidecar files are left
+- [ ] Given a `Patch` entry with `debug: true`, stderr includes the normalized
+      patch text and resolved target path.
 
 ### Command Entries
 

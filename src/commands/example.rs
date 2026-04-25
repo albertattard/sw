@@ -212,6 +212,7 @@ transform:
 
 const PATCH_EXAMPLE_JSON: &str = r#"{
   "type": "Patch",
+  "debug": true,
   "path": "./src/main/java/demo/Main.java",
   "patch": [
     "@@ -10,3 +10,3 @@",
@@ -222,6 +223,7 @@ const PATCH_EXAMPLE_JSON: &str = r#"{
 }"#;
 
 const PATCH_EXAMPLE_YAML: &str = r#"type: Patch
+debug: true
 path: ./src/main/java/demo/Main.java
 patch: |
   @@ -10,3 +10,3 @@

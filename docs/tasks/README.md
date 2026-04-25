@@ -195,6 +195,7 @@ Expected task directories:
 - [TASK-131: Accept Scalar Patch Text](run/TASK-131-accept-scalar-patch-text.md)
 - [TASK-132: Support Limit Lines Output Rewrite](rewrite/TASK-132-support-limit-lines-output-rewrite.md)
 - [TASK-133: Surface Command Capture Stage Discovery](discovery/TASK-133-surface-command-capture-stage-discovery.md)
+- [TASK-134: Support Patch Debug Diagnostics](run/TASK-134-support-patch-debug-diagnostics.md)
 
 ## Pending
 
@@ -207,6 +208,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-134: Support Patch Debug Diagnostics](run/TASK-134-support-patch-debug-diagnostics.md)
 - [x] [TASK-133: Surface Command Capture Stage Discovery](discovery/TASK-133-surface-command-capture-stage-discovery.md)
 - [x] [TASK-132: Support Limit Lines Output Rewrite](rewrite/TASK-132-support-limit-lines-output-rewrite.md)
 - [x] [TASK-131: Accept Scalar Patch Text](run/TASK-131-accept-scalar-patch-text.md)

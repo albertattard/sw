@@ -424,6 +424,41 @@ fn invalid_command_debug_returns_validation_failure() {
 }
 
 #[test]
+fn invalid_patch_debug_returns_validation_failure() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Patch
+    debug: "yes"
+    path: ./demo.txt
+    patch: |
+      @@ -1 +1 @@
+      -before
+      +after
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(
+        &[
+            "validate",
+            "--input-file",
+            "sw-runbook.yaml",
+            "--output-format",
+            "json",
+        ],
+        &dir,
+    );
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": false"));
+    assert!(stdout.contains("\"path\": \"entries[0].debug\""));
+    assert!(stdout.contains("must be a boolean"));
+}
+
+#[test]
 fn invalid_assert_checks_shape_returns_validation_failure() {
     let output = run(&[
         "validate",
@@ -546,6 +581,39 @@ fn valid_patch_returns_success() {
         "--output-format",
         "json",
     ]);
+
+    assert_eq!(output.status.code(), Some(0));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": true"));
+}
+
+#[test]
+fn valid_patch_debug_returns_success() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Patch
+    debug: true
+    path: ./demo.txt
+    patch: |
+      @@ -1 +1 @@
+      -before
+      +after
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(
+        &[
+            "validate",
+            "--input-file",
+            "sw-runbook.yaml",
+            "--output-format",
+            "json",
+        ],
+        &dir,
+    );
 
     assert_eq!(output.status.code(), Some(0));
     let stdout = String::from_utf8_lossy(&output.stdout);

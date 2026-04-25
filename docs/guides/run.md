@@ -91,7 +91,8 @@ Useful `Command` fields include:
 - `output`: control rendered output, captions, streams, content type, trimming,
   and rewrite rules.
 - `capture`: store command output for later interpolation.
-- `debug`: enable diagnostics for a single command entry.
+- `debug`: enable diagnostics for a single supported entry, such as `Command`
+  or `Patch`.
 
 ## Notes
 

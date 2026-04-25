@@ -272,14 +272,27 @@ Use `output.rewrite` for stable generated output. For dates and times, prefer
 `capture_as` creates `@{model_timestamp_original}` and
 `@{model_timestamp_rewritten}` for later entries.
 
-Use `debug: true` when a single command entry needs rewrite and capture
-diagnostics:
+Use `debug: true` when a single supported entry needs diagnostics. For
+`Command`, debug helps troubleshoot command output, rewrites, and captures:
 
 ```yaml
 - type: Command
   debug: true
   commands: |
     echo "hello"
+```
+
+For `Patch`, debug helps troubleshoot patch path resolution and patch
+application:
+
+```yaml
+- type: Patch
+  debug: true
+  path: ./src/main/java/demo/Main.java
+  patch: |
+    @@ -10,3 +10,3 @@
+    -        return oldValue;
+    +        return newValue;
 ```
 
 ## Editing Workflow

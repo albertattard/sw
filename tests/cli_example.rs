@@ -134,6 +134,7 @@ fn patch_example_prints_valid_yaml_entry() {
     let value: serde_json::Value =
         serde_norway::from_str(&stdout).expect("example output should be valid yaml");
     assert_eq!(value["type"], "Patch");
+    assert_eq!(value["debug"], true);
     assert_eq!(value["path"], "./src/main/java/demo/Main.java");
     assert!(stdout.contains("patch: |\n"));
     assert_eq!(
@@ -152,6 +153,7 @@ fn patch_example_prints_valid_json_entry_when_requested() {
     let value: serde_json::Value =
         serde_json::from_str(&stdout).expect("example output should be valid json");
     assert_eq!(value["type"], "Patch");
+    assert_eq!(value["debug"], true);
     assert_eq!(value["path"], "./src/main/java/demo/Main.java");
     assert!(value["patch"].is_array());
     assert_eq!(value["patch"][0], "@@ -10,3 +10,3 @@");

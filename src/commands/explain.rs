@@ -311,7 +311,7 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "`Markdown.contents`, `Command.commands`, `Patch.patch`, `Prerequisite.checks[*].contents`, and `Prerequisite.checks[*].commands` may be a single string or an array of strings.",
                 "When those fields are provided as a string, `sw run` splits them on newline boundaries before rendering or execution and does not turn a terminal line break into an extra blank line.",
                 "`Command.cleanup` supports manual teardown as either a string or an array, and explicit `cleanup` replaces automatic process cleanup for that command entry.",
-                "`Command.debug` enables diagnostics for one command entry, while global `--debug` enables diagnostics for all command entries.",
+                "`Command.debug` and `Patch.debug` enable diagnostics for one entry, while global `--debug` enables diagnostics for all supported debuggable entries.",
                 "A command entry remains active until the command shell has exited and the captured stdout and stderr streams have both closed, so background processes that inherit those pipes can keep the entry open until they exit or the timeout is reached.",
                 "Entries execute in runbook order.",
                 "Command execution and rendering are part of the same workflow.",

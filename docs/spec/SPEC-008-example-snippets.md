@@ -85,6 +85,8 @@ In this increment, supported entity types include:
   only checks the Java major version.
 - The `Patch` YAML example should use a block scalar for `patch` when scalar
   patch text is supported.
+- The `Patch` example should reflect the current troubleshooting contract by
+  including `debug` when patch-scoped debug diagnostics are supported.
 - Example output is documentation-oriented and does not need to be executable
   without further user editing.
 
@@ -111,6 +113,8 @@ In this increment, supported entity types include:
       `Patch` entry that reflects the current automatic-restore contract.
 - [ ] Given `sw example Patch`, the YAML example uses `patch: |` for the patch
       text.
+- [ ] Given `sw example Patch`, the example includes the implemented `debug`
+      field for patch-scoped diagnostics.
 - [ ] Given `sw example Prerequisite`, the CLI prints a valid YAML example of a
       `Prerequisite` entry.
 - [ ] Given `sw example Prerequisite`, the example uses the built-in
