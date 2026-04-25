@@ -115,6 +115,11 @@ const COMMAND_EXAMPLE_JSON: &str = r#"{
         "start_offset": 1,
         "end_offset": -1,
         "show_trim_markers": true
+      },
+      {
+        "type": "limit_lines",
+        "first": 12,
+        "show_trim_marker": true
       }
     ]
   },
@@ -166,6 +171,9 @@ output:
       start_offset: 1
       end_offset: -1
       show_trim_markers: true
+    - type: limit_lines
+      first: 12
+      show_trim_marker: true
 capture:
   - name: generated_value
     source: stdout

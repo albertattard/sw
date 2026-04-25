@@ -2152,6 +2152,89 @@ fn output_rewrite_keep_between_can_keep_from_start_to_end_without_trim_markers()
 }
 
 #[test]
+fn output_rewrite_limit_lines_supports_line_limits_and_markers() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Command
+    commands: |
+      printf '%s\n' 'line 1' 'line 2' 'line 3' 'line 4' 'line 5'
+    output:
+      caption: First lines
+      rewrite:
+        - type: limit_lines
+          first: 2
+
+  - type: Command
+    commands: |
+      printf '%s\n' 'line 1' 'line 2' 'line 3' 'line 4' 'line 5'
+    output:
+      caption: Last lines
+      rewrite:
+        - type: limit_lines
+          last: 2
+
+  - type: Command
+    commands: |
+      printf '%s\n' 'line 1' 'line 2' 'line 3' 'line 4' 'line 5' 'line 6'
+    output:
+      caption: First and last lines
+      rewrite:
+        - type: limit_lines
+          first: 2
+          last: 2
+
+  - type: Command
+    commands: |
+      printf '%s\n' 'line 1' 'line 2' 'line 3' 'line 4' 'line 5' 'line 6'
+    output:
+      caption: Overlapping limits
+      rewrite:
+        - type: limit_lines
+          first: 4
+          last: 4
+
+  - type: Command
+    commands: |
+      printf '%s\n' 'line 1' 'line 2' 'line 3' 'line 4' 'line 5' 'line 6'
+    output:
+      caption: Hidden trim marker
+      rewrite:
+        - type: limit_lines
+          first: 2
+          last: 2
+          show_trim_marker: false
+
+  - type: Command
+    commands: |
+      printf '%s\n' 'line 1' 'line 2' 'line 3'
+    output:
+      caption: No omitted lines
+      rewrite:
+        - type: limit_lines
+          first: 10
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("First lines\n\n```\nline 1\nline 2\n...\n```"));
+    assert!(readme.contains("Last lines\n\n```\n...\nline 4\nline 5\n```"));
+    assert!(
+        readme.contains("First and last lines\n\n```\nline 1\nline 2\n...\nline 5\nline 6\n```")
+    );
+    assert!(readme.contains(
+        "Overlapping limits\n\n```\nline 1\nline 2\nline 3\nline 4\nline 5\nline 6\n```"
+    ));
+    assert!(readme.contains("Hidden trim marker\n\n```\nline 1\nline 2\nline 5\nline 6\n```"));
+    assert!(readme.contains("No omitted lines\n\n```\nline 1\nline 2\nline 3\n```"));
+}
+
+#[test]
 fn command_capture_rewritten_stage_uses_rewritten_stdout() {
     let dir = prepare_workspace();
     write_runbook(

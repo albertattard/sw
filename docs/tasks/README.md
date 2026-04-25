@@ -197,7 +197,6 @@ Expected task directories:
 
 ## Pending
 
-- [ ] [TASK-132: Support Limit Lines Output Rewrite](rewrite/TASK-132-support-limit-lines-output-rewrite.md)
 - [ ] [TASK-127: Support Numeric Captures And Markdown Arithmetic](run/TASK-127-support-numeric-captures-and-markdown-arithmetic.md)
 - [ ] [TASK-121: Support Command Preconditions And Port Checks](run/TASK-121-support-command-preconditions-and-port-checks.md)
 
@@ -207,6 +206,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-132: Support Limit Lines Output Rewrite](rewrite/TASK-132-support-limit-lines-output-rewrite.md)
 - [x] [TASK-131: Accept Scalar Patch Text](run/TASK-131-accept-scalar-patch-text.md)
 - [x] [TASK-130: Add Runbook Entity Editing Guide](discovery/TASK-130-add-runbook-entity-editing-guide.md)
 - [x] [TASK-129: Add Human Guide Documentation Structure](discovery/TASK-129-add-human-guide-documentation-structure.md)

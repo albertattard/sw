@@ -874,6 +874,167 @@ fn valid_output_rewrite_keep_between_start_only_returns_success() {
 }
 
 #[test]
+fn valid_output_rewrite_limit_lines_returns_success() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Command
+    commands: |
+      printf '%s\n' 'line 1' 'line 2' 'line 3'
+    output:
+      rewrite:
+        - type: limit_lines
+          first: 2
+          last: 1
+          show_trim_marker: true
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(
+        &[
+            "validate",
+            "--input-file",
+            "sw-runbook.yaml",
+            "--output-format",
+            "json",
+        ],
+        &dir,
+    );
+
+    assert_eq!(output.status.code(), Some(0));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": true"));
+}
+
+#[test]
+fn invalid_output_rewrite_limit_lines_without_first_or_last_returns_validation_failure() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Command
+    commands: echo invalid
+    output:
+      rewrite:
+        - type: limit_lines
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(
+        &[
+            "validate",
+            "--input-file",
+            "sw-runbook.yaml",
+            "--output-format",
+            "json",
+        ],
+        &dir,
+    );
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": false"));
+    assert!(stdout.contains("\"path\": \"entries[0].output.rewrite[0]\""));
+    assert!(stdout.contains("must include at least one of `first` or `last`"));
+}
+
+#[test]
+fn invalid_output_rewrite_limit_lines_counts_return_validation_failure() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Command
+    commands: echo invalid
+    output:
+      rewrite:
+        - type: limit_lines
+          first: 0
+
+  - type: Command
+    commands: echo invalid
+    output:
+      rewrite:
+        - type: limit_lines
+          last: -1
+
+  - type: Command
+    commands: echo invalid
+    output:
+      rewrite:
+        - type: limit_lines
+          first: 1.5
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(
+        &[
+            "validate",
+            "--input-file",
+            "sw-runbook.yaml",
+            "--output-format",
+            "json",
+        ],
+        &dir,
+    );
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": false"));
+    assert!(stdout.contains("\"path\": \"entries[0].output.rewrite[0].first\""));
+    assert!(stdout.contains("\"path\": \"entries[1].output.rewrite[0].last\""));
+    assert!(stdout.contains("\"path\": \"entries[2].output.rewrite[0].first\""));
+    assert!(stdout.contains("must be an integer greater than 0"));
+}
+
+#[test]
+fn invalid_output_rewrite_limit_lines_properties_return_validation_failure() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Command
+    commands: echo invalid
+    output:
+      rewrite:
+        - type: limit_lines
+          first: 1
+          show_trim_marker: "true"
+
+  - type: Command
+    commands: echo invalid
+    output:
+      rewrite:
+        - type: limit_lines
+          first: 1
+          unknown: value
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(
+        &[
+            "validate",
+            "--input-file",
+            "sw-runbook.yaml",
+            "--output-format",
+            "json",
+        ],
+        &dir,
+    );
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": false"));
+    assert!(stdout.contains("\"path\": \"entries[0].output.rewrite[0].show_trim_marker\""));
+    assert!(stdout.contains("\"path\": \"entries[1].output.rewrite[0].unknown\""));
+}
+
+#[test]
 fn invalid_display_file_returns_validation_failure() {
     let output = run(&[
         "validate",

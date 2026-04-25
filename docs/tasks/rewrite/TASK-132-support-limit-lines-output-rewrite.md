@@ -1,7 +1,7 @@
 ---
 id: TASK-132
 title: Support Limit Lines Output Rewrite
-status: pending
+status: done
 category: rewrite
 related_features:
   - SPEC-003
@@ -43,26 +43,26 @@ leading and/or trailing lines.
 
 ## Acceptance Criteria
 
-- [ ] Given `limit_lines` with `first`, only the first N lines are kept and a
+- [x] Given `limit_lines` with `first`, only the first N lines are kept and a
       trailing trim marker is added when lines were removed.
-- [ ] Given `limit_lines` with `last`, only the last N lines are kept and a
+- [x] Given `limit_lines` with `last`, only the last N lines are kept and a
       leading trim marker is added when lines were removed.
-- [ ] Given `limit_lines` with both `first` and `last`, the first N and last M
+- [x] Given `limit_lines` with both `first` and `last`, the first N and last M
       lines are kept with a single middle trim marker when lines were removed.
-- [ ] Given `limit_lines` with both `first` and `last` where the kept ranges
+- [x] Given `limit_lines` with both `first` and `last` where the kept ranges
       overlap, lines are not duplicated.
-- [ ] Given `limit_lines` where the configured limits do not remove any lines,
+- [x] Given `limit_lines` where the configured limits do not remove any lines,
       the output is unchanged and no marker is added.
-- [ ] Given `limit_lines` with `show_trim_marker: false`, omitted lines do not
+- [x] Given `limit_lines` with `show_trim_marker: false`, omitted lines do not
       render a marker.
-- [ ] Given `limit_lines` without `first` or `last`, validation rejects the
+- [x] Given `limit_lines` without `first` or `last`, validation rejects the
       runbook.
-- [ ] Given `limit_lines` with non-positive or non-integer `first` or `last`,
+- [x] Given `limit_lines` with non-positive or non-integer `first` or `last`,
       validation rejects the runbook.
-- [ ] Given `limit_lines` with non-boolean `show_trim_marker`, validation
+- [x] Given `limit_lines` with non-boolean `show_trim_marker`, validation
       rejects the runbook.
-- [ ] `sw example Command` includes a `limit_lines` rewrite example.
-- [ ] `sw explain run` documents the `limit_lines` rewrite rule.
+- [x] `sw example Command` includes a `limit_lines` rewrite example.
+- [x] `sw explain run` documents the `limit_lines` rewrite rule.
 
 ## Notes
 

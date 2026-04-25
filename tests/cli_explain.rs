@@ -82,6 +82,9 @@ fn explain_run_prints_concise_contract_summary() {
         "`datetime_shift.id` establishes a shared shift anchor, and `datetime_shift.use` reuses an earlier anchor so later rewrite rules follow the same synthetic timeline."
     ));
     assert!(stdout.contains(
+        "Command output can be shortened with `output.rewrite` rule `type: limit_lines`, using `first`, `last`, and optional `show_trim_marker`."
+    ));
+    assert!(stdout.contains(
         "Rewrite `capture_as` creates `@{<capture_as>_original}` and `@{<capture_as>_rewritten}` variables so later entries can reuse the matched original and rewritten values."
     ));
     assert!(stdout.contains(

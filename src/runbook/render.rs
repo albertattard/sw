@@ -2111,6 +2111,7 @@ fn apply_rewrite_rule(
     match rule_type {
         "replace" => apply_replace_rule(entry, execution, rule, rendered, captured_values),
         "keep_between" => apply_keep_between_rule(rule, rendered),
+        "limit_lines" => apply_limit_lines_rule(rule, rendered),
         "datetime_shift" => {
             apply_datetime_shift_rule(entry, execution, rule, rendered, datetime_anchors)
         }
@@ -2268,6 +2269,122 @@ fn apply_datetime_shift_rule(
             format!("[debug] Rewrite datetime_shift match count: {match_count}"),
         ],
     })
+}
+
+fn apply_limit_lines_rule(rule: &Value, rendered: &str) -> Result<RewriteRuleResult, RenderError> {
+    let first = parse_limit_lines_count(rule.get("first"), "first")?;
+    let last = parse_limit_lines_count(rule.get("last"), "last")?;
+    let show_trim_marker = parse_limit_lines_show_trim_marker(rule.get("show_trim_marker"))?;
+
+    if first.is_none() && last.is_none() {
+        return Err(RenderError::Operational(
+            "Command output limit_lines must include at least one of first or last".to_string(),
+        ));
+    }
+
+    let mut lines: Vec<&str> = rendered.split('\n').collect();
+    if rendered.ends_with('\n') {
+        lines.pop();
+    }
+
+    let first_count = first.unwrap_or(0);
+    let last_count = last.unwrap_or(0);
+    if first_count.saturating_add(last_count) >= lines.len()
+        || first_count >= lines.len()
+        || last_count >= lines.len()
+    {
+        return Ok(RewriteRuleResult {
+            rendered: rendered.to_string(),
+            generated_capture: None,
+            debug_lines: vec![
+                format!(
+                    "[debug] Rewrite limit_lines first: {}",
+                    format_optional_count(first)
+                ),
+                format!(
+                    "[debug] Rewrite limit_lines last: {}",
+                    format_optional_count(last)
+                ),
+                "[debug] Rewrite limit_lines omitted lines: 0".to_string(),
+            ],
+        });
+    }
+
+    let omitted_lines = lines.len() - first_count - last_count;
+    let mut kept_lines: Vec<String> = Vec::new();
+    kept_lines.extend(
+        lines
+            .iter()
+            .take(first_count)
+            .map(|line| (*line).to_string()),
+    );
+    if show_trim_marker {
+        kept_lines.push("...".to_string());
+    }
+    if last_count > 0 {
+        kept_lines.extend(
+            lines
+                .iter()
+                .skip(lines.len() - last_count)
+                .map(|line| (*line).to_string()),
+        );
+    }
+
+    Ok(RewriteRuleResult {
+        rendered: kept_lines.join("\n"),
+        generated_capture: None,
+        debug_lines: vec![
+            format!(
+                "[debug] Rewrite limit_lines first: {}",
+                format_optional_count(first)
+            ),
+            format!(
+                "[debug] Rewrite limit_lines last: {}",
+                format_optional_count(last)
+            ),
+            format!("[debug] Rewrite limit_lines omitted lines: {omitted_lines}"),
+        ],
+    })
+}
+
+fn parse_limit_lines_count(value: Option<&Value>, key: &str) -> Result<Option<usize>, RenderError> {
+    match value {
+        None => Ok(None),
+        Some(value) => {
+            let count = value.as_u64().ok_or_else(|| {
+                RenderError::Operational(format!(
+                    "Command output limit_lines {key} must be an integer greater than 0"
+                ))
+            })?;
+            if count == 0 {
+                return Err(RenderError::Operational(format!(
+                    "Command output limit_lines {key} must be an integer greater than 0"
+                )));
+            }
+            usize::try_from(count).map(Some).map_err(|_| {
+                RenderError::Operational(format!(
+                    "Command output limit_lines {key} is too large for this platform"
+                ))
+            })
+        }
+    }
+}
+
+fn parse_limit_lines_show_trim_marker(value: Option<&Value>) -> Result<bool, RenderError> {
+    match value {
+        None => Ok(true),
+        Some(value) => value.as_bool().ok_or_else(|| {
+            RenderError::Operational(
+                "Command output limit_lines show_trim_marker must be a boolean".to_string(),
+            )
+        }),
+    }
+}
+
+fn format_optional_count(value: Option<usize>) -> String {
+    value
+        .map(|count| count.to_string())
+        .unwrap_or_else(|| "(none)".to_string())
 }
 
 fn apply_keep_between_rule(rule: &Value, rendered: &str) -> Result<RewriteRuleResult, RenderError> {

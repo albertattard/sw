@@ -588,6 +588,40 @@ fn validate_rewrite_rule(
                 );
             }
         }
+        "limit_lines" => {
+            for key in object.keys() {
+                if key != "type" && key != "first" && key != "last" && key != "show_trim_marker" {
+                    push_error(
+                        errors,
+                        format!("{path}.{key}"),
+                        "is not a supported limit_lines rewrite property",
+                    );
+                }
+            }
+
+            let has_first = object.get("first").is_some();
+            let has_last = object.get("last").is_some();
+            if !has_first && !has_last {
+                push_error(
+                    errors,
+                    path.to_string(),
+                    "must include at least one of `first` or `last`",
+                );
+            }
+
+            validate_positive_integer(object, "first", path, errors);
+            validate_positive_integer(object, "last", path, errors);
+
+            if let Some(show_trim_marker) = object.get("show_trim_marker")
+                && !show_trim_marker.is_boolean()
+            {
+                push_error(
+                    errors,
+                    format!("{path}.show_trim_marker"),
+                    "must be a boolean",
+                );
+            }
+        }
         "datetime_shift" => {
             for key in object.keys() {
                 if key != "type"
@@ -726,7 +760,7 @@ fn validate_rewrite_rule(
         _ => push_error(
             errors,
             format!("{path}.type"),
-            "must be `replace`, `datetime_shift`, or `keep_between`",
+            "must be `replace`, `datetime_shift`, `keep_between`, or `limit_lines`",
         ),
     }
 }
