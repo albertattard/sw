@@ -11,9 +11,15 @@ source of truth for the command contract. For exact command-line syntax, use
 
 - [Quick workflow](#quick-workflow)
 - [Run a runbook](./run.md)
+- [Edit runbook entities](./entities.md)
 - [Validate a runbook](./validate.md)
 - [Create a starter runbook](./init.md)
 - [Import an existing README](./import.md)
+
+## Editing Guides
+
+- [Runbook entities](./entities.md): choose and edit `Heading`, `Markdown`,
+  `DisplayFile`, `Prerequisite`, `Patch`, and `Command` entries.
 
 ## Subcommand Guides
 
