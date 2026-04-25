@@ -1366,7 +1366,13 @@ fn render_command(
 
     if execution.timed_out {
         emit_debug_lines(debug_enabled, &debug_lines);
-        append_output(entry, &rendered_output, &mut section)?;
+        append_output(
+            entry,
+            &rendered_output,
+            &mut section,
+            &state.captured_values,
+            MissingCaptureBehavior::Preserve,
+        )?;
         return Err(RenderError::Timeout {
             message: combine_messages(
                 &format!("Command timed out after {}", timeout_label(entry)),
@@ -1401,7 +1407,13 @@ fn render_command(
         }
     }
     emit_debug_lines(debug_enabled, &debug_lines);
-    append_output(entry, &rendered_output, &mut section)?;
+    append_output(
+        entry,
+        &rendered_output,
+        &mut section,
+        &state.captured_values,
+        MissingCaptureBehavior::Error,
+    )?;
     apply_indent(entry, section, "Command")
 }
 
@@ -1441,13 +1453,15 @@ fn append_output(
     entry: &Value,
     rendered_output: &str,
     section: &mut String,
+    captured_values: &HashMap<String, String>,
+    missing_behavior: MissingCaptureBehavior,
 ) -> Result<(), RenderError> {
     let Some(output) = entry.get("output") else {
         return Ok(());
     };
 
     if let Some(caption) = output.get("caption") {
-        let caption_text = render_caption(caption)?;
+        let caption_text = render_caption(caption, captured_values, missing_behavior)?;
         section.push_str("\n\n");
         section.push_str(&caption_text);
     }
@@ -1462,8 +1476,12 @@ fn append_output(
     Ok(())
 }
 
-fn render_caption(caption: &Value) -> Result<String, RenderError> {
-    match caption {
+fn render_caption(
+    caption: &Value,
+    captured_values: &HashMap<String, String>,
+    missing_behavior: MissingCaptureBehavior,
+) -> Result<String, RenderError> {
+    let lines = match caption {
         Value::String(text) => Ok(split_multiline_string(text).join("\n")),
         Value::Array(items) => {
             let mut lines = Vec::new();
@@ -1483,7 +1501,14 @@ fn render_caption(caption: &Value) -> Result<String, RenderError> {
         _ => Err(RenderError::Operational(
             "Command output caption must be a string or array of strings".to_string(),
         )),
-    }
+    }?;
+
+    interpolate_captured_variables_with_context(
+        &lines,
+        captured_values,
+        "Command output caption",
+        missing_behavior,
+    )
 }
 
 fn render_prerequisite_entry(entry: &Value) -> Result<String, RenderError> {

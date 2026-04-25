@@ -196,6 +196,7 @@ Expected task directories:
 - [TASK-132: Support Limit Lines Output Rewrite](rewrite/TASK-132-support-limit-lines-output-rewrite.md)
 - [TASK-133: Surface Command Capture Stage Discovery](discovery/TASK-133-surface-command-capture-stage-discovery.md)
 - [TASK-134: Support Patch Debug Diagnostics](run/TASK-134-support-patch-debug-diagnostics.md)
+- [TASK-135: Support Caption Capture Interpolation](run/TASK-135-support-caption-capture-interpolation.md)
 
 ## Pending
 
@@ -208,6 +209,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-135: Support Caption Capture Interpolation](run/TASK-135-support-caption-capture-interpolation.md)
 - [x] [TASK-134: Support Patch Debug Diagnostics](run/TASK-134-support-patch-debug-diagnostics.md)
 - [x] [TASK-133: Surface Command Capture Stage Discovery](discovery/TASK-133-surface-command-capture-stage-discovery.md)
 - [x] [TASK-132: Support Limit Lines Output Rewrite](rewrite/TASK-132-support-limit-lines-output-rewrite.md)

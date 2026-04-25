@@ -1726,6 +1726,74 @@ fn scalar_output_caption_does_not_add_blank_line_before_output_block() {
 }
 
 #[test]
+fn output_caption_interpolates_same_command_and_earlier_captures() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("example.yaml"),
+        r#"entries:
+  - type: Command
+    commands: |
+      printf 'collector=G1\n'
+    capture:
+      - name: collector_name
+        source: stdout
+        stage: raw
+        pattern: 'collector=(.+)'
+
+  - type: Command
+    commands: |
+      printf 'GC(42) Pause Young\n'
+    output:
+      caption: |
+        @{collector_name} ran @{gc_count} times.
+        Literal syntax: @@{gc_count}
+    capture:
+      - name: gc_count
+        source: stdout
+        stage: raw
+        pattern: 'GC\((\d+)\)'
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run", "--input-file", "example.yaml"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(
+        readme.contains(
+            "G1 ran 42 times.\nLiteral syntax: @{gc_count}\n\n```\nGC(42) Pause Young\n```"
+        )
+    );
+}
+
+#[test]
+fn output_caption_unknown_capture_fails_run() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("example.yaml"),
+        r#"entries:
+  - type: Command
+    commands: |
+      printf 'hello\n'
+    output:
+      caption: |
+        Missing value: @{missing_capture}
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run", "--input-file", "example.yaml"], &dir);
+
+    assert_eq!(output.status.code(), Some(2));
+    assert!(!dir.join("README.md").exists());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains(
+        "Command output caption references unknown captured variable `@{missing_capture}`"
+    ));
+}
+
+#[test]
 fn output_stream_does_not_change_stdout_capture_or_assertions() {
     let dir = prepare_workspace();
     write_runbook(

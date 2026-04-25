@@ -567,6 +567,11 @@ in the runbook.
   output after the command block.
 - If `output.caption` is present, render that caption before the captured
   command output.
+- `output.caption` may interpolate captured variables using `@{name}` syntax.
+- `@@{name}` inside `output.caption` preserves the literal `@{name}` text.
+- `output.caption` may reference captures that are available when that command
+  output is rendered, including values captured by the same `Command` entry.
+- `output.caption` does not defer to captures from later entries.
 - If `output.caption` is a scalar string, ignore a terminal line break that
   exists only to terminate the scalar so YAML literal scalars do not introduce
   an extra blank line before the captured output fence.
@@ -1101,6 +1106,11 @@ in the runbook.
       includes the captured command output.
 - [ ] Given a `Command` entry with `output.caption`, the generated Markdown
       includes the caption before the captured command output.
+- [ ] Given a `Command` entry with `output.caption` that references a value
+      captured by the same command, the generated Markdown includes the
+      captured value in the caption.
+- [ ] Given `@@{name}` in `output.caption`, the generated Markdown includes the
+      literal `@{name}` text.
 - [ ] Given a scalar `output.caption` value that ends with a line break only
       because of YAML literal-scalar termination, the generated Markdown does
       not introduce an extra blank line before the captured output fence.

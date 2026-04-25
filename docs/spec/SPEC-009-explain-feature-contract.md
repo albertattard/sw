@@ -159,6 +159,10 @@ should describe the `@{name}` interpolation syntax, the `@@{name}` escape
 syntax, and the current boundary that Markdown may interpolate values captured
 earlier or later in the runbook.
 
+When a topic covers command output captions, the explanation should state that
+`output.caption` can interpolate captured variables, including captures
+produced by the same `Command` entry before the caption is rendered.
+
 When a topic covers command capture behavior, the explanation should document
 the `capture` rule shape enough for agents to author a valid rule without
 guessing enum names. In particular, `run` should explain that `capture.source`
@@ -222,6 +226,8 @@ When `--output-format=skill` is selected:
       `@{name}` and the `@@{name}` escape syntax for captured variables.
 - [ ] Given `sw explain run`, the CLI makes it clear that Markdown entries may
       interpolate values captured earlier or later in the runbook.
+- [ ] Given `sw explain run`, the CLI makes it clear that `output.caption` may
+      interpolate captures produced by the same `Command` entry.
 - [ ] Given `sw explain run`, the CLI documents the supported `capture.stage`
       values `raw` and `rewritten`.
 - [ ] Given `sw explain run`, the CLI documents that `capture.source` is

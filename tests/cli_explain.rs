@@ -102,6 +102,9 @@ fn explain_run_prints_concise_contract_summary() {
     assert!(stdout.contains(
         "Markdown interpolation may reference values captured earlier or later in the runbook."
     ));
+    assert!(stdout.contains(
+        "`Command.output.caption` may interpolate captures available when the command output is rendered, including captures produced by the same command."
+    ));
     assert!(
         stdout.contains(
             "`sw --input-file=-` or `sw run --input-file=-` for stdin-backed JSON runbooks"
