@@ -122,7 +122,7 @@ fn explain_run_prints_concise_contract_summary() {
         "A command entry remains active until the command shell has exited and the captured stdout and stderr streams have both closed, so background processes that inherit those pipes can keep the entry open until they exit or the timeout is reached."
     ));
     assert!(stdout.contains(
-        "`Markdown.contents`, `Command.commands`, `Prerequisite.checks[*].contents`, and `Prerequisite.checks[*].commands` may be a single string or an array of strings."
+        "`Markdown.contents`, `Command.commands`, `Patch.patch`, `Prerequisite.checks[*].contents`, and `Prerequisite.checks[*].commands` may be a single string or an array of strings."
     ));
     assert!(stdout.contains(
         "When those fields are provided as a string, `sw run` splits them on newline boundaries before rendering or execution and does not turn a terminal line break into an extra blank line."
@@ -184,7 +184,7 @@ fn explain_validate_prints_validation_contract_summary() {
         "If more than one default runbook file exists, validation fails with an operational error and requires `--input-file`."
     ));
     assert!(stdout.contains(
-        "`Markdown.contents`, `Command.commands`, `Prerequisite.checks[*].contents`, and `Prerequisite.checks[*].commands` may be a single string or an array of strings."
+        "`Markdown.contents`, `Command.commands`, `Patch.patch`, `Prerequisite.checks[*].contents`, and `Prerequisite.checks[*].commands` may be a single string or an array of strings."
     ));
     assert!(stdout.contains(
         "When those fields are provided as a string, validation treats that as shorthand for the existing line-array model."
@@ -250,7 +250,7 @@ fn explain_check_guides_agent_to_prerequisites_and_examples() {
         "If more than one default runbook file exists, check fails with an operational error and requires `--input-file`."
     ));
     assert!(stdout.contains(
-        "`Markdown.contents`, `Command.commands`, `Prerequisite.checks[*].contents`, and `Prerequisite.checks[*].commands` may be a single string or an array of strings."
+        "`Markdown.contents`, `Command.commands`, `Patch.patch`, `Prerequisite.checks[*].contents`, and `Prerequisite.checks[*].commands` may be a single string or an array of strings."
     ));
     assert!(stdout.contains("Built-in prerequisite kinds include `java`"));
     assert!(stdout.contains(

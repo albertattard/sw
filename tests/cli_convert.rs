@@ -468,7 +468,7 @@ fn convert_json_prerequisite_fields_to_yaml_block_scalars_and_validate() {
 }
 
 #[test]
-fn convert_keeps_non_scalar_capable_string_arrays_as_yaml_sequences() {
+fn convert_json_patch_array_to_yaml_block_scalar() {
     let dir = prepare_workspace();
     write_file(
         &dir,
@@ -493,9 +493,50 @@ fn convert_keeps_non_scalar_capable_string_arrays_as_yaml_sequences() {
 
     assert!(output.status.success());
     let converted = fs::read_to_string(dir.join("example.yaml")).expect("missing yaml output");
-    assert!(converted.contains("patch:\n      - '@@ -1 +1 @@'\n      - -before\n      - +after\n"));
+    assert!(converted.contains("patch: |-"));
+    assert!(converted.contains("@@ -1 +1 @@\n      -before\n      +after"));
 
     let value: serde_json::Value =
         serde_norway::from_str(&converted).expect("converted output should be valid yaml");
-    assert!(value["entries"][0]["patch"].is_array());
+    assert_eq!(value["entries"][0]["patch"], "@@ -1 +1 @@\n-before\n+after");
+}
+
+#[test]
+fn convert_keeps_non_scalar_capable_string_arrays_as_yaml_sequences() {
+    let dir = prepare_workspace();
+    write_file(
+        &dir,
+        "example.json",
+        r#"{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf 'ready\n'"
+      ],
+      "assert": {
+        "checks": [
+          {
+            "source": "stdout",
+            "contains": "ready"
+          }
+        ]
+      }
+    }
+  ]
+}
+"#,
+    );
+
+    let output = run_in_dir(&["convert", "--input-file", "example.json"], &dir);
+
+    assert!(output.status.success());
+    let converted = fs::read_to_string(dir.join("example.yaml")).expect("missing yaml output");
+    assert!(converted.contains("checks:"));
+    assert!(converted.contains("- source: stdout"));
+    assert!(converted.contains("contains: ready"));
+
+    let value: serde_json::Value =
+        serde_norway::from_str(&converted).expect("converted output should be valid yaml");
+    assert!(value["entries"][0]["assert"]["checks"].is_array());
 }

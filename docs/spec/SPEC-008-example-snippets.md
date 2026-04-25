@@ -83,6 +83,8 @@ In this increment, supported entity types include:
   prerequisite contract by showing a version rule and optional guidance
   content, without implying that vendor identity is verified when the engine
   only checks the Java major version.
+- The `Patch` YAML example should use a block scalar for `patch` when scalar
+  patch text is supported.
 - Example output is documentation-oriented and does not need to be executable
   without further user editing.
 
@@ -107,6 +109,8 @@ In this increment, supported entity types include:
       Java `collapse_method_body` transform shape.
 - [ ] Given `sw example Patch`, the CLI prints a valid YAML example of a
       `Patch` entry that reflects the current automatic-restore contract.
+- [ ] Given `sw example Patch`, the YAML example uses `patch: |` for the patch
+      text.
 - [ ] Given `sw example Prerequisite`, the CLI prints a valid YAML example of a
       `Prerequisite` entry.
 - [ ] Given `sw example Prerequisite`, the example uses the built-in

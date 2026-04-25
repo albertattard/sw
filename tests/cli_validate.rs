@@ -553,6 +553,21 @@ fn valid_patch_returns_success() {
 }
 
 #[test]
+fn valid_scalar_patch_returns_success() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-run-patch-scalar.yaml",
+        "--output-format",
+        "json",
+    ]);
+
+    assert_eq!(output.status.code(), Some(0));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": true"));
+}
+
+#[test]
 fn invalid_patch_returns_validation_failure() {
     let output = run(&[
         "validate",

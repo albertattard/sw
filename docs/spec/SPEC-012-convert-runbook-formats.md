@@ -127,7 +127,7 @@ Output:
   already documented as accepting either a string or an array of strings, such
   as `Markdown.contents`, `Command.commands`, `Command.cleanup`,
   `Prerequisite.checks[*].contents`, and
-  `Prerequisite.checks[*].commands`.
+  `Prerequisite.checks[*].commands`, and `Patch.patch`.
 - This normalization is semantic rather than presentation-preserving: it may
   change the serialized YAML shape for those scalar-capable fields while
   keeping the documented runbook meaning unchanged.
@@ -192,6 +192,9 @@ Output:
       `Prerequisite.checks[*].commands` is an array of strings and the target
       format is YAML, `sw convert` may serialize that field as a YAML literal
       block scalar instead of a YAML sequence.
+- [ ] Given JSON input whose `Patch.patch` is an array of strings and the
+      target format is YAML, `sw convert` may serialize that field as a YAML
+      literal block scalar instead of a YAML sequence.
 - [ ] Given JSON input with a string array in a field that is not documented as
       scalar-capable, `sw convert` keeps that field as a YAML sequence.
 

@@ -69,6 +69,7 @@ Default input behavior:
   for stdin.
 - `Markdown.contents` may be either a single string or an array of strings.
 - `Command.commands` may be either a single string or an array of strings.
+- `Patch.patch` may be either a single string or an array of strings.
 - `Prerequisite.checks[*].contents` may be either a single string or an array
   of strings.
 - `Prerequisite.checks[*].commands` may be either a single string or an array
@@ -143,6 +144,9 @@ Exit codes:
       `sw validate --input-file <file> --output-format json` accepts that
       shorthand and returns `valid: true`.
 - [x] Given a runbook whose `Command.commands` is a single string,
+      `sw validate --input-file <file> --output-format json` accepts that
+      shorthand and returns `valid: true`.
+- [x] Given a runbook whose `Patch.patch` is a single string,
       `sw validate --input-file <file> --output-format json` accepts that
       shorthand and returns `valid: true`.
 - [ ] Given a runbook whose `Prerequisite.checks[*].contents` is a single

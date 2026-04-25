@@ -1081,7 +1081,11 @@ fn validate_entry(
             require_string(object, "path", &path, &mut context.errors);
             match object.get("patch") {
                 Some(patch) => {
-                    validate_string_array(patch, &format!("{path}.patch"), &mut context.errors);
+                    validate_string_or_string_array(
+                        patch,
+                        &format!("{path}.patch"),
+                        &mut context.errors,
+                    );
                 }
                 None => push_error(&mut context.errors, format!("{path}.patch"), "is required"),
             }

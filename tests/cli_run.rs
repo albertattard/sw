@@ -543,6 +543,26 @@ fn patch_entry_applies_during_run_and_restores_after_success() {
 }
 
 #[test]
+fn scalar_patch_entry_applies_during_run_and_restores_after_success() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-run-patch-scalar.yaml", "sw-runbook.yaml");
+    write_text_file(&dir, "demo.txt", "before\n");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme");
+    assert!(readme.contains("```diff"));
+    assert!(readme.contains("+after"));
+    assert!(readme.contains("Patched file contents"));
+    assert!(readme.contains("```\nafter\n```"));
+    assert_eq!(
+        fs::read_to_string(dir.join("demo.txt")).expect("missing restored file"),
+        "before\n"
+    );
+}
+
+#[test]
 fn stacked_patch_entries_build_on_each_other_and_restore_original_file() {
     let dir = prepare_workspace();
     write_runbook(&dir, "sw-runbook-run-patch-stacked.json", "sw-runbook.json");

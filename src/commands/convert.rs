@@ -250,6 +250,7 @@ fn normalize_scalar_capable_fields_in_object(map: &mut Map<String, Value>) {
                 normalize_string_array_field(map, "commands");
                 normalize_string_array_field(map, "cleanup");
             }
+            "Patch" => normalize_string_array_field(map, "patch"),
             "Prerequisite" => {
                 if let Some(Value::Array(checks)) = map.get_mut("checks") {
                     for check in checks {

@@ -1245,21 +1245,17 @@ fn render_patch(
     patch_restore_stack: &mut Vec<std::path::PathBuf>,
     patch_snapshots: &mut HashMap<std::path::PathBuf, Vec<u8>>,
 ) -> Result<String, RenderError> {
-    let patch_lines = entry
+    let lines = entry
         .get("patch")
-        .and_then(Value::as_array)
+        .map(|patch| {
+            string_lines(
+                patch,
+                "Patch patch must be a string or an array of strings",
+                "Patch lines must contain only strings",
+            )
+        })
+        .transpose()?
         .ok_or_else(|| RenderError::Operational("Patch entry is missing patch".to_string()))?;
-
-    let mut lines = Vec::new();
-    for item in patch_lines {
-        lines.push(
-            item.as_str()
-                .ok_or_else(|| {
-                    RenderError::Operational("Patch lines must contain only strings".to_string())
-                })?
-                .to_string(),
-        );
-    }
 
     let (target_path, relative_path) = patch_target_path(entry, runbook_path)?;
     patch_snapshots

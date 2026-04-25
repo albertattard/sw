@@ -73,6 +73,8 @@ Default input behavior:
 - `Markdown.contents` may be either a single string or an array of strings,
   and `sw check` applies the same valid-input contract before executing
   prerequisite checks.
+- `Patch.patch` may be either a single string or an array of strings, matching
+  normal runbook validation behavior.
 
 ## Outputs
 
@@ -132,6 +134,9 @@ Default input behavior:
 - [ ] Given a valid runbook whose `Markdown.contents` is a single string,
       `sw check` treats that runbook as valid input and continues to
       prerequisite execution.
+- [ ] Given a valid runbook whose `Patch.patch` is a single string, `sw check`
+      treats that runbook as valid input and continues to prerequisite
+      execution.
 - [ ] Given a valid runbook whose `Prerequisite.checks[*].contents` is a
       single string, `sw check` treats that runbook as valid input and applies
       the same prerequisite-check contract and exit codes.

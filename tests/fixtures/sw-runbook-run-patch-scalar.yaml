@@ -1,0 +1,13 @@
+entries:
+  - type: Patch
+    path: ./demo.txt
+    patch: |
+      @@ -1 +1 @@
+      -before
+      +after
+
+  - type: Command
+    commands: |
+      cat './demo.txt'
+    output:
+      caption: Patched file contents

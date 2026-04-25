@@ -192,6 +192,7 @@ Expected task directories:
 - [TASK-128: Surface Datetime Rewrite Reuse Discovery](discovery/TASK-128-surface-datetime-rewrite-reuse-discovery.md)
 - [TASK-129: Add Human Guide Documentation Structure](discovery/TASK-129-add-human-guide-documentation-structure.md)
 - [TASK-130: Add Runbook Entity Editing Guide](discovery/TASK-130-add-runbook-entity-editing-guide.md)
+- [TASK-131: Accept Scalar Patch Text](run/TASK-131-accept-scalar-patch-text.md)
 
 ## Pending
 
@@ -204,6 +205,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-131: Accept Scalar Patch Text](run/TASK-131-accept-scalar-patch-text.md)
 - [x] [TASK-130: Add Runbook Entity Editing Guide](discovery/TASK-130-add-runbook-entity-editing-guide.md)
 - [x] [TASK-129: Add Human Guide Documentation Structure](discovery/TASK-129-add-human-guide-documentation-structure.md)
 - [x] [TASK-128: Surface Datetime Rewrite Reuse Discovery](discovery/TASK-128-surface-datetime-rewrite-reuse-discovery.md)

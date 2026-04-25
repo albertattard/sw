@@ -327,7 +327,12 @@ in the runbook.
 - `Patch` entries apply a textual patch to a target file during runbook
   execution.
 - `Patch.path` is resolved relative to the runbook location.
-- `Patch` entries declare `patch` as an array of patch lines.
+- `Patch.patch` may be either a single string or an array of strings.
+- When `Patch.patch` is a string, it is normalized into the existing line-array
+  model by splitting on newline boundaries before rendering and execution.
+- Scalar `Patch.patch` ignores a terminal line break that exists only to
+  terminate the scalar, so YAML literal scalars do not add an extra blank patch
+  line.
 - Patch lines are executed as one patch application step in the declared
   order.
 - `Patch` entries render their patch contents as fenced `diff` blocks in the
@@ -853,6 +858,8 @@ in the runbook.
 
 - [ ] Given a runbook with `Patch` entries, the generated Markdown includes
       fenced `diff` blocks for those patches.
+- [ ] Given a YAML `Patch` entry whose `patch` field is a string, the generated
+      Markdown renders the same patch lines as the array form.
 - [ ] Given a `Patch` entry without an explicit restore setting, the patched
       file is restored automatically after a successful run.
 - [ ] Given a `Patch` entry without an explicit restore setting, the patched

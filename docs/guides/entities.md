@@ -147,10 +147,10 @@ change.
 ```yaml
 - type: Patch
   path: ./src/main/java/demo/Main.java
-  patch:
-    - '@@ -10,3 +10,3 @@'
-    - '-        return oldValue;'
-    - '+        return newValue;'
+  patch: |
+    @@ -10,3 +10,3 @@
+    -        return oldValue;
+    +        return newValue;
 ```
 
 Patch entries are applied during the run and restored afterward by default.

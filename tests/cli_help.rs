@@ -54,6 +54,7 @@ fn help_subcommand_for_known_topic_prints_targeted_help() {
     assert!(stdout.contains(
         "`Markdown`, `DisplayFile`, `Patch`, and `Command` entries may declare `indent`"
     ));
+    assert!(stdout.contains("`Patch.patch` may be authored as a YAML block scalar"));
     assert!(stdout.contains("File-based runbooks default to YAML"));
     assert!(stdout.contains("--output-file"));
     assert!(stdout.contains("trim_empty_lines"));
