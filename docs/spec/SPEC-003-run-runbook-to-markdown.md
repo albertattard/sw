@@ -612,7 +612,7 @@ in the runbook.
 - `output.rewrite` is an ordered array of rewrite rules.
 - Rewrite rules are applied in the declared order.
 - In this increment, supported rewrite rule types are `replace`,
-  `datetime_shift`, and `keep_between`.
+  `datetime_shift`, `keep_between`, and `limit_lines`.
 - A `replace` rewrite rule performs a pattern-based replacement on the captured
   command output.
 - A rewrite rule may declare `capture_as` to expose both the matched original
@@ -657,6 +657,21 @@ in the runbook.
 - `show_trim_markers: false` suppresses those trim-marker lines.
 - If a required `keep_between` boundary is not found, the rule leaves the output
   unchanged.
+- A `limit_lines` rewrite rule keeps a bounded number of lines from the start
+  and/or end of the current output.
+- A `limit_lines` rule may declare `first` as a positive integer to keep the
+  first N lines.
+- A `limit_lines` rule may declare `last` as a positive integer to keep the
+  last N lines.
+- A `limit_lines` rule must declare at least one of `first` or `last`.
+- If both `first` and `last` are declared and the kept ranges overlap, the
+  overlapping lines are rendered only once.
+- `limit_lines.show_trim_marker` defaults to `true`.
+- When `show_trim_marker` is `true`, `limit_lines` adds a line containing
+  `...` where one or more lines were omitted.
+- If `limit_lines` does not omit any lines, the output is unchanged and no trim
+  marker is added.
+- `show_trim_marker: false` suppresses the omitted-line marker.
 - A `datetime_shift` rewrite rule shifts matched timestamps so the first match
   becomes the configured base timestamp and later matches preserve their
   relative distance from that first match.
@@ -1150,6 +1165,21 @@ in the runbook.
       trim-marker lines are omitted.
 - [ ] Given a `keep_between` rewrite rule whose `start` or `end` boundary is
       not found, the rule leaves the output unchanged.
+- [ ] Given a `limit_lines` rewrite rule with `first`, only the first N output
+      lines are kept and a trailing trim marker is added when lines were
+      removed.
+- [ ] Given a `limit_lines` rewrite rule with `last`, only the last N output
+      lines are kept and a leading trim marker is added when lines were
+      removed.
+- [ ] Given a `limit_lines` rewrite rule with both `first` and `last`, the
+      first N and last M lines are kept with a single middle trim marker when
+      lines were removed.
+- [ ] Given a `limit_lines` rewrite rule whose kept first and last ranges
+      overlap, overlapping lines are not duplicated.
+- [ ] Given a `limit_lines` rewrite rule that does not remove any lines, the
+      output is unchanged and no trim marker is added.
+- [ ] Given a `limit_lines` rewrite rule with `show_trim_marker: false`, omitted
+      lines do not render a trim marker.
 - [ ] Given a `datetime_shift` rewrite rule, the first matched timestamp is
       rewritten to the configured base timestamp.
 - [ ] Given multiple timestamps matched by the same `datetime_shift` rule,
