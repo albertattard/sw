@@ -43,11 +43,31 @@ The broader product direction is described in the
 - [`sw version`](./docs/spec/SPEC-001-help-and-discovery.md) prints the
   current build identity.
 
-## Typical Workflow
+## Five-Minute Workflow
 
-1. Write or import a file-based runbook in YAML.
-2. Run `sw validate` or `sw check`.
-3. Run `sw run` to execute the workflow and generate the documentation output.
+Create a starter YAML runbook:
+
+```shell
+sw init
+```
+
+Validate the runbook structure:
+
+```shell
+sw validate
+```
+
+Check prerequisites without running the full workflow:
+
+```shell
+sw check
+```
+
+Execute the runbook and generate `README.md`:
+
+```shell
+sw run
+```
 
 ## Format Defaults
 
@@ -58,6 +78,24 @@ The broader product direction is described in the
 - File discovery for `sw run`, `sw validate`, and `sw check` accepts JSON,
   YAML, and YML. If more than one default runbook file exists, `sw` fails and
   requires `--input-file`.
+
+## Documentation
+
+Start with the [human guides](./docs/guides/README.md) for practical usage
+and examples. Each supported subcommand has its own guide page.
+
+AI agents should discover the current product contract from the installed
+binary:
+
+```shell
+sw explain --all
+sw example Command
+sw help run
+```
+
+The generated `sw` skill intentionally stays small and routes agents back to
+`sw explain`, which avoids duplicating stale command knowledge in multiple
+places.
 
 ## Engineering Workflow
 
@@ -72,6 +110,8 @@ The working model is:
 
 The main project records are:
 
+- [`docs/guides/README.md`](./docs/guides/README.md): human-oriented usage
+  guides and subcommand walkthroughs.
 - [`docs/spec/README.md`](./docs/spec/README.md): executable specifications and
   the product contract.
 - [`docs/spec/Product-Vision.md`](./docs/spec/Product-Vision.md): the product
