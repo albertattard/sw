@@ -52,6 +52,10 @@ fn init_writes_requested_yaml_output_file() {
         fs::read_to_string(dir.join("starter.yaml")).expect("missing generated yaml file");
     assert!(contents.starts_with("entries:\n  - type: Heading\n"));
     assert!(contents.contains("\n\n  - type: Markdown\n"));
+    assert!(contents.contains(
+        "  - type: Markdown\n    contents: |\n      Use this starter runbook as a realistic template for your project.\n"
+    ));
+    assert!(!contents.contains("contents:\n      - Use this starter runbook"));
     assert!(contents.contains("checks:\n      - kind: command\n"));
     assert!(contents.contains("commands:\n      - "));
     assert!(contents.contains("caption:\n        - Observed output\n"));

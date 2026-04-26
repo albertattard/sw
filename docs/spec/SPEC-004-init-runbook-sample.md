@@ -3,7 +3,7 @@
 - Status: Draft
 - Owner: `@aattard`
 - Created: `2026-03-12`
-- Updated: `2026-04-16`
+- Updated: `2026-04-26`
 
 ## Goal
 
@@ -58,6 +58,8 @@ It creates a sample runbook in the current directory.
   `entries` list.
 - When YAML output is selected, adjacent top-level `entries` are separated by a
   single blank line so the starter runbook is easier to edit.
+- When YAML output is selected, starter `Markdown.contents` examples use block
+  scalar syntax instead of line-array syntax when a scalar form is clearer.
 - The generated file includes one example of each supported entry type in this
   increment:
   - `Heading`
@@ -95,6 +97,8 @@ It creates a sample runbook in the current directory.
 - [x] Given YAML output from `sw init`, the serialized top-level `entries` list
       uses `entries:\n  - ...` indentation and separates adjacent entries with a
       single blank line.
+- [x] Given YAML output from `sw init`, the starter Markdown example uses
+      `contents: |` instead of a string-array form with a synthetic empty line.
 - [ ] Given `sw init --output-file starter.txt`, the command exits with `1`
       and reports a clear unsupported-format error.
 

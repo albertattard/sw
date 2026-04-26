@@ -197,6 +197,7 @@ Expected task directories:
 - [TASK-133: Surface Command Capture Stage Discovery](discovery/TASK-133-surface-command-capture-stage-discovery.md)
 - [TASK-134: Support Patch Debug Diagnostics](run/TASK-134-support-patch-debug-diagnostics.md)
 - [TASK-135: Support Caption Capture Interpolation](run/TASK-135-support-caption-capture-interpolation.md)
+- [TASK-136: Use Block Scalar Markdown In Init Sample](init/TASK-136-use-block-scalar-markdown-in-init-sample.md)
 
 ## Pending
 
@@ -209,6 +210,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-136: Use Block Scalar Markdown In Init Sample](init/TASK-136-use-block-scalar-markdown-in-init-sample.md)
 - [x] [TASK-135: Support Caption Capture Interpolation](run/TASK-135-support-caption-capture-interpolation.md)
 - [x] [TASK-134: Support Patch Debug Diagnostics](run/TASK-134-support-patch-debug-diagnostics.md)
 - [x] [TASK-133: Surface Command Capture Stage Discovery](discovery/TASK-133-surface-command-capture-stage-discovery.md)

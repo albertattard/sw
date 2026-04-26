@@ -82,11 +82,7 @@ fn sample_runbook() -> Value {
             },
             {
                 "type": "Markdown",
-                "contents": [
-                    "Use this starter runbook as a realistic template for your project.",
-                    "",
-                    "Replace the placeholder file paths, prerequisite checks, commands, and rewrites with behavior that matches your workflow."
-                ]
+                "contents": "Use this starter runbook as a realistic template for your project.\n"
             },
             {
                 "type": "DisplayFile",
