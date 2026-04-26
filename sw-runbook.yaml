@@ -76,21 +76,35 @@ entries:
 
       ### 1. Create the runbook
 
+      Create a minimal runbook:
+
+      ```shell
+      cat > sw-runbook.yaml <<'EOF'
+      entries:
+        - type: Heading
+          level: H1
+          title: Example Workflow
+
+        - type: Markdown
+          contents: |
+            Use this starter runbook as a realistic template for your project.
+      EOF
+      ```
+
+      This creates `sw-runbook.yaml`, the editable source for the documentation
+      workflow. Alternatively, use `sw init` to create a more complete starter
+      runbook.
+
       ```shell
       sw init
       ```
 
-      This creates `sw-runbook.yaml`, the editable source for the documentation
-      workflow. The generated `README.md` is output; the runbook is the file you
-      maintain.
-
       ### 2. Add an executable example
 
       A runbook can contain a command that makes the request and captures the formatted
-      response:
+      response. Append a command entry under the existing `entries:` list:
 
       ```yaml
-      entries:
         - type: Command
           commands: |
             curl --silent 'https://api.github.com/repos/albertattard/sw' |
@@ -101,13 +115,29 @@ entries:
               Repository metadata returned by the GitHub API.
       ```
 
+      You can append that entry to `sw-runbook.yaml` with:
+
+      ```shell
+      cat >> sw-runbook.yaml <<'EOF'
+
+        - type: Command
+          commands: |
+            curl --silent 'https://api.github.com/repos/albertattard/sw' |
+              jq '{name, description, license: .license.spdx_id}'
+          output:
+            content_type: json
+            caption: |
+              Repository metadata returned by the GitHub API.
+      EOF
+      ```
+
       When the runbook is executed, `sw` renders both the command and the captured
       output into the generated documentation.
 
       ### 3. Generate the README from a real run
 
       ```shell
-      sw run
+      sw run --verbose
       ```
 
       `sw` executes the runbook entries in order and writes `README.md` by default.
