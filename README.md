@@ -43,31 +43,73 @@ The broader product direction is described in the
 - [`sw version`](./docs/spec/SPEC-001-help-and-discovery.md) prints the
   current build identity.
 
-## Five-Minute Workflow
+## Five-Minute Walkthrough
 
-Create a starter YAML runbook:
+Most README examples are snapshots. They show a command and some output, but
+nothing proves that the command still works or that the output still matches the
+current system.
+
+For example, a README might document an API request like this:
+
+```shell
+curl --silent 'https://api.github.com/repos/albertattard/sw' |
+  jq '{name, description, license: .license.spdx_id}'
+```
+
+That example is useful only while it remains true. If the command changes, the
+response shape changes, `jq` is missing, or the copied output becomes stale, the
+README can continue looking correct while being wrong.
+
+`sw` solves this by moving the example into a runbook and generating the README
+from a real execution.
+
+### 1. Create the runbook
 
 ```shell
 sw init
 ```
 
-Validate the runbook structure:
+This creates `sw-runbook.yaml`, the editable source for the documentation
+workflow. The generated `README.md` is output; the runbook is the file you
+maintain.
 
-```shell
-sw validate
+### 2. Add an executable example
+
+A runbook can contain a command that makes the request and captures the formatted
+response:
+
+```yaml
+entries:
+  - type: Command
+    commands: |
+      curl --silent 'https://api.github.com/repos/albertattard/sw' |
+        jq '{name, description, license: .license.spdx_id}'
+    output:
+      content_type: json
+      caption: |
+        Repository metadata returned by the GitHub API.
 ```
 
-Check prerequisites without running the full workflow:
+When the runbook is executed, `sw` renders both the command and the captured
+output into the generated documentation.
 
-```shell
-sw check
-```
-
-Execute the runbook and generate `README.md`:
+### 3. Generate the README from a real run
 
 ```shell
 sw run
 ```
+
+`sw` executes the runbook entries in order and writes `README.md` by default.
+The command and its actual formatted output are rendered together.
+
+The result is documentation that is harder to fake and easier to trust: if the
+request stops working, the response changes, or the local environment is missing
+a required tool, the runbook fails instead of silently publishing stale
+instructions.
+
+For regular project use, see the [human guides](./docs/guides/README.md)
+for validation, prerequisite checks, formatting, conversion, and other
+runbook authoring workflows.
 
 ## Format Defaults
 
