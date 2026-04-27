@@ -187,9 +187,10 @@ entries:
       sw help run
       ```
 
-      The generated `sw` skill intentionally stays small and routes agents back to
-      `sw explain`, which avoids duplicating stale command knowledge in multiple
-      places.
+      The generated `sw` skill is a compact operating guide. It gives agents the
+      first workflow rules they need, then routes detailed behavior questions back
+      to `sw explain`, `sw help`, and `sw example` so command knowledge is not
+      duplicated in multiple places.
 
   - type: Heading
     level: H2

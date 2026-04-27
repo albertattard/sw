@@ -406,13 +406,25 @@ fn explain_skill_prints_skill_document_to_stdout() {
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.starts_with(
-        "---\nname: sw\ndescription: Use this skill when the user needs help understanding or operating the `sw` CLI.\n---\n\n# sw\n"
+        "---\nname: sw\ndescription: Use this skill when the user needs help authoring, validating, converting, or running Sociable Weaver (`sw`) runbooks.\n---\n\n# sw\n"
     ));
-    assert!(stdout.contains("## Guidance"));
-    assert!(stdout.contains("Start with `sw explain --all`."));
+    assert!(stdout.contains("## First Step"));
+    assert!(stdout.contains("sw explain --all"));
+    assert!(stdout.contains("## Common Workflows"));
+    assert!(stdout.contains("Use `sw validate --input-file <runbook>` after editing a runbook."));
     assert!(stdout.contains(
-        "Treat the CLI output and the documented specs as authoritative over any cached assumptions."
+        "Use `sw run --input-file <runbook>` to execute the runbook and generate Markdown output."
     ));
+    assert!(stdout.contains("## Authoring Defaults"));
+    assert!(stdout.contains("Prefer YAML for file-based runbooks."));
+    assert!(stdout.contains("Stdin input via `--input-file=-` defaults to JSON unless `--input-format yaml` is provided."));
+    assert!(stdout.contains("## Agent Rules"));
+    assert!(stdout.contains(
+        "Before inventing a field, run `sw explain <topic>` or `sw example <EntryType>`."
+    ));
+    assert!(
+        stdout.contains("Treat that output, `sw help`, and the repository specs as authoritative.")
+    );
     assert!(!stdout.contains("## Command Map"));
     assert!(!stdout.contains("### run"));
 }
@@ -434,9 +446,10 @@ fn explain_skill_output_file_without_value_writes_to_default_codex_path() {
     assert!(stdout.contains(&format!("Wrote explain skill to {}", output_path.display())));
     let skill = fs::read_to_string(&output_path).expect("missing skill output");
     assert!(skill.starts_with(
-        "---\nname: sw\ndescription: Use this skill when the user needs help understanding or operating the `sw` CLI.\n---\n\n# sw\n"
+        "---\nname: sw\ndescription: Use this skill when the user needs help authoring, validating, converting, or running Sociable Weaver (`sw`) runbooks.\n---\n\n# sw\n"
     ));
-    assert!(skill.contains("Start with `sw explain --all`."));
+    assert!(skill.contains("## Common Workflows"));
+    assert!(skill.contains("sw explain --all"));
     assert!(!skill.contains("## Command Map"));
 }
 
@@ -454,9 +467,10 @@ fn explain_skill_output_file_with_explicit_path_writes_to_requested_location() {
     assert!(output.status.success());
     let skill = fs::read_to_string(&output_path).expect("missing skill output");
     assert!(skill.starts_with(
-        "---\nname: sw\ndescription: Use this skill when the user needs help understanding or operating the `sw` CLI.\n---\n\n# sw\n"
+        "---\nname: sw\ndescription: Use this skill when the user needs help authoring, validating, converting, or running Sociable Weaver (`sw`) runbooks.\n---\n\n# sw\n"
     ));
-    assert!(skill.contains("Start with `sw explain --all`."));
+    assert!(skill.contains("## Authoring Defaults"));
+    assert!(skill.contains("## Agent Rules"));
     assert!(!skill.contains("## Command Map"));
 }
 
@@ -501,7 +515,7 @@ fn explain_skill_force_overwrites_existing_file() {
     assert!(output.status.success());
     let skill = fs::read_to_string(&output_path).expect("missing overwritten skill");
     assert!(skill.starts_with(
-        "---\nname: sw\ndescription: Use this skill when the user needs help understanding or operating the `sw` CLI.\n---\n\n# sw\n"
+        "---\nname: sw\ndescription: Use this skill when the user needs help authoring, validating, converting, or running Sociable Weaver (`sw`) runbooks.\n---\n\n# sw\n"
     ));
     assert!(!skill.contains("existing skill"));
 }

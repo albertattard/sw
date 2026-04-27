@@ -198,6 +198,7 @@ Expected task directories:
 - [TASK-134: Support Patch Debug Diagnostics](run/TASK-134-support-patch-debug-diagnostics.md)
 - [TASK-135: Support Caption Capture Interpolation](run/TASK-135-support-caption-capture-interpolation.md)
 - [TASK-136: Use Block Scalar Markdown In Init Sample](init/TASK-136-use-block-scalar-markdown-in-init-sample.md)
+- [TASK-137: Expand Skill Export Operating Guide](explain/TASK-137-expand-skill-export-operating-guide.md)
 
 ## Pending
 
@@ -210,6 +211,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-137: Expand Skill Export Operating Guide](explain/TASK-137-expand-skill-export-operating-guide.md)
 - [x] [TASK-136: Use Block Scalar Markdown In Init Sample](init/TASK-136-use-block-scalar-markdown-in-init-sample.md)
 - [x] [TASK-135: Support Caption Capture Interpolation](run/TASK-135-support-caption-capture-interpolation.md)
 - [x] [TASK-134: Support Patch Debug Diagnostics](run/TASK-134-support-patch-debug-diagnostics.md)

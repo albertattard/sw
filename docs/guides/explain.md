@@ -23,7 +23,7 @@ Print all supported explanations:
 sw explain --all
 ```
 
-Export a Codex skill routing file:
+Export a Codex skill operating guide:
 
 ```shell
 sw explain --output-format skill
@@ -40,8 +40,9 @@ sw explain --output-format skill --output-file
 - Use `sw explain` for behavior, defaults, constraints, and discovery paths.
 - Use `sw help` for exact command-line syntax.
 - Use `sw example` for copyable runbook snippets.
-- The generated skill file should stay small and route agents back to
-  `sw explain`.
+- The generated skill file is a compact operating guide. It gives agents the
+  first workflow rules they need, then routes detailed behavior questions back
+  to `sw explain`, `sw help`, and `sw example`.
 
 For exact syntax, run `sw help explain`. For the behavior contract, read
 [SPEC-009](../spec/SPEC-009-explain-feature-contract.md).

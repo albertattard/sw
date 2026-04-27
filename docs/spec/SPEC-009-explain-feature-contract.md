@@ -186,11 +186,16 @@ When `--output-format=skill` is selected:
 - The default file destination for `--output-file` without a value is the
   standard Codex skill path for the `sw` skill, such as
   `~/.codex/skills/sw/SKILL.md`.
-- The skill content is intentionally minimal and acts as a routing layer rather
-  than an embedded contract dump.
-- The skill content should direct agents to start with `sw explain --all`.
+- The skill content is a compact operating guide rather than an embedded
+  contract dump.
+- The skill content should direct agents to start with `sw explain --all` when
+  they need the current authoritative command contract.
 - The skill content should treat `sw` output as authoritative over cached
   assumptions.
+- The skill content should summarize when to use `sw`, common workflows,
+  authoring defaults, and agent rules that prevent common runbook mistakes.
+- The skill content should not duplicate every topic, option, field, enum, or
+  subcommand contract from `sw explain --all`.
 - The output should remain deterministic so repeated exports produce stable
   skill content aside from intentional contract changes.
 
@@ -295,11 +300,11 @@ When `--output-format=skill` is selected:
       `sw explain --output-format=skill --output-file=<path> --force`, the CLI
       overwrites the target file and exits with `0`.
 - [ ] Given `sw explain --output-format=skill`, the generated skill content is
-      concise and routes agents to `sw explain --all` instead of embedding the
-      full command map.
+      compact and routes agents to `sw explain --all` for the current
+      authoritative command contract instead of embedding the full command map.
 - [ ] Given `sw explain --output-format=skill`, the generated skill content
-      tells agents to treat `sw` output as authoritative over cached
-      assumptions.
+      gives agents a concise operating guide with common workflows, authoring
+      defaults, and validation/discovery rules.
 - [ ] Help output documents `--output-format=<format>`,
       `--output-file[=<path>]`, and `--force` for `explain`.
 - [ ] Help output documents the `explain` command and the `--all` option.
