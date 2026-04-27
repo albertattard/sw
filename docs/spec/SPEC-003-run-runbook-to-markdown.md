@@ -226,6 +226,16 @@ in the runbook.
 - Each non-empty rendered Markdown line is prefixed with that many spaces.
 - Empty lines remain empty.
 
+### Generated Fenced Blocks
+
+- Generated fenced code blocks use backtick fences by default.
+- If the fenced content contains a run of three or more backticks, rendering
+  uses tilde fences when that avoids closing the generated block prematurely.
+- If fenced content contains both backtick and tilde runs, rendering chooses a
+  fence delimiter longer than any same-character run in the fenced content.
+- The fence language label, when present, is preserved regardless of whether
+  the delimiter uses backticks or tildes.
+
 ### DisplayFile Entries
 
 - `DisplayFile` entries copy the contents of the referenced file into the
@@ -930,6 +940,9 @@ in the runbook.
       on a later line.
 - [ ] Given a runbook with `Command` entries, the generated Markdown includes
       fenced command blocks.
+- [ ] Given a `Command` entry whose command text contains a Markdown backtick
+      fence, the generated Markdown uses a fence delimiter that does not close
+      prematurely.
 - [ ] Given a `Command` entry with `indent`, each rendered line in that
       command section is prefixed with the configured number of spaces.
 - [ ] Given `sw run --verbose`, a `Markdown` entry summary uses the first
@@ -1116,6 +1129,9 @@ in the runbook.
       not introduce an extra blank line before the captured output fence.
 - [ ] Given a `Command` entry with `output.content_type: json`, the generated
       Markdown uses a `json` fenced block for captured output.
+- [ ] Given rendered command output containing a Markdown backtick fence, the
+      generated Markdown uses a fence delimiter that does not close
+      prematurely while preserving the output content type label.
 - [ ] Given a `Command` entry with `output.content_type: xml`, the generated
       Markdown uses an `xml` fenced block for captured output.
 - [ ] Given a `Command` entry with `output.content_type: html`, the generated

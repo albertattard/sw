@@ -199,6 +199,7 @@ Expected task directories:
 - [TASK-135: Support Caption Capture Interpolation](run/TASK-135-support-caption-capture-interpolation.md)
 - [TASK-136: Use Block Scalar Markdown In Init Sample](init/TASK-136-use-block-scalar-markdown-in-init-sample.md)
 - [TASK-137: Expand Skill Export Operating Guide](explain/TASK-137-expand-skill-export-operating-guide.md)
+- [TASK-138: Avoid Premature Generated Fence Closures](run/TASK-138-avoid-premature-generated-fence-closures.md)
 
 ## Pending
 
@@ -211,6 +212,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-138: Avoid Premature Generated Fence Closures](run/TASK-138-avoid-premature-generated-fence-closures.md)
 - [x] [TASK-137: Expand Skill Export Operating Guide](explain/TASK-137-expand-skill-export-operating-guide.md)
 - [x] [TASK-136: Use Block Scalar Markdown In Init Sample](init/TASK-136-use-block-scalar-markdown-in-init-sample.md)
 - [x] [TASK-135: Support Caption Capture Interpolation](run/TASK-135-support-caption-capture-interpolation.md)

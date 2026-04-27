@@ -718,12 +718,7 @@ fn render_display_file(entry: &Value, runbook_path: &Path) -> Result<String, Ren
     let contents = slice_display_file_contents(&contents, start_line, line_count, &display_path)?;
     let contents = apply_display_file_offset(entry, contents)?;
 
-    let mut section = format!("```{}\n", display_file_content_type(&display_path));
-    section.push_str(&contents);
-    if !contents.ends_with('\n') && !contents.is_empty() {
-        section.push('\n');
-    }
-    section.push_str("```");
+    let section = fenced_block(Some(display_file_content_type(&display_path)), &contents);
     apply_display_file_indent(entry, section)
 }
 
@@ -1292,12 +1287,7 @@ fn render_patch(
         emit_debug_lines(true, &debug_lines);
     }
 
-    let mut section = String::from("```diff\n");
-    section.push_str(&lines.join("\n"));
-    if !lines.is_empty() {
-        section.push('\n');
-    }
-    section.push_str("```");
+    let section = fenced_block(Some("diff"), &lines.join("\n"));
     apply_indent(entry, section, "Patch")
 }
 
@@ -1319,7 +1309,7 @@ fn render_command(
     let resolved_command_lines = interpolate_command_lines(&command_lines, &state.captured_values)?;
     let command_text = resolved_command_lines.join("\n");
     let rendered_command_text = render_command_text(entry, &command_text)?;
-    let mut section = format!("```shell\n{rendered_command_text}\n```");
+    let mut section = fenced_block(Some("shell"), &rendered_command_text);
     let execution = execute_command(entry, &command_text, runbook_path, timeout_cleanup)?;
     let debug_enabled = entry_debug_enabled(entry, state.debug_all_entries);
     let mut debug_lines = Vec::new();
@@ -1467,12 +1457,10 @@ fn append_output(
     }
 
     section.push_str("\n\n");
-    section.push_str(output_fence_open(output)?);
-    section.push_str(rendered_output);
-    if !rendered_output.ends_with('\n') && !rendered_output.is_empty() {
-        section.push('\n');
-    }
-    section.push_str("```");
+    section.push_str(&fenced_block(
+        output_fence_language(output)?,
+        rendered_output,
+    ));
     Ok(())
 }
 
@@ -1805,17 +1793,65 @@ fn prerequisite_failure(name: &str, help: Option<&str>, detail: &str) -> RenderE
     RenderError::CommandFailed(message)
 }
 
-fn output_fence_open(output: &Value) -> Result<&'static str, RenderError> {
+fn output_fence_language(output: &Value) -> Result<Option<&'static str>, RenderError> {
     match output.get("content_type").and_then(Value::as_str) {
-        Some("text") | None => Ok("```\n"),
-        Some("json") => Ok("```json\n"),
-        Some("xml") => Ok("```xml\n"),
-        Some("html") => Ok("```html\n"),
-        Some("java") => Ok("```java\n"),
+        Some("text") | None => Ok(None),
+        Some("json") => Ok(Some("json")),
+        Some("xml") => Ok(Some("xml")),
+        Some("html") => Ok(Some("html")),
+        Some("java") => Ok(Some("java")),
         Some(other) => Err(RenderError::Operational(format!(
             "Unsupported output content type `{other}`"
         ))),
     }
+}
+
+fn fenced_block(language: Option<&str>, contents: &str) -> String {
+    let fence = fence_delimiter_for(contents);
+    let mut block = String::new();
+    block.push_str(&fence);
+    if let Some(language) = language {
+        block.push_str(language);
+    }
+    block.push('\n');
+    block.push_str(contents);
+    if !contents.ends_with('\n') && !contents.is_empty() {
+        block.push('\n');
+    }
+    block.push_str(&fence);
+    block
+}
+
+fn fence_delimiter_for(contents: &str) -> String {
+    let backtick_run = longest_marker_run(contents, '`');
+    if backtick_run < 3 {
+        return "```".to_string();
+    }
+
+    let tilde_run = longest_marker_run(contents, '~');
+    if tilde_run < 3 {
+        return "~~~".to_string();
+    }
+
+    if backtick_run <= tilde_run {
+        "`".repeat(backtick_run + 1)
+    } else {
+        "~".repeat(tilde_run + 1)
+    }
+}
+
+fn longest_marker_run(contents: &str, marker: char) -> usize {
+    let mut longest = 0;
+    let mut current = 0;
+    for character in contents.chars() {
+        if character == marker {
+            current += 1;
+            longest = longest.max(current);
+        } else {
+            current = 0;
+        }
+    }
+    longest
 }
 
 fn format_entry_for_debug(entry: &Value) -> String {

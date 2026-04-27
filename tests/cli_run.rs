@@ -798,6 +798,35 @@ fn command_indent_applies_to_shell_caption_and_output() {
 }
 
 #[test]
+fn command_block_uses_tilde_fence_when_command_contains_backtick_fence() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("example.yaml"),
+        r#"entries:
+  - type: Command
+    commands: |
+      cat <<'EOF' > 'Example.md'
+      ```markdown
+      Some markdown code
+      ```
+
+      EOF
+    indent: 3
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run", "--input-file", "example.yaml"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains(
+        "   ~~~shell\n   cat <<'EOF' > 'Example.md'\n   ```markdown\n   Some markdown code\n   ```\n\n   EOF\n   ~~~"
+    ));
+    assert!(!readme.contains("   ```shell\n   cat <<'EOF' > 'Example.md'"));
+}
+
+#[test]
 fn markdown_indent_prefixes_each_non_empty_rendered_line() {
     let dir = prepare_workspace();
     write_runbook(
@@ -1486,6 +1515,29 @@ fn json_output_content_type_uses_json_fenced_block() {
     assert!(output.status.success());
     let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
     assert!(readme.contains("```json\n{\"name\":\"Albert Attard\"}\n```"));
+}
+
+#[test]
+fn command_output_uses_tilde_fence_when_output_contains_backtick_fence() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("example.yaml"),
+        r#"entries:
+  - type: Command
+    commands: |
+      printf '%s\n' '```json' '{"status":"ok"}' '```'
+    output:
+      content_type: json
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run", "--input-file", "example.yaml"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("~~~json\n```json\n{\"status\":\"ok\"}\n```\n~~~"));
+    assert!(!readme.contains("```json\n```json\n{\"status\":\"ok\"}\n```\n```"));
 }
 
 #[test]
