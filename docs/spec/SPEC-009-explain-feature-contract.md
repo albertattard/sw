@@ -163,6 +163,10 @@ When a topic covers command output captions, the explanation should state that
 `output.caption` can interpolate captured variables, including captures
 produced by the same `Command` entry before the caption is rendered.
 
+When a topic covers runbook debugging stops, the explanation should document
+the `Breakpoint` entry, its optional `message`, its successful stop behavior,
+and the fact that later entries are not processed after the breakpoint.
+
 When a topic covers command capture behavior, the explanation should document
 the `capture` rule shape enough for agents to author a valid rule without
 guessing enum names. In particular, `run` should explain that `capture.source`

@@ -75,6 +75,7 @@ entry shapes:
 
 ```shell
 sw example Command
+sw example Breakpoint
 sw example DisplayFile
 sw example Prerequisite
 sw example Patch
@@ -93,6 +94,14 @@ Useful `Command` fields include:
 - `capture`: store command output for later interpolation.
 - `debug`: enable diagnostics for a single supported entry, such as `Command`
   or `Patch`.
+
+Use `Breakpoint` while debugging a runbook when you want `sw run` to stop
+successfully before later entries:
+
+```yaml
+- type: Breakpoint
+  message: Stop before the slow section
+```
 
 ## Notes
 

@@ -122,6 +122,32 @@ fn check_succeeds_when_prerequisites_pass_and_skips_main_commands() {
 }
 
 #[test]
+fn check_stops_prerequisite_evaluation_at_breakpoint() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Breakpoint
+    message: Stop before later environment checks
+
+  - type: Prerequisite
+    checks:
+      - kind: command
+        name: Should not run
+        contents: This prerequisite is after the breakpoint.
+        commands: exit 42
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["check"], &dir);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("All prerequisite checks passed"));
+}
+
+#[test]
 fn check_accepts_yaml_input_file() {
     let dir = prepare_workspace();
     write_runbook(

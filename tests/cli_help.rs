@@ -54,6 +54,7 @@ fn help_subcommand_for_known_topic_prints_targeted_help() {
     assert!(stdout.contains(
         "`Markdown`, `DisplayFile`, `Patch`, and `Command` entries may declare `indent`"
     ));
+    assert!(stdout.contains("`Breakpoint` entries stop processing successfully"));
     assert!(stdout.contains("`Patch.patch` may be authored as a YAML block scalar"));
     assert!(stdout.contains("File-based runbooks default to YAML"));
     assert!(stdout.contains("--output-file"));
@@ -123,6 +124,7 @@ fn example_help_prints_help() {
     assert!(stdout.contains("trim_empty_lines"));
     assert!(stdout.contains("stream"));
     assert!(stdout.contains("The `Command` example includes current nested output fields"));
+    assert!(stdout.contains("sw example Breakpoint"));
     assert!(stdout.contains("sw example DisplayFile"));
     assert!(stdout.contains("collapse_method_body"));
 }

@@ -181,6 +181,65 @@ fn validate_accepts_command_working_dir_in_yaml() {
 }
 
 #[test]
+fn validate_accepts_breakpoint_entry() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Breakpoint
+    message: Stop before the failing section
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(
+        &[
+            "validate",
+            "--input-file",
+            "sw-runbook.yaml",
+            "--output-format",
+            "json",
+        ],
+        &dir,
+    );
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": true"));
+    assert!(stdout.contains("\"errors\": []"));
+}
+
+#[test]
+fn validate_rejects_unknown_breakpoint_fields() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Breakpoint
+    message: Stop here
+    indent: 2
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(
+        &[
+            "validate",
+            "--input-file",
+            "sw-runbook.yaml",
+            "--output-format",
+            "json",
+        ],
+        &dir,
+    );
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"path\": \"entries[0].indent\""));
+    assert!(stdout.contains("is not a supported Breakpoint property"));
+}
+
+#[test]
 fn validate_accepts_json_runbook_from_stdin() {
     let dir = prepare_workspace();
     let stdin = fs::read_to_string("tests/fixtures/sw-runbook-anonymized.json")

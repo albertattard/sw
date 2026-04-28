@@ -47,6 +47,10 @@ fn parse_output_format(value: Option<&str>) -> Result<ExampleOutputFormat, Strin
 
 fn example_for_topic(topic: &str) -> Option<ExampleSnippet> {
     match topic.to_ascii_lowercase().as_str() {
+        "breakpoint" => Some(ExampleSnippet {
+            json: BREAKPOINT_EXAMPLE_JSON,
+            yaml: BREAKPOINT_EXAMPLE_YAML,
+        }),
         "command" => Some(ExampleSnippet {
             json: COMMAND_EXAMPLE_JSON,
             yaml: COMMAND_EXAMPLE_YAML,
@@ -66,6 +70,14 @@ fn example_for_topic(topic: &str) -> Option<ExampleSnippet> {
         _ => None,
     }
 }
+
+const BREAKPOINT_EXAMPLE_JSON: &str = r#"{
+  "type": "Breakpoint",
+  "message": "Stop here while debugging this runbook"
+}"#;
+
+const BREAKPOINT_EXAMPLE_YAML: &str = r#"type: Breakpoint
+message: Stop here while debugging this runbook"#;
 
 const COMMAND_EXAMPLE_JSON: &str = r#"{
   "type": "Command",

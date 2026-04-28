@@ -19,7 +19,7 @@ source of truth for the command contract. For exact command-line syntax, use
 ## Editing Guides
 
 - [Runbook entities](./entities.md): choose and edit `Heading`, `Markdown`,
-  `DisplayFile`, `Prerequisite`, `Patch`, and `Command` entries.
+  `DisplayFile`, `Prerequisite`, `Breakpoint`, `Patch`, and `Command` entries.
 
 ## Subcommand Guides
 

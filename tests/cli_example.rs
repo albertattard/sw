@@ -106,6 +106,46 @@ fn command_example_prints_valid_json_entry_when_requested() {
 }
 
 #[test]
+fn breakpoint_example_prints_valid_yaml_entry() {
+    let output = run(&["example", "Breakpoint"]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.trim_start().starts_with("type: Breakpoint\n"));
+    let value: serde_json::Value =
+        serde_norway::from_str(&stdout).expect("example output should be valid yaml");
+    assert_eq!(value["type"], "Breakpoint");
+    assert!(
+        value["message"]
+            .as_str()
+            .expect("message should be a string")
+            .contains("debugging")
+    );
+}
+
+#[test]
+fn breakpoint_example_prints_valid_json_entry_when_requested() {
+    let output = run(&["example", "Breakpoint", "--output-format", "json"]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        stdout
+            .trim_start()
+            .starts_with("{\n  \"type\": \"Breakpoint\"")
+    );
+    let value: serde_json::Value =
+        serde_json::from_str(&stdout).expect("example output should be valid json");
+    assert_eq!(value["type"], "Breakpoint");
+    assert!(
+        value["message"]
+            .as_str()
+            .expect("message should be a string")
+            .contains("debugging")
+    );
+}
+
+#[test]
 fn display_file_example_prints_valid_yaml_entry() {
     let output = run(&["example", "DisplayFile"]);
 

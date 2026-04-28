@@ -209,6 +209,83 @@ fn run_command_accepts_yaml_input_file() {
 }
 
 #[test]
+fn breakpoint_stops_run_successfully_and_skips_later_entries() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Heading
+    level: H1
+    title: Breakpoint Demo
+
+  - type: Command
+    commands: |
+      printf 'before\n' > sequence.txt
+    cleanup: |
+      printf 'cleanup\n' > cleanup.txt
+
+  - type: Breakpoint
+    message: Inspect generated output before continuing
+
+  - type: Command
+    commands: |
+      printf 'after\n' >> sequence.txt
+
+  - type: Markdown
+    contents: This should not render.
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    assert_eq!(
+        fs::read_to_string(dir.join("sequence.txt")).expect("missing sequence"),
+        "before\n"
+    );
+    assert_eq!(
+        fs::read_to_string(dir.join("cleanup.txt")).expect("missing cleanup"),
+        "cleanup\n"
+    );
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("# Breakpoint Demo"));
+    assert!(readme.contains("> Breakpoint reached: Inspect generated output before continuing"));
+    assert!(!readme.contains("This should not render."));
+}
+
+#[test]
+fn breakpoint_preserves_unresolved_placeholders_from_skipped_later_captures() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Markdown
+    contents: |
+      Captured later: @{later_value}
+
+  - type: Breakpoint
+
+  - type: Command
+    commands: printf 'later\n'
+    capture:
+      - name: later_value
+        source: stdout
+        stage: raw
+        pattern: '(later)'
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("Captured later: @{later_value}"));
+    assert!(readme.contains("> Breakpoint reached: Stop here"));
+}
+
+#[test]
 fn run_command_accepts_scalar_prose_contents_in_yaml_input_file() {
     let dir = prepare_workspace();
     write_runbook(&dir, "sw-runbook-scalar-prose.yaml", "example.yaml");

@@ -31,6 +31,8 @@ sw example Command
 - Use `DisplayFile` to show source code or configuration from the repository.
 - Use `Prerequisite` to document and verify tools that must exist before the
   workflow runs.
+- Use `Breakpoint` to intentionally stop a run while debugging or developing a
+  runbook.
 - Use `Patch` to temporarily modify a file during a run and restore it
   afterward.
 - Use `Command` to run shell commands and render verified output.
@@ -118,6 +120,20 @@ code is more important than the implementation details:
       - type: collapse_method_body
         name: initialize
 ```
+
+## Breakpoint
+
+Use `Breakpoint` to stop a runbook at a known point while troubleshooting.
+
+```yaml
+- type: Breakpoint
+  message: Inspect the generated output before continuing
+```
+
+`sw run` exits successfully when it reaches a breakpoint, writes the generated
+output up to that point, skips later entries, and still runs cleanup or patch
+restoration registered by earlier entries. `sw check` also stops evaluating
+later prerequisite entries after a breakpoint.
 
 ## Prerequisite
 
@@ -312,6 +328,7 @@ binary for current discovery:
 ```shell
 sw explain --all
 sw example Command
+sw example Breakpoint
 sw example DisplayFile
 sw example Prerequisite
 sw example Patch

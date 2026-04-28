@@ -104,6 +104,7 @@ pub(crate) fn render_markdown(
     let mut patch_restore_stack = Vec::new();
     let mut patch_snapshots = HashMap::new();
     let mut failure: Option<RenderError> = None;
+    let mut breakpoint_reached = false;
     let mut state = RenderState {
         datetime_anchors: HashMap::new(),
         captured_values: HashMap::new(),
@@ -127,6 +128,10 @@ pub(crate) fn render_markdown(
             },
             "DisplayFile" => RenderSection::Ready(render_display_file(entry, runbook_path)?),
             "Prerequisite" => RenderSection::Ready(render_prerequisite_entry(entry)?),
+            "Breakpoint" => {
+                breakpoint_reached = true;
+                RenderSection::Ready(render_breakpoint(entry)?)
+            }
             "Patch" => match render_patch(
                 entry,
                 runbook_path,
@@ -182,9 +187,17 @@ pub(crate) fn render_markdown(
 
         progress.finish_entry(progress_line);
         sections.push(rendered);
+
+        if breakpoint_reached {
+            break;
+        }
     }
 
-    let rendered_sections = render_sections(&sections, &state.captured_values, failure.is_none())?;
+    let rendered_sections = render_sections(
+        &sections,
+        &state.captured_values,
+        failure.is_none() && !breakpoint_reached,
+    )?;
 
     let mut output = GENERATED_MARKER.to_string();
     if !rendered_sections.is_empty() {
@@ -455,6 +468,7 @@ fn entry_summary(entry: &Value, runbook_path: &Path) -> String {
             .unwrap_or_else(|| "Command".to_string()),
         "DisplayFile" => display_file_summary(entry, runbook_path),
         "Prerequisite" => prerequisite_summary(entry),
+        "Breakpoint" => breakpoint_summary(entry),
         "Patch" => patch_summary(entry, runbook_path),
         other => other.to_string(),
     };
@@ -529,6 +543,16 @@ fn patch_summary(entry: &Value, runbook_path: &Path) -> String {
         .unwrap_or("<missing path>");
     let base_dir = runbook_path.parent().unwrap_or_else(|| Path::new("."));
     base_dir.join(relative_path).display().to_string()
+}
+
+fn breakpoint_summary(entry: &Value) -> String {
+    entry
+        .get("message")
+        .and_then(Value::as_str)
+        .map(str::trim)
+        .filter(|message| !message.is_empty())
+        .unwrap_or("Stop here")
+        .to_string()
 }
 
 fn truncate_progress_summary(summary: &str, max_chars: usize) -> String {
@@ -669,6 +693,19 @@ mod tests {
 
         let summary = entry_summary(&display_file, Path::new("/tmp/sw-runbook.json"));
         assert!(summary.contains("DisplayFile: /tmp/./src/main.java (lines 10-12)"));
+    }
+
+    #[test]
+    fn breakpoint_summary_uses_message_when_present() {
+        let breakpoint = json!({
+            "type": "Breakpoint",
+            "message": "Inspect this state"
+        });
+
+        assert_eq!(
+            entry_summary(&breakpoint, Path::new("sw-runbook.yaml")),
+            "Breakpoint: Inspect this state"
+        );
     }
 
     #[test]
@@ -1178,6 +1215,19 @@ fn render_heading(entry: &Value) -> Result<String, RenderError> {
     Ok(format!("{marker} {title}"))
 }
 
+fn render_breakpoint(entry: &Value) -> Result<String, RenderError> {
+    if let Some(message) = entry.get("message")
+        && !message.is_string()
+    {
+        return Err(RenderError::Operational(
+            "Breakpoint message must be a string".to_string(),
+        ));
+    }
+
+    let message = breakpoint_summary(entry);
+    Ok(format!("> Breakpoint reached: {message}"))
+}
+
 fn markdown_lines(entry: &Value) -> Result<Vec<String>, RenderError> {
     let contents = entry.get("contents").ok_or_else(|| {
         RenderError::Operational("Markdown entry is missing contents".to_string())
@@ -1572,6 +1622,10 @@ pub(crate) fn check_prerequisites(runbook: &Value) -> Result<(), RenderError> {
 
 fn run_prerequisite_checks(entries: &[Value]) -> Result<(), RenderError> {
     for entry in entries {
+        if entry.get("type").and_then(Value::as_str) == Some("Breakpoint") {
+            break;
+        }
+
         let Some("Prerequisite") = entry.get("type").and_then(Value::as_str) else {
             continue;
         };

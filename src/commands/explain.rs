@@ -185,7 +185,7 @@ fn build_skill_document() -> String {
         "## Common Workflows".to_string(),
         "".to_string(),
         "- Use `sw init` to create a starter YAML runbook.".to_string(),
-        "- Use `sw example <EntryType>` to get a current YAML snippet for entries such as `Command`, `DisplayFile`, `Patch`, or `Prerequisite`.".to_string(),
+        "- Use `sw example <EntryType>` to get a current YAML snippet for entries such as `Breakpoint`, `Command`, `DisplayFile`, `Patch`, or `Prerequisite`.".to_string(),
         "- Use `sw validate --input-file <runbook>` after editing a runbook.".to_string(),
         "- Use `sw check --input-file <runbook>` to run prerequisite checks without executing the full workflow.".to_string(),
         "- Use `sw run --input-file <runbook>` to execute the runbook and generate Markdown output.".to_string(),
@@ -309,6 +309,7 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "When `--input-file=-` is used, stdin is parsed as JSON unless `--input-format=yaml` is provided.",
                 "Command output trims leading and trailing empty lines by default unless `output.trim_empty_lines` overrides it.",
                 "`Command` entries default to a `30 seconds` timeout unless `timeout` is provided.",
+                "`Breakpoint` entries stop `sw run` successfully when reached.",
             ],
             inputs: &[
                 "`sw run --input-file <runbook.{json|yaml|yml}>`",
@@ -342,6 +343,7 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "`Command.debug` and `Patch.debug` enable diagnostics for one entry, while global `--debug` enables diagnostics for all supported debuggable entries.",
                 "A command entry remains active until the command shell has exited and the captured stdout and stderr streams have both closed, so background processes that inherit those pipes can keep the entry open until they exit or the timeout is reached.",
                 "Entries execute in runbook order.",
+                "`Breakpoint` may declare an optional string `message`; when reached, it renders a breakpoint note, skips later entries, preserves unresolved placeholders from skipped later captures, and still runs cleanup or patch restoration registered by earlier entries.",
                 "Command execution and rendering are part of the same workflow.",
                 "Machine-readable contracts live in the runbook input, not in stdout.",
                 "`Markdown`, `DisplayFile`, `Patch`, and `Command` entries may declare `indent` to prefix each non-empty rendered line and keep nested Markdown structures readable.",
@@ -405,6 +407,7 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "`Markdown.contents`, `Command.commands`, `Patch.patch`, `Prerequisite.checks[*].contents`, and `Prerequisite.checks[*].commands` may be a single string or an array of strings.",
                 "The runbook is validated before prerequisite execution begins.",
                 "Checks run in runbook order and stop on the first failing prerequisite.",
+                "`Breakpoint` stops `check` from evaluating prerequisite entries declared after the breakpoint.",
                 "Built-in prerequisite kinds include `java`, including version rules such as `21` or `21+`.",
                 "Normal `Command` entries keep their separate `30 seconds` default timeout for `sw run`.",
             ],
@@ -497,7 +500,7 @@ fn explanations() -> Vec<Explanation<'static>> {
             inputs: &[
                 "`sw example <entity-type>`",
                 "`--output-format yaml|json`",
-                "Supported topics currently include `Command`, `DisplayFile`, `Patch`, and `Prerequisite`.",
+                "Supported topics currently include `Breakpoint`, `Command`, `DisplayFile`, `Patch`, and `Prerequisite`.",
             ],
             outputs: &[
                 "Writes a single YAML snippet to stdout by default.",
@@ -511,6 +514,7 @@ fn explanations() -> Vec<Explanation<'static>> {
             constraints: &[
                 "Example output is documentation-oriented and may need editing before use.",
                 "Use `example` for snippet shape, not for command behavior or defaults.",
+                "The `Breakpoint` example shows the minimal debugging stop shape with an optional message.",
                 "The `Command` example includes current nested fields such as `trim_empty_lines`, `stream`, `cleanup`, and `debug`.",
                 "The `DisplayFile` example includes the Java `collapse_method_body` transform for collapsing method bodies.",
                 "The printed snippet is intended to remain a stable starting point for users and agents.",

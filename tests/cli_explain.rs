@@ -69,6 +69,7 @@ fn explain_run_prints_concise_contract_summary() {
     assert!(stdout.contains(
         "`Command` entries default to a `30 seconds` timeout unless `timeout` is provided."
     ));
+    assert!(stdout.contains("`Breakpoint` entries stop `sw run` successfully when reached."));
     assert!(stdout.contains(
         "Command output can render `stdout`, `stderr`, or `combined` with `output.stream`; if omitted, rendered output defaults to `combined`."
     ));
@@ -132,6 +133,9 @@ fn explain_run_prints_concise_contract_summary() {
     ));
     assert!(stdout.contains(
         "A command entry remains active until the command shell has exited and the captured stdout and stderr streams have both closed, so background processes that inherit those pipes can keep the entry open until they exit or the timeout is reached."
+    ));
+    assert!(stdout.contains(
+        "`Breakpoint` may declare an optional string `message`; when reached, it renders a breakpoint note, skips later entries, preserves unresolved placeholders from skipped later captures, and still runs cleanup or patch restoration registered by earlier entries."
     ));
     assert!(stdout.contains(
         "`Markdown.contents`, `Command.commands`, `Patch.patch`, `Prerequisite.checks[*].contents`, and `Prerequisite.checks[*].commands` may be a single string or an array of strings."
@@ -266,6 +270,9 @@ fn explain_check_guides_agent_to_prerequisites_and_examples() {
     ));
     assert!(stdout.contains("Built-in prerequisite kinds include `java`"));
     assert!(stdout.contains(
+        "`Breakpoint` stops `check` from evaluating prerequisite entries declared after the breakpoint."
+    ));
+    assert!(stdout.contains(
         "Normal `Command` entries keep their separate `30 seconds` default timeout for `sw run`."
     ));
 }
@@ -360,6 +367,9 @@ fn explain_example_mentions_command_fields_in_example() {
         "The `Command` example includes current nested fields such as `trim_empty_lines`, `stream`, `cleanup`, and `debug`."
     ));
     assert!(stdout.contains(
+        "The `Breakpoint` example shows the minimal debugging stop shape with an optional message."
+    ));
+    assert!(stdout.contains(
         "The `DisplayFile` example includes the Java `collapse_method_body` transform for collapsing method bodies."
     ));
     assert!(stdout.contains(
@@ -411,6 +421,9 @@ fn explain_skill_prints_skill_document_to_stdout() {
     assert!(stdout.contains("## First Step"));
     assert!(stdout.contains("sw explain --all"));
     assert!(stdout.contains("## Common Workflows"));
+    assert!(stdout.contains(
+        "entries such as `Breakpoint`, `Command`, `DisplayFile`, `Patch`, or `Prerequisite`"
+    ));
     assert!(stdout.contains("Use `sw validate --input-file <runbook>` after editing a runbook."));
     assert!(stdout.contains(
         "Use `sw run --input-file <runbook>` to execute the runbook and generate Markdown output."

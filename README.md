@@ -157,7 +157,7 @@ Start with the [human guides](./docs/guides/README.md) for practical usage
 and examples. Each supported subcommand has its own guide page, and the
 [runbook entity editing guide](./docs/guides/entities.md) explains how to
 choose and edit entries such as `Markdown`, `DisplayFile`, `Prerequisite`,
-`Patch`, and `Command`.
+`Breakpoint`, `Patch`, and `Command`.
 
 AI agents should discover the current product contract from the installed
 binary:

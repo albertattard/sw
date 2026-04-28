@@ -32,6 +32,7 @@ The snippet is intended as a copyable starting point.
 - Optional output format argument: `--output-format yaml|json`
 
 In this increment, supported entity types include:
+- `Breakpoint`
 - `Command`
 - `DisplayFile`
 - `Patch`
@@ -87,6 +88,8 @@ In this increment, supported entity types include:
   patch text is supported.
 - The `Patch` example should reflect the current troubleshooting contract by
   including `debug` when patch-scoped debug diagnostics are supported.
+- The `Breakpoint` example should show the minimal debug-stop shape and the
+  optional `message` field.
 - Example output is documentation-oriented and does not need to be executable
   without further user editing.
 
@@ -122,6 +125,10 @@ In this increment, supported entity types include:
 - [ ] Given `sw example Prerequisite`, the example declares a Java version
       rule and does not imply vendor verification that the built-in check does
       not perform.
+- [ ] Given `sw example Breakpoint`, the CLI prints a valid YAML example of a
+      `Breakpoint` entry.
+- [ ] Given `sw example Breakpoint --output-format json`, the CLI prints a
+      valid JSON example of a `Breakpoint` entry.
 - [ ] Given `sw example Command --output-format yaml`, the CLI prints the same
       YAML shape as the default mode.
 - [ ] Given `sw example Command --output-format json`, the CLI prints a valid

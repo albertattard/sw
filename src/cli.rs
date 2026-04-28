@@ -89,7 +89,7 @@ pub struct FormatArgs {
 
 #[derive(Debug, clap::Args)]
 #[command(
-    after_help = "Runbook-authored `Command` fields such as `trim_empty_lines`, `stream`, and `cleanup` are configured in the runbook, not as CLI flags.\n`Markdown`, `DisplayFile`, `Patch`, and `Command` entries may declare `indent` to nest rendered output inside surrounding Markdown structure.\n`Patch.patch` may be authored as a YAML block scalar or an array of patch lines.\nCaptured variables can be referenced from Markdown with `@{name}` and escaped literally with `@@{name}`.\nFile-based runbooks default to YAML, while `--input-file=-` defaults to JSON unless you set `--input-format=yaml`.\n`Command` entries default to a `30 seconds` timeout, while command-based prerequisite checks default to `5 seconds` unless the runbook sets `timeout`.\n`DisplayFile` fence detection currently recognizes `.java` as `java`, `.sql` as `sql`, and `.xml` as `xml`; other extensions render as `text`.\nUse `--verbose-mode=plain` for SSH-safe line-based progress output when terminal redraws are unreliable.\nUse `sw example Command` for a current YAML snippet and `sw example Command --output-format json` when you need the JSON shape.\nUse `sw explain run` for behavior and defaults."
+    after_help = "Runbook-authored `Command` fields such as `trim_empty_lines`, `stream`, and `cleanup` are configured in the runbook, not as CLI flags.\n`Markdown`, `DisplayFile`, `Patch`, and `Command` entries may declare `indent` to nest rendered output inside surrounding Markdown structure.\n`Breakpoint` entries stop processing successfully when reached and can include an optional `message`.\n`Patch.patch` may be authored as a YAML block scalar or an array of patch lines.\nCaptured variables can be referenced from Markdown with `@{name}` and escaped literally with `@@{name}`.\nFile-based runbooks default to YAML, while `--input-file=-` defaults to JSON unless you set `--input-format=yaml`.\n`Command` entries default to a `30 seconds` timeout, while command-based prerequisite checks default to `5 seconds` unless the runbook sets `timeout`.\n`DisplayFile` fence detection currently recognizes `.java` as `java`, `.sql` as `sql`, and `.xml` as `xml`; other extensions render as `text`.\nUse `--verbose-mode=plain` for SSH-safe line-based progress output when terminal redraws are unreliable.\nUse `sw example Command` for a current YAML snippet and `sw example Command --output-format json` when you need the JSON shape.\nUse `sw explain run` for behavior and defaults."
 )]
 pub struct RunArgs {
     #[command(flatten)]
@@ -106,7 +106,7 @@ pub struct RunArgs {
 
 #[derive(Debug, clap::Args)]
 #[command(
-    after_help = "File-based runbooks default to YAML, while `--input-file=-` defaults to JSON unless you set `--input-format=yaml`.\nCommand-based prerequisite checks default to a `5 seconds` timeout unless the runbook sets `timeout`.\nUse `sw example Prerequisite` for a current prerequisite YAML snippet and `sw example Prerequisite --output-format json` when you need the JSON shape.\nUse `sw explain check` for behavior and defaults."
+    after_help = "File-based runbooks default to YAML, while `--input-file=-` defaults to JSON unless you set `--input-format=yaml`.\nCommand-based prerequisite checks default to a `5 seconds` timeout unless the runbook sets `timeout`.\n`Breakpoint` stops `check` from evaluating prerequisite entries declared after the breakpoint.\nUse `sw example Prerequisite` for a current prerequisite YAML snippet and `sw example Prerequisite --output-format json` when you need the JSON shape.\nUse `sw explain check` for behavior and defaults."
 )]
 pub struct CheckArgs {
     #[command(flatten)]
@@ -139,10 +139,10 @@ pub struct RunbookInputArgs {
 
 #[derive(Debug, clap::Args)]
 #[command(
-    after_help = "Defaults to YAML output for file-based authoring.\nUse `--output-format yaml|json` to choose the example format explicitly.\nThe `Command` example includes current nested output fields such as `trim_empty_lines` and `stream`, along with rewrite, capture, and cleanup examples.\nUse `sw example DisplayFile` when you need the Java `collapse_method_body` transform for collapsing method bodies."
+    after_help = "Defaults to YAML output for file-based authoring.\nUse `--output-format yaml|json` to choose the example format explicitly.\nUse `sw example Breakpoint` for the debugging stop entry shape.\nThe `Command` example includes current nested output fields such as `trim_empty_lines` and `stream`, along with rewrite, capture, and cleanup examples.\nUse `sw example DisplayFile` when you need the Java `collapse_method_body` transform for collapsing method bodies."
 )]
 pub struct ExampleArgs {
-    /// Example topic such as `Command`, `DisplayFile`, or `rewrite.keep_between`.
+    /// Example topic such as `Breakpoint`, `Command`, `DisplayFile`, or `Prerequisite`.
     pub topic: String,
 
     /// Output format: `yaml` or `json`. Defaults to `yaml`.

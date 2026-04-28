@@ -1096,6 +1096,27 @@ fn validate_entry(
             }
             None => push_error(&mut context.errors, format!("{path}.checks"), "is required"),
         },
+        "Breakpoint" => {
+            for key in object.keys() {
+                if key != "type" && key != "message" {
+                    push_error(
+                        &mut context.errors,
+                        format!("{path}.{key}"),
+                        "is not a supported Breakpoint property",
+                    );
+                }
+            }
+
+            if let Some(message) = object.get("message")
+                && !message.is_string()
+            {
+                push_error(
+                    &mut context.errors,
+                    format!("{path}.message"),
+                    "must be a string",
+                );
+            }
+        }
         "Patch" => {
             for key in object.keys() {
                 if key != "type"
