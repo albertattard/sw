@@ -201,6 +201,7 @@ Expected task directories:
 - [TASK-137: Expand Skill Export Operating Guide](explain/TASK-137-expand-skill-export-operating-guide.md)
 - [TASK-138: Avoid Premature Generated Fence Closures](run/TASK-138-avoid-premature-generated-fence-closures.md)
 - [TASK-139: Support Breakpoint Entry](run/TASK-139-support-breakpoint-entry.md)
+- [TASK-140: Report Total Verbose Run Time](run/TASK-140-report-total-verbose-run-time.md)
 
 ## Pending
 
@@ -214,6 +215,7 @@ Expected task directories:
 ## Done
 
 - [x] [TASK-139: Support Breakpoint Entry](run/TASK-139-support-breakpoint-entry.md)
+- [x] [TASK-140: Report Total Verbose Run Time](run/TASK-140-report-total-verbose-run-time.md)
 - [x] [TASK-138: Avoid Premature Generated Fence Closures](run/TASK-138-avoid-premature-generated-fence-closures.md)
 - [x] [TASK-137: Expand Skill Export Operating Guide](explain/TASK-137-expand-skill-export-operating-guide.md)
 - [x] [TASK-136: Use Block Scalar Markdown In Init Sample](init/TASK-136-use-block-scalar-markdown-in-init-sample.md)

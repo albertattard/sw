@@ -363,6 +363,7 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "`Command.output.caption` may interpolate captures available when the command output is rendered, including captures produced by the same command.",
                 "Command-based prerequisite checks use a shorter default timeout of `5 seconds` unless they declare `timeout`.",
                 "`--verbose-mode=plain` is useful for SSH and wrapper-driven execution where in-place redraws are fragile.",
+                "Verbose run output includes a final `Total run time: <duration>` line on stderr after processing stops.",
                 "Prefer `output.rewrite` with `type: datetime_shift` over `replace` for semantic dates and times so relative timing stays intact.",
                 "Use `replace` for dates and times only when the text is not semantically a date or time, or when `datetime_shift` cannot express the required format.",
             ],

@@ -452,7 +452,20 @@ fn verbose_run_reports_entry_progress_to_stderr() {
     );
     assert!(stderr.contains("[3/5] Command: printf 'first\\n' > sequence.txt ("));
     assert!(stderr.contains(" / 30s)"));
+    assert!(stderr.contains("Total run time: "));
     assert!(!stderr.contains("...)"));
+}
+
+#[test]
+fn verbose_run_reports_total_time_after_command_failure() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-run-failure.json", "sw-runbook.json");
+
+    let output = run_in_dir(&["run", "--verbose"], &dir);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("Total run time: "));
 }
 
 #[test]
@@ -467,6 +480,7 @@ fn verbose_flag_before_subcommand_uses_default_run_behavior() {
     assert!(stderr.contains("[1/5] Heading: Runbook execution (starting)"));
     assert!(stderr.contains("[1/5] Heading: Runbook execution ("));
     assert!(stderr.contains("[5/5] Command: printf 'Hello there\\n' ("));
+    assert!(stderr.contains("Total run time: "));
 }
 
 #[test]
@@ -485,6 +499,7 @@ fn verbose_plain_mode_reports_start_and_completion_lines() {
     assert!(stderr.contains("[3/5] Command: printf 'first\\n' > sequence.txt (starting / 30s)"));
     assert!(stderr.contains("[3/5] Command: printf 'first\\n' > sequence.txt ("));
     assert!(stderr.contains(" / 30s)"));
+    assert!(stderr.contains("Total run time: "));
 }
 
 #[test]
@@ -498,6 +513,7 @@ fn verbose_plain_mode_before_subcommand_uses_default_run_behavior() {
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(stderr.contains("[1/5] Heading: Runbook execution (starting)"));
     assert!(stderr.contains("[5/5] Command: printf 'Hello there\\n' (starting / 30s)"));
+    assert!(stderr.contains("Total run time: "));
 }
 
 #[test]

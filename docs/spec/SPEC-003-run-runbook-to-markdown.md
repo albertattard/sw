@@ -159,6 +159,10 @@ in the runbook.
 - A running timer does not use a trailing `...`; the fact that the value keeps
   changing is sufficient to show that the entry is still active.
 - When an entry finishes, the final elapsed time remains on the completed line.
+- After run processing stops, verbose output prints a final total elapsed time
+  line using the same elapsed-time formatting as entry progress.
+- The total elapsed time line is written for successful runs, breakpoints,
+  command failures, timeouts, cleanup failures, and patch restore failures.
 - When stderr is not a TTY, verbose progress falls back to non-live line-based
   output and does not attempt in-place timer updates.
 - `auto` mode chooses live progress only when stderr is a TTY and otherwise
@@ -824,6 +828,8 @@ in the runbook.
 - [ ] Given `sw run --verbose`, elapsed time is shown as seconds with one
       decimal place under one minute and as minutes plus seconds from one
       minute onward.
+- [ ] Given `sw run --verbose`, stderr includes a final total elapsed time line
+      after run processing stops.
 - [ ] Given an invalid runbook, the command exits with `2` and does not write a
       partial output file, and the human-readable validation output includes a
       nearby offending block for entry-scoped validation errors.
@@ -1002,6 +1008,8 @@ in the runbook.
       `...`.
 - [ ] Given `sw run --verbose` with stderr not attached to a TTY, progress
       output falls back to non-live line-based output.
+- [ ] Given `sw run --verbose` for a run that stops because of a command
+      failure, stderr still includes the final total elapsed time line.
 - [ ] Given `sw run --debug` for a `Command` entry with rewrites and captures,
       stderr includes enough interpolated rewrite and capture information to
       help diagnose matching failures.

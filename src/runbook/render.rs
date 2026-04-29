@@ -105,6 +105,7 @@ pub(crate) fn render_markdown(
     let mut patch_snapshots = HashMap::new();
     let mut failure: Option<RenderError> = None;
     let mut breakpoint_reached = false;
+    let run_started_at = Instant::now();
     let mut state = RenderState {
         datetime_anchors: HashMap::new(),
         captured_values: HashMap::new(),
@@ -215,6 +216,7 @@ pub(crate) fn render_markdown(
         post_run_failure_message("Patch restore failed", &patch_restore_failures);
     let post_run_message =
         combine_optional_messages(cleanup_message.as_deref(), patch_restore_message.as_deref());
+    progress.finish_run(run_started_at.elapsed());
 
     match failure {
         Some(RenderError::Timeout { message, .. }) => Err(RenderError::Timeout {
@@ -363,6 +365,19 @@ impl ProgressReporter {
                     progress.timeout.as_deref(),
                 );
                 let _ = writeln!(io::stderr());
+            }
+        }
+    }
+
+    fn finish_run(&mut self, elapsed: StdDuration) {
+        match self.mode {
+            ProgressMode::Off => {}
+            ProgressMode::Plain | ProgressMode::Live => {
+                let _ = writeln!(
+                    io::stderr(),
+                    "Total run time: {}",
+                    format_elapsed_time(elapsed)
+                );
             }
         }
     }

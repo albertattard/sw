@@ -168,6 +168,9 @@ fn explain_run_prints_concise_contract_summary() {
         "`--verbose-mode=plain` is useful for SSH and wrapper-driven execution where in-place redraws are fragile."
     ));
     assert!(stdout.contains(
+        "Verbose run output includes a final `Total run time: <duration>` line on stderr after processing stops."
+    ));
+    assert!(stdout.contains(
         "Use `sw example Command` when you need a current YAML snippet for output fields such as `trim_empty_lines` and `stream`, or add `--output-format json` when the JSON shape is what you need."
     ));
 }
