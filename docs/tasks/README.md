@@ -202,6 +202,7 @@ Expected task directories:
 - [TASK-138: Avoid Premature Generated Fence Closures](run/TASK-138-avoid-premature-generated-fence-closures.md)
 - [TASK-139: Support Breakpoint Entry](run/TASK-139-support-breakpoint-entry.md)
 - [TASK-140: Report Total Verbose Run Time](run/TASK-140-report-total-verbose-run-time.md)
+- [TASK-141: Upgrade Rust Toolchain To 1.95](repo-process/TASK-141-upgrade-rust-toolchain-to-1-95.md)
 
 ## Pending
 
@@ -214,6 +215,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-141: Upgrade Rust Toolchain To 1.95](repo-process/TASK-141-upgrade-rust-toolchain-to-1-95.md)
 - [x] [TASK-139: Support Breakpoint Entry](run/TASK-139-support-breakpoint-entry.md)
 - [x] [TASK-140: Report Total Verbose Run Time](run/TASK-140-report-total-verbose-run-time.md)
 - [x] [TASK-138: Avoid Premature Generated Fence Closures](run/TASK-138-avoid-premature-generated-fence-closures.md)

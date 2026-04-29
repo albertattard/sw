@@ -254,7 +254,7 @@ entries:
       cycles during interactive agent work. Because it rewrites formatting, it can
       change modified Rust files in a dirty worktree before they are staged.
 
-      The repository pins Rust `1.94.1` through `rust-toolchain.toml` so local
+      The repository pins Rust `1.95.0` through `rust-toolchain.toml` so local
       development and CI use the same compiler, formatter, and linter versions.
 
   - type: Heading

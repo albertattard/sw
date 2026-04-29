@@ -27,7 +27,7 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: 1.94.1
+          toolchain: 1.95.0
           components: rustfmt, clippy
 
       - name: Check formatting
@@ -100,7 +100,7 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: 1.94.1
+          toolchain: 1.95.0
 
       - name: Build release
         run: cargo build --release --verbose
