@@ -512,7 +512,8 @@ fn cleanup_chunks(cleanup: &[String]) -> Vec<Vec<String>> {
         let closed_braces = closes_brace_block(trimmed);
         brace_depth = brace_depth.saturating_sub(closed_braces);
 
-        if compound_depth == 0 && brace_depth == 0 {
+        let continued_from_this_line = has_active_line_continuation(trimmed);
+        if compound_depth == 0 && brace_depth == 0 && !continued_from_this_line {
             chunks.push(std::mem::take(&mut current));
         }
     }
@@ -546,6 +547,19 @@ fn closes_brace_block(line: &str) -> usize {
 
 fn leading_token(line: &str) -> Option<&str> {
     line.split_whitespace().next()
+}
+
+fn has_active_line_continuation(line: &str) -> bool {
+    let mut trailing_backslashes = 0usize;
+    for character in line.chars().rev() {
+        if character == '\\' {
+            trailing_backslashes += 1;
+        } else {
+            break;
+        }
+    }
+
+    trailing_backslashes % 2 == 1
 }
 
 fn ensure_expected_exit_code(
@@ -1055,6 +1069,48 @@ mod tests {
         assert!(script.contains(
             "{\nif [ -f cleanup.txt ]; then\n  printf 'cleanup\\n' >> cleanup.txt\nfi\n} || status=$?\n"
         ));
+    }
+
+    #[test]
+    fn cleanup_chunks_keep_line_continuations_together() {
+        let cleanup = vec![
+            "docker compose \\".to_string(),
+            "  --file './infrastructure/compose.yml' \\".to_string(),
+            "  down --volumes".to_string(),
+            "printf 'done\\n' >> cleanup.txt".to_string(),
+        ];
+
+        let chunks = cleanup_chunks(&cleanup);
+
+        assert_eq!(chunks.len(), 2);
+        assert_eq!(
+            chunks[0],
+            vec![
+                "docker compose \\".to_string(),
+                "  --file './infrastructure/compose.yml' \\".to_string(),
+                "  down --volumes".to_string(),
+            ]
+        );
+        assert_eq!(
+            chunks[1],
+            vec!["printf 'done\\n' >> cleanup.txt".to_string()]
+        );
+    }
+
+    #[test]
+    fn cleanup_script_keeps_line_continuations_in_one_wrapper() {
+        let cleanup = vec![
+            "docker compose \\".to_string(),
+            "  --file './infrastructure/compose.yml' \\".to_string(),
+            "  down --volumes".to_string(),
+        ];
+
+        let script = cleanup_script(&cleanup);
+
+        assert!(script.contains(
+            "{\ndocker compose \\\n  --file './infrastructure/compose.yml' \\\n  down --volumes\n} || status=$?\n"
+        ));
+        assert!(!script.contains("{\ndocker compose \\\n} || status=$?\n"));
     }
 
     #[test]

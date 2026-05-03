@@ -204,6 +204,7 @@ Expected task directories:
 - [TASK-140: Report Total Verbose Run Time](run/TASK-140-report-total-verbose-run-time.md)
 - [TASK-141: Upgrade Rust Toolchain To 1.95](repo-process/TASK-141-upgrade-rust-toolchain-to-1-95.md)
 - [TASK-142: Improve Cleanup Failure Diagnostics](run/TASK-142-improve-cleanup-failure-diagnostics.md)
+- [TASK-143: Preserve Cleanup Line Continuations](run/TASK-143-preserve-cleanup-line-continuations.md)
 
 ## Pending
 
@@ -216,6 +217,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-143: Preserve Cleanup Line Continuations](run/TASK-143-preserve-cleanup-line-continuations.md)
 - [x] [TASK-142: Improve Cleanup Failure Diagnostics](run/TASK-142-improve-cleanup-failure-diagnostics.md)
 - [x] [TASK-141: Upgrade Rust Toolchain To 1.95](repo-process/TASK-141-upgrade-rust-toolchain-to-1-95.md)
 - [x] [TASK-139: Support Breakpoint Entry](run/TASK-139-support-breakpoint-entry.md)

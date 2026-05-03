@@ -1391,6 +1391,37 @@ fn cleanup_accepts_scalar_script_in_yaml() {
 }
 
 #[test]
+fn cleanup_preserves_shell_line_continuations() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Command
+    commands: |
+      printf 'main\n' > main.txt
+    cleanup: |
+      printf '%s\n' \
+        cleanup \
+        > cleanup-continuation.txt
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run", "--input-file", "sw-runbook.yaml"], &dir);
+
+    assert!(output.status.success());
+    assert_eq!(
+        fs::read_to_string(dir.join("main.txt")).expect("missing main.txt"),
+        "main\n"
+    );
+    assert_eq!(
+        fs::read_to_string(dir.join("cleanup-continuation.txt"))
+            .expect("missing cleanup continuation file"),
+        "cleanup\n"
+    );
+}
+
+#[test]
 fn command_working_dir_applies_to_commands_cleanup_and_file_assertions() {
     let dir = prepare_workspace();
     write_runbook(&dir, "sw-runbook-working-dir.yaml", "sw-runbook.yaml");

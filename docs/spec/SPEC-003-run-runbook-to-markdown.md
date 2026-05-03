@@ -480,6 +480,8 @@ in the runbook.
 - If a cleanup block contains multiple command lines, those lines are attempted
   in the order declared.
 - If one cleanup line fails, the remaining lines in that cleanup block still run.
+- Cleanup commands that use shell line continuations with trailing `\` are kept
+  together as one cleanup command chunk.
 - If one cleanup block fails, the remaining registered cleanup blocks still run
   in reverse order.
 - Cleanup failures are reported after cleanup execution completes.
@@ -1069,6 +1071,8 @@ in the runbook.
       that entry.
 - [ ] Given a failed cleanup line, the remaining lines in that cleanup block
       still execute.
+- [ ] Given a cleanup command that uses shell line continuations with trailing
+      `\`, the continued command executes as one cleanup command chunk.
 - [ ] Given a failed cleanup block, remaining registered cleanup blocks still
       execute in reverse order.
 - [ ] Given a failed cleanup block, the run error identifies the owning
