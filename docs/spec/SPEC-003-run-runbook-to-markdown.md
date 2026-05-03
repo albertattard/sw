@@ -483,6 +483,14 @@ in the runbook.
 - If one cleanup block fails, the remaining registered cleanup blocks still run
   in reverse order.
 - Cleanup failures are reported after cleanup execution completes.
+- Cleanup failure output includes the owning `Command` entry, the cleanup
+  working directory, the normalized cleanup script that was executed, cleanup
+  stdout, cleanup stderr, and the failure detail.
+- When the owning `Command` entry has `debug: true`, cleanup execution emits
+  cleanup diagnostics that include the owning entry, working directory, script,
+  stdout, and stderr.
+- When `sw run --debug` is used, cleanup execution emits the same cleanup
+  diagnostics for every command cleanup block.
 - A run with one or more cleanup failures is considered failed.
 - A `Command` entry may declare a `timeout`.
 - If `timeout` is omitted, the default timeout is `30 seconds`.
@@ -1063,6 +1071,14 @@ in the runbook.
       still execute.
 - [ ] Given a failed cleanup block, remaining registered cleanup blocks still
       execute in reverse order.
+- [ ] Given a failed cleanup block, the run error identifies the owning
+      `Command` entry.
+- [ ] Given a failed cleanup block, the run error includes the cleanup working
+      directory, normalized cleanup script, stdout, stderr, and failure detail.
+- [ ] Given a command with `cleanup` and `debug: true`, cleanup execution emits
+      debug diagnostics for the cleanup block.
+- [ ] Given `sw run --debug` and a command with `cleanup`, cleanup execution
+      emits debug diagnostics for the cleanup block.
 - [ ] Given one or more cleanup failures, the run is reported as failed after
       cleanup completes.
 

@@ -1486,6 +1486,71 @@ fn cleanup_failures_do_not_stop_remaining_cleanup_and_fail_the_run() {
 
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(stderr.contains("Cleanup failed"));
+    assert!(stderr.contains("Cleanup failed for command entry"));
+    assert!(stderr.contains("\"type\": \"Command\""));
+    assert!(stderr.contains("cleanup working directory:"));
+    assert!(stderr.contains("cleanup script:"));
+    assert!(stderr.contains("printf 'A cleanup 1\\n' >> cleanup-failure-order.txt"));
+    assert!(stderr.contains("cleanup stdout:"));
+    assert!(stderr.contains("cleanup stderr:"));
+    assert!(stderr.contains("Cleanup failed with exit code 1"));
+}
+
+#[test]
+fn command_scoped_debug_prints_cleanup_diagnostics() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Command
+    debug: true
+    commands: |
+      printf 'main\n'
+    cleanup: |
+      printf 'cleanup stdout\n'
+      printf 'cleanup stderr\n' >&2
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run", "--input-file", "sw-runbook.yaml"], &dir);
+
+    assert!(output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("[debug] Cleanup command entry:"));
+    assert!(stderr.contains("[debug] Cleanup working directory:"));
+    assert!(stderr.contains("[debug] Cleanup script:"));
+    assert!(stderr.contains("printf 'cleanup stdout\\n'"));
+    assert!(stderr.contains("[debug] Cleanup stdout:"));
+    assert!(stderr.contains("cleanup stdout"));
+    assert!(stderr.contains("[debug] Cleanup stderr:"));
+    assert!(stderr.contains("cleanup stderr"));
+}
+
+#[test]
+fn global_debug_prints_cleanup_diagnostics() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Command
+    commands: |
+      printf 'main\n'
+    cleanup: |
+      printf 'cleanup stdout\n'
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run", "--debug", "--input-file", "sw-runbook.yaml"], &dir);
+
+    assert!(output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("[debug] Cleanup command entry:"));
+    assert!(stderr.contains("[debug] Cleanup working directory:"));
+    assert!(stderr.contains("[debug] Cleanup script:"));
+    assert!(stderr.contains("[debug] Cleanup stdout:"));
+    assert!(stderr.contains("cleanup stdout"));
 }
 
 #[test]

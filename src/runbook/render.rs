@@ -148,7 +148,11 @@ pub(crate) fn render_markdown(
                 }
             },
             "Command" => {
-                let cleanup = cleanup_block(entry, runbook_path)?;
+                let cleanup = cleanup_block(
+                    entry,
+                    runbook_path,
+                    entry_debug_enabled(entry, state.debug_all_entries),
+                )?;
 
                 match render_command(entry, runbook_path, &mut state, cleanup.as_ref()) {
                     Ok(section) => {

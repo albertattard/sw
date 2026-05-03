@@ -19,8 +19,10 @@ pub(crate) struct CommandExecution {
 }
 
 pub(crate) struct CleanupBlock {
+    pub(crate) entry: Value,
     pub(crate) lines: Vec<String>,
     pub(crate) working_dir: PathBuf,
+    pub(crate) debug_enabled: bool,
 }
 
 pub(crate) struct PatchApplication {
@@ -109,18 +111,21 @@ fn uses_automatic_process_cleanup(entry: &Value) -> bool {
 pub(crate) fn cleanup_block(
     entry: &Value,
     runbook_path: &Path,
+    debug_enabled: bool,
 ) -> Result<Option<CleanupBlock>, RenderError> {
     let Some(cleanup) = entry.get("cleanup") else {
         return Ok(None);
     };
 
     Ok(Some(CleanupBlock {
+        entry: entry.clone(),
         lines: string_lines(
             cleanup,
             "Command cleanup must be a string or an array of strings",
             "Command cleanup must contain only strings",
         )?,
         working_dir: resolve_command_working_dir(entry, runbook_path)?,
+        debug_enabled,
     }))
 }
 
@@ -399,24 +404,77 @@ fn run_cleanup_block(cleanup: &CleanupBlock) -> Result<(), String> {
     let script = cleanup_script(&cleanup.lines);
     let output = Command::new("sh")
         .arg("-lc")
-        .arg(script)
+        .arg(&script)
         .current_dir(&cleanup.working_dir)
         .output()
-        .map_err(|err| format!("Failed to execute cleanup: {err}"))?;
+        .map_err(|err| format_cleanup_spawn_failure(cleanup, &script, &err))?;
+
+    let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
+    let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
+    emit_cleanup_debug(cleanup, &script, &stdout, &stderr);
 
     if output.status.success() {
         return Ok(());
     }
 
     let exit_code = output.status.code().unwrap_or(-1);
-    let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
-    if stderr.is_empty() {
-        Err(format!("Cleanup failed with exit code {exit_code}"))
-    } else {
-        Err(format!(
-            "Cleanup failed with exit code {exit_code}: {stderr}"
-        ))
+    Err(format_cleanup_failure(
+        cleanup,
+        &script,
+        &stdout,
+        &stderr,
+        &format!("Cleanup failed with exit code {exit_code}"),
+    ))
+}
+
+fn format_cleanup_spawn_failure(
+    cleanup: &CleanupBlock,
+    script: &str,
+    err: &std::io::Error,
+) -> String {
+    format_cleanup_failure(
+        cleanup,
+        script,
+        "",
+        "",
+        &format!("Failed to execute cleanup: {err}"),
+    )
+}
+
+fn format_cleanup_failure(
+    cleanup: &CleanupBlock,
+    script: &str,
+    stdout: &str,
+    stderr: &str,
+    detail: &str,
+) -> String {
+    format!(
+        "Cleanup failed for command entry:\n{}\ncleanup working directory:\n{}\ncleanup script:\n{}\ncleanup stdout:\n{}\ncleanup stderr:\n{}\n{detail}",
+        format_command_entry(&cleanup.entry),
+        cleanup.working_dir.display(),
+        script,
+        format_command_stream(stdout),
+        format_command_stream(stderr),
+    )
+}
+
+fn emit_cleanup_debug(cleanup: &CleanupBlock, script: &str, stdout: &str, stderr: &str) {
+    if !cleanup.debug_enabled {
+        return;
     }
+
+    eprintln!("[debug] Cleanup command entry:");
+    eprintln!("{}", format_command_entry(&cleanup.entry));
+    eprintln!(
+        "[debug] Cleanup working directory: {}",
+        cleanup.working_dir.display()
+    );
+    eprintln!("[debug] Cleanup script:");
+    eprintln!("{script}");
+    eprintln!("[debug] Cleanup stdout:");
+    eprintln!("{}", format_command_stream(stdout));
+    eprintln!("[debug] Cleanup stderr:");
+    eprintln!("{}", format_command_stream(stderr));
 }
 
 fn cleanup_script(cleanup: &[String]) -> String {
@@ -1006,7 +1064,7 @@ mod tests {
             "cleanup": "first\n\n"
         });
 
-        let cleanup = match cleanup_block(&entry, Path::new("sw-runbook.json")) {
+        let cleanup = match cleanup_block(&entry, Path::new("sw-runbook.json"), false) {
             Ok(cleanup) => cleanup,
             Err(_) => panic!("cleanup block should parse"),
         };
