@@ -162,7 +162,7 @@ fn runbook_base_dir(runbook_path: &Path) -> &Path {
 fn validate_command_working_dir(
     value: &Value,
     path: &str,
-    runbook_path: &Path,
+    execution_root: &Path,
     errors: &mut Vec<ValidationIssue>,
 ) {
     let Some(working_dir) = value.as_str() else {
@@ -176,7 +176,7 @@ fn validate_command_working_dir(
         return;
     }
 
-    let Some(base_dir) = normalize_to_absolute(runbook_base_dir(runbook_path)) else {
+    let Some(base_dir) = normalize_to_absolute(execution_root) else {
         return;
     };
     let Some(resolved_dir) = normalize_to_absolute(&base_dir.join(working_dir_path)) else {
@@ -187,7 +187,7 @@ fn validate_command_working_dir(
         push_error(
             errors,
             path.to_string(),
-            "must stay within the runbook directory",
+            "must stay within the working directory",
         );
     }
 }
@@ -1012,7 +1012,7 @@ fn validate_file_assert_check(
 fn validate_entry(
     value: &Value,
     index: usize,
-    runbook_path: &Path,
+    execution_root: &Path,
     context: &mut ValidationContext,
 ) {
     let path = format!("entries[{index}]");
@@ -1133,7 +1133,7 @@ fn validate_entry(
                 object,
                 &path,
                 &mut context.warnings,
-                runbook_path,
+                execution_root,
             );
         }
         "Prerequisite" => match object.get("checks") {
@@ -1287,7 +1287,7 @@ fn validate_entry(
                 validate_command_working_dir(
                     working_dir,
                     &format!("{path}.working_dir"),
-                    runbook_path,
+                    execution_root,
                     &mut context.errors,
                 );
             }
@@ -1590,6 +1590,12 @@ fn parse_timeout(timeout: &str) -> Result<Duration, ()> {
 }
 
 pub fn validate(runbook: &Value, runbook_path: &Path) -> ValidationResult {
+    let execution_root =
+        normalize_to_absolute(runbook_base_dir(runbook_path)).unwrap_or_else(|| PathBuf::from("."));
+    validate_with_execution_root(runbook, &execution_root)
+}
+
+pub fn validate_with_execution_root(runbook: &Value, execution_root: &Path) -> ValidationResult {
     let mut context = ValidationContext {
         errors: Vec::new(),
         warnings: Vec::new(),
@@ -1628,7 +1634,7 @@ pub fn validate(runbook: &Value, runbook_path: &Path) -> ValidationResult {
                 context.all_capture_names = collect_all_capture_names(items);
 
                 for (index, entry) in items.iter().enumerate() {
-                    validate_entry(entry, index, runbook_path, &mut context);
+                    validate_entry(entry, index, execution_root, &mut context);
                 }
             }
         }
@@ -1647,7 +1653,7 @@ fn maybe_warn_display_file_negative_offset(
     object: &Map<String, Value>,
     path: &str,
     warnings: &mut Vec<ValidationIssue>,
-    runbook_path: &Path,
+    execution_root: &Path,
 ) {
     let Some(offset) = object.get("offset").and_then(Value::as_i64) else {
         return;
@@ -1660,8 +1666,7 @@ fn maybe_warn_display_file_negative_offset(
         return;
     };
 
-    let base_dir = runbook_path.parent().unwrap_or_else(|| Path::new("."));
-    let display_path = base_dir.join(relative_path);
+    let display_path = execution_root.join(relative_path);
     let Ok(contents) = fs::read_to_string(&display_path) else {
         return;
     };

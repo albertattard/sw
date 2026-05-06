@@ -181,6 +181,46 @@ fn validate_accepts_command_working_dir_in_yaml() {
 }
 
 #[test]
+fn validate_working_directory_sets_execution_root_for_command_working_dir() {
+    let dir = prepare_workspace();
+    let runbook_dir = dir.join("runbook");
+    let project_dir = dir.join("project");
+    fs::create_dir_all(&runbook_dir).expect("failed to create runbook dir");
+    fs::create_dir_all(project_dir.join("child")).expect("failed to create project child dir");
+    fs::write(
+        runbook_dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Command
+    working_dir: ../project/child
+    commands: echo ok
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let input_file = runbook_dir
+        .join("sw-runbook.yaml")
+        .to_string_lossy()
+        .to_string();
+    let working_directory = project_dir.to_string_lossy().to_string();
+    let output = run_in_dir(
+        &[
+            "validate",
+            "--input-file",
+            &input_file,
+            "--working-directory",
+            &working_directory,
+            "--output-format",
+            "json",
+        ],
+        &dir,
+    );
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": true"));
+}
+
+#[test]
 fn validate_accepts_breakpoint_entry() {
     let dir = prepare_workspace();
     fs::write(

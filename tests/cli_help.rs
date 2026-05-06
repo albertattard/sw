@@ -18,6 +18,7 @@ fn help_flag_prints_help() {
     assert!(stdout.contains("--verbose-mode"));
     assert!(stdout.contains("--output-format"));
     assert!(stdout.contains("--output-file"));
+    assert!(stdout.contains("--working-directory"));
     assert!(stdout.contains("Still weaving the nest. Features are hatching soon."));
 }
 
@@ -32,6 +33,7 @@ fn help_subcommand_prints_help() {
     assert!(stdout.contains("--verbose-mode"));
     assert!(stdout.contains("--debug"));
     assert!(stdout.contains("--output-file"));
+    assert!(stdout.contains("--working-directory"));
     assert!(stdout.contains("check"));
     assert!(stdout.contains("convert"));
     assert!(stdout.contains("example"));
@@ -54,6 +56,8 @@ fn help_subcommand_for_known_topic_prints_targeted_help() {
     assert!(stdout.contains("Use `-` to read from stdin"));
     assert!(stdout.contains("--input-format"));
     assert!(stdout.contains("Ignored unless `--input-file=-` is used"));
+    assert!(stdout.contains("--working-directory"));
+    assert!(stdout.contains("changes the execution root"));
     assert!(stdout.contains(
         "`Markdown`, `DisplayFile`, `Patch`, and `Command` entries may declare `indent`"
     ));
@@ -111,6 +115,7 @@ fn check_help_prints_help() {
     assert!(stdout.contains("Use `-` to read from stdin"));
     assert!(stdout.contains("--input-format"));
     assert!(stdout.contains("Ignored unless `--input-file=-` is used"));
+    assert!(stdout.contains("--working-directory"));
     assert!(stdout.contains("File-based runbooks default to YAML"));
     assert!(stdout.contains("Command-based prerequisite checks default to a `5 seconds` timeout"));
     assert!(stdout.contains("sw explain check"));
@@ -218,6 +223,7 @@ fn run_help_prints_help() {
     assert!(stdout.contains("Use `-` to read from stdin"));
     assert!(stdout.contains("--input-format"));
     assert!(stdout.contains("Ignored unless `--input-file=-` is used"));
+    assert!(stdout.contains("--working-directory"));
     assert!(stdout.contains("File-based runbooks default to YAML"));
     assert!(stdout.contains("--output-format"));
     assert!(stdout.contains("--output-file"));
@@ -244,6 +250,7 @@ fn validate_help_prints_help() {
     assert!(stdout.contains("Use `-` to read from stdin"));
     assert!(stdout.contains("--input-format"));
     assert!(stdout.contains("Ignored unless `--input-file=-` is used"));
+    assert!(stdout.contains("--working-directory"));
     assert!(stdout.contains("File-based runbooks default to YAML elsewhere in the CLI"));
     assert!(stdout.contains("--output-format"));
 }

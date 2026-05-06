@@ -50,6 +50,20 @@ sw run \
   --output-file ./generated.md
 ```
 
+Run a runbook against a different project directory:
+
+```shell
+sw run \
+  --input-file /path/to/runbook/sw-runbook.yaml \
+  --working-directory /path/to/project \
+  --output-file ./generated.md
+```
+
+`--input-file` and `--output-file` remain relative to the shell current
+directory when they are relative. `--working-directory` selects the execution
+root for runbook-relative paths such as `DisplayFile.path`, `Patch.path`,
+command execution, command cleanup, and command file assertions.
+
 Show progress while running:
 
 ```shell
@@ -84,7 +98,8 @@ sw example Patch
 Useful `Command` fields include:
 
 - `commands`: shell script to execute.
-- `working_dir`: run commands from a runbook-relative directory.
+- `working_dir`: run commands from a directory relative to the effective
+  execution root.
 - `timeout`: override the default command timeout.
 - `cleanup`: release resources after the command finishes or the run fails.
 - `assert.exit_code`: assert that a command succeeds or intentionally fails.
@@ -106,6 +121,8 @@ successfully before later entries:
 ## Notes
 
 - Default output file is `README.md`.
+- If `--working-directory` is omitted, the execution root is the runbook file's
+  directory.
 - Command output is rendered only when a `Command` entry declares `output`.
 - Markdown can interpolate captured variables with `@{name}`.
 - Use `@@{name}` when the generated Markdown should contain a literal

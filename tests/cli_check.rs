@@ -168,6 +168,51 @@ fn check_accepts_yaml_input_file() {
 }
 
 #[test]
+fn check_working_directory_sets_execution_root_for_command_prerequisites() {
+    let dir = prepare_workspace();
+    let runbook_dir = dir.join("runbook");
+    let project_dir = dir.join("project");
+    fs::create_dir_all(&runbook_dir).expect("failed to create runbook dir");
+    fs::create_dir_all(&project_dir).expect("failed to create project dir");
+    fs::write(project_dir.join("marker.txt"), "ready\n").expect("failed to write marker");
+    fs::write(
+        runbook_dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Prerequisite
+    checks:
+      - kind: command
+        name: project marker
+        contents: |
+          Project marker file
+        commands: |
+          pwd > check-pwd.txt
+          test -f marker.txt
+        help: Create marker.txt in the project directory.
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let input_file = runbook_dir
+        .join("sw-runbook.yaml")
+        .to_string_lossy()
+        .to_string();
+    let working_directory = project_dir.to_string_lossy().to_string();
+    let output = run_in_dir(
+        &[
+            "check",
+            "--input-file",
+            &input_file,
+            "--working-directory",
+            &working_directory,
+        ],
+        &dir,
+    );
+
+    assert!(output.status.success());
+    assert!(project_dir.join("check-pwd.txt").exists());
+}
+
+#[test]
 fn check_accepts_scalar_prose_contents_in_yaml_input_file() {
     let dir = prepare_workspace();
     write_runbook(&dir, "sw-runbook-scalar-prose.yaml", "example.yaml");

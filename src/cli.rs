@@ -92,7 +92,7 @@ pub struct FormatArgs {
 
 #[derive(Debug, clap::Args)]
 #[command(
-    after_help = "Runbook-authored `Command` fields such as `trim_empty_lines`, `stream`, and `cleanup` are configured in the runbook, not as CLI flags.\n`Markdown`, `DisplayFile`, `Patch`, and `Command` entries may declare `indent` to nest rendered output inside surrounding Markdown structure.\n`Breakpoint` entries stop processing successfully when reached and can include an optional `message`.\n`Patch.patch` may be authored as a YAML block scalar or an array of patch lines.\nCaptured variables can be referenced from Markdown with `@{name}` and escaped literally with `@@{name}`.\nFile-based runbooks default to YAML, while `--input-file=-` defaults to JSON unless you set `--input-format=yaml`.\n`Command` entries default to a `30 seconds` timeout, while command-based prerequisite checks default to `5 seconds` unless the runbook sets `timeout`.\n`DisplayFile` fence detection currently recognizes `.java` as `java`, `.sql` as `sql`, and `.xml` as `xml`; other extensions render as `text`.\n`keep_between` supports literal `start`/`end` boundaries and regex `start_pattern`/`end_pattern` boundaries.\nUse `--verbose-mode=plain` for SSH-safe line-based progress output when terminal redraws are unreliable.\nVerbose run output includes a final `Total run time` line on stderr.\nUse `sw example Command` for a current YAML snippet and `sw example Command --output-format json` when you need the JSON shape.\nUse `sw explain run` for behavior and defaults."
+    after_help = "Runbook-authored `Command` fields such as `trim_empty_lines`, `stream`, and `cleanup` are configured in the runbook, not as CLI flags.\n`--working-directory` changes the execution root for runbook-relative paths while leaving CLI paths such as `--input-file` and `--output-file` relative to the shell current directory.\n`Markdown`, `DisplayFile`, `Patch`, and `Command` entries may declare `indent` to nest rendered output inside surrounding Markdown structure.\n`Breakpoint` entries stop processing successfully when reached and can include an optional `message`.\n`Patch.patch` may be authored as a YAML block scalar or an array of patch lines.\nCaptured variables can be referenced from Markdown with `@{name}` and escaped literally with `@@{name}`.\nFile-based runbooks default to YAML, while `--input-file=-` defaults to JSON unless you set `--input-format=yaml`.\n`Command` entries default to a `30 seconds` timeout, while command-based prerequisite checks default to `5 seconds` unless the runbook sets `timeout`.\n`DisplayFile` fence detection currently recognizes `.java` as `java`, `.sql` as `sql`, and `.xml` as `xml`; other extensions render as `text`.\n`keep_between` supports literal `start`/`end` boundaries and regex `start_pattern`/`end_pattern` boundaries.\nUse `--verbose-mode=plain` for SSH-safe line-based progress output when terminal redraws are unreliable.\nVerbose run output includes a final `Total run time` line on stderr.\nUse `sw example Command` for a current YAML snippet and `sw example Command --output-format json` when you need the JSON shape.\nUse `sw explain run` for behavior and defaults."
 )]
 pub struct RunArgs {
     #[command(flatten)]
@@ -115,7 +115,7 @@ pub struct RunOutputArgs {
 
 #[derive(Debug, clap::Args)]
 #[command(
-    after_help = "File-based runbooks default to YAML, while `--input-file=-` defaults to JSON unless you set `--input-format=yaml`.\nCommand-based prerequisite checks default to a `5 seconds` timeout unless the runbook sets `timeout`.\n`Breakpoint` stops `check` from evaluating prerequisite entries declared after the breakpoint.\nUse `sw example Prerequisite` for a current prerequisite YAML snippet and `sw example Prerequisite --output-format json` when you need the JSON shape.\nUse `sw explain check` for behavior and defaults."
+    after_help = "File-based runbooks default to YAML, while `--input-file=-` defaults to JSON unless you set `--input-format=yaml`.\n`--working-directory` changes the execution root for runbook-relative paths while leaving `--input-file` relative to the shell current directory.\nCommand-based prerequisite checks default to a `5 seconds` timeout unless the runbook sets `timeout`.\n`Breakpoint` stops `check` from evaluating prerequisite entries declared after the breakpoint.\nUse `sw example Prerequisite` for a current prerequisite YAML snippet and `sw example Prerequisite --output-format json` when you need the JSON shape.\nUse `sw explain check` for behavior and defaults."
 )]
 pub struct CheckArgs {
     #[command(flatten)]
@@ -124,7 +124,7 @@ pub struct CheckArgs {
 
 #[derive(Debug, clap::Args)]
 #[command(
-    after_help = "Validation accepts JSON, YAML, and YML files.\nFile-based runbooks default to YAML elsewhere in the CLI, while `--input-file=-` defaults to JSON unless you set `--input-format=yaml`.\nUse `sw explain validate` for behavior and defaults."
+    after_help = "Validation accepts JSON, YAML, and YML files.\nFile-based runbooks default to YAML elsewhere in the CLI, while `--input-file=-` defaults to JSON unless you set `--input-format=yaml`.\n`--working-directory` changes the execution root used for runbook-relative path validation while leaving `--input-file` relative to the shell current directory.\nUse `sw explain validate` for behavior and defaults."
 )]
 pub struct ValidateArgs {
     #[command(flatten)]
@@ -144,6 +144,16 @@ pub struct RunbookInputArgs {
     /// Input format for stdin runbooks. Ignored unless `--input-file=-` is used.
     #[arg(long, value_enum)]
     pub input_format: Option<InputFormat>,
+
+    /// Execution root for runbook-relative paths.
+    #[arg(long)]
+    pub working_directory: Option<PathBuf>,
+}
+
+impl RunbookInputArgs {
+    pub fn has_values(&self) -> bool {
+        self.input_file.is_some() || self.input_format.is_some() || self.working_directory.is_some()
+    }
 }
 
 #[derive(Debug, clap::Args)]

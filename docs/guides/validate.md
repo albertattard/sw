@@ -21,6 +21,14 @@ Validate an explicit file:
 sw validate --input-file ./sw-runbook.yaml
 ```
 
+Validate runbook-relative paths against a different project directory:
+
+```shell
+sw validate \
+  --input-file /path/to/runbook/sw-runbook.yaml \
+  --working-directory /path/to/project
+```
+
 Return machine-readable validation output:
 
 ```shell
@@ -37,6 +45,8 @@ sw validate --input-file=- --input-format yaml
 
 - File-backed validation accepts JSON, YAML, and YML runbooks.
 - Stdin input defaults to JSON unless `--input-format yaml` is provided.
+- `--working-directory` selects the execution root used for runbook-relative
+  path validation.
 - Validation checks documented structure and field rules; it does not execute
   normal workflow commands.
 

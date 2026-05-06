@@ -221,6 +221,154 @@ fn implicit_run_writes_requested_output_file() {
 }
 
 #[test]
+fn run_working_directory_sets_execution_root_for_runbook_relative_paths() {
+    let dir = prepare_workspace();
+    let runbook_dir = dir.join("runbook");
+    let project_dir = dir.join("project");
+    fs::create_dir_all(&runbook_dir).expect("failed to create runbook dir");
+    fs::create_dir_all(project_dir.join("nested")).expect("failed to create project dir");
+    fs::write(project_dir.join("source.txt"), "source from project\n")
+        .expect("failed to write source file");
+    fs::write(project_dir.join("patch.txt"), "old\n").expect("failed to write patch target");
+    fs::write(
+        runbook_dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: DisplayFile
+    path: source.txt
+
+  - type: Patch
+    path: patch.txt
+    patch: |
+      @@ -1 +1 @@
+      -old
+      +new
+
+  - type: Command
+    commands: |
+      pwd > root-pwd.txt
+      printf 'root\n' > root-command.txt
+      cat patch.txt > patched-during-run.txt
+    assert:
+      checks:
+        - source: file
+          path: root-command.txt
+          exists: true
+
+  - type: Command
+    working_dir: nested
+    commands: |
+      pwd > child-pwd.txt
+      printf 'child\n' > child-command.txt
+    assert:
+      checks:
+        - source: file
+          path: child-command.txt
+          exists: true
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let input_file = runbook_dir
+        .join("sw-runbook.yaml")
+        .to_string_lossy()
+        .to_string();
+    let working_directory = project_dir.to_string_lossy().to_string();
+    let output = run_in_dir(
+        &[
+            "run",
+            "--input-file",
+            &input_file,
+            "--working-directory",
+            &working_directory,
+            "--output-file",
+            "result.md",
+        ],
+        &dir,
+    );
+
+    assert!(output.status.success());
+    assert!(dir.join("result.md").exists());
+    assert!(!project_dir.join("result.md").exists());
+    assert_eq!(
+        fs::read_to_string(project_dir.join("root-command.txt"))
+            .expect("missing root command side effect"),
+        "root\n"
+    );
+    assert_eq!(
+        fs::read_to_string(project_dir.join("patched-during-run.txt"))
+            .expect("missing patched command output"),
+        "new\n"
+    );
+    assert_eq!(
+        fs::read_to_string(project_dir.join("patch.txt")).expect("missing restored patch target"),
+        "old\n"
+    );
+    assert_eq!(
+        fs::read_to_string(project_dir.join("nested/child-command.txt"))
+            .expect("missing child command side effect"),
+        "child\n"
+    );
+    let readme = fs::read_to_string(dir.join("result.md")).expect("missing rendered output");
+    assert!(readme.contains("source from project"));
+}
+
+#[test]
+fn implicit_run_accepts_working_directory() {
+    let dir = prepare_workspace();
+    let runbook_dir = dir.join("runbook");
+    let project_dir = dir.join("project");
+    fs::create_dir_all(&runbook_dir).expect("failed to create runbook dir");
+    fs::create_dir_all(&project_dir).expect("failed to create project dir");
+    fs::write(
+        runbook_dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Command
+    commands: |
+      printf 'implicit\n' > implicit.txt
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let input_file = runbook_dir
+        .join("sw-runbook.yaml")
+        .to_string_lossy()
+        .to_string();
+    let working_directory = project_dir.to_string_lossy().to_string();
+    let output = run_in_dir(
+        &[
+            "--input-file",
+            &input_file,
+            "--working-directory",
+            &working_directory,
+            "--output-file",
+            "implicit.md",
+        ],
+        &dir,
+    );
+
+    assert!(output.status.success());
+    assert_eq!(
+        fs::read_to_string(project_dir.join("implicit.txt")).expect("missing implicit side effect"),
+        "implicit\n"
+    );
+}
+
+#[test]
+fn run_working_directory_fails_when_directory_is_missing() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-run-success.json", "sw-runbook.json");
+
+    let missing = dir.join("missing");
+    let missing_arg = missing.to_string_lossy().to_string();
+    let output = run_in_dir(&["run", "--working-directory", &missing_arg], &dir);
+
+    assert_eq!(output.status.code(), Some(1));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("Working directory"));
+    assert!(stderr.contains("did not exist"));
+}
+
+#[test]
 fn implicit_run_accepts_output_format() {
     let dir = prepare_workspace();
     write_runbook(&dir, "sw-runbook-run-success.json", "sw-runbook.json");
@@ -245,6 +393,21 @@ fn implicit_run_rejects_output_options_before_explicit_subcommand() {
     assert!(stderr.contains("Run output options such as --output-file and --output-format"));
     assert!(stderr.contains("Try `sw run --output-file <path>` instead."));
     assert!(!dir.join("ignored.md").exists());
+}
+
+#[test]
+fn implicit_run_rejects_input_options_before_explicit_subcommand() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-run-success.json", "sw-runbook.json");
+
+    let output = run_in_dir(&["--working-directory", ".", "validate"], &dir);
+
+    assert_eq!(output.status.code(), Some(1));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains(
+        "Run input options such as --input-file, --input-format, and --working-directory"
+    ));
+    assert!(stderr.contains("after the target subcommand"));
 }
 
 #[test]

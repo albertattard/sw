@@ -113,6 +113,9 @@ fn explain_run_prints_concise_contract_summary() {
     );
     assert!(stdout.contains("`--input-format json|yaml` for stdin-backed input"));
     assert!(
+        stdout.contains("`sw --working-directory <path>` or `sw run --working-directory <path>`")
+    );
+    assert!(
         stdout.contains("`--verbose-mode auto|live|plain` to choose how verbose progress renders")
     );
     assert!(stdout.contains("`--input-file=-` reads the runbook from stdin."));
@@ -124,6 +127,12 @@ fn explain_run_prints_concise_contract_summary() {
     ));
     assert!(stdout.contains(
         "If more than one default runbook file exists, run fails with an operational error and requires `--input-file`."
+    ));
+    assert!(stdout.contains(
+        "`--working-directory` selects the execution root for runbook-relative paths and resolves relative to the shell current directory when relative."
+    ));
+    assert!(stdout.contains(
+        "`--input-file` and `--output-file` remain normal CLI paths and are not resolved from `--working-directory`."
     ));
     assert!(stdout.contains(
         "`Command.cleanup` supports manual teardown as either a string or an array, and explicit `cleanup` replaces automatic process cleanup for that command entry."
@@ -197,6 +206,9 @@ fn explain_validate_prints_validation_contract_summary() {
     ));
     assert!(stdout.contains("`sw validate --input-file=-`"));
     assert!(stdout.contains("`--input-format json|yaml` for stdin-backed input"));
+    assert!(stdout.contains(
+        "`--working-directory <path>` to choose the execution root for runbook-relative paths"
+    ));
     assert!(stdout.contains("Validation accepts JSON, YAML, and YML runbooks."));
     assert!(stdout.contains("`--input-file=-` reads the runbook from stdin."));
     assert!(stdout.contains(
@@ -204,6 +216,9 @@ fn explain_validate_prints_validation_contract_summary() {
     ));
     assert!(stdout.contains(
         "If more than one default runbook file exists, validation fails with an operational error and requires `--input-file`."
+    ));
+    assert!(stdout.contains(
+        "`--working-directory` resolves relative to the shell current directory when relative, must already exist, and is used for runbook-relative path validation."
     ));
     assert!(stdout.contains(
         "`Markdown.contents`, `Command.commands`, `Patch.patch`, `Prerequisite.checks[*].contents`, and `Prerequisite.checks[*].commands` may be a single string or an array of strings."
@@ -264,12 +279,18 @@ fn explain_check_guides_agent_to_prerequisites_and_examples() {
     ));
     assert!(stdout.contains("`sw check --input-file=-`"));
     assert!(stdout.contains("`--input-format json|yaml` for stdin-backed input"));
+    assert!(stdout.contains(
+        "`--working-directory <path>` to choose the execution root for runbook-relative paths"
+    ));
     assert!(stdout.contains("`--input-file=-` reads the runbook from stdin."));
     assert!(stdout.contains(
         "Without `--input-file=-`, `--input-format` keeps the existing file-backed defaults and does not override file-extension-based parsing."
     ));
     assert!(stdout.contains(
         "If more than one default runbook file exists, check fails with an operational error and requires `--input-file`."
+    ));
+    assert!(stdout.contains(
+        "`--working-directory` resolves relative to the shell current directory when relative, must already exist, and is used for command-based prerequisite checks."
     ));
     assert!(stdout.contains(
         "`Markdown.contents`, `Command.commands`, `Patch.patch`, `Prerequisite.checks[*].contents`, and `Prerequisite.checks[*].commands` may be a single string or an array of strings."

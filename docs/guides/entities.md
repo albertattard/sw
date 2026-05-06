@@ -206,8 +206,9 @@ Use `output` when command output should appear in the generated Markdown:
     stream: stdout
 ```
 
-Use `working_dir` when the command should run from a runbook-relative
-directory:
+Use `working_dir` when the command should run from a directory relative to the
+effective execution root. By default that root is the runbook file's directory;
+`sw run --working-directory <path>` can override it from the CLI:
 
 ```yaml
 - type: Command

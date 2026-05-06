@@ -8,8 +8,9 @@ pub fn run(args: RunArgs, verbose: bool, verbose_mode: VerboseMode, debug: bool)
         .output
         .output_file
         .unwrap_or_else(|| PathBuf::from("README.md"));
+    let input_args = args.input;
 
-    let loaded = match runbook::load(args.input.input_file, args.input.input_format) {
+    let loaded = match runbook::load(input_args.input_file, input_args.input_format) {
         Ok(loaded) => loaded,
         Err(message) => {
             eprintln!("{message}");
@@ -18,8 +19,16 @@ pub fn run(args: RunArgs, verbose: bool, verbose_mode: VerboseMode, debug: bool)
     };
     let input_path = loaded.path;
     let runbook = loaded.document;
+    let execution_root =
+        match runbook::resolve_execution_root(&input_path, input_args.working_directory) {
+            Ok(root) => root,
+            Err(message) => {
+                eprintln!("{message}");
+                return ExitCode::from(1);
+            }
+        };
 
-    let validation_result = runbook::validate(&runbook, &input_path);
+    let validation_result = runbook::validate_with_execution_root(&runbook, &execution_root);
     if !validation_result.valid {
         runbook::print_human_with_runbook(&validation_result, &input_path, Some(&runbook));
         return ExitCode::from(2);
@@ -31,7 +40,8 @@ pub fn run(args: RunArgs, verbose: bool, verbose_mode: VerboseMode, debug: bool)
         .unwrap_or(RunOutputFormat::Markdown)
     {
         RunOutputFormat::Markdown => {
-            match runbook::render_markdown(&runbook, &input_path, verbose, verbose_mode, debug) {
+            match runbook::render_markdown(&runbook, &execution_root, verbose, verbose_mode, debug)
+            {
                 Ok(markdown) => markdown,
                 Err(runbook::RenderError::Operational(message)) => {
                     eprintln!("{message}");

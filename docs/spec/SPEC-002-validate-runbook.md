@@ -19,6 +19,7 @@ The CLI provides a validation command:
 ```bash
 sw validate --input-file <sw-runbook.yaml> --output-format json
 sw validate --input-file=- --output-format json
+sw validate --input-file <sw-runbook.yaml> --working-directory /path/to/project
 ```
 
 If no input file is provided, the command uses the implicit default runbook
@@ -44,6 +45,7 @@ Input:
   or `--input-file=-` to read the runbook from stdin.
 - Optional input format (`json` or `yaml`) via `--input-format`.
 - Optional output format (`json` or `human`) via `--output-format`.
+- Optional execution root via `--working-directory <path>`.
 
 Default input behavior:
 - File-backed workflows elsewhere in the CLI default to YAML authoring, but
@@ -65,6 +67,17 @@ Default input behavior:
   input format from the file extension or default file name.
 - `--input-format` does not bypass this default file ambiguity check when
   `--input-file=-` is not used.
+- If `--working-directory` is not provided, validation resolves
+  runbook-relative paths from the runbook file's directory. For stdin-backed
+  runbooks, it resolves them from the shell current directory.
+- If `--working-directory` is provided, resolve it relative to the shell
+  current directory when it is relative.
+- If `--working-directory` is provided, it must already exist and be a
+  directory.
+- `--input-file` remains a normal CLI path and resolves relative to the shell
+  current directory when it is relative.
+- Runbook-relative path validation uses the execution root selected by
+  `--working-directory`.
 - Supported input formats are JSON, YAML, and YML for files, and JSON or YAML
   for stdin.
 - `Markdown.contents` may be either a single string or an array of strings.

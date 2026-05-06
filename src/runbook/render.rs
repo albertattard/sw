@@ -2,7 +2,7 @@ use super::RenderError;
 use super::execute::{
     CleanupBlock, CommandExecution, apply_patch_entry, cleanup_block, ensure_assertions,
     execute_command, format_command_failure, patch_target_path, patch_text_for, run_cleanup_blocks,
-    run_patch_restores, runbook_base_dir, snapshot_patch_target, timeout_label,
+    run_patch_restores, snapshot_patch_target, timeout_label,
 };
 use crate::cli::VerboseMode;
 use chrono::Timelike;
@@ -87,7 +87,7 @@ fn emit_debug_lines(enabled: bool, lines: &[String]) {
 
 pub(crate) fn render_markdown(
     runbook: &Value,
-    runbook_path: &Path,
+    execution_root: &Path,
     verbose: bool,
     verbose_mode: VerboseMode,
     debug: bool,
@@ -113,13 +113,13 @@ pub(crate) fn render_markdown(
     };
     let mut progress = ProgressReporter::new(entries.len(), verbose, verbose_mode);
 
-    run_prerequisite_checks(entries)?;
+    run_prerequisite_checks(entries, execution_root)?;
 
     for (index, entry) in entries.iter().enumerate() {
         let entry_type = entry.get("type").and_then(Value::as_str).ok_or_else(|| {
             RenderError::Operational("Runbook entry is missing a type".to_string())
         })?;
-        let progress_line = progress.start_entry(index, entry, runbook_path);
+        let progress_line = progress.start_entry(index, entry, execution_root);
 
         let rendered = match entry_type {
             "Heading" => RenderSection::Ready(render_heading(entry)?),
@@ -127,7 +127,7 @@ pub(crate) fn render_markdown(
                 entry: entry.clone(),
                 lines: markdown_lines(entry)?,
             },
-            "DisplayFile" => RenderSection::Ready(render_display_file(entry, runbook_path)?),
+            "DisplayFile" => RenderSection::Ready(render_display_file(entry, execution_root)?),
             "Prerequisite" => RenderSection::Ready(render_prerequisite_entry(entry)?),
             "Breakpoint" => {
                 breakpoint_reached = true;
@@ -135,7 +135,7 @@ pub(crate) fn render_markdown(
             }
             "Patch" => match render_patch(
                 entry,
-                runbook_path,
+                execution_root,
                 &mut patch_restore_stack,
                 &mut patch_snapshots,
                 state.debug_all_entries,
@@ -150,11 +150,11 @@ pub(crate) fn render_markdown(
             "Command" => {
                 let cleanup = cleanup_block(
                     entry,
-                    runbook_path,
+                    execution_root,
                     entry_debug_enabled(entry, state.debug_all_entries),
                 )?;
 
-                match render_command(entry, runbook_path, &mut state, cleanup.as_ref()) {
+                match render_command(entry, execution_root, &mut state, cleanup.as_ref()) {
                     Ok(section) => {
                         if let Some(cleanup) = cleanup {
                             cleanups.push(cleanup);
@@ -279,7 +279,7 @@ impl ProgressReporter {
         &mut self,
         index: usize,
         entry: &Value,
-        runbook_path: &Path,
+        execution_root: &Path,
     ) -> Option<EntryProgress> {
         match self.mode {
             ProgressMode::Off => None,
@@ -287,7 +287,7 @@ impl ProgressReporter {
                 let line = format_progress_line(
                     index + 1,
                     self.total_entries,
-                    entry_summary(entry, runbook_path),
+                    entry_summary(entry, execution_root),
                 );
                 let timeout = verbose_timeout_label(entry);
                 let _ = writeln!(
@@ -308,7 +308,7 @@ impl ProgressReporter {
                 let line = format_progress_line(
                     index + 1,
                     self.total_entries,
-                    entry_summary(entry, runbook_path),
+                    entry_summary(entry, execution_root),
                 );
                 let stop_signal = Arc::new(AtomicBool::new(false));
                 let thread_stop_signal = Arc::clone(&stop_signal);
@@ -473,7 +473,7 @@ fn format_progress_line(current: usize, total: usize, summary: String) -> String
     format!("[{current:>width$}/{total}] {summary}")
 }
 
-fn entry_summary(entry: &Value, runbook_path: &Path) -> String {
+fn entry_summary(entry: &Value, execution_root: &Path) -> String {
     let entry_type = entry.get("type").and_then(Value::as_str).unwrap_or("Entry");
     let summary = match entry_type {
         "Heading" => entry
@@ -485,10 +485,10 @@ fn entry_summary(entry: &Value, runbook_path: &Path) -> String {
             .unwrap_or_else(|| "Markdown".to_string()),
         "Command" => first_non_empty_string_line(entry.get("commands"))
             .unwrap_or_else(|| "Command".to_string()),
-        "DisplayFile" => display_file_summary(entry, runbook_path),
+        "DisplayFile" => display_file_summary(entry, execution_root),
         "Prerequisite" => prerequisite_summary(entry),
         "Breakpoint" => breakpoint_summary(entry),
-        "Patch" => patch_summary(entry, runbook_path),
+        "Patch" => patch_summary(entry, execution_root),
         other => other.to_string(),
     };
 
@@ -519,13 +519,12 @@ fn first_non_empty_string_line(value: Option<&Value>) -> Option<String> {
     }
 }
 
-fn display_file_summary(entry: &Value, runbook_path: &Path) -> String {
+fn display_file_summary(entry: &Value, execution_root: &Path) -> String {
     let relative_path = entry
         .get("path")
         .and_then(Value::as_str)
         .unwrap_or("<missing path>");
-    let base_dir = runbook_path.parent().unwrap_or_else(|| Path::new("."));
-    let display_path = base_dir.join(relative_path);
+    let display_path = execution_root.join(relative_path);
     let start_line = entry.get("start_line").and_then(Value::as_u64);
     let line_count = entry.get("line_count").and_then(Value::as_u64);
 
@@ -555,13 +554,12 @@ fn prerequisite_summary(entry: &Value) -> String {
     }
 }
 
-fn patch_summary(entry: &Value, runbook_path: &Path) -> String {
+fn patch_summary(entry: &Value, execution_root: &Path) -> String {
     let relative_path = entry
         .get("path")
         .and_then(Value::as_str)
         .unwrap_or("<missing path>");
-    let base_dir = runbook_path.parent().unwrap_or_else(|| Path::new("."));
-    base_dir.join(relative_path).display().to_string()
+    execution_root.join(relative_path).display().to_string()
 }
 
 fn breakpoint_summary(entry: &Value) -> String {
@@ -679,11 +677,11 @@ mod tests {
         });
 
         assert_eq!(
-            entry_summary(&markdown, Path::new("sw-runbook.json")),
+            entry_summary(&markdown, Path::new(".")),
             "Markdown: 1. Start the application"
         );
         assert_eq!(
-            entry_summary(&command, Path::new("sw-runbook.json")),
+            entry_summary(&command, Path::new(".")),
             "Command: java -jar './target/app.jar'"
         );
     }
@@ -696,7 +694,7 @@ mod tests {
         });
 
         assert_eq!(
-            entry_summary(&command, Path::new("sw-runbook.json")),
+            entry_summary(&command, Path::new(".")),
             "Command: java -jar './target/app.jar'"
         );
     }
@@ -710,7 +708,7 @@ mod tests {
             "line_count": 3
         });
 
-        let summary = entry_summary(&display_file, Path::new("/tmp/sw-runbook.json"));
+        let summary = entry_summary(&display_file, Path::new("/tmp"));
         assert!(summary.contains("DisplayFile: /tmp/./src/main.java (lines 10-12)"));
     }
 
@@ -722,7 +720,7 @@ mod tests {
         });
 
         assert_eq!(
-            entry_summary(&breakpoint, Path::new("sw-runbook.yaml")),
+            entry_summary(&breakpoint, Path::new(".")),
             "Breakpoint: Inspect this state"
         );
     }
@@ -751,13 +749,12 @@ mod tests {
     }
 }
 
-fn render_display_file(entry: &Value, runbook_path: &Path) -> Result<String, RenderError> {
+fn render_display_file(entry: &Value, execution_root: &Path) -> Result<String, RenderError> {
     let relative_path = entry
         .get("path")
         .and_then(Value::as_str)
         .ok_or_else(|| RenderError::Operational("DisplayFile entry is missing path".to_string()))?;
-    let base_dir = runbook_path.parent().unwrap_or_else(|| Path::new("."));
-    let display_path = base_dir.join(relative_path);
+    let display_path = execution_root.join(relative_path);
     let contents = fs::read_to_string(&display_path).map_err(|err| {
         RenderError::Operational(format!("Failed to read {}: {err}", display_path.display()))
     })?;
@@ -1306,7 +1303,7 @@ fn interpolate_command_lines(
 
 fn render_patch(
     entry: &Value,
-    runbook_path: &Path,
+    execution_root: &Path,
     patch_restore_stack: &mut Vec<std::path::PathBuf>,
     patch_snapshots: &mut HashMap<std::path::PathBuf, Vec<u8>>,
     debug_all_entries: bool,
@@ -1323,7 +1320,7 @@ fn render_patch(
         .transpose()?
         .ok_or_else(|| RenderError::Operational("Patch entry is missing patch".to_string()))?;
 
-    let (target_path, relative_path) = patch_target_path(entry, runbook_path)?;
+    let (target_path, relative_path) = patch_target_path(entry, execution_root)?;
     let debug_enabled = entry_debug_enabled(entry, debug_all_entries);
     let mut debug_lines = Vec::new();
     if debug_enabled {
@@ -1335,7 +1332,7 @@ fn render_patch(
         ));
         debug_lines.push(format!(
             "[debug] Patch working directory: {}",
-            runbook_base_dir(runbook_path).display()
+            execution_root.display()
         ));
         debug_lines.push("[debug] Normalized patch text:".to_string());
         debug_lines.push(patch_text_for(&relative_path, &lines));
@@ -1347,7 +1344,7 @@ fn render_patch(
         .entry(target_path.clone())
         .or_insert(snapshot_patch_target(&target_path)?);
     patch_restore_stack.push(target_path);
-    let application = apply_patch_entry(runbook_path, &relative_path, &lines)?;
+    let application = apply_patch_entry(execution_root, &relative_path, &lines)?;
     if debug_enabled {
         debug_lines.push("[debug] Patch command stdout:".to_string());
         debug_lines.push(format_command_stream_for_debug(&application.stdout));
@@ -1362,7 +1359,7 @@ fn render_patch(
 
 fn render_command(
     entry: &Value,
-    runbook_path: &Path,
+    execution_root: &Path,
     state: &mut RenderState,
     timeout_cleanup: Option<&CleanupBlock>,
 ) -> Result<String, RenderError> {
@@ -1379,7 +1376,7 @@ fn render_command(
     let command_text = resolved_command_lines.join("\n");
     let rendered_command_text = render_command_text(entry, &command_text)?;
     let mut section = fenced_block(Some("shell"), &rendered_command_text);
-    let execution = execute_command(entry, &command_text, runbook_path, timeout_cleanup)?;
+    let execution = execute_command(entry, &command_text, execution_root, timeout_cleanup)?;
     let debug_enabled = entry_debug_enabled(entry, state.debug_all_entries);
     let mut debug_lines = Vec::new();
     if debug_enabled {
@@ -1470,7 +1467,7 @@ fn render_command(
         });
     }
 
-    ensure_assertions(entry, &execution, runbook_path)?;
+    ensure_assertions(entry, &execution, execution_root)?;
     if let Err(err) = extract_captured_values(
         entry,
         &execution.stdout,
@@ -1660,17 +1657,20 @@ fn split_multiline_string(value: &str) -> Vec<String> {
         .collect()
 }
 
-pub(crate) fn check_prerequisites(runbook: &Value) -> Result<(), RenderError> {
+pub(crate) fn check_prerequisites(
+    runbook: &Value,
+    execution_root: &Path,
+) -> Result<(), RenderError> {
     let entries = runbook
         .get("entries")
         .and_then(Value::as_array)
         .ok_or_else(|| {
             RenderError::Operational("Runbook is missing an entries array".to_string())
         })?;
-    run_prerequisite_checks(entries)
+    run_prerequisite_checks(entries, execution_root)
 }
 
-fn run_prerequisite_checks(entries: &[Value]) -> Result<(), RenderError> {
+fn run_prerequisite_checks(entries: &[Value], execution_root: &Path) -> Result<(), RenderError> {
     for entry in entries {
         if entry.get("type").and_then(Value::as_str) == Some("Breakpoint") {
             break;
@@ -1688,14 +1688,14 @@ fn run_prerequisite_checks(entries: &[Value]) -> Result<(), RenderError> {
             })?;
 
         for check in checks {
-            run_prerequisite_check(check)?;
+            run_prerequisite_check(check, execution_root)?;
         }
     }
 
     Ok(())
 }
 
-fn run_prerequisite_check(check: &Value) -> Result<(), RenderError> {
+fn run_prerequisite_check(check: &Value, execution_root: &Path) -> Result<(), RenderError> {
     let name = check.get("name").and_then(Value::as_str).ok_or_else(|| {
         RenderError::Operational("Prerequisite name must be a string".to_string())
     })?;
@@ -1704,7 +1704,7 @@ fn run_prerequisite_check(check: &Value) -> Result<(), RenderError> {
     })?;
 
     match kind {
-        "command" => run_command_prerequisite_check(check, name),
+        "command" => run_command_prerequisite_check(check, name, execution_root),
         "java" => run_java_prerequisite_check(check, name),
         other => Err(RenderError::Operational(format!(
             "Unsupported prerequisite kind `{other}`"
@@ -1712,7 +1712,11 @@ fn run_prerequisite_check(check: &Value) -> Result<(), RenderError> {
     }
 }
 
-fn run_command_prerequisite_check(check: &Value, name: &str) -> Result<(), RenderError> {
+fn run_command_prerequisite_check(
+    check: &Value,
+    name: &str,
+    execution_root: &Path,
+) -> Result<(), RenderError> {
     let commands = check.get("commands").ok_or_else(|| {
         RenderError::Operational("Prerequisite commands are required".to_string())
     })?;
@@ -1723,7 +1727,7 @@ fn run_command_prerequisite_check(check: &Value, name: &str) -> Result<(), Rende
     )?;
 
     let script = lines.join("\n");
-    let execution = execute_command(check, &script, Path::new("."), None)?;
+    let execution = execute_command(check, &script, execution_root, None)?;
     if execution.timed_out {
         return Err(prerequisite_failure(
             name,
@@ -1732,7 +1736,7 @@ fn run_command_prerequisite_check(check: &Value, name: &str) -> Result<(), Rende
         ));
     }
 
-    ensure_assertions(check, &execution, Path::new(".")).map_err(|err| match err {
+    ensure_assertions(check, &execution, execution_root).map_err(|err| match err {
         RenderError::CommandFailed(message) => {
             prerequisite_failure(name, check.get("help").and_then(Value::as_str), &message)
         }

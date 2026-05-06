@@ -34,6 +34,15 @@ pub fn run(cli: Cli) -> ExitCode {
             verbose_mode,
             debug,
         ),
+        Some(_) if default_run_input.has_values() => {
+            eprintln!(
+                "Run input options such as --input-file, --input-format, and --working-directory must be used with implicit `sw` or after the target subcommand"
+            );
+            eprintln!(
+                "Try `sw run --input-file <path>` or `sw validate --input-file <path>` instead."
+            );
+            ExitCode::from(1)
+        }
         Some(_) if default_run_output.has_values() => {
             eprintln!(
                 "Run output options such as --output-file and --output-format must be used with implicit `sw` or after `sw run`"

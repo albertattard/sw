@@ -7,10 +7,10 @@ use serde::Serialize;
 use serde_json::Value;
 use std::fs;
 use std::io::{self, Read};
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 
 pub(crate) use render::{check_prerequisites, render_markdown};
-pub use validate::validate;
+pub use validate::{validate, validate_with_execution_root};
 
 #[derive(Debug, Serialize)]
 pub struct ValidationIssue {
@@ -82,6 +82,40 @@ pub fn load_file_only(input_file: Option<PathBuf>) -> Result<LoadedRunbook, Stri
     let path = resolve_file_input_path(input_file)?;
     let document = read(&path)?;
     Ok(LoadedRunbook { path, document })
+}
+
+pub fn resolve_execution_root(
+    runbook_path: &Path,
+    working_directory: Option<PathBuf>,
+) -> Result<PathBuf, String> {
+    let root = match working_directory {
+        Some(path) => normalize_to_absolute(&path)?,
+        None if runbook_path == Path::new(STDIN_INPUT_PATH) => {
+            normalize_to_absolute(Path::new("."))?
+        }
+        None => normalize_to_absolute(
+            runbook_path
+                .parent()
+                .filter(|path| !path.as_os_str().is_empty())
+                .unwrap_or_else(|| Path::new(".")),
+        )?,
+    };
+
+    if !root.exists() {
+        return Err(format!(
+            "Working directory `{}` did not exist",
+            root.display()
+        ));
+    }
+
+    if !root.is_dir() {
+        return Err(format!(
+            "Working directory `{}` was not a directory",
+            root.display()
+        ));
+    }
+
+    Ok(root)
 }
 
 pub fn resolve_single_existing_default_input_path() -> Result<PathBuf, String> {
@@ -419,6 +453,32 @@ fn resolve_file_input_path(input_file: Option<PathBuf>) -> Result<PathBuf, Strin
     }
 
     Ok(path)
+}
+
+fn normalize_path(path: &Path) -> PathBuf {
+    let mut normalized = PathBuf::new();
+
+    for component in path.components() {
+        match component {
+            Component::CurDir => {}
+            Component::ParentDir => {
+                normalized.pop();
+            }
+            other => normalized.push(other.as_os_str()),
+        }
+    }
+
+    normalized
+}
+
+fn normalize_to_absolute(path: &Path) -> Result<PathBuf, String> {
+    if path.is_absolute() {
+        return Ok(normalize_path(path));
+    }
+
+    let current_dir = std::env::current_dir()
+        .map_err(|err| format!("Failed to resolve current directory: {err}"))?;
+    Ok(normalize_path(&current_dir.join(path)))
 }
 
 fn resolve_default_input_path() -> Result<PathBuf, String> {

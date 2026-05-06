@@ -20,6 +20,7 @@ The CLI provides a prerequisite-check command:
 ```bash
 sw check --input-file <sw-runbook.yaml>
 sw check --input-file=-
+sw check --input-file <sw-runbook.yaml> --working-directory /path/to/project
 ```
 
 If no input file is provided, the command uses the implicit default runbook
@@ -43,6 +44,7 @@ entries and reports whether the current environment is ready for `sw run`.
 - Optional named input file parameter: `--input-file <runbook.{json|yaml|yml}>`
   or `--input-file=-` to read the runbook from stdin.
 - Optional input format parameter: `--input-format json|yaml`.
+- Optional execution root parameter: `--working-directory <path>`.
 
 Default input behavior:
 - File-backed workflows elsewhere in the CLI default to YAML authoring, but
@@ -64,6 +66,17 @@ Default input behavior:
   input format from the file extension or default file name.
 - `--input-format` does not bypass this default file ambiguity check when
   `--input-file=-` is not used.
+- If `--working-directory` is not provided, prerequisite checks resolve
+  runbook-relative paths from the runbook file's directory. For stdin-backed
+  runbooks, they resolve them from the shell current directory.
+- If `--working-directory` is provided, resolve it relative to the shell
+  current directory when it is relative.
+- If `--working-directory` is provided, it must already exist and be a
+  directory.
+- `--input-file` remains a normal CLI path and resolves relative to the shell
+  current directory when it is relative.
+- Runbook-relative path validation and command-based prerequisite checks use
+  the execution root selected by `--working-directory`.
 - Supported input formats are JSON, YAML, and YML for files, and JSON or YAML
   for stdin.
 - `Prerequisite.checks[*].contents` may be either a single string or an array

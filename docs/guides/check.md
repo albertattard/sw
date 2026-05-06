@@ -23,6 +23,14 @@ Check an explicit file:
 sw check --input-file ./sw-runbook.yaml
 ```
 
+Check prerequisites against a different project directory:
+
+```shell
+sw check \
+  --input-file /path/to/runbook/sw-runbook.yaml \
+  --working-directory /path/to/project
+```
+
 Check YAML from stdin:
 
 ```shell
@@ -32,6 +40,8 @@ sw check --input-file=- --input-format yaml
 ## Notes
 
 - `sw check` does not render or write `README.md`.
+- `--working-directory` selects the execution root for runbook-relative paths
+  used by prerequisite checks.
 - Normal `Command` entries are not executed.
 - Built-in prerequisite checks include Java version checks.
 - Command-based prerequisite checks use a shorter default timeout than normal

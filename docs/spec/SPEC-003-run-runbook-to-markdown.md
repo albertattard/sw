@@ -30,6 +30,7 @@ sw --verbose
 sw --debug
 sw --input-file=-
 sw --output-file runbook.md
+sw --working-directory /path/to/project
 sw run
 sw run --input-file <sw-runbook.yaml>
 sw run --input-file=- --input-format=yaml
@@ -56,6 +57,7 @@ in the runbook.
 - Optional input format parameter: `--input-format json|yaml`.
 - Optional output format parameter: `--output-format markdown`.
 - Optional output file parameter: `--output-file <path>`.
+- Optional execution root parameter: `--working-directory <path>`.
 - Optional progress parameter: `--verbose`.
 - Optional verbose progress mode parameter: `--verbose-mode auto|live|plain`.
 - Optional diagnostic parameter: `--debug`.
@@ -90,6 +92,18 @@ in the runbook.
   input format from the file extension or default file name.
 - If `--output-format` is not provided, default to `markdown`.
 - If `--output-file` is not provided, default to `./README.md`.
+- If `--working-directory` is not provided, the execution root is the runbook
+  file's directory. For stdin-backed runbooks, the execution root is the shell
+  current directory.
+- If `--working-directory` is provided, resolve it relative to the shell
+  current directory when it is relative.
+- If `--working-directory` is provided, it must already exist and be a
+  directory.
+- `--input-file` and `--output-file` remain normal CLI paths and resolve
+  relative to the shell current directory when they are relative.
+- Runbook-relative paths are resolved from the execution root. This includes
+  `DisplayFile.path`, `Patch.path`, `Command.working_dir`, command execution,
+  explicit command cleanup, and command file assertions.
 - If `--verbose` is not provided, progress output is suppressed.
 - If `--verbose-mode` is not provided, it defaults to `auto`.
 - If `--verbose` is not provided, `--verbose-mode` has no effect.
@@ -429,12 +443,11 @@ in the runbook.
   command line.
 - A `Command` entry may declare `working_dir`.
 - If `working_dir` is present, it must be a string.
-- `working_dir` is resolved relative to the runbook file's directory.
+- `working_dir` is resolved relative to the execution root.
 - `working_dir` applies to command execution, that command entry's explicit
   cleanup block, and file assertions for that command entry.
-- If `working_dir` is omitted, command execution uses the runbook file's
-  directory.
-- `working_dir` must remain within the runbook file's directory tree after
+- If `working_dir` is omitted, command execution uses the execution root.
+- `working_dir` must remain within the execution root directory tree after
   normalization.
 - Absolute `working_dir` paths are not supported in this increment.
 - If `working_dir` is present, the rendered command block wraps the displayed
@@ -1509,7 +1522,7 @@ in the runbook.
   or `html`.
 - Output content type uses an unsupported value.
 - Command output is large.
-- `working_dir` points outside the runbook directory via `..`.
+- `working_dir` points outside the execution root via `..`.
 - `working_dir` resolves to a path that does not exist.
 - `working_dir` resolves to a file rather than a directory.
 - `working_dir` includes shell-sensitive characters that require quoting in the
