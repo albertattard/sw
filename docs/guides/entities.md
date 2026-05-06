@@ -106,7 +106,8 @@ the whole fenced block in the generated Markdown.
 ```
 
 `DisplayFile` currently recognizes common file extensions such as `.java`,
-`.sql`, and `.xml` for fenced-code labels. Unknown extensions render as text.
+`.md`, `.markdown`, `.sql`, and `.xml` for fenced-code labels. Unknown
+extensions render as text.
 
 For Java examples, `transform` can collapse method bodies when the surrounding
 code is more important than the implementation details:

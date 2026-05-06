@@ -1,0 +1,10 @@
+entries:
+  - type: Heading
+    level: H1
+    title: Display Markdown file
+
+  - type: DisplayFile
+    path: ./SKILL.md
+    start_line: 1
+    line_count: 3
+    indent: 3

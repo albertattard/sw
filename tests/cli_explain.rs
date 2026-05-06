@@ -156,7 +156,7 @@ fn explain_run_prints_concise_contract_summary() {
         "`Markdown`, `DisplayFile`, `Patch`, and `Command` entries may declare `indent` to prefix each non-empty rendered line and keep nested Markdown structures readable."
     ));
     assert!(stdout.contains(
-        "`DisplayFile` fence detection recognizes `.java` as `java`, `.sql` as `sql`, and `.xml` as `xml`; other extensions fall back to `text`."
+        "`DisplayFile` fence detection recognizes `.java` as `java`, `.md` and `.markdown` as `markdown`, `.sql` as `sql`, and `.xml` as `xml`; other extensions fall back to `text`."
     ));
     assert!(stdout.contains(
         "Use `sw check` first if the question is whether prerequisites such as Java are available."

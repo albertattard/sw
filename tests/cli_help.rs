@@ -233,7 +233,9 @@ fn run_help_prints_help() {
     assert!(stdout.contains("regex `start_pattern`/`end_pattern` boundaries"));
     assert!(stdout.contains("`Command` entries default to a `30 seconds` timeout"));
     assert!(stdout.contains("prerequisite checks default to `5 seconds`"));
-    assert!(stdout.contains("`.java` as `java`, `.sql` as `sql`, and `.xml` as `xml`"));
+    assert!(stdout.contains(
+        "`.java` as `java`, `.md` and `.markdown` as `markdown`, `.sql` as `sql`, and `.xml` as `xml`"
+    ));
     assert!(stdout.contains("SSH-safe line-based progress output"));
     assert!(stdout.contains("sw example Command"));
     assert!(stdout.contains("--output-format json"));

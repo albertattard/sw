@@ -3073,6 +3073,28 @@ fn display_file_xml_uses_xml_fenced_block() {
 }
 
 #[test]
+fn display_file_markdown_uses_markdown_fenced_block() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-display-file-markdown.yaml",
+        "sw-runbook.yaml",
+    );
+    fs::write(
+        dir.join("SKILL.md"),
+        "---\nname: create-scope\n---\n# Create Scope\n",
+    )
+    .expect("failed to write SKILL.md");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("# Display Markdown file"));
+    assert!(readme.contains("   ```markdown\n   ---\n   name: create-scope\n   ---\n   ```"));
+}
+
+#[test]
 fn display_file_java_transform_can_collapse_a_method_body() {
     let dir = prepare_workspace();
     write_runbook(

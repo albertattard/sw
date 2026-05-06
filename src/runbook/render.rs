@@ -584,8 +584,8 @@ fn truncate_progress_summary(summary: &str, max_chars: usize) -> String {
 #[cfg(test)]
 mod tests {
     use super::{
-        compact_timeout_label, entry_summary, format_elapsed_time, format_progress_line,
-        progress_line_text, progress_start_line_text, resolve_progress_mode,
+        compact_timeout_label, display_file_content_type, entry_summary, format_elapsed_time,
+        format_progress_line, progress_line_text, progress_start_line_text, resolve_progress_mode,
         split_multiline_string, truncate_progress_summary,
     };
     use crate::cli::VerboseMode;
@@ -710,6 +710,15 @@ mod tests {
 
         let summary = entry_summary(&display_file, Path::new("/tmp"));
         assert!(summary.contains("DisplayFile: /tmp/./src/main.java (lines 10-12)"));
+    }
+
+    #[test]
+    fn display_file_content_type_recognizes_markdown_extensions() {
+        assert_eq!(display_file_content_type(Path::new("SKILL.md")), "markdown");
+        assert_eq!(
+            display_file_content_type(Path::new("README.markdown")),
+            "markdown"
+        );
     }
 
     #[test]
@@ -3192,6 +3201,7 @@ fn trim_segment_trailing_whitespace(segment: &str) -> String {
 fn display_file_content_type(path: &Path) -> &'static str {
     match path.extension().and_then(|extension| extension.to_str()) {
         Some("java") => "java",
+        Some("md") | Some("markdown") => "markdown",
         Some("sql") => "sql",
         Some("xml") => "xml",
         _ => "text",
