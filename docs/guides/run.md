@@ -98,8 +98,9 @@ sw example Patch
 Useful `Command` fields include:
 
 - `commands`: shell script to execute.
-- `working_dir`: run commands from a directory relative to the effective
-  execution root.
+- `working_directory`: run commands from a directory relative to the effective
+  execution root. Legacy `working_dir` is still accepted for existing runbooks,
+  but new runbooks should use `working_directory`.
 - `timeout`: override the default command timeout.
 - `cleanup`: release resources after the command finishes or the run fails.
 - `assert.exit_code`: assert that a command succeeds or intentionally fails.

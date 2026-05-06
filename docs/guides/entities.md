@@ -207,13 +207,15 @@ Use `output` when command output should appear in the generated Markdown:
     stream: stdout
 ```
 
-Use `working_dir` when the command should run from a directory relative to the
-effective execution root. By default that root is the runbook file's directory;
-`sw run --working-directory <path>` can override it from the CLI:
+Use `working_directory` when the command should run from a directory relative
+to the effective execution root. By default that root is the runbook file's
+directory; `sw run --working-directory <path>` can override it from the CLI.
+Legacy `working_dir` is still accepted for existing runbooks, but new runbooks
+should use `working_directory`:
 
 ```yaml
 - type: Command
-  working_dir: reverse-proxy
+  working_directory: reverse-proxy
   commands: |
     docker build \
       --file Dockerfile \

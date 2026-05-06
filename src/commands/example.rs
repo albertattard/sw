@@ -82,6 +82,7 @@ message: Stop here while debugging this runbook"#;
 const COMMAND_EXAMPLE_JSON: &str = r#"{
   "type": "Command",
   "debug": true,
+  "working_directory": "demo",
   "commands": [
     "echo 'Hello there'"
   ],
@@ -150,6 +151,7 @@ const COMMAND_EXAMPLE_JSON: &str = r#"{
 
 const COMMAND_EXAMPLE_YAML: &str = r#"type: Command
 debug: true
+working_directory: demo
 commands:
   - "echo 'Hello there'"
 timeout: 30 seconds

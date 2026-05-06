@@ -208,7 +208,6 @@ Expected task directories:
 - [TASK-144: Support Output Options On Implicit Run](run/TASK-144-support-output-options-on-implicit-run.md)
 - [TASK-145: Support Regex Keep Between Boundaries](rewrite/TASK-145-support-regex-keep-between-boundaries.md)
 - [TASK-146: Support Stderr Command Captures](run/TASK-146-support-stderr-command-captures.md)
-- [TASK-147: Adopt Working Directory Runbook Field](run/TASK-147-adopt-working-directory-runbook-field.md)
 - [TASK-148: Support CLI Working Directory](run/TASK-148-support-cli-working-directory.md)
 - [TASK-149: Recognize Markdown DisplayFile Fences](display-file/TASK-149-recognize-markdown-display-file-fences.md)
 
@@ -226,6 +225,7 @@ Expected task directories:
 
 - [x] [TASK-149: Recognize Markdown DisplayFile Fences](display-file/TASK-149-recognize-markdown-display-file-fences.md)
 - [x] [TASK-148: Support CLI Working Directory](run/TASK-148-support-cli-working-directory.md)
+- [x] [TASK-147: Adopt Working Directory Runbook Field](run/TASK-147-adopt-working-directory-runbook-field.md)
 - [x] [TASK-146: Support Stderr Command Captures](run/TASK-146-support-stderr-command-captures.md)
 - [x] [TASK-145: Support Regex Keep Between Boundaries](rewrite/TASK-145-support-regex-keep-between-boundaries.md)
 - [x] [TASK-144: Support Output Options On Implicit Run](run/TASK-144-support-output-options-on-implicit-run.md)

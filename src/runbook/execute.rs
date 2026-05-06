@@ -833,37 +833,48 @@ fn resolve_command_working_dir(
 ) -> Result<PathBuf, RenderError> {
     let base_dir = normalize_to_absolute(execution_root)?;
 
-    let Some(working_dir) = entry.get("working_dir") else {
+    let legacy_working_dir = entry.get("working_dir");
+    let preferred_working_dir = entry.get("working_directory");
+    if legacy_working_dir.is_some() && preferred_working_dir.is_some() {
+        return Err(RenderError::Operational(
+            "Command must not declare both working_dir and working_directory".to_string(),
+        ));
+    }
+
+    let Some((field_name, working_dir)) = preferred_working_dir
+        .map(|value| ("working_directory", value))
+        .or_else(|| legacy_working_dir.map(|value| ("working_dir", value)))
+    else {
         return Ok(base_dir);
     };
 
     let working_dir = working_dir.as_str().ok_or_else(|| {
-        RenderError::Operational("Command working_dir must be a string".to_string())
+        RenderError::Operational(format!("Command {field_name} must be a string"))
     })?;
     let working_dir_path = Path::new(working_dir);
 
     if working_dir_path.is_absolute() {
-        return Err(RenderError::Operational(
-            "Command working_dir must be a relative path".to_string(),
-        ));
+        return Err(RenderError::Operational(format!(
+            "Command {field_name} must be a relative path"
+        )));
     }
 
     let resolved_dir = normalize_to_absolute(&base_dir.join(working_dir_path))?;
     if !resolved_dir.starts_with(&base_dir) {
-        return Err(RenderError::Operational(
-            "Command working_dir must stay within the working directory".to_string(),
-        ));
+        return Err(RenderError::Operational(format!(
+            "Command {field_name} must stay within the working directory"
+        )));
     }
 
     if !resolved_dir.exists() {
         return Err(RenderError::Operational(format!(
-            "Command working_dir `{working_dir}` did not exist"
+            "Command {field_name} `{working_dir}` did not exist"
         )));
     }
 
     if !resolved_dir.is_dir() {
         return Err(RenderError::Operational(format!(
-            "Command working_dir `{working_dir}` was not a directory"
+            "Command {field_name} `{working_dir}` was not a directory"
         )));
     }
 
@@ -1129,8 +1140,30 @@ mod tests {
     }
 
     #[test]
-    fn resolve_command_working_dir_uses_execution_root_relative_directory() {
+    fn resolve_command_working_dir_uses_preferred_execution_root_relative_directory() {
         let dir = std::env::temp_dir().join(format!("sw-working-dir-{}", std::process::id()));
+        let nested = dir.join("nested/demo");
+        let _ = fs::remove_dir_all(&dir);
+        fs::create_dir_all(&nested).expect("create nested dir");
+
+        let entry = json!({
+            "type": "Command",
+            "working_directory": "nested/demo"
+        });
+
+        let resolved = match resolve_command_working_dir(&entry, &dir) {
+            Ok(path) => path,
+            Err(_) => panic!("resolve dir"),
+        };
+        assert_eq!(resolved, nested);
+
+        let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn resolve_command_working_dir_accepts_legacy_field() {
+        let dir =
+            std::env::temp_dir().join(format!("sw-legacy-working-dir-{}", std::process::id()));
         let nested = dir.join("nested/demo");
         let _ = fs::remove_dir_all(&dir);
         fs::create_dir_all(&nested).expect("create nested dir");
@@ -1150,7 +1183,7 @@ mod tests {
     }
 
     #[test]
-    fn resolve_assertion_path_uses_command_working_dir_for_relative_paths() {
+    fn resolve_assertion_path_uses_command_working_directory_for_relative_paths() {
         let dir = std::env::temp_dir().join(format!("sw-assert-path-{}", std::process::id()));
         let nested = dir.join("nested/demo");
         let _ = fs::remove_dir_all(&dir);
@@ -1158,7 +1191,7 @@ mod tests {
 
         let entry = json!({
             "type": "Command",
-            "working_dir": "nested/demo"
+            "working_directory": "nested/demo"
         });
 
         let resolved = match resolve_assertion_path(&entry, &dir, "out.txt") {

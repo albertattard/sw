@@ -1514,12 +1514,23 @@ fn render_command(
 }
 
 fn render_command_text(entry: &Value, command_text: &str) -> Result<String, RenderError> {
-    let Some(working_dir) = entry.get("working_dir") else {
+    let legacy_working_dir = entry.get("working_dir");
+    let preferred_working_dir = entry.get("working_directory");
+    if legacy_working_dir.is_some() && preferred_working_dir.is_some() {
+        return Err(RenderError::Operational(
+            "Command must not declare both working_dir and working_directory".to_string(),
+        ));
+    }
+
+    let Some((field_name, working_dir)) = preferred_working_dir
+        .map(|value| ("working_directory", value))
+        .or_else(|| legacy_working_dir.map(|value| ("working_dir", value)))
+    else {
         return Ok(command_text.to_string());
     };
 
     let working_dir = working_dir.as_str().ok_or_else(|| {
-        RenderError::Operational("Command working_dir must be a string".to_string())
+        RenderError::Operational(format!("Command {field_name} must be a string"))
     })?;
     let quoted_working_dir = shell_single_quote(working_dir);
     let indented_command = command_text

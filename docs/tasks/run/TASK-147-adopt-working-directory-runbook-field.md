@@ -1,7 +1,7 @@
 ---
 id: TASK-147
 title: Adopt Working Directory Runbook Field
-status: pending
+status: done
 category: run
 related_features:
   - SPEC-003
@@ -20,27 +20,27 @@ is shorter and no longer matches the preferred CLI terminology.
 
 ## Decision
 
-Track a later compatibility-focused change to move runbook entry syntax toward
-`working_directory`. This should be handled separately from the initial
-CLI-level `--working-directory` feature so the CLI behavior can land without
-forcing a runbook schema migration at the same time.
+Adopt `working_directory` as the preferred command-level runbook field while
+keeping `working_dir` as a legacy compatibility alias. Reject entries that
+declare both fields so command execution, cleanup, rendering, and file
+assertions do not depend on an ambiguous working-directory source.
 
 ## Scope
 
-- Define whether `working_directory` replaces `working_dir` immediately or is
-  introduced as a compatibility alias first.
+- Introduce `working_directory` as the preferred command-level field.
+- Keep `working_dir` as a compatibility alias for existing runbooks.
 - Update the runbook spec for command-level working directory syntax.
-- Update validation, rendering, examples, explain output, guides, and tests.
-- Decide how `sw format`, `sw convert`, and generated examples should serialize
-  the field during any compatibility period.
+- Update validation, rendering, examples, guides, and tests.
+- Document that `sw format` and `sw convert` preserve the authored compatible
+  field name instead of silently migrating `working_dir`.
 - Preserve a clear validation error for ambiguous entries that declare both
   `working_dir` and `working_directory`.
 
 ## Acceptance Criteria
 
-- [ ] The runbook spec defines the preferred command-level working directory
+- [x] The runbook spec defines the preferred command-level working directory
       field name.
-- [ ] Existing runbooks using `working_dir` have a documented migration path.
-- [ ] Examples and discovery output use the preferred field name.
-- [ ] Validation rejects entries that declare both field names.
-- [ ] Automated tests cover the preferred field name and compatibility behavior.
+- [x] Existing runbooks using `working_dir` have a documented migration path.
+- [x] Examples and discovery output use the preferred field name.
+- [x] Validation rejects entries that declare both field names.
+- [x] Automated tests cover the preferred field name and compatibility behavior.

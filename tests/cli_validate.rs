@@ -165,7 +165,7 @@ fn validate_accepts_scalar_cleanup_scripts_in_yaml() {
 }
 
 #[test]
-fn validate_accepts_command_working_dir_in_yaml() {
+fn validate_accepts_command_working_directory_in_yaml() {
     let output = run(&[
         "validate",
         "--input-file",
@@ -181,7 +181,71 @@ fn validate_accepts_command_working_dir_in_yaml() {
 }
 
 #[test]
-fn validate_working_directory_sets_execution_root_for_command_working_dir() {
+fn validate_accepts_legacy_command_working_dir_in_yaml() {
+    let dir = prepare_workspace();
+    fs::create_dir_all(dir.join("reverse-proxy")).expect("failed to create working directory");
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Command
+    working_dir: reverse-proxy
+    commands: echo ok
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(
+        &[
+            "validate",
+            "--input-file",
+            "sw-runbook.yaml",
+            "--output-format",
+            "json",
+        ],
+        &dir,
+    );
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": true"));
+    assert!(stdout.contains("\"errors\": []"));
+}
+
+#[test]
+fn validate_rejects_command_with_both_working_directory_fields() {
+    let dir = prepare_workspace();
+    fs::create_dir_all(dir.join("reverse-proxy")).expect("failed to create working directory");
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Command
+    working_dir: reverse-proxy
+    working_directory: reverse-proxy
+    commands: echo ok
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(
+        &[
+            "validate",
+            "--input-file",
+            "sw-runbook.yaml",
+            "--output-format",
+            "json",
+        ],
+        &dir,
+    );
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": false"));
+    assert!(stdout.contains("\"path\": \"entries[0].working_directory\""));
+    assert!(stdout.contains("must not be declared together with `working_dir`"));
+}
+
+#[test]
+fn validate_working_directory_sets_execution_root_for_command_working_directory() {
     let dir = prepare_workspace();
     let runbook_dir = dir.join("runbook");
     let project_dir = dir.join("project");
@@ -191,7 +255,7 @@ fn validate_working_directory_sets_execution_root_for_command_working_dir() {
         runbook_dir.join("sw-runbook.yaml"),
         r#"entries:
   - type: Command
-    working_dir: ../project/child
+    working_directory: ../project/child
     commands: echo ok
 "#,
     )
@@ -637,7 +701,7 @@ fn absolute_working_dir_returns_validation_failure() {
     assert_eq!(output.status.code(), Some(2));
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("\"valid\": false"));
-    assert!(stdout.contains("\"path\": \"entries[0].working_dir\""));
+    assert!(stdout.contains("\"path\": \"entries[0].working_directory\""));
 }
 
 #[test]
@@ -653,7 +717,7 @@ fn escaping_working_dir_returns_validation_failure() {
     assert_eq!(output.status.code(), Some(2));
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("\"valid\": false"));
-    assert!(stdout.contains("\"path\": \"entries[0].working_dir\""));
+    assert!(stdout.contains("\"path\": \"entries[0].working_directory\""));
 }
 
 #[test]

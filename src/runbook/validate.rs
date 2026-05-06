@@ -192,6 +192,28 @@ fn validate_command_working_dir(
     }
 }
 
+fn command_working_directory_field<'a>(
+    object: &'a serde_json::Map<String, Value>,
+    path: &str,
+    errors: &mut Vec<ValidationIssue>,
+) -> Option<(&'static str, &'a Value)> {
+    let legacy = object.get("working_dir");
+    let preferred = object.get("working_directory");
+
+    if legacy.is_some() && preferred.is_some() {
+        push_error(
+            errors,
+            format!("{path}.working_directory"),
+            "must not be declared together with `working_dir`",
+        );
+        return None;
+    }
+
+    preferred
+        .map(|value| ("working_directory", value))
+        .or_else(|| legacy.map(|value| ("working_dir", value)))
+}
+
 fn validate_output_with_context(
     value: &Value,
     path: &str,
@@ -1235,6 +1257,7 @@ fn validate_entry(
                 if key != "type"
                     && key != "commands"
                     && key != "working_dir"
+                    && key != "working_directory"
                     && key != "indent"
                     && key != "debug"
                     && key != "output"
@@ -1283,10 +1306,12 @@ fn validate_entry(
                 );
             }
 
-            if let Some(working_dir) = object.get("working_dir") {
+            if let Some((field_name, working_dir)) =
+                command_working_directory_field(object, &path, &mut context.errors)
+            {
                 validate_command_working_dir(
                     working_dir,
-                    &format!("{path}.working_dir"),
+                    &format!("{path}.{field_name}"),
                     execution_root,
                     &mut context.errors,
                 );

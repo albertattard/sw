@@ -156,6 +156,12 @@ fn explain_run_prints_concise_contract_summary() {
         "`Markdown`, `DisplayFile`, `Patch`, and `Command` entries may declare `indent` to prefix each non-empty rendered line and keep nested Markdown structures readable."
     ));
     assert!(stdout.contains(
+        "`Command.working_directory` runs one command entry from a directory relative to the execution root; legacy `working_dir` remains accepted but new runbooks should use `working_directory`."
+    ));
+    assert!(stdout.contains(
+        "A command entry that declares both `working_directory` and `working_dir` is invalid."
+    ));
+    assert!(stdout.contains(
         "`DisplayFile` fence detection recognizes `.java` as `java`, `.md` and `.markdown` as `markdown`, `.sql` as `sql`, and `.xml` as `xml`; other extensions fall back to `text`."
     ));
     assert!(stdout.contains(

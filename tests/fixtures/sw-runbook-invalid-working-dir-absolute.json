@@ -5,7 +5,7 @@
       "commands": [
         "echo 'hello'"
       ],
-      "working_dir": "/tmp"
+      "working_directory": "/tmp"
     }
   ]
 }

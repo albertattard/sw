@@ -255,7 +255,7 @@ fn run_working_directory_sets_execution_root_for_runbook_relative_paths() {
           exists: true
 
   - type: Command
-    working_dir: nested
+    working_directory: nested
     commands: |
       pwd > child-pwd.txt
       printf 'child\n' > child-command.txt
@@ -1694,7 +1694,7 @@ fn command_working_dir_renders_shell_safe_quotes() {
         dir.join("sw-runbook.yaml"),
         r#"entries:
   - type: Command
-    working_dir: dir'with-quote
+    working_directory: dir'with-quote
     commands: |
       printf 'quoted\n' > output.txt
 "#,

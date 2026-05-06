@@ -102,8 +102,9 @@ in the runbook.
 - `--input-file` and `--output-file` remain normal CLI paths and resolve
   relative to the shell current directory when they are relative.
 - Runbook-relative paths are resolved from the execution root. This includes
-  `DisplayFile.path`, `Patch.path`, `Command.working_dir`, command execution,
-  explicit command cleanup, and command file assertions.
+  `DisplayFile.path`, `Patch.path`, `Command.working_directory`, legacy
+  `Command.working_dir`, command execution, explicit command cleanup, and
+  command file assertions.
 - If `--verbose` is not provided, progress output is suppressed.
 - If `--verbose-mode` is not provided, it defaults to `auto`.
 - If `--verbose` is not provided, `--verbose-mode` has no effect.
@@ -441,21 +442,28 @@ in the runbook.
 - Scalar `Command.commands` ignores a terminal line break that exists only to
   terminate the scalar, so YAML literal scalars do not add an extra blank
   command line.
-- A `Command` entry may declare `working_dir`.
-- If `working_dir` is present, it must be a string.
-- `working_dir` is resolved relative to the execution root.
-- `working_dir` applies to command execution, that command entry's explicit
-  cleanup block, and file assertions for that command entry.
-- If `working_dir` is omitted, command execution uses the execution root.
-- `working_dir` must remain within the execution root directory tree after
-  normalization.
-- Absolute `working_dir` paths are not supported in this increment.
-- If `working_dir` is present, the rendered command block wraps the displayed
-  command in a subshell that changes into that directory before executing the
-  command text.
+- A `Command` entry may declare `working_directory`.
+- `working_directory` is the preferred command-level working-directory field.
+- For compatibility, `Command.working_dir` is accepted as a legacy alias.
+- A `Command` entry must not declare both `working_directory` and
+  `working_dir`.
+- If `working_directory` or legacy `working_dir` is present, it must be a
+  string.
+- `working_directory` is resolved relative to the execution root.
+- `working_directory` applies to command execution, that command entry's
+  explicit cleanup block, and file assertions for that command entry.
+- If `working_directory` is omitted, command execution uses the execution root.
+- `working_directory` must remain within the execution root directory tree
+  after normalization.
+- Absolute `working_directory` paths are not supported in this increment.
+- If `working_directory` is present, the rendered command block wraps the
+  displayed command in a subshell that changes into that directory before
+  executing the command text.
 - The rendered wrapper must be copy-pasteable as shell input.
-- The rendered wrapper should use `cd '<working_dir>' &&` so the displayed
-  command fails safely if the directory change fails.
+- The rendered wrapper should use `cd '<working_directory>' &&` so the
+  displayed command fails safely if the directory change fails.
+- `sw format` and `sw convert` preserve whichever compatible field name is
+  authored; they do not silently migrate `working_dir` to `working_directory`.
 - A `Command` entry may declare `indent`.
 - If `indent` is present, the rendered command section is prefixed with that
   number of leading spaces on each rendered line.
@@ -1524,11 +1532,14 @@ in the runbook.
   or `html`.
 - Output content type uses an unsupported value.
 - Command output is large.
-- `working_dir` points outside the execution root via `..`.
-- `working_dir` resolves to a path that does not exist.
-- `working_dir` resolves to a file rather than a directory.
-- `working_dir` includes shell-sensitive characters that require quoting in the
-  rendered command block.
+- `working_directory` points outside the execution root via `..`.
+- `working_directory` resolves to a path that does not exist.
+- `working_directory` resolves to a file rather than a directory.
+- `working_directory` includes shell-sensitive characters that require quoting
+  in the rendered command block.
+- `working_dir` is used as a legacy alias.
+- Both `working_directory` and `working_dir` are declared on the same command
+  entry.
 
 ## Notes for Reimplementation
 

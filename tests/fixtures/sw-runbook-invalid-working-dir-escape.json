@@ -5,7 +5,7 @@
       "commands": [
         "echo 'hello'"
       ],
-      "working_dir": "../outside"
+      "working_directory": "../outside"
     }
   ]
 }
