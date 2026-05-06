@@ -10,7 +10,7 @@ related_features:
   - SPEC-009
 owner: @aattard
 created: 2026-03-22
-updated: 2026-03-23
+updated: 2026-05-06
 ---
 
 ## Summary
@@ -26,7 +26,8 @@ tools that report meaningful output on stderr without shell-level redirection.
 - Keep `stdout` as the default when `output.stream` is omitted
 - Apply stream selection before output rewrites and output trimming
 - Keep `capture.source` unchanged in this increment so capture remains limited
-  to stdout
+  to stdout. `TASK-146` later expanded command capture sources to include
+  stderr.
 - Keep assertion-check sources unchanged in this increment
 - Validate unsupported `output.stream` values
 - Update `sw example Command` so the output shape includes `stream`

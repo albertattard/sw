@@ -8,7 +8,7 @@ related_features:
   - SPEC-009
 owner: @aattard
 created: 2026-04-25
-updated: 2026-04-25
+updated: 2026-05-06
 ---
 
 ## Summary
@@ -33,7 +33,9 @@ behavior in the discovery surfaces.
 - This task does not change runbook execution or validation behavior.
 - `stage: original` remains invalid; the documented values are `raw` and
   `rewritten`.
-- `capture.source` remains limited to `stdout`.
+- At the time this task was completed, `capture.source` was limited to
+  `stdout`. `TASK-146` later expanded the supported sources to `stdout` and
+  `stderr`.
 
 ## Acceptance Criteria
 

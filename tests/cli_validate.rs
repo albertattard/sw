@@ -1537,6 +1537,74 @@ fn invalid_capture_forward_reference_returns_validation_failure() {
 }
 
 #[test]
+fn capture_source_stderr_returns_validation_success() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Command
+    commands: echo example
+    capture:
+      - name: session_id
+        source: stderr
+        stage: raw
+        pattern: 'session id: ([0-9a-fA-F-]+)'
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(
+        &[
+            "validate",
+            "--input-file",
+            "sw-runbook.yaml",
+            "--output-format",
+            "json",
+        ],
+        &dir,
+    );
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": true"));
+}
+
+#[test]
+fn invalid_capture_source_returns_validation_failure() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Command
+    commands: echo example
+    capture:
+      - name: session_id
+        source: combined
+        stage: raw
+        pattern: 'session id: ([0-9a-fA-F-]+)'
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(
+        &[
+            "validate",
+            "--input-file",
+            "sw-runbook.yaml",
+            "--output-format",
+            "json",
+        ],
+        &dir,
+    );
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": false"));
+    assert!(stdout.contains("\"path\": \"entries[0].capture[0].source\""));
+    assert!(stdout.contains("must be `stdout` or `stderr`"));
+}
+
+#[test]
 fn invalid_output_rewrite_replacement_forward_reference_returns_validation_failure() {
     let output = run(&[
         "validate",

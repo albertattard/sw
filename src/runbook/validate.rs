@@ -348,8 +348,12 @@ fn validate_capture(
         }
 
         match object.get("source").and_then(Value::as_str) {
-            Some("stdout") => {}
-            Some(_) => push_error(errors, format!("{capture_path}.source"), "must be `stdout`"),
+            Some("stdout" | "stderr") => {}
+            Some(_) => push_error(
+                errors,
+                format!("{capture_path}.source"),
+                "must be `stdout` or `stderr`",
+            ),
             None => push_error(errors, format!("{capture_path}.source"), "must be a string"),
         }
 

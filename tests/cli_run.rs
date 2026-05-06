@@ -588,7 +588,6 @@ fn debug_run_reports_rewrite_and_capture_diagnostics_to_stderr() {
     assert!(stderr.contains("audio file> target/audio/audio_20260312_142351.mp3"));
     assert!(stderr.contains("[debug] Rewrite datetime_shift pattern: audio_\\d{8}_\\d{6}"));
     assert!(stderr.contains("[debug] Rewrite datetime_shift match count: 1"));
-    assert!(stderr.contains("[debug] Rewritten stdout for capture:"));
     assert!(stderr.contains("[debug] Rewritten rendered output stream:"));
     assert!(stderr.contains("audio file> target/audio/audio_20770427_123456.mp3"));
     assert!(
@@ -613,7 +612,6 @@ fn debug_flag_before_subcommand_uses_default_run_behavior() {
     assert!(output.status.success());
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(stderr.contains("[debug] Command entry:"));
-    assert!(stderr.contains("[debug] Rewritten stdout for capture:"));
     assert!(stderr.contains("[debug] Rewritten rendered output stream:"));
 }
 
@@ -2714,6 +2712,75 @@ fn command_capture_rewritten_stage_uses_rewritten_stdout() {
         fs::read_to_string(dir.join("captured-rewritten.txt"))
             .expect("missing captured-rewritten.txt"),
         "./target/audio/demo.mp3\n"
+    );
+}
+
+#[test]
+fn command_capture_raw_stage_can_use_stderr() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Command
+    commands: |
+      printf 'session id: 019dfb66-0c37-7243-a804-bcae47d4cf89\n' >&2
+    capture:
+      - name: session_id
+        source: stderr
+        stage: raw
+        pattern: 'session id: ([0-9a-fA-F-]+)'
+
+  - type: Command
+    commands: |
+      printf '%s\n' '@{session_id}' > captured-stderr.txt
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    assert_eq!(
+        fs::read_to_string(dir.join("captured-stderr.txt")).expect("missing captured-stderr.txt"),
+        "019dfb66-0c37-7243-a804-bcae47d4cf89\n"
+    );
+}
+
+#[test]
+fn command_capture_rewritten_stage_can_use_rewritten_stderr() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Command
+    commands: |
+      printf 'session id: 019dfb66-0c37-7243-a804-bcae47d4cf89\n' >&2
+    output:
+      stream: stderr
+      rewrite:
+        - type: replace
+          pattern: 'session id: [0-9a-fA-F-]+'
+          replacement: 'session id: stable-session'
+    capture:
+      - name: session_id
+        source: stderr
+        stage: rewritten
+        pattern: 'session id: ([a-z-]+)'
+
+  - type: Command
+    commands: |
+      printf '%s\n' '@{session_id}' > captured-rewritten-stderr.txt
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    assert_eq!(
+        fs::read_to_string(dir.join("captured-rewritten-stderr.txt"))
+            .expect("missing captured-rewritten-stderr.txt"),
+        "stable-session\n"
     );
 }
 

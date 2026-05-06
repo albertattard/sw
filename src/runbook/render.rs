@@ -1390,15 +1390,6 @@ fn render_command(
         debug_lines.push("[debug] Raw stderr:".to_string());
         debug_lines.push(format_command_stream_for_debug(&execution.stderr));
     }
-    let capture_rewrite_result = match rewritten_stdout_for_capture(entry, &execution, state) {
-        Ok(result) => result,
-        Err(err) => {
-            emit_debug_lines(debug_enabled, &debug_lines);
-            return Err(err);
-        }
-    };
-    let rewritten_stdout = capture_rewrite_result.rendered.clone();
-    let generated_captures = capture_rewrite_result.generated_captures;
     let output_stream = rendered_output_stream(entry)?;
     let render_rewrite_result = match rendered_output_for_entry(entry, &execution, state) {
         Ok(result) => result,
@@ -1407,12 +1398,50 @@ fn render_command(
             return Err(err);
         }
     };
-    if output_stream != OutputStream::Stdout && debug_enabled {
+    let rewritten_stdout =
+        if capture_rules_require_rewritten_source(entry, CommandCaptureSource::Stdout) {
+            match rewritten_stream_for_capture(entry, &execution, &execution.stdout, state) {
+                Ok(result) => Some(result.rendered),
+                Err(err) => {
+                    emit_debug_lines(debug_enabled, &debug_lines);
+                    return Err(err);
+                }
+            }
+        } else {
+            None
+        };
+    let rewritten_stderr =
+        if capture_rules_require_rewritten_source(entry, CommandCaptureSource::Stderr) {
+            match rewritten_stream_for_capture(entry, &execution, &execution.stderr, state) {
+                Ok(result) => Some(result.rendered),
+                Err(err) => {
+                    emit_debug_lines(debug_enabled, &debug_lines);
+                    return Err(err);
+                }
+            }
+        } else {
+            None
+        };
+    if let Some(rewritten_stdout) = &rewritten_stdout
+        && output_stream != OutputStream::Stdout
+        && debug_enabled
+    {
         debug_lines.push("[debug] Rewritten stdout for capture:".to_string());
-        debug_lines.push(format_command_stream_for_debug(&rewritten_stdout));
+        debug_lines.push(format_command_stream_for_debug(rewritten_stdout));
     }
-    debug_lines.extend(render_rewrite_result.debug_lines);
-    let rendered_output = render_rewrite_result.rendered;
+    if let Some(rewritten_stderr) = &rewritten_stderr
+        && output_stream != OutputStream::Stderr
+        && debug_enabled
+    {
+        debug_lines.push("[debug] Rewritten stderr for capture:".to_string());
+        debug_lines.push(format_command_stream_for_debug(rewritten_stderr));
+    }
+    let RewriteResult {
+        rendered: rendered_output,
+        generated_captures,
+        debug_lines: render_debug_lines,
+    } = render_rewrite_result;
+    debug_lines.extend(render_debug_lines);
     if debug_enabled {
         if output_stream == OutputStream::Stdout {
             debug_lines.push("[debug] Rewritten stdout:".to_string());
@@ -1445,7 +1474,9 @@ fn render_command(
     if let Err(err) = extract_captured_values(
         entry,
         &execution.stdout,
-        &rewritten_stdout,
+        rewritten_stdout.as_deref(),
+        &execution.stderr,
+        rewritten_stderr.as_deref(),
         &mut state.captured_values,
         &mut debug_lines,
     ) {
@@ -1974,14 +2005,15 @@ fn normalize_rendered_output(
     })
 }
 
-fn rewritten_stdout_for_capture(
+fn rewritten_stream_for_capture(
     entry: &Value,
     execution: &CommandExecution,
+    source_output: &str,
     state: &mut RenderState,
 ) -> Result<RewriteResult, RenderError> {
     let Some(output) = entry.get("output") else {
         return Ok(RewriteResult {
-            rendered: execution.stdout.to_string(),
+            rendered: source_output.to_string(),
             generated_captures: Vec::new(),
             debug_lines: Vec::new(),
         });
@@ -1992,7 +2024,7 @@ fn rewritten_stdout_for_capture(
         entry,
         output,
         execution,
-        &execution.stdout,
+        source_output,
         &mut local_datetime_anchors,
         &state.captured_values,
     )
@@ -2110,10 +2142,35 @@ fn store_generated_rewrite_captures(
     }
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum CommandCaptureSource {
+    Stdout,
+    Stderr,
+}
+
+fn capture_rules_require_rewritten_source(entry: &Value, source: CommandCaptureSource) -> bool {
+    entry
+        .get("capture")
+        .and_then(Value::as_array)
+        .is_some_and(|captures| {
+            captures.iter().any(|rule| {
+                let matches_source = match rule.get("source").and_then(Value::as_str) {
+                    Some("stdout") => source == CommandCaptureSource::Stdout,
+                    Some("stderr") => source == CommandCaptureSource::Stderr,
+                    _ => false,
+                };
+                matches_source
+                    && matches!(rule.get("stage").and_then(Value::as_str), Some("rewritten"))
+            })
+        })
+}
+
 fn extract_captured_values(
     entry: &Value,
     raw_stdout: &str,
-    rewritten_stdout: &str,
+    rewritten_stdout: Option<&str>,
+    raw_stderr: &str,
+    rewritten_stderr: Option<&str>,
     captured_values: &mut HashMap<String, String>,
     debug_lines: &mut Vec<String>,
 ) -> Result<(), RenderError> {
@@ -2139,21 +2196,30 @@ fn extract_captured_values(
         let source = rule.get("source").and_then(Value::as_str).ok_or_else(|| {
             RenderError::Operational("Command capture source must be a string".to_string())
         })?;
-        if source != "stdout" {
-            return Err(RenderError::Operational(format!(
-                "Unsupported command capture source `{source}`"
-            )));
-        }
-
         let stage = rule.get("stage").and_then(Value::as_str).ok_or_else(|| {
             RenderError::Operational("Command capture stage must be a string".to_string())
         })?;
-        let candidate = match stage {
-            "raw" => raw_stdout,
-            "rewritten" => rewritten_stdout,
-            other => {
+        let candidate = match (source, stage) {
+            ("stdout", "raw") => raw_stdout,
+            ("stdout", "rewritten") => rewritten_stdout.ok_or_else(|| {
+                RenderError::Operational(
+                    "Rewritten stdout was not prepared for command capture".to_string(),
+                )
+            })?,
+            ("stderr", "raw") => raw_stderr,
+            ("stderr", "rewritten") => rewritten_stderr.ok_or_else(|| {
+                RenderError::Operational(
+                    "Rewritten stderr was not prepared for command capture".to_string(),
+                )
+            })?,
+            ("stdout" | "stderr", other) => {
                 return Err(RenderError::Operational(format!(
                     "Unsupported command capture stage `{other}`"
+                )));
+            }
+            (other, _) => {
+                return Err(RenderError::Operational(format!(
+                    "Unsupported command capture source `{other}`"
                 )));
             }
         };
@@ -2181,7 +2247,10 @@ fn extract_captured_values(
         match matches.len() {
             1 => {
                 captured_values.insert(name.to_string(), matches[0].clone());
-                debug_lines.push(format!("[debug] Capture {name} ({stage}) = {}", matches[0]));
+                debug_lines.push(format!(
+                    "[debug] Capture {name} ({source}/{stage}) = {}",
+                    matches[0]
+                ));
             }
             0 => {
                 return Err(RenderError::CommandFailed(format!(

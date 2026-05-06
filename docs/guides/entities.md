@@ -246,11 +246,11 @@ Use `capture` when later entries need a value from command output:
       pattern: 'image=(.+)'
 ```
 
-`capture.source` is currently limited to `stdout`. Use `stage: raw` to match
-the original stdout before `output.rewrite`, or `stage: rewritten` to match the
-stdout after rewrite rules have been applied. When `pattern` contains a regex
-capture group, `sw` stores the first captured group; otherwise it stores the
-full match.
+`capture.source` supports `stdout` and `stderr`. Use `stage: raw` to match the
+selected original stream before `output.rewrite`, or `stage: rewritten` to
+match the selected stream after rewrite rules have been applied. When
+`pattern` contains a regex capture group, `sw` stores the first captured group;
+otherwise it stores the full match.
 
 For example, this captures `109` from `Computed in 109 ms`:
 

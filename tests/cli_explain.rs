@@ -77,7 +77,7 @@ fn explain_run_prints_concise_contract_summary() {
         "Command output content types currently support `text`, `json`, `xml`, `html`, and `java`."
     ));
     assert!(stdout.contains(
-        "`output.stream` changes rendered output only and does not widen capture or assertion sources."
+        "`output.stream` changes rendered output only and does not change explicit capture or assertion sources."
     ));
     assert!(stdout.contains(
         "`datetime_shift.id` establishes a shared shift anchor, and `datetime_shift.use` reuses an earlier anchor so later rewrite rules follow the same synthetic timeline."
@@ -92,7 +92,7 @@ fn explain_run_prints_concise_contract_summary() {
         "Use `datetime_shift.id`/`use` when you need timeline reuse; use rewrite `capture_as` when you need to reuse the rewritten timestamp text."
     ));
     assert!(stdout.contains(
-        "`Command.capture` rules currently use `source: stdout`; `stage: raw` captures before `output.rewrite`, and `stage: rewritten` captures after `output.rewrite`."
+        "`Command.capture` rules use `source: stdout` or `source: stderr`; `stage: raw` captures before `output.rewrite`, and `stage: rewritten` captures from the selected source after `output.rewrite`."
     ));
     assert!(stdout.contains(
         "`Command.capture.pattern` stores the first regex capture group when present, otherwise it stores the full regex match."

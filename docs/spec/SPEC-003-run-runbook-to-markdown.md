@@ -574,11 +574,12 @@ in the runbook.
 - `capture` is an array of named extraction rules.
 - Each capture rule declares a variable `name`.
 - Captured variable names must be unique across the whole runbook.
-- In this increment, the only supported capture `source` is `stdout`.
+- Each capture rule declares a `source` of either `stdout` or `stderr`.
 - Each capture rule declares a `stage` of either `raw` or `rewritten`.
-- `raw` captures from the original command stdout before output rewrites are
-  applied.
-- `rewritten` captures from stdout after `output.rewrite` has been applied.
+- `raw` captures from the selected original command stream before output
+  rewrites are applied.
+- `rewritten` captures from the selected command stream after `output.rewrite`
+  has been applied to that stream.
 - Each capture rule declares a regex `pattern`.
 - A capture rule succeeds when its pattern matches exactly one value to store.
 - A capture rule may declare `parse_as`.
@@ -651,8 +652,9 @@ in the runbook.
   `output.trim_empty_lines` are applied.
 - `output.stream` affects rendering only and does not change command
   assertions, capture sources, or process execution behavior.
-- In this increment, `capture.source` remains limited to `stdout` even when
-  `output.stream` renders `stderr` or `combined`.
+- `output.stream` does not change explicit `capture.source` values. A capture
+  with `source: stdout` reads stdout, and a capture with `source: stderr` reads
+  stderr, regardless of the rendered output stream.
 - In this increment, assertion check sources remain unchanged even when
   `output.stream` renders `stderr` or `combined`.
 - If `output.content_type` is omitted, captured command output is rendered as
@@ -1055,8 +1057,8 @@ in the runbook.
       apply to the selected stderr stream before rendering.
 - [ ] Given `output.stream: combined` together with output trimming, trimming
       applies to the selected combined stream before rendering.
-- [ ] Given `output.stream: stderr` or `output.stream: combined`,
-      `capture.source` and assertion-check sources keep their existing
+- [ ] Given `output.stream: stderr` or `output.stream: combined`, explicit
+      `capture.source` values and assertion-check sources keep their existing
       contracts and are not implicitly widened.
 
 ### Command Cleanup
@@ -1185,9 +1187,16 @@ in the runbook.
       instead of locale rules.
 - [ ] Given a capture rule with `parse_as.locale` together with explicit
       separators, validation rejects the runbook.
-- [ ] Given `stage: raw`, capture uses stdout before rewrite rules are applied.
-- [ ] Given `stage: rewritten`, capture uses stdout after rewrite rules are
-      applied.
+- [ ] Given `source: stdout` and `stage: raw`, capture uses stdout before
+      rewrite rules are applied.
+- [ ] Given `source: stdout` and `stage: rewritten`, capture uses stdout after
+      rewrite rules are applied.
+- [ ] Given `source: stderr` and `stage: raw`, capture uses stderr before
+      rewrite rules are applied.
+- [ ] Given `source: stderr` and `stage: rewritten`, capture uses stderr after
+      rewrite rules are applied.
+- [ ] Given a capture rule with an unsupported `source`, validation rejects the
+      runbook with a clear error.
 - [ ] Given a later command that uses `@{name}`, the captured value is
       interpolated into the command before execution.
 - [ ] Given a capture rule with `parse_as.type: number`, plain `@{name}`
