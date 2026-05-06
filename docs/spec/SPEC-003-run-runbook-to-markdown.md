@@ -708,10 +708,17 @@ in the runbook.
   `@{name}` text.
 - A `replace` rule `replacement` that references `@{name}` must use a variable
   captured earlier in the runbook.
-- A `keep_between` rewrite rule keeps only the lines between a matched `start`
-  line and an optional matched `end` line.
-- In this increment, `start` and `end` are matched as literal strings, not
-  regular expressions.
+- A `keep_between` rewrite rule keeps only the lines between a matched start
+  boundary and an optional matched end boundary.
+- `keep_between` may declare `start` for a literal full-line start boundary or
+  `start_pattern` for a regex start boundary.
+- `keep_between` may declare `end` for a literal full-line end boundary or
+  `end_pattern` for a regex end boundary.
+- A `keep_between` rule must declare exactly one of `start` or `start_pattern`.
+- A `keep_between` rule may declare at most one of `end` or `end_pattern`.
+- Literal `start` and `end` boundaries continue to match the whole line exactly.
+- Regex `start_pattern` and `end_pattern` boundaries match when the regex
+  matches the line.
 - `keep_between` uses line-based offsets.
 - `start_offset` defaults to `1`.
 - `end_offset` defaults to `-1`.
@@ -1272,6 +1279,14 @@ in the runbook.
       `@{name}` is preserved without interpolation.
 - [ ] Given a `keep_between` rewrite rule, only the lines between the matched
       `start` and `end` boundaries are kept.
+- [ ] Given a `keep_between` rewrite rule with `start_pattern`, the start
+      boundary is matched with the declared regex.
+- [ ] Given a `keep_between` rewrite rule with `end_pattern`, the end boundary
+      is matched with the declared regex.
+- [ ] Given a `keep_between` rewrite rule with both `start` and
+      `start_pattern`, validation rejects the runbook.
+- [ ] Given a `keep_between` rewrite rule with both `end` and `end_pattern`,
+      validation rejects the runbook.
 - [ ] Given a `keep_between` rewrite rule with `start` and no `end`, the kept
       slice runs from the adjusted `start` boundary to the end of the output.
 - [ ] Given a `keep_between` rewrite rule without explicit offsets,

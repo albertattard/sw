@@ -206,6 +206,7 @@ Expected task directories:
 - [TASK-142: Improve Cleanup Failure Diagnostics](run/TASK-142-improve-cleanup-failure-diagnostics.md)
 - [TASK-143: Preserve Cleanup Line Continuations](run/TASK-143-preserve-cleanup-line-continuations.md)
 - [TASK-144: Support Output Options On Implicit Run](run/TASK-144-support-output-options-on-implicit-run.md)
+- [TASK-145: Support Regex Keep Between Boundaries](rewrite/TASK-145-support-regex-keep-between-boundaries.md)
 
 ## Pending
 
@@ -218,6 +219,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-145: Support Regex Keep Between Boundaries](rewrite/TASK-145-support-regex-keep-between-boundaries.md)
 - [x] [TASK-144: Support Output Options On Implicit Run](run/TASK-144-support-output-options-on-implicit-run.md)
 - [x] [TASK-143: Preserve Cleanup Line Continuations](run/TASK-143-preserve-cleanup-line-continuations.md)
 - [x] [TASK-142: Improve Cleanup Failure Diagnostics](run/TASK-142-improve-cleanup-failure-diagnostics.md)

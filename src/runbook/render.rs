@@ -2550,10 +2550,13 @@ fn format_optional_count(value: Option<usize>) -> String {
 }
 
 fn apply_keep_between_rule(rule: &Value, rendered: &str) -> Result<RewriteRuleResult, RenderError> {
-    let start = rule.get("start").and_then(Value::as_str).ok_or_else(|| {
-        RenderError::Operational("Command output keep_between start must be a string".to_string())
-    })?;
-    let end = rule.get("end").and_then(Value::as_str);
+    let start_boundary =
+        keep_between_boundary(rule, "start", "start_pattern")?.ok_or_else(|| {
+            RenderError::Operational(
+                "Command output keep_between must declare start or start_pattern".to_string(),
+            )
+        })?;
+    let end_boundary = keep_between_boundary(rule, "end", "end_pattern")?;
     let start_offset = parse_keep_between_offset(rule.get("start_offset"), 1, "start_offset")?;
     let end_offset = parse_keep_between_offset(rule.get("end_offset"), -1, "end_offset")?;
     let show_trim_markers = parse_keep_between_show_trim_markers(rule.get("show_trim_markers"))?;
@@ -2562,28 +2565,28 @@ fn apply_keep_between_rule(rule: &Value, rendered: &str) -> Result<RewriteRuleRe
     if rendered.ends_with('\n') {
         lines.pop();
     }
-    let Some(start_index) = lines.iter().position(|line| *line == start) else {
+    let Some(start_index) = find_keep_between_boundary(&lines, &start_boundary) else {
         return Ok(RewriteRuleResult {
             rendered: rendered.to_string(),
             generated_capture: None,
             debug_lines: vec![format!(
                 "[debug] Rewrite keep_between start not found: {}",
-                start
+                start_boundary.label()
             )],
         });
     };
     let start_line = offset_index(start_index, start_offset, lines.len());
-    let end_line = match end {
-        Some(end) => {
+    let end_line = match end_boundary.as_ref() {
+        Some(end_boundary) => {
             let Some(relative_end_index) =
-                lines[start_index..].iter().position(|line| *line == end)
+                find_keep_between_boundary(&lines[start_index..], end_boundary)
             else {
                 return Ok(RewriteRuleResult {
                     rendered: rendered.to_string(),
                     generated_capture: None,
                     debug_lines: vec![format!(
                         "[debug] Rewrite keep_between end not found: {}",
-                        end
+                        end_boundary.label()
                     )],
                 });
             };
@@ -2630,10 +2633,16 @@ fn apply_keep_between_rule(rule: &Value, rendered: &str) -> Result<RewriteRuleRe
         rendered: kept_lines.join("\n"),
         generated_capture: None,
         debug_lines: vec![
-            format!("[debug] Rewrite keep_between start: {}", start),
+            format!(
+                "[debug] Rewrite keep_between start: {}",
+                start_boundary.label()
+            ),
             format!(
                 "[debug] Rewrite keep_between end: {}",
-                end.unwrap_or("(end of output)")
+                end_boundary
+                    .as_ref()
+                    .map(KeepBetweenBoundary::label)
+                    .unwrap_or("(end of output)")
             ),
             format!(
                 "[debug] Rewrite keep_between line range: {}..={}",
@@ -2641,6 +2650,59 @@ fn apply_keep_between_rule(rule: &Value, rendered: &str) -> Result<RewriteRuleRe
             ),
         ],
     })
+}
+
+enum KeepBetweenBoundary {
+    Literal(String),
+    Pattern { label: String, regex: Regex },
+}
+
+impl KeepBetweenBoundary {
+    fn label(&self) -> &str {
+        match self {
+            Self::Literal(value) => value,
+            Self::Pattern { label, .. } => label,
+        }
+    }
+
+    fn matches(&self, line: &str) -> bool {
+        match self {
+            Self::Literal(value) => line == value,
+            Self::Pattern { regex, .. } => regex.is_match(line),
+        }
+    }
+}
+
+fn keep_between_boundary(
+    rule: &Value,
+    literal_key: &str,
+    pattern_key: &str,
+) -> Result<Option<KeepBetweenBoundary>, RenderError> {
+    if let Some(pattern) = rule.get(pattern_key) {
+        let pattern = pattern.as_str().ok_or_else(|| {
+            RenderError::Operational(format!(
+                "Command output keep_between {pattern_key} must be a string"
+            ))
+        })?;
+        let regex = Regex::new(pattern).map_err(|err| {
+            RenderError::Operational(format!(
+                "Command output keep_between {pattern_key} must be a valid regex: {err}"
+            ))
+        })?;
+        return Ok(Some(KeepBetweenBoundary::Pattern {
+            label: pattern.to_string(),
+            regex,
+        }));
+    }
+
+    Ok(rule
+        .get(literal_key)
+        .and_then(Value::as_str)
+        .map(|literal| KeepBetweenBoundary::Literal(literal.to_string())))
+}
+
+fn find_keep_between_boundary(lines: &[&str], boundary: &KeepBetweenBoundary) -> Option<usize> {
+    lines.iter().position(|line| boundary.matches(line))
 }
 
 fn parse_keep_between_offset(

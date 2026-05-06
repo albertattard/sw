@@ -285,6 +285,17 @@ fn validate_output_with_context(
     }
 }
 
+fn validate_regex_value(value: &Value, path: String, errors: &mut Vec<ValidationIssue>) {
+    let Some(pattern) = value.as_str() else {
+        push_error(errors, path, "must be a string");
+        return;
+    };
+
+    if let Err(err) = Regex::new(pattern) {
+        push_error(errors, path, format!("must be a valid regex: {err}"));
+    }
+}
+
 fn validate_capture(
     value: &Value,
     path: &str,
@@ -544,7 +555,9 @@ fn validate_rewrite_rule(
             for key in object.keys() {
                 if key != "type"
                     && key != "start"
+                    && key != "start_pattern"
                     && key != "end"
+                    && key != "end_pattern"
                     && key != "start_offset"
                     && key != "end_offset"
                     && key != "show_trim_markers"
@@ -557,11 +570,40 @@ fn validate_rewrite_rule(
                 }
             }
 
-            require_string(object, "start", path, errors);
+            match (object.get("start"), object.get("start_pattern")) {
+                (Some(_), Some(_)) => push_error(
+                    errors,
+                    path.to_string(),
+                    "keep_between must use either `start` or `start_pattern`, not both",
+                ),
+                (None, None) => push_error(
+                    errors,
+                    format!("{path}.start"),
+                    "must be provided when start_pattern is omitted",
+                ),
+                (Some(start), None) => {
+                    if !start.is_string() {
+                        push_error(errors, format!("{path}.start"), "must be a string");
+                    }
+                }
+                (None, Some(start_pattern)) => {
+                    validate_regex_value(start_pattern, format!("{path}.start_pattern"), errors);
+                }
+            }
             if let Some(end) = object.get("end")
                 && !end.is_string()
             {
                 push_error(errors, format!("{path}.end"), "must be a string");
+            }
+            if let Some(end_pattern) = object.get("end_pattern") {
+                validate_regex_value(end_pattern, format!("{path}.end_pattern"), errors);
+            }
+            if object.get("end").is_some() && object.get("end_pattern").is_some() {
+                push_error(
+                    errors,
+                    path.to_string(),
+                    "keep_between must use either `end` or `end_pattern`, not both",
+                );
             }
 
             if let Some(start_offset) = object.get("start_offset")

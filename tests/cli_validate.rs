@@ -1001,6 +1001,110 @@ fn valid_output_rewrite_keep_between_start_only_returns_success() {
 }
 
 #[test]
+fn valid_output_rewrite_keep_between_patterns_returns_success() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Command
+    commands: printf 'ready\n'
+    output:
+      rewrite:
+        - type: keep_between
+          start_pattern: '^session id: [0-9a-fA-F-]+$'
+          end_pattern: '^tokens used$'
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(
+        &[
+            "validate",
+            "--input-file",
+            "sw-runbook.yaml",
+            "--output-format",
+            "json",
+        ],
+        &dir,
+    );
+
+    assert_eq!(output.status.code(), Some(0));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": true"));
+}
+
+#[test]
+fn invalid_output_rewrite_keep_between_pattern_conflicts_return_validation_failure() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Command
+    commands: printf 'ready\n'
+    output:
+      rewrite:
+        - type: keep_between
+          start: session id
+          start_pattern: '^session id: .+$'
+          end: tokens used
+          end_pattern: '^tokens used$'
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(
+        &[
+            "validate",
+            "--input-file",
+            "sw-runbook.yaml",
+            "--output-format",
+            "json",
+        ],
+        &dir,
+    );
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": false"));
+    assert!(stdout.contains("keep_between must use either `start` or `start_pattern`, not both"));
+    assert!(stdout.contains("keep_between must use either `end` or `end_pattern`, not both"));
+}
+
+#[test]
+fn invalid_output_rewrite_keep_between_pattern_regex_returns_validation_failure() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Command
+    commands: printf 'ready\n'
+    output:
+      rewrite:
+        - type: keep_between
+          start_pattern: '['
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(
+        &[
+            "validate",
+            "--input-file",
+            "sw-runbook.yaml",
+            "--output-format",
+            "json",
+        ],
+        &dir,
+    );
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": false"));
+    assert!(stdout.contains("\"path\": \"entries[0].output.rewrite[0].start_pattern\""));
+    assert!(stdout.contains("must be a valid regex"));
+}
+
+#[test]
 fn valid_output_rewrite_limit_lines_returns_success() {
     let dir = prepare_workspace();
     fs::write(

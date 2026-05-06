@@ -353,6 +353,7 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "`output.stream` changes rendered output only and does not widen capture or assertion sources.",
                 "`datetime_shift.id` establishes a shared shift anchor, and `datetime_shift.use` reuses an earlier anchor so later rewrite rules follow the same synthetic timeline.",
                 "Command output can be shortened with `output.rewrite` rule `type: limit_lines`, using `first`, `last`, and optional `show_trim_marker`.",
+                "`keep_between` supports literal `start`/`end` boundaries and regex `start_pattern`/`end_pattern` boundaries.",
                 "Rewrite `capture_as` creates `@{<capture_as>_original}` and `@{<capture_as>_rewritten}` variables so later entries can reuse the matched original and rewritten values.",
                 "Use `datetime_shift.id`/`use` when you need timeline reuse; use rewrite `capture_as` when you need to reuse the rewritten timestamp text.",
                 "`Command.capture` rules currently use `source: stdout`; `stage: raw` captures before `output.rewrite`, and `stage: rewritten` captures after `output.rewrite`.",

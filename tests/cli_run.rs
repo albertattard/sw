@@ -2567,6 +2567,55 @@ fn output_rewrite_keep_between_can_keep_from_start_to_end_without_trim_markers()
 }
 
 #[test]
+fn output_rewrite_keep_between_supports_regex_boundaries() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Command
+    commands: |
+      cat <<'EOF'
+      Understood. I'll keep commits scoped.
+      OpenAI Codex v0.128.0 (research preview)
+      --------
+      session id: 019dfb55-a188-7263-84ae-660192b72475
+      --------
+      user
+      Keep commits coherent.
+
+      codex
+      Understood. I'll keep commits scoped to one logical change.
+      tokens used
+      2.646
+      EOF
+    output:
+      rewrite:
+        - type: keep_between
+          start_pattern: '^session id: [0-9a-fA-F-]+$'
+          end_pattern: '^tokens used$'
+          start_offset: 0
+          end_offset: -1
+          show_trim_markers: false
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run", "--input-file", "sw-runbook.yaml"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains(
+        "```\nsession id: 019dfb55-a188-7263-84ae-660192b72475\n--------\nuser\nKeep commits coherent.\n\ncodex\nUnderstood. I'll keep commits scoped to one logical change.\n```"
+    ));
+    assert!(
+        !readme.contains("```\nOpenAI Codex v0.128.0 (research preview)\n--------\nsession id:")
+    );
+    assert!(!readme.contains(
+        "Understood. I'll keep commits scoped to one logical change.\ntokens used\n2.646\n```"
+    ));
+}
+
+#[test]
 fn output_rewrite_limit_lines_supports_line_limits_and_markers() {
     let dir = prepare_workspace();
     fs::write(

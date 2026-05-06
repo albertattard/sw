@@ -162,6 +162,9 @@ fn explain_run_prints_concise_contract_summary() {
         "Command output can trim outer empty lines with `output.trim_empty_lines` using `leading_trailing`, `leading`, `trailing`, or `none`."
     ));
     assert!(stdout.contains(
+        "`keep_between` supports literal `start`/`end` boundaries and regex `start_pattern`/`end_pattern` boundaries."
+    ));
+    assert!(stdout.contains(
         "Command-based prerequisite checks use a shorter default timeout of `5 seconds` unless they declare `timeout`."
     ));
     assert!(stdout.contains(
