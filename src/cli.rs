@@ -25,6 +25,9 @@ pub struct Cli {
     #[command(flatten)]
     pub default_run_input: RunbookInputArgs,
 
+    #[command(flatten)]
+    pub default_run_output: RunOutputArgs,
+
     #[command(subcommand)]
     pub command: Option<Commands>,
 }
@@ -95,9 +98,15 @@ pub struct RunArgs {
     #[command(flatten)]
     pub input: RunbookInputArgs,
 
+    #[command(flatten)]
+    pub output: RunOutputArgs,
+}
+
+#[derive(Debug, Default, Clone, clap::Args)]
+pub struct RunOutputArgs {
     /// Output format.
-    #[arg(long, value_enum, default_value_t = RunOutputFormat::Markdown)]
-    pub output_format: RunOutputFormat,
+    #[arg(long, value_enum)]
+    pub output_format: Option<RunOutputFormat>,
 
     /// Path to the generated output file.
     #[arg(long)]
@@ -216,6 +225,12 @@ pub struct ImportArgs {
     /// Overwrite the output file if it already exists.
     #[arg(long)]
     pub force: bool,
+}
+
+impl RunOutputArgs {
+    pub fn has_values(&self) -> bool {
+        self.output_format.is_some() || self.output_file.is_some()
+    }
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, ValueEnum)]

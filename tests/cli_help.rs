@@ -16,6 +16,8 @@ fn help_flag_prints_help() {
     assert!(stdout.contains("Sociable Weaver (SW)"));
     assert!(stdout.contains("--version"));
     assert!(stdout.contains("--verbose-mode"));
+    assert!(stdout.contains("--output-format"));
+    assert!(stdout.contains("--output-file"));
     assert!(stdout.contains("Still weaving the nest. Features are hatching soon."));
 }
 
@@ -29,6 +31,7 @@ fn help_subcommand_prints_help() {
     assert!(stdout.contains("--verbose"));
     assert!(stdout.contains("--verbose-mode"));
     assert!(stdout.contains("--debug"));
+    assert!(stdout.contains("--output-file"));
     assert!(stdout.contains("check"));
     assert!(stdout.contains("convert"));
     assert!(stdout.contains("example"));

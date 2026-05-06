@@ -5,6 +5,7 @@ use std::process::ExitCode;
 
 pub fn run(args: RunArgs, verbose: bool, verbose_mode: VerboseMode, debug: bool) -> ExitCode {
     let output_path = args
+        .output
         .output_file
         .unwrap_or_else(|| PathBuf::from("README.md"));
 
@@ -24,7 +25,11 @@ pub fn run(args: RunArgs, verbose: bool, verbose_mode: VerboseMode, debug: bool)
         return ExitCode::from(2);
     }
 
-    let markdown = match args.output_format {
+    let markdown = match args
+        .output
+        .output_format
+        .unwrap_or(RunOutputFormat::Markdown)
+    {
         RunOutputFormat::Markdown => {
             match runbook::render_markdown(&runbook, &input_path, verbose, verbose_mode, debug) {
                 Ok(markdown) => markdown,

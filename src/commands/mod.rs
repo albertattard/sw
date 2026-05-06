@@ -11,7 +11,6 @@ pub mod version;
 
 use crate::cli::{
     Cli, Commands, ConvertArgs, ExplainArgs, FormatArgs, HelpArgs, ImportArgs, RunArgs,
-    RunOutputFormat,
 };
 use std::process::ExitCode;
 
@@ -21,6 +20,7 @@ pub fn run(cli: Cli) -> ExitCode {
         verbose_mode,
         debug,
         default_run_input,
+        default_run_output,
         command,
     } = cli;
 
@@ -28,13 +28,19 @@ pub fn run(cli: Cli) -> ExitCode {
         None => run::run(
             RunArgs {
                 input: default_run_input,
-                output_format: RunOutputFormat::Markdown,
-                output_file: None,
+                output: default_run_output,
             },
             verbose,
             verbose_mode,
             debug,
         ),
+        Some(_) if default_run_output.has_values() => {
+            eprintln!(
+                "Run output options such as --output-file and --output-format must be used with implicit `sw` or after `sw run`"
+            );
+            eprintln!("Try `sw run --output-file <path>` instead.");
+            ExitCode::from(1)
+        }
         Some(Commands::Help(args)) => run_help(args),
         Some(Commands::Check(args)) => check::run(args),
         Some(Commands::Convert(args)) => run_convert(args),

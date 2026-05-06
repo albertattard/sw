@@ -196,6 +196,58 @@ fn run_command_writes_requested_output_file() {
 }
 
 #[test]
+fn implicit_run_writes_requested_output_file() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-run-success.json", "example.json");
+
+    let output = run_in_dir(
+        &[
+            "--input-file",
+            "example.json",
+            "--output-format",
+            "markdown",
+            "--output-file",
+            "implicit.md",
+        ],
+        &dir,
+    );
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("Rendered runbook to implicit.md"));
+    let readme = fs::read_to_string(dir.join("implicit.md")).expect("missing implicit output");
+    assert!(readme.contains("Captured output"));
+    assert!(!dir.join("README.md").exists());
+}
+
+#[test]
+fn implicit_run_accepts_output_format() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-run-success.json", "sw-runbook.json");
+
+    let output = run_in_dir(&["--output-format", "markdown"], &dir);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("Rendered runbook to README.md"));
+    assert!(dir.join("README.md").exists());
+}
+
+#[test]
+fn implicit_run_rejects_output_options_before_explicit_subcommand() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-run-success.json", "sw-runbook.json");
+
+    let output = run_in_dir(&["--output-file", "ignored.md", "validate"], &dir);
+
+    assert_eq!(output.status.code(), Some(1));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("Run output options such as --output-file and --output-format"));
+    assert!(stderr.contains("Try `sw run --output-file <path>` instead."));
+    assert!(!dir.join("ignored.md").exists());
+}
+
+#[test]
 fn run_command_accepts_yaml_input_file() {
     let dir = prepare_workspace();
     write_runbook(&dir, "sw-runbook-run-success.yaml", "example.yaml");

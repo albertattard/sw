@@ -205,6 +205,7 @@ Expected task directories:
 - [TASK-141: Upgrade Rust Toolchain To 1.95](repo-process/TASK-141-upgrade-rust-toolchain-to-1-95.md)
 - [TASK-142: Improve Cleanup Failure Diagnostics](run/TASK-142-improve-cleanup-failure-diagnostics.md)
 - [TASK-143: Preserve Cleanup Line Continuations](run/TASK-143-preserve-cleanup-line-continuations.md)
+- [TASK-144: Support Output Options On Implicit Run](run/TASK-144-support-output-options-on-implicit-run.md)
 
 ## Pending
 
@@ -217,6 +218,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-144: Support Output Options On Implicit Run](run/TASK-144-support-output-options-on-implicit-run.md)
 - [x] [TASK-143: Preserve Cleanup Line Continuations](run/TASK-143-preserve-cleanup-line-continuations.md)
 - [x] [TASK-142: Improve Cleanup Failure Diagnostics](run/TASK-142-improve-cleanup-failure-diagnostics.md)
 - [x] [TASK-141: Upgrade Rust Toolchain To 1.95](repo-process/TASK-141-upgrade-rust-toolchain-to-1-95.md)

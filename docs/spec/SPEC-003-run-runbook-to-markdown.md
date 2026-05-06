@@ -29,6 +29,7 @@ sw
 sw --verbose
 sw --debug
 sw --input-file=-
+sw --output-file runbook.md
 sw run
 sw run --input-file <sw-runbook.yaml>
 sw run --input-file=- --input-format=yaml
@@ -64,6 +65,8 @@ in the runbook.
   flag or after the `run` subcommand.
 - `--debug` may be provided either before the subcommand as a global flag or
   after the `run` subcommand.
+- `--output-format` and `--output-file` may be provided on the implicit `sw`
+  run form or after the explicit `run` subcommand.
 
 ### CLI Defaults
 
@@ -97,6 +100,10 @@ in the runbook.
   the same as `sw run --verbose-mode=<mode>`.
 - If `sw` is invoked without a subcommand, `sw --debug` behaves the same as
   `sw run --debug`.
+- If `sw` is invoked without a subcommand, `sw --output-format=<format>`
+  behaves the same as `sw run --output-format=<format>`.
+- If `sw` is invoked without a subcommand, `sw --output-file <path>` behaves
+  the same as `sw run --output-file <path>`.
 - If a `Command` entry omits `timeout`, it defaults to `30 seconds`.
 
 ## Outputs
@@ -814,6 +821,10 @@ in the runbook.
       code `1` with a clear ambiguity error that requires `--input-file`.
 - [ ] Given `--output-file <path>`, the command writes the output to the
       provided path.
+- [ ] Given `sw --output-file <path>` with no subcommand, the command behaves
+      the same as `sw run --output-file <path>`.
+- [ ] Given `sw --output-format markdown` with no subcommand, the command
+      behaves the same as `sw run --output-format markdown`.
 - [ ] Given `sw run --verbose`, progress lines are written to stderr without
       changing the existing stdout contract.
 - [ ] Given `sw --verbose` with no subcommand, the command behaves the same as
