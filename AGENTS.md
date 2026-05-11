@@ -2,16 +2,20 @@
 
 ## Trigger phrases
 - `commit changes`
-  - Run `./tools/verify.sh`
   - If the current branch is `main`, create and switch to a short
     feature branch before committing, named from the intended change, for
     example `clarify-cleanup-ownership`
+  - Run `./tools/verify.sh` on the branch that will receive the commit
   - Stage all staged and unstaged changes with `git add .`
   - Create a commit using the commit message format in this file
-  - Push the commit to `origin` on the current branch
-  - If the pushed branch is not `main`, open a pull request to `main` with
-    `gh pr create` when the GitHub CLI is available; otherwise report the
-    exact command the user can run
+  - Push the commit to `origin` on the current branch; do not push directly to
+    `main`
+  - Open a pull request to `main` with `gh pr create` when the pushed branch is
+    not `main` and the GitHub CLI is available; otherwise report the exact
+    command the user can run
+  - Do not delete local branches as part of this trigger; after the pull
+    request is merged, use the conservative post-merge cleanup flow in the Git
+    workflow section
   - Report the result in this format:
     - A short summary sentence, for example `Committed and pushed the current changes.`
     - `Verification run before commit:` followed by the non-git verification and build commands that were executed, listed as bullets in the order they were executed
@@ -29,6 +33,17 @@
   and, when the branch is not `main`, open a pull request to `main`.
 - Do not push directly to `main`; branch protection requires the `Quality`
   check to run through a pull request.
+- After a pull request is merged, clean up local branches conservatively:
+  - Fetch and prune remote-tracking refs with `git fetch --prune origin`.
+  - Fast-forward local `main` with `git switch main` followed by
+    `git pull --ff-only origin main`.
+  - Delete the local feature branch with `git branch -d <branch>`.
+  - If `git branch -d` refuses because the branch is not fully merged, do not
+    immediately force delete it. First verify that the PR was squash-merged or
+    otherwise merged, that `origin/main` contains the intended changes, and
+    that the branch has no unique work that must be preserved.
+  - Use `git branch -D <branch>` only after that evidence is clear, and report
+    the reason force deletion was appropriate.
 - Before `commit changes`, run `./tools/verify.sh`.
 - `./tools/verify.sh` runs `cargo fmt` first, then the standard lint, test,
   and release-build checks. This reduces avoidable retry cycles in interactive
