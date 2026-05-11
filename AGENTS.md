@@ -3,21 +3,32 @@
 ## Trigger phrases
 - `commit changes`
   - Run `./tools/verify.sh`
+  - If the current branch is `main`, create and switch to a short
+    feature branch before committing, named from the intended change, for
+    example `clarify-cleanup-ownership`
   - Stage all staged and unstaged changes with `git add .`
   - Create a commit using the commit message format in this file
   - Push the commit to `origin` on the current branch
+  - If the pushed branch is not `main`, open a pull request to `main` with
+    `gh pr create` when the GitHub CLI is available; otherwise report the
+    exact command the user can run
   - Report the result in this format:
     - A short summary sentence, for example `Committed and pushed the current changes.`
     - `Verification run before commit:` followed by the non-git verification and build commands that were executed, listed as bullets in the order they were executed
     - `Commit:` with the short commit hash
     - `Branch:` with the branch name
     - `Remote:` with the pushed remote and branch
+    - `Pull request:` with the PR URL, or the exact `gh pr create` command if a PR could not be opened
     - `Commit message used:` followed by the full commit message with a blank line between subject and body
     - If unrelated local changes were intentionally left uncommitted, list them under `I left unrelated local changes uncommitted:`
 
 ## Git workflow
 - Only create a commit when the user explicitly asks.
 - Only push when the user explicitly asks.
+- Treat `commit changes` as explicit permission to push the resulting branch
+  and, when the branch is not `main`, open a pull request to `main`.
+- Do not push directly to `main`; branch protection requires the `Quality`
+  check to run through a pull request.
 - Before `commit changes`, run `./tools/verify.sh`.
 - `./tools/verify.sh` runs `cargo fmt` first, then the standard lint, test,
   and release-build checks. This reduces avoidable retry cycles in interactive
