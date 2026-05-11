@@ -213,6 +213,8 @@ Expected task directories:
 - [TASK-150: Surface Cleanup Ownership In Skill](explain/TASK-150-surface-cleanup-ownership-in-skill.md)
 - [TASK-151: Use PR Flow For Protected Main](repo-process/TASK-151-use-pr-flow-for-protected-main.md)
 - [TASK-152: Make Branch Cleanup Conservative](repo-process/TASK-152-make-branch-cleanup-conservative.md)
+- [TASK-153: Add Reliable Post Merge Cleanup Tool](repo-process/TASK-153-document-squash-merge-cleanup-checks.md)
+- [TASK-154: Run Quality On All Pull Requests](repo-process/TASK-154-run-quality-on-all-prs.md)
 
 ## Pending
 
@@ -357,6 +359,8 @@ Expected task directories:
 - [x] [TASK-103: Review upload artifact v7 Upgrade](repo-process/TASK-103-review-upload-artifact-v7-upgrade.md)
 - [x] [TASK-151: Use PR Flow For Protected Main](repo-process/TASK-151-use-pr-flow-for-protected-main.md)
 - [x] [TASK-152: Make Branch Cleanup Conservative](repo-process/TASK-152-make-branch-cleanup-conservative.md)
+- [x] [TASK-153: Add Reliable Post Merge Cleanup Tool](repo-process/TASK-153-document-squash-merge-cleanup-checks.md)
+- [x] [TASK-154: Run Quality On All Pull Requests](repo-process/TASK-154-run-quality-on-all-prs.md)
 - [x] [TASK-104: Default Example Output To YAML](example/TASK-104-default-example-output-to-yaml.md)
 - [x] [TASK-061: Add Debug Run Diagnostics](run/TASK-061-add-debug-run-diagnostics.md)
 - [x] [TASK-062: Support Command-Scoped Debug Diagnostics](run/TASK-062-support-command-scoped-debug-diagnostics.md)

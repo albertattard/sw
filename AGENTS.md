@@ -34,16 +34,14 @@
 - Do not push directly to `main`; branch protection requires the `Quality`
   check to run through a pull request.
 - After a pull request is merged, clean up local branches conservatively:
-  - Fetch and prune remote-tracking refs with `git fetch --prune origin`.
-  - Fast-forward local `main` with `git switch main` followed by
-    `git pull --ff-only origin main`.
-  - Delete the local feature branch with `git branch -d <branch>`.
-  - If `git branch -d` refuses because the branch is not fully merged, do not
-    immediately force delete it. First verify that the PR was squash-merged or
-    otherwise merged, that `origin/main` contains the intended changes, and
-    that the branch has no unique work that must be preserved.
-  - Use `git branch -D <branch>` only after that evidence is clear, and report
-    the reason force deletion was appropriate.
+  - Run `./tools/cleanup-merged-branch.sh <branch>`.
+  - The cleanup tool fetches and fast-forwards `main`, tries safe deletion with
+    `git branch -d`, and only uses `git branch -D` when `git diff --quiet main
+    <branch>` and `git cherry -v main <branch>` prove that no unique work would
+    be lost after a squash or rebase merge.
+  - Report whether the branch was deleted safely with `git branch -d` or force
+    deleted after the tool verified that the branch patch was already present
+    on current `main`.
 - Before `commit changes`, run `./tools/verify.sh`.
 - `./tools/verify.sh` runs `cargo fmt` first, then the standard lint, test,
   and release-build checks. This reduces avoidable retry cycles in interactive
