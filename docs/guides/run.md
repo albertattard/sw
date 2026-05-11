@@ -102,7 +102,11 @@ Useful `Command` fields include:
   execution root. Legacy `working_dir` is still accepted for existing runbooks,
   but new runbooks should use `working_directory`.
 - `timeout`: override the default command timeout.
-- `cleanup`: release resources after the command finishes or the run fails.
+- `cleanup`: release resources after the command finishes or the run fails. If
+  `cleanup` is omitted, `sw run` automatically terminates remaining processes
+  started by that command entry. If `cleanup` is present, that explicit cleanup
+  replaces automatic process cleanup, so it must tear down any processes that
+  should not keep running.
 - `assert.exit_code`: assert that a command succeeds or intentionally fails.
 - `assert.checks`: assert expected output or file state.
 - `output`: control rendered output, captions, streams, content type, trimming,

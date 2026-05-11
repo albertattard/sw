@@ -196,6 +196,7 @@ fn build_skill_document() -> String {
         "".to_string(),
         "- Prefer YAML for file-based runbooks.".to_string(),
         "- Use block scalars for multiline fields such as `commands`, `cleanup`, `contents`, and `patch`.".to_string(),
+        "- When a `Command` starts processes that should stop, either omit `cleanup` so `sw run` can terminate remaining processes automatically, or provide `cleanup` that stops them explicitly. Explicit `cleanup` disables automatic process cleanup for that command entry.".to_string(),
         "- Stdin input via `--input-file=-` defaults to JSON unless `--input-format yaml` is provided.".to_string(),
         "- If both default runbook files exist, pass `--input-file` explicitly.".to_string(),
         "".to_string(),

@@ -463,6 +463,11 @@ fn explain_skill_prints_skill_document_to_stdout() {
     ));
     assert!(stdout.contains("## Authoring Defaults"));
     assert!(stdout.contains("Prefer YAML for file-based runbooks."));
+    assert!(
+        stdout.contains(
+            "Explicit `cleanup` disables automatic process cleanup for that command entry."
+        )
+    );
     assert!(stdout.contains("Stdin input via `--input-file=-` defaults to JSON unless `--input-format yaml` is provided."));
     assert!(stdout.contains("## Agent Rules"));
     assert!(stdout.contains(
@@ -496,6 +501,9 @@ fn explain_skill_output_file_without_value_writes_to_default_codex_path() {
     ));
     assert!(skill.contains("## Common Workflows"));
     assert!(skill.contains("sw explain --all"));
+    assert!(skill.contains(
+        "either omit `cleanup` so `sw run` can terminate remaining processes automatically, or provide `cleanup` that stops them explicitly"
+    ));
     assert!(!skill.contains("## Command Map"));
 }
 
@@ -516,6 +524,11 @@ fn explain_skill_output_file_with_explicit_path_writes_to_requested_location() {
         "---\nname: sw\ndescription: Use this skill when the user needs help authoring, validating, converting, or running Sociable Weaver (`sw`) runbooks.\n---\n\n# sw\n"
     ));
     assert!(skill.contains("## Authoring Defaults"));
+    assert!(
+        skill.contains(
+            "Explicit `cleanup` disables automatic process cleanup for that command entry."
+        )
+    );
     assert!(skill.contains("## Agent Rules"));
     assert!(!skill.contains("## Command Map"));
 }

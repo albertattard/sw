@@ -198,6 +198,9 @@ When `--output-format=skill` is selected:
   assumptions.
 - The skill content should summarize when to use `sw`, common workflows,
   authoring defaults, and agent rules that prevent common runbook mistakes.
+- The skill content should warn agents that providing `Command.cleanup`
+  disables automatic process cleanup for that command entry, so explicit
+  cleanup must stop processes that should not keep running.
 - The skill content should not duplicate every topic, option, field, enum, or
   subcommand contract from `sw explain --all`.
 - The output should remain deterministic so repeated exports produce stable
