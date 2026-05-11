@@ -210,6 +210,7 @@ Expected task directories:
 - [TASK-146: Support Stderr Command Captures](run/TASK-146-support-stderr-command-captures.md)
 - [TASK-148: Support CLI Working Directory](run/TASK-148-support-cli-working-directory.md)
 - [TASK-149: Recognize Markdown DisplayFile Fences](display-file/TASK-149-recognize-markdown-display-file-fences.md)
+- [TASK-150: Surface Cleanup Ownership In Skill](explain/TASK-150-surface-cleanup-ownership-in-skill.md)
 
 ## Pending
 
