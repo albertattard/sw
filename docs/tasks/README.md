@@ -211,6 +211,7 @@ Expected task directories:
 - [TASK-148: Support CLI Working Directory](run/TASK-148-support-cli-working-directory.md)
 - [TASK-149: Recognize Markdown DisplayFile Fences](display-file/TASK-149-recognize-markdown-display-file-fences.md)
 - [TASK-150: Surface Cleanup Ownership In Skill](explain/TASK-150-surface-cleanup-ownership-in-skill.md)
+- [TASK-151: Use PR Flow For Protected Main](repo-process/TASK-151-use-pr-flow-for-protected-main.md)
 
 ## Pending
 
@@ -353,6 +354,7 @@ Expected task directories:
 - [x] [TASK-101: Upgrade sha2 To 0.11](repo-process/TASK-101-upgrade-sha2-to-0-11.md)
 - [x] [TASK-102: Review actions checkout v6 Upgrade](repo-process/TASK-102-review-actions-checkout-v6-upgrade.md)
 - [x] [TASK-103: Review upload artifact v7 Upgrade](repo-process/TASK-103-review-upload-artifact-v7-upgrade.md)
+- [x] [TASK-151: Use PR Flow For Protected Main](repo-process/TASK-151-use-pr-flow-for-protected-main.md)
 - [x] [TASK-104: Default Example Output To YAML](example/TASK-104-default-example-output-to-yaml.md)
 - [x] [TASK-061: Add Debug Run Diagnostics](run/TASK-061-add-debug-run-diagnostics.md)
 - [x] [TASK-062: Support Command-Scoped Debug Diagnostics](run/TASK-062-support-command-scoped-debug-diagnostics.md)
