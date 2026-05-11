@@ -6,11 +6,7 @@ on:
       - "**"
     tags:
       - "v*"
-    paths-ignore:
-      - "docs/**"
   pull_request:
-    paths-ignore:
-      - "docs/**"
 
 permissions:
   contents: write
