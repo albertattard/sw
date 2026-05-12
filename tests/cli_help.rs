@@ -61,6 +61,7 @@ fn help_subcommand_for_known_topic_prints_targeted_help() {
     assert!(stdout.contains(
         "`Markdown`, `DisplayFile`, `Patch`, and `Command` entries may declare `indent`"
     ));
+    assert!(stdout.contains("`DisplayFile.content_type` overrides fence detection"));
     assert!(stdout.contains("`Breakpoint` entries stop processing successfully"));
     assert!(stdout.contains("`Patch.patch` may be authored as a YAML block scalar"));
     assert!(stdout.contains("File-based runbooks default to YAML"));
@@ -235,7 +236,7 @@ fn run_help_prints_help() {
     assert!(stdout.contains("`Command` entries default to a `30 seconds` timeout"));
     assert!(stdout.contains("prerequisite checks default to `5 seconds`"));
     assert!(stdout.contains(
-        "`.java` as `java`, `.md` and `.markdown` as `markdown`, `.sql` as `sql`, and `.xml` as `xml`"
+        "`DisplayFile.content_type` overrides fence detection; otherwise `.java`, `.md`, `.markdown`, `.sql`, and `.xml` are detected"
     ));
     assert!(stdout.contains("SSH-safe line-based progress output"));
     assert!(stdout.contains("sw example Command"));

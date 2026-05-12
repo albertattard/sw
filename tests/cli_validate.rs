@@ -1453,6 +1453,37 @@ fn negative_display_file_indent_returns_validation_failure() {
 }
 
 #[test]
+fn display_file_content_type_is_validated() {
+    let dir = prepare_workspace();
+    fs::write(dir.join("Example"), "class Example {}\n").expect("failed to write Example");
+
+    let valid = run_in_dir_with_stdin(
+        &["validate", "--input-file=-", "--input-format", "yaml"],
+        &dir,
+        "entries:\n  - type: DisplayFile\n    path: ./Example\n    content_type: java\n",
+    );
+    assert!(valid.status.success());
+
+    let invalid = run_in_dir_with_stdin(
+        &[
+            "validate",
+            "--input-file=-",
+            "--input-format",
+            "yaml",
+            "--output-format",
+            "json",
+        ],
+        &dir,
+        "entries:\n  - type: DisplayFile\n    path: ./Example\n    content_type: yaml\n",
+    );
+    assert_eq!(invalid.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&invalid.stdout);
+    assert!(stdout.contains("\"valid\": false"));
+    assert!(stdout.contains("\"path\": \"entries[0].content_type\""));
+    assert!(stdout.contains("must be one of `text`, `json`, `xml`, `html`, `java`, or `markdown`"));
+}
+
+#[test]
 fn negative_markdown_indent_returns_validation_failure() {
     let output = run(&[
         "validate",

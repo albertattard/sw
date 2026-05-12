@@ -105,9 +105,16 @@ the whole fenced block in the generated Markdown.
   indent: 2
 ```
 
-`DisplayFile` currently recognizes common file extensions such as `.java`,
-`.md`, `.markdown`, `.sql`, and `.xml` for fenced-code labels. Unknown
-extensions render as text.
+Use `content_type` when the file extension is missing or should not control
+the generated fenced-code label. When `content_type` is omitted, `DisplayFile`
+recognizes common file extensions such as `.java`, `.md`, `.markdown`, `.sql`,
+and `.xml`. Unknown extensions render as text.
+
+```yaml
+- type: DisplayFile
+  path: ./src/main/java/demo/GeneratedExample
+  content_type: java
+```
 
 For Java examples, `transform` can collapse method bodies when the surrounding
 code is more important than the implementation details:

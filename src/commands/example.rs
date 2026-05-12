@@ -199,6 +199,7 @@ cleanup:
 const DISPLAY_FILE_EXAMPLE_JSON: &str = r#"{
   "type": "DisplayFile",
   "path": "./src/main/java/demo/Example.java",
+  "content_type": "java",
   "start_line": 1,
   "line_count": 12,
   "indent": 3,
@@ -215,6 +216,7 @@ const DISPLAY_FILE_EXAMPLE_JSON: &str = r#"{
 
 const DISPLAY_FILE_EXAMPLE_YAML: &str = r#"type: DisplayFile
 path: ./src/main/java/demo/Example.java
+content_type: java
 start_line: 1
 line_count: 12
 indent: 3
