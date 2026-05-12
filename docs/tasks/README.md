@@ -215,6 +215,7 @@ Expected task directories:
 - [TASK-152: Make Branch Cleanup Conservative](repo-process/TASK-152-make-branch-cleanup-conservative.md)
 - [TASK-153: Add Reliable Post Merge Cleanup Tool](repo-process/TASK-153-document-squash-merge-cleanup-checks.md)
 - [TASK-154: Run Quality On All Pull Requests](repo-process/TASK-154-run-quality-on-all-prs.md)
+- [TASK-155: Support DisplayFile Content Type](display-file/TASK-155-support-display-file-content-type.md)
 
 ## Pending
 
@@ -228,6 +229,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-155: Support DisplayFile Content Type](display-file/TASK-155-support-display-file-content-type.md)
 - [x] [TASK-149: Recognize Markdown DisplayFile Fences](display-file/TASK-149-recognize-markdown-display-file-fences.md)
 - [x] [TASK-148: Support CLI Working Directory](run/TASK-148-support-cli-working-directory.md)
 - [x] [TASK-147: Adopt Working Directory Runbook Field](run/TASK-147-adopt-working-directory-runbook-field.md)

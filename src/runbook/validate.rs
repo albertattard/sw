@@ -1099,6 +1099,7 @@ fn validate_entry(
                     && key != "line_count"
                     && key != "indent"
                     && key != "offset"
+                    && key != "content_type"
                     && key != "transform"
                 {
                     push_error(
@@ -1133,6 +1134,20 @@ fn validate_entry(
                     format!("{path}.offset"),
                     "must be an integer",
                 );
+            }
+
+            match object.get("content_type") {
+                Some(Value::String(content_type))
+                    if matches!(
+                        content_type.as_str(),
+                        "text" | "json" | "xml" | "html" | "java" | "markdown"
+                    ) => {}
+                Some(_) => push_error(
+                    &mut context.errors,
+                    format!("{path}.content_type"),
+                    "must be one of `text`, `json`, `xml`, `html`, `java`, or `markdown`",
+                ),
+                None => {}
             }
 
             if object.get("line_count").is_some() && object.get("start_line").is_none() {

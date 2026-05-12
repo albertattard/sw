@@ -283,6 +283,7 @@ in the runbook.
 - `DisplayFile` may declare `line_count`.
 - `DisplayFile` may declare `indent`.
 - `DisplayFile` may declare `offset`.
+- `DisplayFile` may declare `content_type`.
 - `start_line` is 1-based.
 - If `start_line` is omitted, rendering starts from line 1.
 - If `start_line` is present and `line_count` is omitted, rendering continues
@@ -305,13 +306,17 @@ in the runbook.
   warning that the negative offset cannot be fully applied to all lines.
 - `line_count` without `start_line` is invalid.
 - `DisplayFile` rendering does not execute the referenced file.
-- `DisplayFile` fenced blocks use a detected content type when the file
-  extension is recognized.
+- If `DisplayFile.content_type` is present, the generated Markdown fenced
+  block uses that value as its language label.
+- If `DisplayFile.content_type` is omitted, fenced blocks use a detected
+  content type when the file extension is recognized.
 - In this increment, recognized `DisplayFile` extensions include `.java`,
   which renders as `java`, `.md` and `.markdown`, which render as `markdown`,
   `.sql`, which renders as `sql`, and `.xml`, which renders as `xml`.
 - If the `DisplayFile` extension is not recognized, the generated Markdown
   uses a `text` fenced block.
+- In this increment, supported `DisplayFile.content_type` values are `text`,
+  `json`, `xml`, `html`, `java`, and `markdown`.
 
 ### Prerequisite Entries
 
@@ -937,6 +942,10 @@ in the runbook.
       the generated Markdown uses a `markdown` fenced block.
 - [ ] Given a `DisplayFile` entry whose extension is not recognized, the
       generated Markdown uses a `text` fenced block.
+- [ ] Given a `DisplayFile` entry with `content_type`, the generated Markdown
+      uses that fenced block language instead of the file extension.
+- [ ] Given a `DisplayFile` entry without `content_type`, the generated
+      Markdown continues to use extension-based fence detection.
 - [ ] Given a `DisplayFile` entry with `start_line`, rendering begins at that
       1-based line.
 - [ ] Given a `DisplayFile` entry with `start_line` and `line_count`, only the

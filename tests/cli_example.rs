@@ -158,6 +158,7 @@ fn display_file_example_prints_valid_yaml_entry() {
     let value: serde_json::Value =
         serde_norway::from_str(&stdout).expect("example output should be valid yaml");
     assert_eq!(value["type"], "DisplayFile");
+    assert_eq!(value["content_type"], "java");
     assert_eq!(value["start_line"], 1);
     assert_eq!(value["line_count"], 12);
     assert_eq!(value["indent"], 3);

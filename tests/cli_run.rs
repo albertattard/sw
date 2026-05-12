@@ -3160,6 +3160,46 @@ fn display_file_can_render_from_start_line_to_end_of_file() {
 }
 
 #[test]
+fn display_file_content_type_overrides_unrecognized_extension() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        "entries:\n  - type: DisplayFile\n    path: ./PrintCertificateState\n    content_type: java\n",
+    )
+    .expect("failed to write runbook");
+    fs::write(
+        dir.join("PrintCertificateState"),
+        "class PrintCertificateState {}\n",
+    )
+    .expect("failed to write source file");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```java\nclass PrintCertificateState {}\n```"));
+    assert!(!readme.contains("```text\nclass PrintCertificateState {}\n```"));
+}
+
+#[test]
+fn display_file_content_type_takes_precedence_over_extension() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        "entries:\n  - type: DisplayFile\n    path: ./Example.java\n    content_type: text\n",
+    )
+    .expect("failed to write runbook");
+    fs::write(dir.join("Example.java"), "class Example {}\n").expect("failed to write source file");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```text\nclass Example {}\n```"));
+    assert!(!readme.contains("```java\nclass Example {}\n```"));
+}
+
+#[test]
 fn display_file_indent_prefixes_the_whole_fenced_block() {
     let dir = prepare_workspace();
     write_runbook(

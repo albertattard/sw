@@ -91,6 +91,8 @@ expanded intentionally.
 - `DisplayFile` renders the transformed content into the fenced block.
 - The output remains human-readable Markdown.
 - Existing fence-language detection still applies based on the displayed file.
+- Explicit `DisplayFile.content_type`, when present, still controls the
+  fenced block label after transformations are applied.
 - Transformations affect only rendered output; they do not write back to the
   source file.
 

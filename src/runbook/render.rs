@@ -780,7 +780,10 @@ fn render_display_file(entry: &Value, execution_root: &Path) -> Result<String, R
     let contents = slice_display_file_contents(&contents, start_line, line_count, &display_path)?;
     let contents = apply_display_file_offset(entry, contents)?;
 
-    let section = fenced_block(Some(display_file_content_type(&display_path)), &contents);
+    let section = fenced_block(
+        Some(display_file_fence_language(entry, &display_path)?),
+        &contents,
+    );
     apply_display_file_indent(entry, section)
 }
 
@@ -3216,6 +3219,21 @@ fn display_file_content_type(path: &Path) -> &'static str {
         Some("sql") => "sql",
         Some("xml") => "xml",
         _ => "text",
+    }
+}
+
+fn display_file_fence_language(entry: &Value, path: &Path) -> Result<&'static str, RenderError> {
+    match entry.get("content_type").and_then(Value::as_str) {
+        Some("text") => Ok("text"),
+        Some("json") => Ok("json"),
+        Some("xml") => Ok("xml"),
+        Some("html") => Ok("html"),
+        Some("java") => Ok("java"),
+        Some("markdown") => Ok("markdown"),
+        Some(other) => Err(RenderError::Operational(format!(
+            "Unsupported DisplayFile content type `{other}`"
+        ))),
+        None => Ok(display_file_content_type(path)),
     }
 }
 
