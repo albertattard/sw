@@ -147,6 +147,14 @@ later prerequisite entries after a breakpoint.
 
 Use `Prerequisite` to document and verify tools required by the runbook.
 
+Java prerequisites validate the resolved runtime's major version. Use an exact
+version such as `'17'` when only that major version is acceptable, or a minimum
+version such as `'25+'` when newer Java versions are acceptable.
+
+Use `distribution` when a Java runtime must match a supported distribution in
+addition to the major version. In this increment, `epp` checks that
+`java -version` output contains the EPP `-perf` marker.
+
 Java prerequisites can resolve the runtime in three ways.
 
 Use `PATH` when any matching Java executable is acceptable:
@@ -189,6 +197,21 @@ environment variable:
       contents: |
         - Java 11 must be available through `JAVA_11_HOME`.
       help: Set `JAVA_11_HOME` to a Java 11 home directory.
+```
+
+Use `distribution: epp` when the required Java runtime must be Java EPP:
+
+```yaml
+- type: Prerequisite
+  checks:
+    - kind: java
+      name: Java EPP
+      version: '8'
+      distribution: epp
+      java_home_env: JAVA_EPP_HOME
+      contents: |
+        - Java EPP must be available through `JAVA_EPP_HOME`.
+      help: Set `JAVA_EPP_HOME` to a Java EPP home directory.
 ```
 
 Use `kind: command` when there is no built-in prerequisite kind for the tool:

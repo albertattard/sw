@@ -120,6 +120,8 @@ Default input behavior:
   declared version rule.
 - A `java` prerequisite check may target Java from `PATH`, a literal
   `java_home`, or a `java_home_env` environment variable.
+- A `java` prerequisite check may declare `distribution: "epp"` to require the
+  resolved Java version output to contain the EPP `-perf` marker.
 - If a failing prerequisite check includes `help`, that remediation message is
   surfaced in the command output.
 
@@ -184,6 +186,9 @@ Default input behavior:
       `sw check` fails with a clear prerequisite error.
 - [ ] Given a `java` prerequisite check with both `java_home` and
       `java_home_env`, the runbook is invalid.
+- [ ] Given a `java` prerequisite check with `version: "8"` and
+      `distribution: "epp"`, `sw check` passes only when the resolved Java
+      runtime output contains the EPP `-perf` marker.
 - [ ] Given a failing prerequisite check with `help`, the failure output
       includes that remediation message.
 - [ ] Given a passing prerequisite check followed by a `Command` entry,

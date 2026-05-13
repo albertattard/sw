@@ -830,6 +830,23 @@ fn invalid_java_prerequisite_with_both_java_home_and_java_home_env_returns_valid
 }
 
 #[test]
+fn invalid_java_prerequisite_distribution_returns_validation_failure() {
+    let output = run(&[
+        "validate",
+        "--input-file",
+        "tests/fixtures/sw-runbook-invalid-prerequisite-java-distribution.json",
+        "--output-format",
+        "json",
+    ]);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": false"));
+    assert!(stdout.contains("\"path\": \"entries[0].checks[0].distribution\""));
+    assert!(stdout.contains("must be `epp` when provided"));
+}
+
+#[test]
 fn invalid_output_content_type_returns_validation_failure() {
     let output = run(&[
         "validate",

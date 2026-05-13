@@ -115,7 +115,7 @@ pub struct RunOutputArgs {
 
 #[derive(Debug, clap::Args)]
 #[command(
-    after_help = "File-based runbooks default to YAML, while `--input-file=-` defaults to JSON unless you set `--input-format=yaml`.\n`--working-directory` changes the execution root for runbook-relative paths while leaving `--input-file` relative to the shell current directory.\nCommand-based prerequisite checks default to a `5 seconds` timeout unless the runbook sets `timeout`.\n`Breakpoint` stops `check` from evaluating prerequisite entries declared after the breakpoint.\nUse `sw example Prerequisite` for a current prerequisite YAML snippet and `sw example Prerequisite --output-format json` when you need the JSON shape.\nUse `sw explain check` for behavior and defaults."
+    after_help = "File-based runbooks default to YAML, while `--input-file=-` defaults to JSON unless you set `--input-format=yaml`.\n`--working-directory` changes the execution root for runbook-relative paths while leaving `--input-file` relative to the shell current directory.\nCommand-based prerequisite checks default to a `5 seconds` timeout unless the runbook sets `timeout`.\nJava prerequisites support version rules such as `21` or `21+`, and `distribution: epp` for Java EPP.\n`Breakpoint` stops `check` from evaluating prerequisite entries declared after the breakpoint.\nUse `sw example Prerequisite` for a current prerequisite YAML snippet and `sw example Prerequisite --output-format json` when you need the JSON shape.\nUse `sw explain check` for behavior and defaults."
 )]
 pub struct CheckArgs {
     #[command(flatten)]
