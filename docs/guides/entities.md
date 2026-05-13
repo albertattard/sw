@@ -147,15 +147,64 @@ later prerequisite entries after a breakpoint.
 
 Use `Prerequisite` to document and verify tools required by the runbook.
 
+Java prerequisites can resolve the runtime in three ways.
+
+Use `PATH` when any matching Java executable is acceptable:
+
 ```yaml
 - type: Prerequisite
   checks:
     - kind: java
       name: Java 25+
-      version: 25+
-      contents:
-        - "- [Java downloads](https://www.oracle.com/java/technologies/downloads/)"
+      version: '25+'
+      contents: |
+        - [Java downloads](https://www.oracle.com/java/technologies/downloads/)
       help: Install Java 25 or newer and make sure `java` is available on the PATH.
+```
+
+Use `java_home` when the runbook should check a literal Java home path:
+
+```yaml
+- type: Prerequisite
+  checks:
+    - kind: java
+      name: Java 17
+      version: '17'
+      java_home: /opt/jdk-17
+      contents: |
+        - Java 17 must be available at `/opt/jdk-17`.
+      help: Install Java 17 at `/opt/jdk-17`, or update the runbook to the correct Java home.
+```
+
+Use `java_home_env` when the required Java runtime is exposed through an
+environment variable:
+
+```yaml
+- type: Prerequisite
+  checks:
+    - kind: java
+      name: Java 11
+      version: '11'
+      java_home_env: JAVA_11_HOME
+      contents: |
+        - Java 11 must be available through `JAVA_11_HOME`.
+      help: Set `JAVA_11_HOME` to a Java 11 home directory.
+```
+
+Use `kind: command` when there is no built-in prerequisite kind for the tool:
+
+```yaml
+- type: Prerequisite
+  checks:
+    - kind: command
+      name: cURL
+      contents: |
+        - cURL must be available on the PATH.
+      commands: |
+        curl --version
+      assert:
+        exit_code: 0
+      help: Install cURL and make sure `curl` is available on the PATH.
 ```
 
 Prefer built-in prerequisite kinds when they exist. Use command-based checks
