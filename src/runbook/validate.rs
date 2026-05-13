@@ -266,11 +266,11 @@ fn validate_output_with_context(
     }
 
     match object.get("content_type").and_then(Value::as_str) {
-        Some("text" | "json" | "xml" | "html" | "java") => {}
+        Some("text" | "json" | "xml" | "html" | "java" | "markdown") => {}
         Some(_) => push_error(
             errors,
             format!("{path}.content_type"),
-            "must be one of `text`, `json`, `xml`, `html`, or `java`",
+            "must be one of `text`, `json`, `xml`, `html`, `java`, or `markdown`",
         ),
         None => {}
     }
