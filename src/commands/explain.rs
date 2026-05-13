@@ -424,7 +424,7 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "The runbook is validated before prerequisite execution begins.",
                 "Checks run in runbook order and stop on the first failing prerequisite.",
                 "`Breakpoint` stops `check` from evaluating prerequisite entries declared after the breakpoint.",
-                "Built-in prerequisite kinds include `java`, including version rules such as `21` or `21+`.",
+                "Built-in prerequisite kinds include `java`, including version rules such as `21` or `21+` and `distribution: epp` for Java EPP.",
                 "Normal `Command` entries keep their separate `30 seconds` default timeout for `sw run`.",
             ],
             next: &[

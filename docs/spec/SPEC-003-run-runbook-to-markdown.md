@@ -364,11 +364,17 @@ in the runbook.
 - `java_home_env` names an environment variable whose value must resolve to a
   Java home directory.
 - `java_home` and `java_home_env` are mutually exclusive.
+- A `java` prerequisite check may declare `distribution`.
+- In this increment, supported `distribution` values are `epp`.
+- `distribution: "epp"` requires the resolved Java runtime's `java -version`
+  output to contain the EPP `-perf` marker.
 - A `java` prerequisite check validates Java by executing the resolved
   `<java-home>/bin/java` or `java` from `PATH`.
 - A `java` prerequisite check fails if the Java executable cannot be resolved.
 - A `java` prerequisite check fails if the resolved Java major version does not
   satisfy `version`.
+- A `java` prerequisite check fails if the resolved Java distribution does not
+  satisfy `distribution`.
 - Each prerequisite check may declare `assert` using the same structure as
   `Command` assertions.
 - Each prerequisite check may declare `help` as a human-readable remediation

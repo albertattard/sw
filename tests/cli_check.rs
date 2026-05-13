@@ -80,13 +80,25 @@ fn write_runbook(dir: &Path, fixture_name: &str, target_name: &str) -> PathBuf {
 }
 
 fn create_fake_java_home(dir: &Path, folder_name: &str, version: &str) -> PathBuf {
+    create_fake_java_home_with_version_output(
+        dir,
+        folder_name,
+        &format!("openjdk version \"{version}.0.1\"\nFake Java"),
+    )
+}
+
+fn create_fake_java_home_with_version_output(
+    dir: &Path,
+    folder_name: &str,
+    version_output: &str,
+) -> PathBuf {
     let java_home = dir.join(folder_name);
     let bin_dir = java_home.join("bin");
     fs::create_dir_all(&bin_dir).expect("failed to create fake java bin dir");
     let java_path = bin_dir.join("java");
     fs::write(
         &java_path,
-        format!("#!/bin/sh\necho 'openjdk version \"{version}.0.1\"' >&2\necho 'Fake Java' >&2\n"),
+        format!("#!/bin/sh\ncat >&2 <<'EOF'\n{version_output}\nEOF\n"),
     )
     .expect("failed to write fake java");
     #[cfg(unix)]
@@ -379,6 +391,76 @@ fn check_succeeds_when_java_prerequisites_pass() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("All prerequisite checks passed"));
     assert!(!dir.join("prereq-java-order.txt").exists());
+}
+
+#[test]
+fn check_succeeds_when_java_epp_distribution_matches() {
+    let dir = prepare_workspace();
+    let java_epp_home = create_fake_java_home_with_version_output(
+        &dir,
+        "jdk-epp",
+        "java version \"1.8.0_491\"\nJava(TM) SE Runtime Environment (build 1.8.0_491-perf-37-b08)\nJava HotSpot(TM) 64-Bit Server VM (build 17.0.19+8-perf-37, mixed mode, sharing)",
+    );
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Prerequisite
+    checks:
+      - kind: java
+        name: Java EPP
+        version: '8'
+        distribution: epp
+        java_home_env: JAVA_EPP_HOME
+        contents: |
+          - Java EPP must be available through `JAVA_EPP_HOME`.
+        help: Set `JAVA_EPP_HOME` to a Java EPP home directory.
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir_with_env(&["check"], &dir, &[("JAVA_EPP_HOME", &java_epp_home)]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("All prerequisite checks passed"));
+}
+
+#[test]
+fn check_fails_when_java_epp_distribution_marker_is_missing() {
+    let dir = prepare_workspace();
+    let java_8_home = create_fake_java_home_with_version_output(
+        &dir,
+        "jdk-8",
+        "java version \"1.8.0_491\"\nJava(TM) SE Runtime Environment (build 1.8.0_491-b10)\nJava HotSpot(TM) 64-Bit Server VM (build 25.491-b10, mixed mode)",
+    );
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Prerequisite
+    checks:
+      - kind: java
+        name: Java EPP
+        version: '8'
+        distribution: epp
+        java_home_env: JAVA_EPP_HOME
+        contents: |
+          - Java EPP must be available through `JAVA_EPP_HOME`.
+        help: Set `JAVA_EPP_HOME` to a Java EPP home directory.
+  - type: Command
+    commands: |
+      printf '%s\n' main >> epp-order.txt
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir_with_env(&["check"], &dir, &[("JAVA_EPP_HOME", &java_8_home)]);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("Prerequisite failed: Java EPP"));
+    assert!(stderr.contains("expected Java distribution `epp`"));
+    assert!(stderr.contains("Set `JAVA_EPP_HOME` to a Java EPP home directory."));
+    assert!(!dir.join("epp-order.txt").exists());
 }
 
 #[test]

@@ -1808,18 +1808,35 @@ fn run_java_prerequisite_check(check: &Value, name: &str) -> Result<(), RenderEr
         )
     })?;
 
-    if requirement.matches(detected) {
-        return Ok(());
+    if !requirement.matches(detected) {
+        return Err(prerequisite_failure(
+            name,
+            check.get("help").and_then(Value::as_str),
+            &format!(
+                "expected Java version `{}`, found `{detected}`",
+                requirement.display()
+            ),
+        ));
     }
 
-    Err(prerequisite_failure(
-        name,
-        check.get("help").and_then(Value::as_str),
-        &format!(
-            "expected Java version `{}`, found `{detected}`",
-            requirement.display()
+    if let Some(distribution) = check.get("distribution").and_then(Value::as_str) {
+        ensure_java_distribution(distribution, &combined).map_err(|detail| {
+            prerequisite_failure(name, check.get("help").and_then(Value::as_str), &detail)
+        })?;
+    }
+
+    Ok(())
+}
+
+fn ensure_java_distribution(distribution: &str, version_output: &str) -> Result<(), String> {
+    match distribution {
+        "epp" if version_output.contains("-perf") => Ok(()),
+        "epp" => Err(
+            "expected Java distribution `epp`, but `java -version` output did not contain `-perf`"
+                .to_string(),
         ),
-    ))
+        _ => Err(format!("unsupported Java distribution `{distribution}`")),
+    }
 }
 
 fn resolve_prerequisite_java_executable(check: &Value) -> Result<std::path::PathBuf, String> {

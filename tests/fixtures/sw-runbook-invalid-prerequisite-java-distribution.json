@@ -1,0 +1,20 @@
+{
+  "entries": [
+    {
+      "type": "Prerequisite",
+      "checks": [
+        {
+          "kind": "java",
+          "name": "Java EPP",
+          "contents": [
+            "- Java EPP"
+          ],
+          "java_home_env": "JAVA_EPP_HOME",
+          "version": "8",
+          "distribution": "standard",
+          "help": "Set `JAVA_EPP_HOME` to a Java EPP home directory."
+        }
+      ]
+    }
+  ]
+}

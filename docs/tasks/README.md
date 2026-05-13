@@ -217,6 +217,7 @@ Expected task directories:
 - [TASK-154: Run Quality On All Pull Requests](repo-process/TASK-154-run-quality-on-all-prs.md)
 - [TASK-155: Support DisplayFile Content Type](display-file/TASK-155-support-display-file-content-type.md)
 - [TASK-156: Support Markdown Command Output Content Type](run/TASK-156-support-markdown-command-output-content-type.md)
+- [TASK-157: Support Java EPP Prerequisites](prerequisite/TASK-157-support-java-epp-prerequisites.md)
 
 ## Pending
 
@@ -230,6 +231,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-157: Support Java EPP Prerequisites](prerequisite/TASK-157-support-java-epp-prerequisites.md)
 - [x] [TASK-156: Support Markdown Command Output Content Type](run/TASK-156-support-markdown-command-output-content-type.md)
 - [x] [TASK-155: Support DisplayFile Content Type](display-file/TASK-155-support-display-file-content-type.md)
 - [x] [TASK-149: Recognize Markdown DisplayFile Fences](display-file/TASK-149-recognize-markdown-display-file-fences.md)

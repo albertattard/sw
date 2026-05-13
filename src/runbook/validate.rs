@@ -1542,6 +1542,7 @@ fn validate_java_prerequisite_check(
             && key != "version"
             && key != "java_home"
             && key != "java_home_env"
+            && key != "distribution"
             && key != "help"
         {
             push_error(
@@ -1580,6 +1581,18 @@ fn validate_java_prerequisite_check(
             path.to_string(),
             "must not include both `java_home` and `java_home_env`",
         );
+    }
+
+    if let Some(distribution) = object.get("distribution") {
+        match distribution.as_str() {
+            Some("epp") => {}
+            Some(_) => push_error(
+                errors,
+                format!("{path}.distribution"),
+                "must be `epp` when provided",
+            ),
+            None => push_error(errors, format!("{path}.distribution"), "must be a string"),
+        }
     }
 }
 
