@@ -1931,6 +1931,7 @@ fn output_fence_language(output: &Value) -> Result<Option<&'static str>, RenderE
         Some("xml") => Ok(Some("xml")),
         Some("html") => Ok(Some("html")),
         Some("java") => Ok(Some("java")),
+        Some("markdown") => Ok(Some("markdown")),
         Some(other) => Err(RenderError::Operational(format!(
             "Unsupported output content type `{other}`"
         ))),

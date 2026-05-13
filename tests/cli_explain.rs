@@ -74,7 +74,7 @@ fn explain_run_prints_concise_contract_summary() {
         "Command output can render `stdout`, `stderr`, or `combined` with `output.stream`; if omitted, rendered output defaults to `combined`."
     ));
     assert!(stdout.contains(
-        "Command output content types currently support `text`, `json`, `xml`, `html`, and `java`."
+        "Command output content types currently support `text`, `json`, `xml`, `html`, `java`, and `markdown`."
     ));
     assert!(stdout.contains(
         "`output.stream` changes rendered output only and does not change explicit capture or assertion sources."

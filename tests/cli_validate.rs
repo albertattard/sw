@@ -843,7 +843,27 @@ fn invalid_output_content_type_returns_validation_failure() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("\"valid\": false"));
     assert!(stdout.contains("\"path\": \"entries[0].output.content_type\""));
-    assert!(stdout.contains("must be one of `text`, `json`, `xml`, `html`, or `java`"));
+    assert!(stdout.contains("must be one of `text`, `json`, `xml`, `html`, `java`, or `markdown`"));
+}
+
+#[test]
+fn markdown_output_content_type_validates_successfully() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Command
+    commands: |
+      printf '# Generated\n'
+    output:
+      content_type: markdown
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["validate", "--input-file", "sw-runbook.yaml"], &dir);
+
+    assert!(output.status.success());
 }
 
 #[test]
