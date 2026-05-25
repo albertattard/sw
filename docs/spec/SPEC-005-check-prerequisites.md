@@ -3,7 +3,7 @@ id: SPEC-005
 title: Check Runbook Prerequisites
 status: implemented
 priority: medium
-owner: @aattard
+owner: albertattard
 last_updated: 2026-04-15
 ---
 

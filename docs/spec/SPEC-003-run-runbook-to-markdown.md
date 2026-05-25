@@ -3,7 +3,7 @@ id: SPEC-003
 title: Run Runbook to Markdown
 status: in_progress
 priority: high
-owner: @aattard
+owner: albertattard
 last_updated: 2026-04-23
 ---
 

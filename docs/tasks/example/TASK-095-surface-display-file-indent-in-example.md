@@ -5,7 +5,7 @@ status: done
 category: example
 related_features:
   - SPEC-008
-owner: @aattard
+owner: albertattard
 created: 2026-04-08
 updated: 2026-04-08
 ---

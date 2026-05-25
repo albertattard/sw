@@ -5,7 +5,7 @@ status: done
 category: repo-process
 related_features:
   - CI
-owner: @aattard
+owner: albertattard
 created: 2026-05-11
 updated: 2026-05-11
 ---

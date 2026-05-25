@@ -3,7 +3,7 @@ id: SPEC-012
 title: Convert Runbook Formats
 status: implemented
 priority: medium
-owner: @aattard
+owner: albertattard
 last_updated: 2026-04-23
 ---
 

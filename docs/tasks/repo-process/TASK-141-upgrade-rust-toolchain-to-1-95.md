@@ -4,7 +4,7 @@ title: Upgrade Rust Toolchain To 1.95
 status: done
 category: repo-process
 related_features: []
-owner: @aattard
+owner: albertattard
 created: 2026-04-29
 updated: 2026-04-29
 ---

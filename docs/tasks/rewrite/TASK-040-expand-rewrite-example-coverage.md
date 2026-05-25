@@ -5,7 +5,7 @@ status: done
 category: rewrite
 related_features:
   - SPEC-008
-owner: @aattard
+owner: albertattard
 created: 2026-03-13
 updated: 2026-03-13
 ---

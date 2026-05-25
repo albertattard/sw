@@ -5,7 +5,7 @@ status: done
 category: repo-process
 related_features:
   - SPEC-005
-owner: @aattard
+owner: albertattard
 created: 2026-04-07
 updated: 2026-04-07
 ---

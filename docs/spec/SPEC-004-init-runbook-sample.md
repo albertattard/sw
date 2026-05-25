@@ -3,7 +3,7 @@ id: SPEC-004
 title: Init Runbook Sample
 status: implemented
 priority: high
-owner: @aattard
+owner: albertattard
 last_updated: 2026-04-26
 ---
 

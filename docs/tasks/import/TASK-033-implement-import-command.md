@@ -5,7 +5,7 @@ status: done
 category: import
 related_features:
   - SPEC-006
-owner: @aattard
+owner: albertattard
 created: 2026-03-13
 updated: 2026-04-02
 ---

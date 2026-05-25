@@ -5,7 +5,7 @@ status: done
 category: release
 related_features:
   - SPEC-007
-owner: @aattard
+owner: albertattard
 created: 2026-04-14
 updated: 2026-04-14
 ---

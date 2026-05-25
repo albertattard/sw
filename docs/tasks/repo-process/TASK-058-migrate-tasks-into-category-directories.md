@@ -4,7 +4,7 @@ title: Migrate Tasks Into Category Directories
 status: done
 category: repo-process
 related_features: []
-owner: @aattard
+owner: albertattard
 created: 2026-03-15
 updated: 2026-03-15
 ---

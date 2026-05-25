@@ -4,7 +4,7 @@ title: Add Rust Quality And Dependency Hygiene Automation
 status: done
 category: repo-process
 related_features: []
-owner: @aattard
+owner: albertattard
 created: 2026-04-02
 updated: 2026-04-02
 ---

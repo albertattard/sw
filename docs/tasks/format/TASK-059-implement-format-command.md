@@ -5,7 +5,7 @@ status: done
 category: format
 related_features:
   - SPEC-010
-owner: @aattard
+owner: albertattard
 created: 2026-03-15
 updated: 2026-04-15
 ---

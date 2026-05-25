@@ -3,7 +3,7 @@ id: SPEC-006
 title: Import README to Runbook
 status: implemented
 priority: high
-owner: @aattard
+owner: albertattard
 last_updated: 2026-04-16
 ---
 

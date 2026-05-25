@@ -5,7 +5,7 @@ status: done
 category: init
 related_features:
   - SPEC-004
-owner: @aattard
+owner: albertattard
 created: 2026-03-12
 updated: 2026-04-15
 ---

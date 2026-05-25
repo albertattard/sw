@@ -6,7 +6,7 @@ category: discovery
 related_features:
   - SPEC-003
   - SPEC-008
-owner: @aattard
+owner: albertattard
 created: 2026-04-25
 updated: 2026-04-25
 ---

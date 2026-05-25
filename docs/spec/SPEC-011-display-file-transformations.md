@@ -3,7 +3,7 @@ id: SPEC-011
 title: DisplayFile Transformations
 status: implemented
 priority: medium
-owner: @aattard
+owner: albertattard
 last_updated: 2026-03-22
 ---
 

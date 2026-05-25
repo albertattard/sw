@@ -5,7 +5,7 @@ status: done
 category: display-file
 related_features:
   - SPEC-003
-owner: @aattard
+owner: albertattard
 created: 2026-05-06
 updated: 2026-05-06
 ---
