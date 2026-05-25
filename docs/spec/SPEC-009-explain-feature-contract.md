@@ -292,18 +292,18 @@ When `--output-format=skill` is selected:
       with YAML frontmatter delimited by `---`.
 - [x] Given `sw explain --output-format=skill`, the generated YAML frontmatter
       includes `name: sw` and a non-empty `description`.
-- [ ] Given `sw explain --output-format=skill --output-file`, the CLI exits
+- [x] Given `sw explain --output-format=skill --output-file`, the CLI exits
       with `0` and writes the skill document to the default Codex skill
       location for `sw`.
-- [ ] Given `sw explain --output-format=skill --output-file=<path>`, the CLI
+- [x] Given `sw explain --output-format=skill --output-file=<path>`, the CLI
       exits with `0` and writes the skill document to the provided path.
-- [ ] Given `sw explain --output-format=skill --output-file` when the default
+- [x] Given `sw explain --output-format=skill --output-file` when the default
       target file already exists, the CLI exits with `1` and does not
       overwrite the file.
-- [ ] Given `sw explain --output-format=skill --output-file=<path>` when the
+- [x] Given `sw explain --output-format=skill --output-file=<path>` when the
       target file already exists, the CLI exits with `1` and does not
       overwrite the file.
-- [ ] Given `sw explain --output-format=skill --output-file --force` or
+- [x] Given `sw explain --output-format=skill --output-file --force` or
       `sw explain --output-format=skill --output-file=<path> --force`, the CLI
       overwrites the target file and exits with `0`.
 - [x] Given `sw explain --output-format=skill`, the generated skill content is

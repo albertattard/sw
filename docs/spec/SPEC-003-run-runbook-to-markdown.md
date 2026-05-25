@@ -837,93 +837,93 @@ in the runbook.
 
 ### Command Invocation And Files
 
-- [ ] `sw` with no subcommand behaves the same as `sw run`.
-- [ ] Given no input file argument and a valid `./sw-runbook.json`, with no
+- [x] `sw` with no subcommand behaves the same as `sw run`.
+- [x] Given no input file argument and a valid `./sw-runbook.json`, with no
       other default runbook file present, `sw` renders the file and writes
       `./README.md`.
-- [ ] Given `sw run --input-file <file>` with a valid runbook, the command
+- [x] Given `sw run --input-file <file>` with a valid runbook, the command
       renders entries in order and exits with `0`.
-- [ ] Given `sw run --input-file=-` with a valid JSON runbook on stdin, the
+- [x] Given `sw run --input-file=-` with a valid JSON runbook on stdin, the
       command renders entries in order and exits with `0`.
-- [ ] Given `sw --input-file=-` with a valid JSON runbook on stdin, the
+- [x] Given `sw --input-file=-` with a valid JSON runbook on stdin, the
       command behaves the same as `sw run --input-file=-`.
-- [ ] Given `sw run --input-file=- --input-format=yaml` with a valid YAML
+- [x] Given `sw run --input-file=- --input-format=yaml` with a valid YAML
       runbook on stdin, the command renders entries in order and exits with
       `0`.
-- [ ] Given `sw run --input-file=-` with YAML on stdin and no
+- [x] Given `sw run --input-file=-` with YAML on stdin and no
       `--input-format=yaml`, the command exits with `1` and reports a clear
       parsing error.
-- [ ] Given `--input-format=json` or `--input-format=yaml` without
+- [x] Given `--input-format=json` or `--input-format=yaml` without
       `--input-file=-`, the command still uses the existing default file lookup
       behavior, including ambiguity failures when multiple default runbooks
       exist.
-- [ ] Given no input file argument and more than one of `./sw-runbook.json`,
+- [x] Given no input file argument and more than one of `./sw-runbook.json`,
       `./sw-runbook.yaml`, or `./sw-runbook.yml` present, `sw run` returns exit
       code `1` with a clear ambiguity error that requires `--input-file`.
-- [ ] Given `--output-file <path>`, the command writes the output to the
+- [x] Given `--output-file <path>`, the command writes the output to the
       provided path.
-- [ ] Given `sw --output-file <path>` with no subcommand, the command behaves
+- [x] Given `sw --output-file <path>` with no subcommand, the command behaves
       the same as `sw run --output-file <path>`.
-- [ ] Given `sw --output-format markdown` with no subcommand, the command
+- [x] Given `sw --output-format markdown` with no subcommand, the command
       behaves the same as `sw run --output-format markdown`.
-- [ ] Given `sw run --verbose`, progress lines are written to stderr without
+- [x] Given `sw run --verbose`, progress lines are written to stderr without
       changing the existing stdout contract.
-- [ ] Given `sw --verbose` with no subcommand, the command behaves the same as
+- [x] Given `sw --verbose` with no subcommand, the command behaves the same as
       `sw run --verbose`.
-- [ ] Given `sw run --debug`, diagnostic output is written to stderr without
+- [x] Given `sw run --debug`, diagnostic output is written to stderr without
       changing the existing stdout contract.
-- [ ] Given `sw --debug` with no subcommand, the command behaves the same as
+- [x] Given `sw --debug` with no subcommand, the command behaves the same as
       `sw run --debug`.
-- [ ] Given a runbook with one `Command` entry with `debug: true` and another
+- [x] Given a runbook with one `Command` entry with `debug: true` and another
       without it, and no global `--debug`, diagnostics are written only for
       the flagged command entry.
-- [ ] Given a `Command` entry with `debug: false`, that entry does not emit
+- [x] Given a `Command` entry with `debug: false`, that entry does not emit
       debug diagnostics unless global `--debug` is enabled.
-- [ ] Given global `--debug`, all command entries emit debug diagnostics
+- [x] Given global `--debug`, all command entries emit debug diagnostics
       regardless of command-level `debug`.
-- [ ] Given a `Patch` entry with `debug: true`, that entry emits patch
+- [x] Given a `Patch` entry with `debug: true`, that entry emits patch
       diagnostics without requiring global `--debug`.
-- [ ] Given global `--debug`, all patch entries emit debug diagnostics
+- [x] Given global `--debug`, all patch entries emit debug diagnostics
       regardless of patch-level `debug`.
-- [ ] Given `sw run --verbose`, entry numbers are padded so summaries align to
+- [x] Given `sw run --verbose`, entry numbers are padded so summaries align to
       the same starting column.
-- [ ] Given `sw run --verbose`, elapsed time is shown as seconds with one
+- [x] Given `sw run --verbose`, elapsed time is shown as seconds with one
       decimal place under one minute and as minutes plus seconds from one
       minute onward.
-- [ ] Given `sw run --verbose`, stderr includes a final total elapsed time line
+- [x] Given `sw run --verbose`, stderr includes a final total elapsed time line
       after run processing stops.
-- [ ] Given an invalid runbook, the command exits with `2` and does not write a
+- [x] Given an invalid runbook, the command exits with `2` and does not write a
       partial output file, and the human-readable validation output includes a
       nearby offending block for entry-scoped validation errors.
-- [ ] Given a missing input file, the command exits with `1` and reports a
+- [x] Given a missing input file, the command exits with `1` and reports a
       clear error.
-- [ ] Generated Markdown begins with the comment
+- [x] Generated Markdown begins with the comment
       `<!-- Generated by Sociable Weaver (https://github.com/albertattard/sw). Manual edits will be overwritten when regenerated. -->`.
 
 ### Heading Entries
 
-- [ ] Given a runbook with `Heading` entries, the generated Markdown contains
+- [x] Given a runbook with `Heading` entries, the generated Markdown contains
       the expected heading markers for the configured levels.
 
 ### Markdown Entries
 
-- [ ] Given a runbook with `Markdown` entries, the generated Markdown preserves
+- [x] Given a runbook with `Markdown` entries, the generated Markdown preserves
       the entry content in order.
-- [ ] Given a runbook whose `Markdown.contents` is a single string, the
+- [x] Given a runbook whose `Markdown.contents` is a single string, the
       generated Markdown preserves that content as if the lines had been
       declared explicitly in an array.
-- [ ] Given a scalar `Markdown.contents` value that ends with a line break only
+- [x] Given a scalar `Markdown.contents` value that ends with a line break only
       because of YAML literal-scalar termination, the generated Markdown does
       not introduce an extra blank line before the following entry.
 - [x] Given a `Markdown` entry with `indent`, each non-empty rendered Markdown
       line is prefixed with that many spaces.
 - [x] Given a `Markdown` entry with `indent` and blank lines, blank lines
       remain empty in the rendered output.
-- [ ] Markdown entries may interpolate `@{name}` when that variable is
+- [x] Markdown entries may interpolate `@{name}` when that variable is
       captured anywhere in the runbook.
-- [ ] `@@{name}` in Markdown content preserves the literal `@{name}`.
-- [ ] Markdown entries may interpolate values captured later in the runbook.
-- [ ] A Markdown entry that references a variable that is never captured
+- [x] `@@{name}` in Markdown content preserves the literal `@{name}`.
+- [x] Markdown entries may interpolate values captured later in the runbook.
+- [x] A Markdown entry that references a variable that is never captured
       anywhere in the runbook causes the run to fail.
 - [ ] Markdown entries may interpolate arithmetic expressions using
       `@{= variable_a * variable_b }`.
@@ -936,47 +936,47 @@ in the runbook.
 
 ### DisplayFile Entries
 
-- [ ] Given a runbook with `DisplayFile` entries, the generated Markdown
+- [x] Given a runbook with `DisplayFile` entries, the generated Markdown
       includes the referenced file contents in a fenced block.
-- [ ] Given a `DisplayFile` entry that references a `.java` file, the
+- [x] Given a `DisplayFile` entry that references a `.java` file, the
       generated Markdown uses a `java` fenced block.
-- [ ] Given a `DisplayFile` entry that references a `.sql` file, the
+- [x] Given a `DisplayFile` entry that references a `.sql` file, the
       generated Markdown uses a `sql` fenced block.
-- [ ] Given a `DisplayFile` entry that references a `.xml` file, the
+- [x] Given a `DisplayFile` entry that references a `.xml` file, the
       generated Markdown uses an `xml` fenced block.
-- [ ] Given a `DisplayFile` entry that references a `.md` or `.markdown` file,
+- [x] Given a `DisplayFile` entry that references a `.md` or `.markdown` file,
       the generated Markdown uses a `markdown` fenced block.
-- [ ] Given a `DisplayFile` entry whose extension is not recognized, the
+- [x] Given a `DisplayFile` entry whose extension is not recognized, the
       generated Markdown uses a `text` fenced block.
-- [ ] Given a `DisplayFile` entry with `content_type`, the generated Markdown
+- [x] Given a `DisplayFile` entry with `content_type`, the generated Markdown
       uses that fenced block language instead of the file extension.
-- [ ] Given a `DisplayFile` entry without `content_type`, the generated
+- [x] Given a `DisplayFile` entry without `content_type`, the generated
       Markdown continues to use extension-based fence detection.
-- [ ] Given a `DisplayFile` entry with `start_line`, rendering begins at that
+- [x] Given a `DisplayFile` entry with `start_line`, rendering begins at that
       1-based line.
-- [ ] Given a `DisplayFile` entry with `start_line` and `line_count`, only the
+- [x] Given a `DisplayFile` entry with `start_line` and `line_count`, only the
       requested slice is rendered.
-- [ ] Given a `DisplayFile` entry with `start_line` and no `line_count`,
+- [x] Given a `DisplayFile` entry with `start_line` and no `line_count`,
       rendering continues from that line to the end of the file.
-- [ ] Given a `DisplayFile` entry with `indent`, the opening fence, copied
+- [x] Given a `DisplayFile` entry with `indent`, the opening fence, copied
       content lines, and closing fence are all prefixed with that many spaces.
-- [ ] Given a `DisplayFile` entry with a positive `offset`, each non-empty
+- [x] Given a `DisplayFile` entry with a positive `offset`, each non-empty
       copied file content line is prefixed with that many spaces inside the
       fenced block.
-- [ ] Given a `DisplayFile` entry with a negative `offset`, up to that many
+- [x] Given a `DisplayFile` entry with a negative `offset`, up to that many
       leading spaces are removed from each non-empty copied file content line
       inside the fenced block.
-- [ ] Given a `DisplayFile` entry with blank lines and `offset`, blank copied
+- [x] Given a `DisplayFile` entry with blank lines and `offset`, blank copied
       file content lines remain blank in the rendered output.
 
 ### Prerequisite Entries
 
-- [ ] Given a runbook with `Prerequisite` entries, the generated Markdown
+- [x] Given a runbook with `Prerequisite` entries, the generated Markdown
       includes the declared prerequisite `contents` in order.
-- [ ] Given a prerequisite check whose `contents` is a single string, the
+- [x] Given a prerequisite check whose `contents` is a single string, the
       generated Markdown preserves that content as if the lines had been
       declared explicitly in an array.
-- [ ] Given a scalar prerequisite `contents` value that ends with a line break
+- [x] Given a scalar prerequisite `contents` value that ends with a line break
       only because of YAML literal-scalar termination, the generated Markdown
       does not introduce an extra blank line before the following entry.
 - [x] Given a prerequisite check whose `commands` is a single string, those
@@ -985,56 +985,56 @@ in the runbook.
 - [x] Given scalar prerequisite `commands` that end with a line break only
       because of YAML literal-scalar termination, execution does not introduce
       an extra blank command line.
-- [ ] Given a single `Prerequisite` entry with multiple checks, all of those
+- [x] Given a single `Prerequisite` entry with multiple checks, all of those
       checks are evaluated from that entry's `checks` array.
-- [ ] Given a prerequisite check with multiple command lines, those lines
+- [x] Given a prerequisite check with multiple command lines, those lines
       execute together in the same shell context.
-- [ ] Given prerequisite checks, they execute before normal runbook commands.
-- [ ] Given a failing prerequisite check, the run exits with `2` before
+- [x] Given prerequisite checks, they execute before normal runbook commands.
+- [x] Given a failing prerequisite check, the run exits with `2` before
       executing the main workflow.
-- [ ] Given a failing prerequisite check with `help`, the failure output
+- [x] Given a failing prerequisite check with `help`, the failure output
       includes that remediation message.
-- [ ] Given passing prerequisite checks, the run continues to the main
+- [x] Given passing prerequisite checks, the run continues to the main
       workflow.
 
 ### Breakpoint Entries
 
-- [ ] Given a runbook with a `Breakpoint` entry, `sw run` exits with `0`,
+- [x] Given a runbook with a `Breakpoint` entry, `sw run` exits with `0`,
       writes the generated Markdown up to the breakpoint, and does not render
       later entries.
-- [ ] Given a runbook with a `Breakpoint` entry before a later `Command` entry,
+- [x] Given a runbook with a `Breakpoint` entry before a later `Command` entry,
       the later command is not executed.
-- [ ] Given a runbook with a `Breakpoint` entry with `message`, the generated
+- [x] Given a runbook with a `Breakpoint` entry with `message`, the generated
       Markdown includes that message in the breakpoint note.
-- [ ] Given a runbook with a `Breakpoint` entry and earlier registered cleanup
+- [x] Given a runbook with a `Breakpoint` entry and earlier registered cleanup
       or patch restoration work, that cleanup or restoration still runs.
-- [ ] Given a `Breakpoint` entry with an unsupported field, validation rejects
+- [x] Given a `Breakpoint` entry with an unsupported field, validation rejects
       the runbook.
-- [ ] Given `sw check` with a `Breakpoint` before a later `Prerequisite`, the
+- [x] Given `sw check` with a `Breakpoint` before a later `Prerequisite`, the
       later prerequisite is not evaluated.
 
 ### Patch Entries
 
-- [ ] Given a runbook with `Patch` entries, the generated Markdown includes
+- [x] Given a runbook with `Patch` entries, the generated Markdown includes
       fenced `diff` blocks for those patches.
-- [ ] Given a YAML `Patch` entry whose `patch` field is a string, the generated
+- [x] Given a YAML `Patch` entry whose `patch` field is a string, the generated
       Markdown renders the same patch lines as the array form.
-- [ ] Given a `Patch` entry without an explicit restore setting, the patched
+- [x] Given a `Patch` entry without an explicit restore setting, the patched
       file is restored automatically after a successful run.
-- [ ] Given a `Patch` entry without an explicit restore setting, the patched
+- [x] Given a `Patch` entry without an explicit restore setting, the patched
       file is restored automatically after a failed or timed-out run.
-- [ ] Given multiple `Patch` entries that modify the same file, later patch
+- [x] Given multiple `Patch` entries that modify the same file, later patch
       entries may build on the earlier patched state during the run.
-- [ ] Given multiple `Patch` entries that modify the same file, restoration
+- [x] Given multiple `Patch` entries that modify the same file, restoration
       unwinds in reverse patch-application order and leaves the file in its
       original pre-run state.
-- [ ] Given a failure while restoring one patched file, later registered patch
+- [x] Given a failure while restoring one patched file, later registered patch
       restores still run.
-- [ ] Given a `Patch` entry that cannot be applied cleanly, the run fails
+- [x] Given a `Patch` entry that cannot be applied cleanly, the run fails
       without waiting for interactive input from the patch tool.
-- [ ] Given a `Patch` entry that cannot be applied cleanly, the target file
+- [x] Given a `Patch` entry that cannot be applied cleanly, the target file
       remains unchanged and no `.orig` or `.rej` sidecar files are left
-- [ ] Given a `Patch` entry with `debug: true`, stderr includes the normalized
+- [x] Given a `Patch` entry with `debug: true`, stderr includes the normalized
       patch text and resolved target path.
 
 ### Command Entries
@@ -1051,113 +1051,113 @@ in the runbook.
 
 ### Command Execution
 
-- [ ] Given a runbook with `Command` entries, the commands are executed in the
+- [x] Given a runbook with `Command` entries, the commands are executed in the
       same order as they appear in the runbook.
-- [ ] Given a `Command` entry with multiple command lines, those lines execute
+- [x] Given a `Command` entry with multiple command lines, those lines execute
       together in the same shell context so values set on one line can be used
       on a later line.
-- [ ] Given a runbook with `Command` entries, the generated Markdown includes
+- [x] Given a runbook with `Command` entries, the generated Markdown includes
       fenced command blocks.
-- [ ] Given a `Command` entry whose command text contains a Markdown backtick
+- [x] Given a `Command` entry whose command text contains a Markdown backtick
       fence, the generated Markdown uses a fence delimiter that does not close
       prematurely.
-- [ ] Given a `Command` entry with `indent`, each rendered line in that
+- [x] Given a `Command` entry with `indent`, each rendered line in that
       command section is prefixed with the configured number of spaces.
-- [ ] Given `sw run --verbose`, a `Markdown` entry summary uses the first
+- [x] Given `sw run --verbose`, a `Markdown` entry summary uses the first
       non-empty content line instead of the full block contents.
-- [ ] Given `sw run --verbose`, a `Command` entry summary uses the first
+- [x] Given `sw run --verbose`, a `Command` entry summary uses the first
       non-empty command line instead of the full command block.
-- [ ] Given `sw run --verbose`, a running `Command` entry shows elapsed time
+- [x] Given `sw run --verbose`, a running `Command` entry shows elapsed time
       together with the expected timeout window.
-- [ ] Given `sw run --verbose` with stderr attached to a TTY, the current
+- [x] Given `sw run --verbose` with stderr attached to a TTY, the current
       entry line shows a live elapsed timer that updates in place while the
       entry is running.
-- [ ] Given `sw run --verbose`, the running timer does not use a trailing
+- [x] Given `sw run --verbose`, the running timer does not use a trailing
       `...`.
-- [ ] Given `sw run --verbose` with stderr not attached to a TTY, progress
+- [x] Given `sw run --verbose` with stderr not attached to a TTY, progress
       output falls back to non-live line-based output.
-- [ ] Given `sw run --verbose` for a run that stops because of a command
+- [x] Given `sw run --verbose` for a run that stops because of a command
       failure, stderr still includes the final total elapsed time line.
-- [ ] Given `sw run --debug` for a `Command` entry with rewrites and captures,
+- [x] Given `sw run --debug` for a `Command` entry with rewrites and captures,
       stderr includes enough interpolated rewrite and capture information to
       help diagnose matching failures.
-- [ ] Given `output.stream: stdout`, rendered command output includes only
+- [x] Given `output.stream: stdout`, rendered command output includes only
       captured stdout.
-- [ ] Given `output.stream: stderr`, rendered command output includes only
+- [x] Given `output.stream: stderr`, rendered command output includes only
       captured stderr.
-- [ ] Given `output.stream: combined`, rendered command output includes
+- [x] Given `output.stream: combined`, rendered command output includes
       captured stdout followed by captured stderr.
-- [ ] Given no `output.stream`, rendered command output defaults to combined
+- [x] Given no `output.stream`, rendered command output defaults to combined
       stdout followed by stderr.
-- [ ] Given an invalid `output.stream` value, validation rejects the runbook
+- [x] Given an invalid `output.stream` value, validation rejects the runbook
       with a clear error.
-- [ ] Given `output.stream: stderr` together with `output.rewrite`, rewrites
+- [x] Given `output.stream: stderr` together with `output.rewrite`, rewrites
       apply to the selected stderr stream before rendering.
-- [ ] Given `output.stream: combined` together with output trimming, trimming
+- [x] Given `output.stream: combined` together with output trimming, trimming
       applies to the selected combined stream before rendering.
-- [ ] Given `output.stream: stderr` or `output.stream: combined`, explicit
+- [x] Given `output.stream: stderr` or `output.stream: combined`, explicit
       `capture.source` values and assertion-check sources keep their existing
       contracts and are not implicitly widened.
 
 ### Command Cleanup
 
-- [ ] Given a command without `cleanup`, remaining processes started by that
+- [x] Given a command without `cleanup`, remaining processes started by that
       command are terminated automatically after the entry finishes.
-- [ ] Given a command without `cleanup`, remaining processes started by that
+- [x] Given a command without `cleanup`, remaining processes started by that
       command are terminated automatically after failure or timeout.
-- [ ] Given automatic process cleanup for a command whose process group has
+- [x] Given automatic process cleanup for a command whose process group has
       already exited, the cleanup step is treated as a successful no-op.
-- [ ] Given automatic process cleanup for a command whose process group has
+- [x] Given automatic process cleanup for a command whose process group has
       already exited, no user-visible "No such process" warning is printed.
-- [ ] Given commands that declare `cleanup`, cleanup commands execute in reverse
+- [x] Given commands that declare `cleanup`, cleanup commands execute in reverse
       order after the run completes.
-- [ ] Given a `cleanup` block with multiple command lines, those lines execute
+- [x] Given a `cleanup` block with multiple command lines, those lines execute
       in the declared order and in the same shell context.
-- [ ] Given a command whose `cleanup` is a single string, cleanup executes with
+- [x] Given a command whose `cleanup` is a single string, cleanup executes with
       the same behavior as the existing line-array cleanup model.
-- [ ] Given a command whose `cleanup` is a YAML literal scalar with a terminal
+- [x] Given a command whose `cleanup` is a YAML literal scalar with a terminal
       line break, the implicit terminator blank line is ignored.
-- [ ] Given a `cleanup` block that expresses a shell control structure across
+- [x] Given a `cleanup` block that expresses a shell control structure across
       multiple lines, that structure executes correctly during cleanup.
-- [ ] Given a command with `cleanup`, the explicit cleanup block is used
+- [x] Given a command with `cleanup`, the explicit cleanup block is used
       instead of automatic process cleanup for that entry.
-- [ ] Given a command failure, previously registered cleanup commands still
+- [x] Given a command failure, previously registered cleanup commands still
       execute in reverse order before the run exits.
-- [ ] Given a command timeout, previously registered cleanup commands still
+- [x] Given a command timeout, previously registered cleanup commands still
       execute in reverse order before the run exits.
-- [ ] Given a command without `cleanup`, no cleanup command is registered for
+- [x] Given a command without `cleanup`, no cleanup command is registered for
       that entry.
-- [ ] Given a failed cleanup line, the remaining lines in that cleanup block
+- [x] Given a failed cleanup line, the remaining lines in that cleanup block
       still execute.
-- [ ] Given a cleanup command that uses shell line continuations with trailing
+- [x] Given a cleanup command that uses shell line continuations with trailing
       `\`, the continued command executes as one cleanup command chunk.
-- [ ] Given a failed cleanup block, remaining registered cleanup blocks still
+- [x] Given a failed cleanup block, remaining registered cleanup blocks still
       execute in reverse order.
-- [ ] Given a failed cleanup block, the run error identifies the owning
+- [x] Given a failed cleanup block, the run error identifies the owning
       `Command` entry.
-- [ ] Given a failed cleanup block, the run error includes the cleanup working
+- [x] Given a failed cleanup block, the run error includes the cleanup working
       directory, normalized cleanup script, stdout, stderr, and failure detail.
-- [ ] Given a command with `cleanup` and `debug: true`, cleanup execution emits
+- [x] Given a command with `cleanup` and `debug: true`, cleanup execution emits
       debug diagnostics for the cleanup block.
-- [ ] Given `sw run --debug` and a command with `cleanup`, cleanup execution
+- [x] Given `sw run --debug` and a command with `cleanup`, cleanup execution
       emits debug diagnostics for the cleanup block.
-- [ ] Given one or more cleanup failures, the run is reported as failed after
+- [x] Given one or more cleanup failures, the run is reported as failed after
       cleanup completes.
 
 ### Command Timeouts
 
-- [ ] Given a command without a declared timeout, the default timeout of
+- [x] Given a command without a declared timeout, the default timeout of
       `30 seconds` is used.
-- [ ] Given a command with a declared timeout such as `30 seconds`,
+- [x] Given a command with a declared timeout such as `30 seconds`,
       `1 minute`, or `5 minutes`, that timeout is used for the command.
-- [ ] Given a command that finishes within its timeout, the run continues.
-- [ ] Given a command whose shell exits but whose inherited stdout or stderr
+- [x] Given a command that finishes within its timeout, the run continues.
+- [x] Given a command whose shell exits but whose inherited stdout or stderr
       pipe remains open, the command entry remains active until the pipe
       closes or the timeout is reached.
-- [ ] Given a command that exceeds its timeout, the command process is
+- [x] Given a command that exceeds its timeout, the command process is
       terminated, the run exits with `2`, and any captured output produced
       before termination is preserved to aid debugging.
-- [ ] Given a command with explicit `cleanup` that starts a background process
+- [x] Given a command with explicit `cleanup` that starts a background process
       without redirecting stdout and stderr away from the captured command
       pipes, the timeout still applies to the full entry lifecycle and
       terminates the remaining command processes when that lifecycle exceeds
@@ -1165,20 +1165,20 @@ in the runbook.
 
 ### Command Assertions
 
-- [ ] Given a command without an `assert` section that exits successfully, the
+- [x] Given a command without an `assert` section that exits successfully, the
       run continues.
-- [ ] Given a command without an `assert` section that exits with an error, the
+- [x] Given a command without an `assert` section that exits with an error, the
       command exits with `2` and does not write a partial output file.
-- [ ] Given a command with `assert.exit_code`, the command is considered
+- [x] Given a command with `assert.exit_code`, the command is considered
       successful only when the actual exit code matches the asserted value.
-- [ ] Given a command with `assert.exit_code` that does not match the actual
+- [x] Given a command with `assert.exit_code` that does not match the actual
       exit code, the command exits with `2` and does not write a partial output
       file, and the error output includes the failing `Command` entry together
       with the captured stdout and stderr.
-- [ ] Given a command with `assert.checks` using `source: stdout` and
+- [x] Given a command with `assert.checks` using `source: stdout` and
       `contains`, the command is considered successful only when stdout
       contains the expected text.
-- [ ] Given a command with a `stdout` `contains` check that fails, the run
+- [x] Given a command with a `stdout` `contains` check that fails, the run
       exits with `2`, does not write a partial output file, and reports the
       failing `Command` entry together with the captured stdout and stderr.
 - [ ] Given a command with `preconditions.checks` using `source: port`,
@@ -1187,16 +1187,16 @@ in the runbook.
 - [ ] Given a failing `port` precondition check, the run exits with `2`,
       does not execute the command body, does not write a partial output file,
       and reports the failing `Command` entry.
-- [ ] Given a command with `assert.checks` using `source: file`, `path`, and
+- [x] Given a command with `assert.checks` using `source: file`, `path`, and
       `exists: true`, the command is considered successful only when the file
       exists after command execution.
-- [ ] Given a command with `assert.checks` using `source: file`, `path`, and
+- [x] Given a command with `assert.checks` using `source: file`, `path`, and
       `sha256`, the command is considered successful only when the file exists
       and its SHA-256 matches the expected digest.
 - [ ] Given a command with `assert.checks` using `source: port`, `port: 8080`,
       and `free: true`, the command is considered successful only when TCP
       port `8080` is not listening locally after the command body completes.
-- [ ] Given a failing `file` assertion, the run exits with `2`, does not write
+- [x] Given a failing `file` assertion, the run exits with `2`, does not write
       a partial output file, and reports the failing `Command` entry together
       with the captured stdout and stderr.
 - [ ] Given a failing `port` assertion, the run exits with `2`, does not write
@@ -1205,12 +1205,12 @@ in the runbook.
 - [ ] Given a command with `cleanup` that releases a port, a same-entry
       `source: port` assertion still evaluates before deferred cleanup and does
       not treat post-cleanup port state as part of that assertion.
-- [ ] Given multiple assertion checks, all checks must pass for the command to
+- [x] Given multiple assertion checks, all checks must pass for the command to
       be considered successful.
 
 ### Command Capture
 
-- [ ] Given a `Command` entry with `capture`, matching values are stored under
+- [x] Given a `Command` entry with `capture`, matching values are stored under
       the declared variable names.
 - [ ] Given a capture rule with `parse_as.type: number` and no locale or
       explicit separators, the captured value is parsed using the canonical
@@ -1225,194 +1225,194 @@ in the runbook.
       instead of locale rules.
 - [ ] Given a capture rule with `parse_as.locale` together with explicit
       separators, validation rejects the runbook.
-- [ ] Given `source: stdout` and `stage: raw`, capture uses stdout before
+- [x] Given `source: stdout` and `stage: raw`, capture uses stdout before
       rewrite rules are applied.
-- [ ] Given `source: stdout` and `stage: rewritten`, capture uses stdout after
+- [x] Given `source: stdout` and `stage: rewritten`, capture uses stdout after
       rewrite rules are applied.
-- [ ] Given `source: stderr` and `stage: raw`, capture uses stderr before
+- [x] Given `source: stderr` and `stage: raw`, capture uses stderr before
       rewrite rules are applied.
-- [ ] Given `source: stderr` and `stage: rewritten`, capture uses stderr after
+- [x] Given `source: stderr` and `stage: rewritten`, capture uses stderr after
       rewrite rules are applied.
-- [ ] Given a capture rule with an unsupported `source`, validation rejects the
+- [x] Given a capture rule with an unsupported `source`, validation rejects the
       runbook with a clear error.
-- [ ] Given a later command that uses `@{name}`, the captured value is
+- [x] Given a later command that uses `@{name}`, the captured value is
       interpolated into the command before execution.
 - [ ] Given a capture rule with `parse_as.type: number`, plain `@{name}`
       interpolation still uses the original captured string value.
-- [ ] Given a command that references `@{name}` before that variable is
+- [x] Given a command that references `@{name}` before that variable is
       captured earlier in the runbook, validation rejects the runbook.
-- [ ] Given duplicate capture variable names anywhere in the runbook,
+- [x] Given duplicate capture variable names anywhere in the runbook,
       validation rejects the runbook.
-- [ ] Given a capture rule whose pattern does not resolve to exactly one value,
+- [x] Given a capture rule whose pattern does not resolve to exactly one value,
       the run fails.
 - [ ] Given a capture rule with `parse_as.type: number` whose matched text
       cannot be parsed under the declared parsing rules, the run fails.
-- [ ] Given `@@{name}` in command or Markdown content, the literal `@{name}`
+- [x] Given `@@{name}` in command or Markdown content, the literal `@{name}`
       is preserved without interpolation.
 
 ### Command Output Rendering
 
-- [ ] Given a `Command` entry with an `output` property, the generated Markdown
+- [x] Given a `Command` entry with an `output` property, the generated Markdown
       includes the captured command output.
-- [ ] Given a `Command` entry with `output.caption`, the generated Markdown
+- [x] Given a `Command` entry with `output.caption`, the generated Markdown
       includes the caption before the captured command output.
-- [ ] Given a `Command` entry with `output.caption` that references a value
+- [x] Given a `Command` entry with `output.caption` that references a value
       captured by the same command, the generated Markdown includes the
       captured value in the caption.
-- [ ] Given `@@{name}` in `output.caption`, the generated Markdown includes the
+- [x] Given `@@{name}` in `output.caption`, the generated Markdown includes the
       literal `@{name}` text.
-- [ ] Given a scalar `output.caption` value that ends with a line break only
+- [x] Given a scalar `output.caption` value that ends with a line break only
       because of YAML literal-scalar termination, the generated Markdown does
       not introduce an extra blank line before the captured output fence.
-- [ ] Given a `Command` entry with `output.content_type: json`, the generated
+- [x] Given a `Command` entry with `output.content_type: json`, the generated
       Markdown uses a `json` fenced block for captured output.
-- [ ] Given rendered command output containing a Markdown backtick fence, the
+- [x] Given rendered command output containing a Markdown backtick fence, the
       generated Markdown uses a fence delimiter that does not close
       prematurely while preserving the output content type label.
-- [ ] Given a `Command` entry with `output.content_type: xml`, the generated
+- [x] Given a `Command` entry with `output.content_type: xml`, the generated
       Markdown uses an `xml` fenced block for captured output.
-- [ ] Given a `Command` entry with `output.content_type: html`, the generated
+- [x] Given a `Command` entry with `output.content_type: html`, the generated
       Markdown uses an `html` fenced block for captured output.
-- [ ] Given a `Command` entry with `output.content_type: java`, the generated
+- [x] Given a `Command` entry with `output.content_type: java`, the generated
       Markdown uses a `java` fenced block for captured output.
-- [ ] Given a `Command` entry with `output.content_type: markdown`, the
+- [x] Given a `Command` entry with `output.content_type: markdown`, the
       generated Markdown uses a `markdown` fenced block for captured output.
-- [ ] Given a `Command` entry with `output` but no `content_type`, the
+- [x] Given a `Command` entry with `output` but no `content_type`, the
       generated Markdown uses an unlabeled fenced block for captured output.
-- [ ] Given a `Command` entry with `output.content_type: text`, the generated
+- [x] Given a `Command` entry with `output.content_type: text`, the generated
       Markdown uses an unlabeled fenced block for captured output.
-- [ ] Given a `Command` entry with `output.trim_empty_lines: leading_trailing`,
+- [x] Given a `Command` entry with `output.trim_empty_lines: leading_trailing`,
       leading and trailing empty lines are removed from rendered output.
-- [ ] Given a `Command` entry with `output` and no `trim_empty_lines`,
+- [x] Given a `Command` entry with `output` and no `trim_empty_lines`,
       leading and trailing empty lines are removed from rendered output.
-- [ ] Given a `Command` entry with `output.trim_empty_lines: leading`, only
+- [x] Given a `Command` entry with `output.trim_empty_lines: leading`, only
       leading empty lines are removed from rendered output.
-- [ ] Given a `Command` entry with `output.trim_empty_lines: trailing`, only
+- [x] Given a `Command` entry with `output.trim_empty_lines: trailing`, only
       trailing empty lines are removed from rendered output.
-- [ ] Given a `Command` entry with `output.trim_empty_lines: none`, leading and
+- [x] Given a `Command` entry with `output.trim_empty_lines: none`, leading and
       trailing empty lines are preserved in rendered output.
-- [ ] Given a `Command` entry with `output` and no
+- [x] Given a `Command` entry with `output` and no
       `trim_trailing_whitespace`, trailing whitespace is removed from the end
       of each rendered output line.
-- [ ] Given a `Command` entry with `output.trim_trailing_whitespace: false`,
+- [x] Given a `Command` entry with `output.trim_trailing_whitespace: false`,
       trailing whitespace is preserved in rendered output.
-- [ ] Given a `Command` entry with `output.rewrite`, rewrite rules are applied
+- [x] Given a `Command` entry with `output.rewrite`, rewrite rules are applied
       in the declared order before output is rendered.
-- [ ] Given a `replace` rewrite rule, matching text is replaced in rendered
+- [x] Given a `replace` rewrite rule, matching text is replaced in rendered
       output.
-- [ ] Given a rewrite rule with `capture_as`, the matched pre-rewrite value is
+- [x] Given a rewrite rule with `capture_as`, the matched pre-rewrite value is
       stored as `@{<capture_as>_original}`.
-- [ ] Given a rewrite rule with `capture_as`, the rewritten value is stored as
+- [x] Given a rewrite rule with `capture_as`, the rewritten value is stored as
       `@{<capture_as>_rewritten}`.
-- [ ] Given a rewrite rule with `capture_as`, later commands and Markdown may
+- [x] Given a rewrite rule with `capture_as`, later commands and Markdown may
       reference those generated variables using the normal capture syntax.
-- [ ] Given a rewrite rule with `capture_as` whose generated names collide with
+- [x] Given a rewrite rule with `capture_as` whose generated names collide with
       an existing captured variable, validation rejects the runbook.
-- [ ] Given a rewrite rule with `capture_as` that matches zero values or more
+- [x] Given a rewrite rule with `capture_as` that matches zero values or more
       than one value, the run exits with `2`, does not write a partial output
       file, and reports the failing `Command` entry together with the captured
       stdout and stderr.
-- [ ] Given a `replace` rewrite rule `pattern` that uses `@{name}` after that
+- [x] Given a `replace` rewrite rule `pattern` that uses `@{name}` after that
       variable is captured earlier in the runbook, the pattern text includes
       the captured value before matching.
-- [ ] Given a `replace` rewrite rule `pattern` that uses `@{name}` before that
+- [x] Given a `replace` rewrite rule `pattern` that uses `@{name}` before that
       variable is captured, validation rejects the runbook.
-- [ ] Given `@@{name}` in a `replace` rewrite rule `pattern`, the literal
+- [x] Given `@@{name}` in a `replace` rewrite rule `pattern`, the literal
       `@{name}` is preserved without interpolation.
-- [ ] Given a `replace` rewrite rule `replacement` that uses `@{name}` after
+- [x] Given a `replace` rewrite rule `replacement` that uses `@{name}` after
       that variable is captured earlier in the runbook, the replacement text
       includes the captured value.
-- [ ] Given a `replace` rewrite rule `replacement` that uses `@{name}` before
+- [x] Given a `replace` rewrite rule `replacement` that uses `@{name}` before
       that variable is captured, validation rejects the runbook.
-- [ ] Given `@@{name}` in a `replace` rewrite rule `replacement`, the literal
+- [x] Given `@@{name}` in a `replace` rewrite rule `replacement`, the literal
       `@{name}` is preserved without interpolation.
-- [ ] Given a `keep_between` rewrite rule, only the lines between the matched
+- [x] Given a `keep_between` rewrite rule, only the lines between the matched
       `start` and `end` boundaries are kept.
-- [ ] Given a `keep_between` rewrite rule with `start_pattern`, the start
+- [x] Given a `keep_between` rewrite rule with `start_pattern`, the start
       boundary is matched with the declared regex.
-- [ ] Given a `keep_between` rewrite rule with `end_pattern`, the end boundary
+- [x] Given a `keep_between` rewrite rule with `end_pattern`, the end boundary
       is matched with the declared regex.
-- [ ] Given a `keep_between` rewrite rule with both `start` and
+- [x] Given a `keep_between` rewrite rule with both `start` and
       `start_pattern`, validation rejects the runbook.
-- [ ] Given a `keep_between` rewrite rule with both `end` and `end_pattern`,
+- [x] Given a `keep_between` rewrite rule with both `end` and `end_pattern`,
       validation rejects the runbook.
-- [ ] Given a `keep_between` rewrite rule with `start` and no `end`, the kept
+- [x] Given a `keep_between` rewrite rule with `start` and no `end`, the kept
       slice runs from the adjusted `start` boundary to the end of the output.
-- [ ] Given a `keep_between` rewrite rule without explicit offsets,
+- [x] Given a `keep_between` rewrite rule without explicit offsets,
       `start_offset: 1` and `end_offset: -1` are used.
-- [ ] Given a `keep_between` rewrite rule with explicit offsets, the resulting
+- [x] Given a `keep_between` rewrite rule with explicit offsets, the resulting
       output slice reflects those line-based offsets.
-- [ ] Given a `keep_between` rewrite rule without `end`, `end_offset` is
+- [x] Given a `keep_between` rewrite rule without `end`, `end_offset` is
       ignored.
-- [ ] Given a `keep_between` rewrite rule without explicit
+- [x] Given a `keep_between` rewrite rule without explicit
       `show_trim_markers`, trim-marker lines are added only on the sides where
       output was trimmed.
-- [ ] Given a `keep_between` rewrite rule with `show_trim_markers: false`,
+- [x] Given a `keep_between` rewrite rule with `show_trim_markers: false`,
       trim-marker lines are omitted.
-- [ ] Given a `keep_between` rewrite rule whose `start` or `end` boundary is
+- [x] Given a `keep_between` rewrite rule whose `start` or `end` boundary is
       not found, the rule leaves the output unchanged.
-- [ ] Given a `limit_lines` rewrite rule with `first`, only the first N output
+- [x] Given a `limit_lines` rewrite rule with `first`, only the first N output
       lines are kept and a trailing trim marker is added when lines were
       removed.
-- [ ] Given a `limit_lines` rewrite rule with `last`, only the last N output
+- [x] Given a `limit_lines` rewrite rule with `last`, only the last N output
       lines are kept and a leading trim marker is added when lines were
       removed.
-- [ ] Given a `limit_lines` rewrite rule with both `first` and `last`, the
+- [x] Given a `limit_lines` rewrite rule with both `first` and `last`, the
       first N and last M lines are kept with a single middle trim marker when
       lines were removed.
-- [ ] Given a `limit_lines` rewrite rule whose kept first and last ranges
+- [x] Given a `limit_lines` rewrite rule whose kept first and last ranges
       overlap, overlapping lines are not duplicated.
-- [ ] Given a `limit_lines` rewrite rule that does not remove any lines, the
+- [x] Given a `limit_lines` rewrite rule that does not remove any lines, the
       output is unchanged and no trim marker is added.
-- [ ] Given a `limit_lines` rewrite rule with `show_trim_marker: false`, omitted
+- [x] Given a `limit_lines` rewrite rule with `show_trim_marker: false`, omitted
       lines do not render a trim marker.
-- [ ] Given a `datetime_shift` rewrite rule, the first matched timestamp is
+- [x] Given a `datetime_shift` rewrite rule, the first matched timestamp is
       rewritten to the configured base timestamp.
-- [ ] Given multiple timestamps matched by the same `datetime_shift` rule,
+- [x] Given multiple timestamps matched by the same `datetime_shift` rule,
       later timestamps preserve their relative distance from the first matched
       timestamp.
-- [ ] Given a `datetime_shift` rewrite rule without `base`, the default base
+- [x] Given a `datetime_shift` rewrite rule without `base`, the default base
       timestamp `2077-04-27T12:34:56.789+01:00` is used.
-- [ ] Given a `datetime_shift` rewrite rule with `format: rfc3339`, matched
+- [x] Given a `datetime_shift` rewrite rule with `format: rfc3339`, matched
       timestamps are rewritten and kept in RFC 3339 form.
-- [ ] Given a `datetime_shift` rewrite rule with `format: rfc3339` and matched
+- [x] Given a `datetime_shift` rewrite rule with `format: rfc3339` and matched
       timestamps that use 1 to 9 fractional-second digits, those timestamps
       are rewritten successfully without requiring a custom pattern.
-- [ ] Given a `datetime_shift` rewrite rule with `format: rfc3339` and a
+- [x] Given a `datetime_shift` rewrite rule with `format: rfc3339` and a
       matched timestamp that uses `Z`, the timestamp is rewritten
       successfully without requiring a custom pattern.
-- [ ] Given a `datetime_shift` rewrite rule with `format: rfc3339` and a
+- [x] Given a `datetime_shift` rewrite rule with `format: rfc3339` and a
       matched timestamp that uses fractional seconds together with `Z`, the
       timestamp is rewritten successfully without requiring a custom pattern.
-- [ ] Given a `datetime_shift` rewrite rule with `format: rfc1123`, matched
+- [x] Given a `datetime_shift` rewrite rule with `format: rfc1123`, matched
       timestamps are rewritten and kept in RFC 1123 form.
-- [ ] Given a `datetime_shift` rewrite rule with `id`, later datetime rules may
+- [x] Given a `datetime_shift` rewrite rule with `id`, later datetime rules may
       reuse that established shift with `use`.
-- [ ] Given multiple `datetime_shift` rewrite rules that share one anchor,
+- [x] Given multiple `datetime_shift` rewrite rules that share one anchor,
       matched datetimes in different supported formats preserve the same shared
       timeline shift.
-- [ ] Given duplicate `datetime_shift.id` values anywhere in the runbook,
+- [x] Given duplicate `datetime_shift.id` values anywhere in the runbook,
       validation rejects the runbook.
-- [ ] Given a `datetime_shift` rewrite rule that uses `use`, the referenced
+- [x] Given a `datetime_shift` rewrite rule that uses `use`, the referenced
       anchor must have been established earlier in the runbook.
-- [ ] Given a `datetime_shift` rewrite rule in a later command output block
+- [x] Given a `datetime_shift` rewrite rule in a later command output block
       that uses an anchor established earlier in the runbook, the rule is
       valid and follows that shared timeline.
-- [ ] Given a `datetime_shift` rewrite rule with `pattern` and
+- [x] Given a `datetime_shift` rewrite rule with `pattern` and
       `custom_format`, matched datetimes are rewritten while preserving that
       custom textual format.
-- [ ] Given a `datetime_shift` rewrite rule with `pattern` and
+- [x] Given a `datetime_shift` rewrite rule with `pattern` and
       `custom_format` that describe a time-only value, the value is shifted
       using the date and offset from the configured or inherited base
       timestamp and is rendered back in the same time-only textual format.
-- [ ] Given multiple time-only values matched by the same `datetime_shift`
+- [x] Given multiple time-only values matched by the same `datetime_shift`
       rule, later values preserve their relative distance from the first
       matched time-only value.
-- [ ] Given a time-only `datetime_shift` rule that uses `use`, the rule
+- [x] Given a time-only `datetime_shift` rule that uses `use`, the rule
       follows the same shared anchor established by an earlier datetime rule.
-- [ ] Given a `datetime_shift` rewrite rule that uses `use`, the rule does not
+- [x] Given a `datetime_shift` rewrite rule that uses `use`, the rule does not
       declare its own `base`.
-- [ ] Given a `Command` entry without an `output` property, the generated
+- [x] Given a `Command` entry without an `output` property, the generated
       Markdown does not include the captured command output.
 
 ## Non-goals

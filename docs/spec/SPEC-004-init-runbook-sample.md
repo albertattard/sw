@@ -79,27 +79,27 @@ It creates a sample runbook in the current directory.
 
 ## Acceptance Criteria
 
-- [ ] Given `sw init` in a directory without `sw-runbook.yaml`, the command
+- [x] Given `sw init` in a directory without `sw-runbook.yaml`, the command
       writes `./sw-runbook.yaml` and exits with `0`.
-- [ ] Given `sw init --output-file <path>`, the command writes the sample to
+- [x] Given `sw init --output-file <path>`, the command writes the sample to
       the provided path using the format inferred from the file extension.
-- [ ] Given `sw init` when the target file already exists, the command exits
+- [x] Given `sw init` when the target file already exists, the command exits
       with `1` and does not overwrite the file.
-- [ ] Given `sw init --force` when the target file already exists, the command
+- [x] Given `sw init --force` when the target file already exists, the command
       overwrites the file and exits with `0`.
-- [ ] The generated sample file is valid according to `sw validate`.
-- [ ] The generated sample includes one example of each supported entry type in
+- [x] The generated sample file is valid according to `sw validate`.
+- [x] The generated sample includes one example of each supported entry type in
       this increment.
-- [ ] Given `sw init --output-file starter.json`, the command writes valid JSON
+- [x] Given `sw init --output-file starter.json`, the command writes valid JSON
       to `starter.json`.
-- [ ] Given `sw init --output-file starter.yaml`, the command writes valid YAML
+- [x] Given `sw init --output-file starter.yaml`, the command writes valid YAML
       to `starter.yaml`.
 - [x] Given YAML output from `sw init`, the serialized top-level `entries` list
       uses `entries:\n  - ...` indentation and separates adjacent entries with a
       single blank line.
 - [x] Given YAML output from `sw init`, the starter Markdown example uses
       `contents: |` instead of a string-array form with a synthetic empty line.
-- [ ] Given `sw init --output-file starter.txt`, the command exits with `1`
+- [x] Given `sw init --output-file starter.txt`, the command exits with `1`
       and reports a clear unsupported-format error.
 
 ## Non-goals

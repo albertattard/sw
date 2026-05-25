@@ -102,13 +102,13 @@ file.
 - [x] Given `sw import --input-file <path> --output-file <path>`, the command
       reads the provided Markdown file and writes the runbook to the provided
       output path.
-- [ ] Given `sw import --output-format json`, the command writes
+- [x] Given `sw import --output-format json`, the command writes
       `./sw-runbook.json` and exits with `0`.
-- [ ] Given `sw import --output-file <path>.json` without `--output-format`,
+- [x] Given `sw import --output-file <path>.json` without `--output-format`,
       the command writes JSON to that output path.
-- [ ] Given `sw import --output-file <path>.yaml` without `--output-format`,
+- [x] Given `sw import --output-file <path>.yaml` without `--output-format`,
       the command writes YAML to that output path.
-- [ ] Given `sw import --output-format json --output-file <path>.yaml`, the
+- [x] Given `sw import --output-format json --output-file <path>.yaml`, the
       command exits with `1` and reports the format mismatch.
 - [x] Given `sw import` when the target output file already exists, the command
       exits with `1` and does not overwrite the file.

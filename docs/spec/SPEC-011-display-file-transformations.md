@@ -176,17 +176,17 @@ public void initialize(final int moduloDivisor) { /* Closed for brevity */ }
 
 ## Acceptance Criteria
 
-- [ ] Given a `DisplayFile` entry with `transform.language: "java"` and a
+- [x] Given a `DisplayFile` entry with `transform.language: "java"` and a
       `collapse_method_body` operation, the rendered snippet preserves the
       method signature and replaces the body with the requested replacement or
       the default replacement when omitted.
-- [ ] Given a `DisplayFile` entry without `transform`, rendering behaves the
+- [x] Given a `DisplayFile` entry without `transform`, rendering behaves the
       same as today.
-- [ ] Validation rejects unknown `transform.language` values.
-- [ ] Validation rejects unknown transform operation types.
-- [ ] Given a named Java method that does not exist, rendering fails with a
+- [x] Validation rejects unknown `transform.language` values.
+- [x] Validation rejects unknown transform operation types.
+- [x] Given a named Java method that does not exist, rendering fails with a
       clear operational error.
-- [ ] Help, explain, and examples are updated when the first transform
+- [x] Help, explain, and examples are updated when the first transform
       increment is implemented so users and agents can discover
       `collapse_method_body`.
 
