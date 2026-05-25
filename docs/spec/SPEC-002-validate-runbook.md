@@ -122,38 +122,38 @@ Exit codes:
 
 ## Acceptance Criteria
 
-- [ ] Given a valid runbook file,
+- [x] Given a valid runbook file,
       `sw validate --input-file <file> --output-format json`
       returns `valid: true`, an empty `errors` array, and exit code `0`.
-- [ ] Given a runbook that triggers a warning but no validation errors,
+- [x] Given a runbook that triggers a warning but no validation errors,
       `sw validate --input-file <file> --output-format json`
       returns `valid: true`, a non-empty `warnings` array, and exit code `0`.
-- [ ] Given an invalid runbook file,
+- [x] Given an invalid runbook file,
       `sw validate --input-file <file> --output-format json`
       returns `valid: false`, at least one structured error, and exit code `2`.
-- [ ] Given a missing input file, command returns exit code `1` with a clear
+- [x] Given a missing input file, command returns exit code `1` with a clear
       error message.
-- [ ] Given no input file argument and a valid `./sw-runbook.json`, with no
+- [x] Given no input file argument and a valid `./sw-runbook.json`, with no
       other default runbook file present, `sw validate --output-format json`
       validates that file and returns exit code `0`.
-- [ ] Given no input file argument, no `./sw-runbook.json`, and a valid
+- [x] Given no input file argument, no `./sw-runbook.json`, and a valid
       `./sw-runbook.yaml`, with no other default runbook file present,
       `sw validate --output-format json` validates that file and returns exit
       code `0`.
-- [ ] Given no input file argument, no `./sw-runbook.json` or
+- [x] Given no input file argument, no `./sw-runbook.json` or
       `./sw-runbook.yaml`, and a valid `./sw-runbook.yml`,
       `sw validate --output-format json` validates that file and returns exit
       code `0`.
-- [ ] Given no input file argument and more than one of `./sw-runbook.json`,
+- [x] Given no input file argument and more than one of `./sw-runbook.json`,
       `./sw-runbook.yaml`, or `./sw-runbook.yml` present,
       `sw validate --output-format json` returns exit code `1` with a clear
       ambiguity error that requires `--input-file`.
-- [ ] Given no input file argument and none of `./sw-runbook.json`,
+- [x] Given no input file argument and none of `./sw-runbook.json`,
       `./sw-runbook.yaml`, or `./sw-runbook.yml` present, the command returns
       exit code `1` with a clear missing-file error.
-- [ ] Given `sw validate --input-file <file.yaml>` with a valid YAML runbook,
+- [x] Given `sw validate --input-file <file.yaml>` with a valid YAML runbook,
       the command validates that file and returns exit code `0`.
-- [ ] Given a runbook whose `Markdown.contents` is a single string,
+- [x] Given a runbook whose `Markdown.contents` is a single string,
       `sw validate --input-file <file> --output-format json` accepts that
       shorthand and returns `valid: true`.
 - [x] Given a runbook whose `Command.commands` is a single string,
@@ -162,30 +162,30 @@ Exit codes:
 - [x] Given a runbook whose `Patch.patch` is a single string,
       `sw validate --input-file <file> --output-format json` accepts that
       shorthand and returns `valid: true`.
-- [ ] Given a runbook whose `Prerequisite.checks[*].contents` is a single
+- [x] Given a runbook whose `Prerequisite.checks[*].contents` is a single
       string, `sw validate --input-file <file> --output-format json` accepts
       that shorthand and returns `valid: true`.
 - [x] Given a runbook whose `Prerequisite.checks[*].commands` is a single
       string, `sw validate --input-file <file> --output-format json` accepts
       that shorthand and returns `valid: true`.
-- [ ] Given `sw validate --input-file=- --output-format json` with a valid
+- [x] Given `sw validate --input-file=- --output-format json` with a valid
       JSON runbook on stdin, the command validates stdin and returns exit code
       `0`.
-- [ ] Given `sw validate --input-file=- --input-format yaml --output-format json`
+- [x] Given `sw validate --input-file=- --input-format yaml --output-format json`
       with a valid YAML runbook on stdin, the command validates stdin and
       returns exit code `0`.
-- [ ] Given `sw validate --input-file=- --output-format json` with YAML on
+- [x] Given `sw validate --input-file=- --output-format json` with YAML on
       stdin and no `--input-format=yaml`, the command exits with `1` and
       reports a clear parsing error.
-- [ ] Given `--input-format=json` or `--input-format=yaml` without
+- [x] Given `--input-format=json` or `--input-format=yaml` without
       `--input-file=-`, the command still uses the existing default file lookup
       behavior, including ambiguity failures when multiple default runbooks
       exist.
-- [ ] Given no `--output-format` option, command uses `human` output by
+- [x] Given no `--output-format` option, command uses `human` output by
       default.
-- [ ] Given a human-readable validation failure for `entries[N]`, the output
+- [x] Given a human-readable validation failure for `entries[N]`, the output
       includes a nearby offending block for that error.
-- [ ] Validation performs no write operations (read-only behavior).
+- [x] Validation performs no write operations (read-only behavior).
 
 ## Non-goals
 

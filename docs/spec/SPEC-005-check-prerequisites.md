@@ -127,73 +127,73 @@ Default input behavior:
 
 ## Acceptance Criteria
 
-- [ ] Given a valid runbook whose prerequisite checks all pass, `sw check`
+- [x] Given a valid runbook whose prerequisite checks all pass, `sw check`
       exits with `0`.
-- [ ] Given no `--input-file` and a valid `./sw-runbook.json`, with no other
+- [x] Given no `--input-file` and a valid `./sw-runbook.json`, with no other
       default runbook file present, `sw check` checks that file.
-- [ ] Given no `--input-file`, no `./sw-runbook.json`, and a valid
+- [x] Given no `--input-file`, no `./sw-runbook.json`, and a valid
       `./sw-runbook.yaml`, with no other default runbook file present,
       `sw check` checks that file.
-- [ ] Given no `--input-file`, no `./sw-runbook.json` or
+- [x] Given no `--input-file`, no `./sw-runbook.json` or
       `./sw-runbook.yaml`, and a valid `./sw-runbook.yml`, `sw check` checks
       that file.
-- [ ] Given no `--input-file` and more than one of `./sw-runbook.json`,
+- [x] Given no `--input-file` and more than one of `./sw-runbook.json`,
       `./sw-runbook.yaml`, or `./sw-runbook.yml` present, `sw check` exits
       with `1` and reports a clear ambiguity error that requires
       `--input-file`.
-- [ ] Given a missing input file, `sw check` exits with `1` and reports a
+- [x] Given a missing input file, `sw check` exits with `1` and reports a
       clear file error.
-- [ ] Given `sw check --input-file <file.yaml>` with a valid YAML runbook,
+- [x] Given `sw check --input-file <file.yaml>` with a valid YAML runbook,
       `sw check` applies the same prerequisite-check contract and exit codes as
       a JSON runbook.
-- [ ] Given a valid runbook whose `Markdown.contents` is a single string,
+- [x] Given a valid runbook whose `Markdown.contents` is a single string,
       `sw check` treats that runbook as valid input and continues to
       prerequisite execution.
-- [ ] Given a valid runbook whose `Patch.patch` is a single string, `sw check`
+- [x] Given a valid runbook whose `Patch.patch` is a single string, `sw check`
       treats that runbook as valid input and continues to prerequisite
       execution.
-- [ ] Given a valid runbook whose `Prerequisite.checks[*].contents` is a
+- [x] Given a valid runbook whose `Prerequisite.checks[*].contents` is a
       single string, `sw check` treats that runbook as valid input and applies
       the same prerequisite-check contract and exit codes.
 - [x] Given a valid runbook whose `Prerequisite.checks[*].commands` is a
       single string, `sw check` treats that runbook as valid input and applies
       the same prerequisite-check contract and exit codes.
-- [ ] Given `sw check --input-file=-` with a valid JSON runbook on stdin,
+- [x] Given `sw check --input-file=-` with a valid JSON runbook on stdin,
       `sw check` applies the same prerequisite-check contract and exit codes as
       a file-backed JSON runbook.
-- [ ] Given `sw check --input-file=- --input-format=yaml` with a valid YAML
+- [x] Given `sw check --input-file=- --input-format=yaml` with a valid YAML
       runbook on stdin, `sw check` applies the same prerequisite-check
       contract and exit codes as a file-backed YAML runbook.
-- [ ] Given `sw check --input-file=-` with YAML on stdin and no
+- [x] Given `sw check --input-file=-` with YAML on stdin and no
       `--input-format=yaml`, the command exits with `1` and reports a clear
       parsing error.
-- [ ] Given `--input-format=json` or `--input-format=yaml` without
+- [x] Given `--input-format=json` or `--input-format=yaml` without
       `--input-file=-`, the command still uses the existing default file lookup
       behavior, including ambiguity failures when multiple default runbooks
       exist.
-- [ ] Given an invalid runbook, `sw check` exits with `1` and reports that the
+- [x] Given an invalid runbook, `sw check` exits with `1` and reports that the
       runbook is invalid, including a nearby offending block for
       entry-scoped validation errors.
-- [ ] Given a failing prerequisite check, `sw check` exits with `2` before any
+- [x] Given a failing prerequisite check, `sw check` exits with `2` before any
       normal `Command` entry executes.
-- [ ] Given a `java` prerequisite check with `version: "24+"`, `sw check`
+- [x] Given a `java` prerequisite check with `version: "24+"`, `sw check`
       passes when the resolved Java runtime is Java 24 or higher.
-- [ ] Given a `java` prerequisite check with `version: "17"`, `sw check`
+- [x] Given a `java` prerequisite check with `version: "17"`, `sw check`
       passes only when the resolved Java runtime is exactly Java 17.
-- [ ] Given a `java` prerequisite check with `java_home_env`, `sw check`
+- [x] Given a `java` prerequisite check with `java_home_env`, `sw check`
       resolves Java from that environment variable.
-- [ ] Given a `java` prerequisite check with an unset `java_home_env`,
+- [x] Given a `java` prerequisite check with an unset `java_home_env`,
       `sw check` fails with a clear prerequisite error.
-- [ ] Given a `java` prerequisite check with both `java_home` and
+- [x] Given a `java` prerequisite check with both `java_home` and
       `java_home_env`, the runbook is invalid.
-- [ ] Given a `java` prerequisite check with `version: "8"` and
+- [x] Given a `java` prerequisite check with `version: "8"` and
       `distribution: "epp"`, `sw check` passes only when the resolved Java
       runtime output contains the EPP `-perf` marker.
-- [ ] Given a failing prerequisite check with `help`, the failure output
+- [x] Given a failing prerequisite check with `help`, the failure output
       includes that remediation message.
-- [ ] Given a passing prerequisite check followed by a `Command` entry,
+- [x] Given a passing prerequisite check followed by a `Command` entry,
       `sw check` does not execute that `Command` entry.
-- [ ] `sw check` performs no README rendering or file writes.
+- [x] `sw check` performs no README rendering or file writes.
 
 ## Non-goals
 

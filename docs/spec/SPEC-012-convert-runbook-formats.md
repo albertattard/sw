@@ -179,23 +179,23 @@ Output:
 - [x] Given an output path equal to the input path, `sw convert` exits with `1`
       and reports that in-place conversion is not supported.
 - [x] Help output documents the `convert` command and its options.
-- [ ] Given JSON input whose `Markdown.contents` is an array of strings and the
+- [x] Given JSON input whose `Markdown.contents` is an array of strings and the
       target format is YAML, `sw convert` may serialize that field as a YAML
       literal block scalar instead of a YAML sequence.
-- [ ] Given JSON input whose `Command.commands` is an array of strings and the
+- [x] Given JSON input whose `Command.commands` is an array of strings and the
       target format is YAML, `sw convert` may serialize that field as a YAML
       literal block scalar instead of a YAML sequence.
-- [ ] Given JSON input whose `Command.cleanup` is an array of strings and the
+- [x] Given JSON input whose `Command.cleanup` is an array of strings and the
       target format is YAML, `sw convert` may serialize that field as a YAML
       literal block scalar instead of a YAML sequence.
-- [ ] Given JSON input whose `Prerequisite.checks[*].contents` or
+- [x] Given JSON input whose `Prerequisite.checks[*].contents` or
       `Prerequisite.checks[*].commands` is an array of strings and the target
       format is YAML, `sw convert` may serialize that field as a YAML literal
       block scalar instead of a YAML sequence.
-- [ ] Given JSON input whose `Patch.patch` is an array of strings and the
+- [x] Given JSON input whose `Patch.patch` is an array of strings and the
       target format is YAML, `sw convert` may serialize that field as a YAML
       literal block scalar instead of a YAML sequence.
-- [ ] Given JSON input with a string array in a field that is not documented as
+- [x] Given JSON input with a string array in a field that is not documented as
       scalar-capable, `sw convert` keeps that field as a YAML sequence.
 
 ## Non-goals

@@ -1,7 +1,7 @@
 ---
 id: TASK-121
 title: Support Command Preconditions And Port Checks
-status: proposed
+status: pending
 category: run
 related_features:
   - SPEC-003
