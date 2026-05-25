@@ -1,7 +1,7 @@
 ---
 id: TASK-098
 title: Format Imported YAML For Editing
-status: completed
+status: done
 category: import
 related_features:
   - SPEC-006

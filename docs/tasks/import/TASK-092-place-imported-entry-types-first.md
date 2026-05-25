@@ -1,7 +1,7 @@
 ---
 id: TASK-092
 title: Place Imported Entry Types First
-status: completed
+status: done
 category: import
 related_features:
   - SPEC-006

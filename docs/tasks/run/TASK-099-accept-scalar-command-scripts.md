@@ -1,7 +1,7 @@
 ---
 id: TASK-099
 title: Accept Scalar Command Scripts
-status: completed
+status: done
 category: run
 related_features:
   - SPEC-002

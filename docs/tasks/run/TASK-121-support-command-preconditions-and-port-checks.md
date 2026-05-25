@@ -7,7 +7,7 @@ related_features:
   - SPEC-003
 owner: @aattard
 created: 2026-04-22
-updated: 2026-04-22
+updated: 2026-05-25
 ---
 
 ## Summary
@@ -40,7 +40,8 @@ state immediately after the command body completes.
       `free: true`, the command body executes only when TCP port `8080` is not
       listening locally.
 - [ ] Given a failing port precondition, the run exits with `2`, does not
-      execute the command body, and reports the failing `Command` entry.
+      execute the command body, does not write a partial output file, and
+      reports the failing `Command` entry.
 - [ ] Given `assert.checks` with `source: port`, `port: 8080`, and
       `free: true`, the command is considered successful only when TCP port
       `8080` is not listening locally after the command body completes.

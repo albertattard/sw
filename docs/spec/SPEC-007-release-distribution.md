@@ -1,9 +1,11 @@
-# SPEC-007: Release Distribution Contract
-
-- Status: Draft
-- Owner: `@aattard`
-- Created: `2026-03-13`
-- Updated: `2026-04-15`
+---
+id: SPEC-007
+title: Release Distribution Contract
+status: in_progress
+priority: high
+owner: @aattard
+last_updated: 2026-05-25
+---
 
 ## Goal
 

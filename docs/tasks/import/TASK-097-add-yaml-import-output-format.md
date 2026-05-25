@@ -1,7 +1,7 @@
 ---
 id: TASK-097
 title: Add YAML Import Output Format
-status: completed
+status: done
 category: import
 related_features:
   - SPEC-006
