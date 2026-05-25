@@ -3,7 +3,7 @@ id: SPEC-009
 title: Explain Feature Contract
 status: implemented
 priority: high
-owner: @aattard
+owner: albertattard
 last_updated: 2026-04-25
 ---
 

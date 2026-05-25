@@ -6,7 +6,7 @@ category: example
 related_features:
   - SPEC-008
   - SPEC-003
-owner: @aattard
+owner: albertattard
 created: 2026-03-16
 updated: 2026-03-16
 ---

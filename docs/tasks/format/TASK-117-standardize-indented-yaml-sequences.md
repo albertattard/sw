@@ -7,7 +7,7 @@ related_features:
   - SPEC-004
   - SPEC-006
   - SPEC-010
-owner: @aattard
+owner: albertattard
 created: 2026-04-16
 updated: 2026-04-16
 ---

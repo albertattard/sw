@@ -5,7 +5,7 @@ status: done
 category: run
 related_features:
   - SPEC-003
-owner: @aattard
+owner: albertattard
 created: 2026-04-29
 updated: 2026-04-29
 ---

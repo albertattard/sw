@@ -6,7 +6,7 @@ category: prerequisite
 related_features:
   - SPEC-003
   - SPEC-005
-owner: @aattard
+owner: albertattard
 created: 2026-05-13
 updated: 2026-05-13
 ---

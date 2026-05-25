@@ -4,7 +4,7 @@ title: Review actions checkout v6 Upgrade
 status: done
 category: repo-process
 related_features: []
-owner: @aattard
+owner: albertattard
 created: 2026-04-09
 updated: 2026-04-09
 ---

@@ -5,7 +5,7 @@ status: done
 category: validate
 related_features:
   - SPEC-002
-owner: @aattard
+owner: albertattard
 created: 2026-03-05
 updated: 2026-03-11
 ---

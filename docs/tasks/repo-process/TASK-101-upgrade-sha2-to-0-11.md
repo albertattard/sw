@@ -4,7 +4,7 @@ title: Upgrade sha2 To 0.11
 status: done
 category: repo-process
 related_features: []
-owner: @aattard
+owner: albertattard
 created: 2026-04-09
 updated: 2026-04-09
 ---

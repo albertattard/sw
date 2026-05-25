@@ -3,7 +3,7 @@ id: SPEC-007
 title: Release Distribution Contract
 status: in_progress
 priority: high
-owner: @aattard
+owner: albertattard
 last_updated: 2026-05-25
 ---
 

@@ -3,7 +3,7 @@ id: SPEC-008
 title: Example Snippets Contract
 status: implemented
 priority: high
-owner: @aattard
+owner: albertattard
 last_updated: 2026-04-25
 ---
 

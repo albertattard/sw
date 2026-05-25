@@ -3,7 +3,7 @@ id: SPEC-002
 title: Validate Runbook Input
 status: implemented
 priority: high
-owner: @aattard
+owner: albertattard
 last_updated: 2026-04-15
 ---
 
