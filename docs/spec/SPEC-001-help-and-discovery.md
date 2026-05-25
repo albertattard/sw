@@ -77,26 +77,26 @@ Exit codes:
 - [x] `sw help` prints top-level usage and exits with `0`.
 - [x] `sw version` prints the same version/build identity as `sw --version`
       and exits with `0`.
-- [ ] `sw help <subcommand>` prints help for a known subcommand and exits with `0`.
-- [ ] `sw help run` documents the CLI flags for `run` and directs users to
+- [x] `sw help <subcommand>` prints help for a known subcommand and exits with `0`.
+- [x] `sw help run` documents the CLI flags for `run` and directs users to
       `sw example Command` and `sw explain run` for runbook-authored output
       fields such as `trim_empty_lines`, `stream`, and `cleanup`.
-- [ ] `sw help run` makes it clear that captured variables can be referenced
+- [x] `sw help run` makes it clear that captured variables can be referenced
       from Markdown using `@{name}` and escaped with `@@{name}`, while
       directing users to `sw explain run` for the wider interpolation
       contract.
-- [ ] `sw help run`, `sw help check`, and `sw help validate` document
+- [x] `sw help run`, `sw help check`, and `sw help validate` document
       `--input-file=-` for stdin-backed runbook input and `--input-format` for
       explicit YAML stdin input.
-- [ ] `sw help run`, `sw help check`, and `sw help validate` make it clear
+- [x] `sw help run`, `sw help check`, and `sw help validate` make it clear
       that stdin defaults to JSON while file-based authoring elsewhere in the
       CLI defaults to YAML.
-- [ ] `sw help example` makes it clear that `sw example DisplayFile` includes
+- [x] `sw help example` makes it clear that `sw example DisplayFile` includes
       the Java `collapse_method_body` transform for collapsing method bodies.
-- [ ] `sw help example`, `sw help init`, and `sw help import` make it clear
+- [x] `sw help example`, `sw help init`, and `sw help import` make it clear
       that file-based snippet and starter-runbook workflows default to YAML.
-- [ ] `sw help <subcommand>` with an unknown subcommand exits with `1` and reports a clear error.
-- [ ] `sw help --all` prints top-level help plus help for each known subcommand and exits with `0`.
+- [x] `sw help <subcommand>` with an unknown subcommand exits with `1` and reports a clear error.
+- [x] `sw help --all` prints top-level help plus help for each known subcommand and exits with `0`.
 - [x] `sw [command] --help` is documented as the command-level help pattern.
 - [x] Help output includes a short in-progress placeholder line.
 - [x] The version output contains the package version from `Cargo.toml`.

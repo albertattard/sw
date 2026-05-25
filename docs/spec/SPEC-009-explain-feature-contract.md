@@ -170,9 +170,9 @@ and the fact that later entries are not processed after the breakpoint.
 When a topic covers command capture behavior, the explanation should document
 the `capture` rule shape enough for agents to author a valid rule without
 guessing enum names. In particular, `run` should explain that `capture.source`
-is currently `stdout`, `capture.stage` is either `raw` or `rewritten`, `raw`
-captures before `output.rewrite`, `rewritten` captures after `output.rewrite`,
-and the first regex capture group is stored when present.
+is either `stdout` or `stderr`, `capture.stage` is either `raw` or `rewritten`,
+`raw` captures before `output.rewrite`, `rewritten` captures after
+`output.rewrite`, and the first regex capture group is stored when present.
 
 When a topic covers runbook output stream selection, the explanation should
 describe `output.stream`, its supported values, and the boundary between
@@ -214,83 +214,83 @@ When `--output-format=skill` is selected:
 
 ## Acceptance Criteria
 
-- [ ] Given `sw explain run`, the CLI prints a concise explanation of the run
+- [x] Given `sw explain run`, the CLI prints a concise explanation of the run
       contract derived from `SPEC-003`.
-- [ ] Given `sw explain run`, the CLI tells agents to prefer
+- [x] Given `sw explain run`, the CLI tells agents to prefer
       `datetime_shift` over `replace` for semantic dates and times, using
       `replace` only for non-semantic text or unsupported formats.
-- [ ] Given `sw explain run`, the CLI documents that `datetime_shift.id`
+- [x] Given `sw explain run`, the CLI documents that `datetime_shift.id`
       establishes a shared shift anchor and `datetime_shift.use` reuses an
       earlier anchor.
-- [ ] Given `sw explain run`, the CLI documents rewrite `capture_as` generated
+- [x] Given `sw explain run`, the CLI documents rewrite `capture_as` generated
       variables and makes it clear that this reuses rewritten values rather
       than a shared timeline.
-- [ ] Given `sw explain run`, the CLI documents `output.trim_empty_lines` and
+- [x] Given `sw explain run`, the CLI documents `output.trim_empty_lines` and
       its supported values for trimming leading and trailing empty output
       lines.
-- [ ] Given `sw explain run`, the CLI documents `cleanup` as a `Command`
+- [x] Given `sw explain run`, the CLI documents `cleanup` as a `Command`
       field for manual teardown and makes it clear that explicit `cleanup`
       replaces automatic process cleanup for that entry.
-- [ ] Given `sw explain run`, the CLI documents entry-scoped `debug: true` for
+- [x] Given `sw explain run`, the CLI documents entry-scoped `debug: true` for
       supported entries such as `Command` and `Patch`, and explains the
       boundary between that setting and global `--debug`.
-- [ ] Given `sw explain run`, the CLI documents Markdown interpolation with
+- [x] Given `sw explain run`, the CLI documents Markdown interpolation with
       `@{name}` and the `@@{name}` escape syntax for captured variables.
-- [ ] Given `sw explain run`, the CLI makes it clear that Markdown entries may
+- [x] Given `sw explain run`, the CLI makes it clear that Markdown entries may
       interpolate values captured earlier or later in the runbook.
-- [ ] Given `sw explain run`, the CLI makes it clear that `output.caption` may
+- [x] Given `sw explain run`, the CLI makes it clear that `output.caption` may
       interpolate captures produced by the same `Command` entry.
-- [ ] Given `sw explain run`, the CLI documents the supported `capture.stage`
+- [x] Given `sw explain run`, the CLI documents the supported `capture.stage`
       values `raw` and `rewritten`.
-- [ ] Given `sw explain run`, the CLI documents that `capture.source` is
-      currently limited to `stdout`.
-- [ ] Given `sw explain run`, the CLI documents that capture stores the first
+- [x] Given `sw explain run`, the CLI documents the supported `capture.source`
+      values `stdout` and `stderr`.
+- [x] Given `sw explain run`, the CLI documents that capture stores the first
       regex capture group when present, otherwise the full regex match.
-- [ ] Given `sw explain run`, the CLI documents `output.stream` and its
+- [x] Given `sw explain run`, the CLI documents `output.stream` and its
       supported values `stdout`, `stderr`, and `combined`.
-- [ ] Given `sw explain run`, the CLI documents that omitted `output.stream`
+- [x] Given `sw explain run`, the CLI documents that omitted `output.stream`
       defaults to `combined`.
-- [ ] Given `sw explain run`, the CLI makes it clear that `output.stream`
+- [x] Given `sw explain run`, the CLI makes it clear that `output.stream`
       changes rendered output only and does not broaden `capture.source` or
       assertion-check sources beyond their current contracts.
-- [ ] Given `sw explain validate`, the CLI prints a concise explanation of the
+- [x] Given `sw explain validate`, the CLI prints a concise explanation of the
       validate contract derived from `SPEC-002`.
-- [ ] Given `sw explain validate`, the CLI documents `--input-file=-` for
+- [x] Given `sw explain validate`, the CLI documents `--input-file=-` for
       stdin input, JSON as the default stdin format, and `--input-format=yaml`
       for YAML stdin input.
-- [ ] Given `sw explain --all`, the CLI prints explanations for all supported
+- [x] Given `sw explain --all`, the CLI prints explanations for all supported
       topics.
-- [ ] Given an agent-oriented user question such as "how do I check for Java
+- [x] Given an agent-oriented user question such as "how do I check for Java
       21?", the documented `explain` contract makes it clear that `explain` is
       the correct discovery command rather than `help`.
-- [ ] Given an agent-oriented user question about configuration shape, the
+- [x] Given an agent-oriented user question about configuration shape, the
       documented `explain` contract makes it clear when the next step should be
       `sw example <topic>`.
-- [ ] Given `sw explain example`, the CLI makes it clear that the `Command`
+- [x] Given `sw explain example`, the CLI makes it clear that the `Command`
       example includes current nested fields such as `trim_empty_lines`,
       `stream`, `cleanup`, and `debug`.
-- [ ] Given `sw explain example`, the CLI makes it clear that the `DisplayFile`
+- [x] Given `sw explain example`, the CLI makes it clear that the `DisplayFile`
       example includes the Java `collapse_method_body` transform for
       collapsing method bodies.
-- [ ] Given `sw explain run` or `sw explain check`, the CLI documents
+- [x] Given `sw explain run` or `sw explain check`, the CLI documents
       `--input-file=-` for stdin input, JSON as the default stdin format, and
       `--input-format=yaml` for YAML stdin input.
-- [ ] Given `sw explain run`, `sw explain check`, or `sw explain validate`,
+- [x] Given `sw explain run`, `sw explain check`, or `sw explain validate`,
       the CLI makes it clear that `--input-format=json|yaml` without
       `--input-file=-` keeps the existing file-backed default behavior.
-- [ ] Given an agent choosing among `help`, `example`, and `explain`, the
+- [x] Given an agent choosing among `help`, `example`, and `explain`, the
       documented `explain` contract provides enough context to choose
       reliably.
-- [ ] Given `sw explain RUN`, the CLI behaves the same as `sw explain run`.
-- [ ] Given `sw explain unknown`, the CLI exits with `1` and prints a clear
+- [x] Given `sw explain RUN`, the CLI behaves the same as `sw explain run`.
+- [x] Given `sw explain unknown`, the CLI exits with `1` and prints a clear
       error.
-- [ ] Given `sw explain` without a topic and without `--all`, the CLI exits
+- [x] Given `sw explain` without a topic and without `--all`, the CLI exits
       with `1` and prints a clear usage error.
-- [ ] Given `sw explain --output-format=skill`, the CLI exits with `0` and
+- [x] Given `sw explain --output-format=skill`, the CLI exits with `0` and
       prints a deterministic `SKILL.md`-compatible document to stdout.
-- [ ] Given `sw explain --output-format=skill`, the generated document starts
+- [x] Given `sw explain --output-format=skill`, the generated document starts
       with YAML frontmatter delimited by `---`.
-- [ ] Given `sw explain --output-format=skill`, the generated YAML frontmatter
+- [x] Given `sw explain --output-format=skill`, the generated YAML frontmatter
       includes `name: sw` and a non-empty `description`.
 - [ ] Given `sw explain --output-format=skill --output-file`, the CLI exits
       with `0` and writes the skill document to the default Codex skill
@@ -306,15 +306,15 @@ When `--output-format=skill` is selected:
 - [ ] Given `sw explain --output-format=skill --output-file --force` or
       `sw explain --output-format=skill --output-file=<path> --force`, the CLI
       overwrites the target file and exits with `0`.
-- [ ] Given `sw explain --output-format=skill`, the generated skill content is
+- [x] Given `sw explain --output-format=skill`, the generated skill content is
       compact and routes agents to `sw explain --all` for the current
       authoritative command contract instead of embedding the full command map.
-- [ ] Given `sw explain --output-format=skill`, the generated skill content
+- [x] Given `sw explain --output-format=skill`, the generated skill content
       gives agents a concise operating guide with common workflows, authoring
       defaults, and validation/discovery rules.
-- [ ] Help output documents `--output-format=<format>`,
+- [x] Help output documents `--output-format=<format>`,
       `--output-file[=<path>]`, and `--force` for `explain`.
-- [ ] Help output documents the `explain` command and the `--all` option.
+- [x] Help output documents the `explain` command and the `--all` option.
 
 ## Edge Cases
 

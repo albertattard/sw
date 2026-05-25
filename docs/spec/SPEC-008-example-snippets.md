@@ -97,53 +97,53 @@ In this increment, supported entity types include:
 
 ## Acceptance Criteria
 
-- [ ] Given `sw example Command`, the CLI prints a valid YAML example of a
+- [x] Given `sw example Command`, the CLI prints a valid YAML example of a
       `Command` entry with its commonly used nested properties.
-- [ ] Given `sw example Command`, the example includes the implemented
+- [x] Given `sw example Command`, the example includes the implemented
       `trim_empty_lines` output field.
-- [ ] Given `sw example Command`, the example includes the implemented
+- [x] Given `sw example Command`, the example includes the implemented
       `stream` output field.
-- [ ] Given `sw example Command`, the example includes the implemented
+- [x] Given `sw example Command`, the example includes the implemented
       `debug` field for command-scoped diagnostics.
-- [ ] Given `sw example Command`, the example includes `capture_as` on an
+- [x] Given `sw example Command`, the example includes `capture_as` on an
       output rewrite rule so users and agents can discover
       `@{<capture_as>_original}` and `@{<capture_as>_rewritten}` variables.
-- [ ] Given `sw example DisplayFile`, the CLI prints a valid YAML example of a
+- [x] Given `sw example DisplayFile`, the CLI prints a valid YAML example of a
       `DisplayFile` entry.
-- [ ] Given `sw example DisplayFile`, the example includes the implemented
+- [x] Given `sw example DisplayFile`, the example includes the implemented
       `indent` field for whole-block indentation.
-- [ ] Given `sw example DisplayFile`, the example includes the implemented
+- [x] Given `sw example DisplayFile`, the example includes the implemented
       `content_type` field for explicit fenced-code labels.
-- [ ] Given `sw example DisplayFile`, the example includes the implemented
+- [x] Given `sw example DisplayFile`, the example includes the implemented
       Java `collapse_method_body` transform shape.
-- [ ] Given `sw example Patch`, the CLI prints a valid YAML example of a
+- [x] Given `sw example Patch`, the CLI prints a valid YAML example of a
       `Patch` entry that reflects the current automatic-restore contract.
-- [ ] Given `sw example Patch`, the YAML example uses `patch: |` for the patch
+- [x] Given `sw example Patch`, the YAML example uses `patch: |` for the patch
       text.
-- [ ] Given `sw example Patch`, the example includes the implemented `debug`
+- [x] Given `sw example Patch`, the example includes the implemented `debug`
       field for patch-scoped diagnostics.
-- [ ] Given `sw example Prerequisite`, the CLI prints a valid YAML example of a
+- [x] Given `sw example Prerequisite`, the CLI prints a valid YAML example of a
       `Prerequisite` entry.
-- [ ] Given `sw example Prerequisite`, the example uses the built-in
+- [x] Given `sw example Prerequisite`, the example uses the built-in
       `kind: java` check instead of a command-based Java version probe.
-- [ ] Given `sw example Prerequisite`, the example declares a Java version
+- [x] Given `sw example Prerequisite`, the example declares a Java version
       rule and does not imply vendor verification that the built-in check does
       not perform.
-- [ ] Given `sw example Breakpoint`, the CLI prints a valid YAML example of a
+- [x] Given `sw example Breakpoint`, the CLI prints a valid YAML example of a
       `Breakpoint` entry.
-- [ ] Given `sw example Breakpoint --output-format json`, the CLI prints a
+- [x] Given `sw example Breakpoint --output-format json`, the CLI prints a
       valid JSON example of a `Breakpoint` entry.
-- [ ] Given `sw example Command --output-format yaml`, the CLI prints the same
+- [x] Given `sw example Command --output-format yaml`, the CLI prints the same
       YAML shape as the default mode.
-- [ ] Given `sw example Command --output-format json`, the CLI prints a valid
+- [x] Given `sw example Command --output-format json`, the CLI prints a valid
       JSON example of a `Command` entry.
-- [ ] Given `sw example command`, the CLI behaves the same as
+- [x] Given `sw example command`, the CLI behaves the same as
       `sw example Command`.
-- [ ] Given an unsupported entity type, the CLI exits with `1` and reports
+- [x] Given an unsupported entity type, the CLI exits with `1` and reports
       that the entity type is unknown.
-- [ ] Given an unsupported output format, the CLI exits with `1` and reports
+- [x] Given an unsupported output format, the CLI exits with `1` and reports
       that the format is unknown.
-- [ ] The help output documents the `example` command and how to request an
+- [x] The help output documents the `example` command and how to request an
       entity type and output format.
 
 ## Non-goals
