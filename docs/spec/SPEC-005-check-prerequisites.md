@@ -1,7 +1,7 @@
 ---
 id: SPEC-005
 title: Check Runbook Prerequisites
-status: proposed
+status: implemented
 priority: medium
 owner: @aattard
 last_updated: 2026-04-15

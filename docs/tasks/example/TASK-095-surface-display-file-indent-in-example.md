@@ -1,7 +1,7 @@
 ---
 id: TASK-095
 title: Surface DisplayFile Indent In Example Output
-status: completed
+status: done
 category: example
 related_features:
   - SPEC-008

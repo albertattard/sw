@@ -7,7 +7,7 @@ related_features:
   - SPEC-003
 owner: @aattard
 created: 2026-04-23
-updated: 2026-04-23
+updated: 2026-05-25
 ---
 
 ## Summary
@@ -60,6 +60,8 @@ default parsing behavior depend on the host locale.
       the rendered Markdown includes the computed numeric result.
 - [ ] Given Markdown arithmetic expressions, supported operators include `+`,
       `-`, `*`, `/`, and parentheses.
+- [ ] Given Markdown arithmetic expressions, computed results render as
+      canonical numeric output without locale-specific grouping separators.
 - [ ] Given a Markdown arithmetic expression that references a variable
       without a parsed numeric value, the run fails clearly.
 - [ ] Given a numeric parse rule whose matched text does not conform to the

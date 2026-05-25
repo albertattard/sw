@@ -1,9 +1,11 @@
-# SPEC-006: Import README to Runbook
-
-- Status: Implemented
-- Owner: `@aattard`
-- Created: `2026-03-13`
-- Updated: `2026-04-16`
+---
+id: SPEC-006
+title: Import README to Runbook
+status: implemented
+priority: high
+owner: @aattard
+last_updated: 2026-04-16
+---
 
 ## Goal
 

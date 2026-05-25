@@ -71,6 +71,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-159: Include Failing Command Entry in Assertion Errors](run/TASK-159-include-failing-command-entry-in-assertion-errors.md)
 - [x] [TASK-157: Support Java EPP Prerequisites](prerequisite/TASK-157-support-java-epp-prerequisites.md)
 - [x] [TASK-156: Support Markdown Command Output Content Type](run/TASK-156-support-markdown-command-output-content-type.md)
 - [x] [TASK-155: Support DisplayFile Content Type](display-file/TASK-155-support-display-file-content-type.md)
@@ -166,7 +167,6 @@ Expected task directories:
 - [x] [TASK-041: Make Example Topics Case-Insensitive And Richer](example/TASK-041-make-example-topics-case-insensitive-and-richer.md)
 - [x] [TASK-042: Support Time-Only Datetime Shift](rewrite/TASK-042-support-time-only-datetime-shift.md)
 - [x] [TASK-043: Implement Explain Command](explain/TASK-043-implement-explain-command.md)
-- [x] [TASK-043: Include Failing Command Entry in Assertion Errors](run/TASK-043-include-failing-command-entry-in-assertion-errors.md)
 - [x] [TASK-044: Include Command Output In Assertion Errors](run/TASK-044-include-command-output-in-assertion-errors.md)
 - [x] [TASK-045: Support DisplayFile Indent Control](display-file/TASK-045-support-display-file-indent-control.md)
 - [x] [TASK-046: Support File Assertion Checks](run/TASK-046-support-file-assertion-checks.md)

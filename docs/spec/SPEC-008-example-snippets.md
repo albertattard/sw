@@ -1,9 +1,11 @@
-# SPEC-008: Example Snippets Contract
-
-- Status: Draft
-- Owner: `@aattard`
-- Created: `2026-03-13`
-- Updated: `2026-04-25`
+---
+id: SPEC-008
+title: Example Snippets Contract
+status: implemented
+priority: high
+owner: @aattard
+last_updated: 2026-04-25
+---
 
 ## Goal
 

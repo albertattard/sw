@@ -1,7 +1,7 @@
 ---
 id: TASK-096
 title: Trim Scalar Output Caption Terminator Blank Lines
-status: completed
+status: done
 category: run
 related_features:
   - SPEC-003

@@ -1,7 +1,7 @@
 ---
 id: TASK-094
 title: Accept Scalar Prose Contents
-status: completed
+status: done
 category: validate
 related_features:
   - SPEC-002

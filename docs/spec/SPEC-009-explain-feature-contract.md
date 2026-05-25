@@ -1,9 +1,11 @@
-# SPEC-009: Explain Feature Contract
-
-- Status: Proposed
-- Owner: @aattard
-- Created: 2026-03-13
-- Last updated: 2026-04-25
+---
+id: SPEC-009
+title: Explain Feature Contract
+status: implemented
+priority: high
+owner: @aattard
+last_updated: 2026-04-25
+---
 
 ## Problem
 

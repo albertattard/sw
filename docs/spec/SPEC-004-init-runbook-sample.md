@@ -1,9 +1,11 @@
-# SPEC-004: Init Runbook Sample
-
-- Status: Draft
-- Owner: `@aattard`
-- Created: `2026-03-12`
-- Updated: `2026-04-26`
+---
+id: SPEC-004
+title: Init Runbook Sample
+status: implemented
+priority: high
+owner: @aattard
+last_updated: 2026-04-26
+---
 
 ## Goal
 
