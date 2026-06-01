@@ -318,6 +318,52 @@ in the runbook.
 - In this increment, supported `DisplayFile.content_type` values are `text`,
   `json`, `xml`, `html`, `java`, and `markdown`.
 
+### DisplayUrl Entries
+
+- `DisplayUrl` entries fetch the contents of an absolute URL and copy the
+  response body into the generated Markdown as a fenced code block.
+- `DisplayUrl.url` is required.
+- `DisplayUrl` supports `http` and `https` URLs.
+- `DisplayUrl` may declare `timeout`.
+- If `timeout` is omitted, rendering uses `10 seconds`.
+- `DisplayUrl` may declare `start_line`.
+- `DisplayUrl` may declare `line_count`.
+- `DisplayUrl` may declare `indent`.
+- `DisplayUrl` may declare `offset`.
+- `DisplayUrl` may declare `content_type`.
+- `start_line` is 1-based.
+- If `start_line` is omitted, rendering starts from line 1.
+- If `start_line` is present and `line_count` is omitted, rendering continues
+  from `start_line` to the end of the fetched response body.
+- If `line_count` is present, only that many lines are rendered starting from
+  `start_line`.
+- If `indent` is present, it is a non-negative integer.
+- `indent` applies to the whole rendered fenced block, including the opening
+  fence, inner content lines, and closing fence.
+- If `offset` is present, it is an integer.
+- `offset` applies only to copied response body lines inside the fenced block.
+- If `offset` is positive, each non-empty copied response body line is
+  prefixed with that many spaces.
+- If `offset` is negative, up to that many leading spaces are removed from
+  each non-empty copied response body line.
+- Empty copied response body lines are preserved when `offset` is applied.
+- `line_count` without `start_line` is invalid.
+- `DisplayUrl` rendering performs an HTTP GET and does not execute the fetched
+  content.
+- Rendering follows redirects supported by the HTTP client.
+- Rendering fails with a clear operational error when the URL cannot be
+  fetched successfully.
+- If `DisplayUrl.content_type` is present, the generated Markdown fenced block
+  uses that value as its language label.
+- If `DisplayUrl.content_type` is omitted, fenced blocks use a detected
+  content type when the URL path extension is recognized.
+- Recognized `DisplayUrl` path extensions match `DisplayFile`: `.java`,
+  `.md`, `.markdown`, `.sql`, and `.xml`.
+- If the `DisplayUrl` extension is not recognized, the generated Markdown uses
+  a `text` fenced block.
+- Supported `DisplayUrl.content_type` values match `DisplayFile`: `text`,
+  `json`, `xml`, `html`, `java`, and `markdown`.
+
 ### Prerequisite Entries
 
 - `Prerequisite` entries render prerequisite documentation and verify the
@@ -968,6 +1014,24 @@ in the runbook.
       inside the fenced block.
 - [x] Given a `DisplayFile` entry with blank lines and `offset`, blank copied
       file content lines remain blank in the rendered output.
+
+### DisplayUrl Entries
+
+- [x] Given a runbook with `DisplayUrl` entries, the generated Markdown
+      includes the fetched URL contents in a fenced block.
+- [x] Given a `DisplayUrl` entry with `content_type`, the generated Markdown
+      uses that fenced block language instead of the URL extension.
+- [x] Given a `DisplayUrl` entry without `content_type`, the generated
+      Markdown uses URL path extension-based fence detection.
+- [x] Given a `DisplayUrl` entry with `start_line` and `line_count`, only the
+      requested response body slice is rendered.
+- [x] Given a `DisplayUrl` entry with `indent`, the opening fence, copied
+      content lines, and closing fence are all prefixed with that many spaces.
+- [x] Given a `DisplayUrl` entry with an unsupported URL scheme, validation
+      fails.
+- [x] Given a `DisplayUrl` entry without `url`, validation fails.
+- [x] Given a `DisplayUrl` entry whose URL fetch fails, rendering fails with a
+      clear operational error.
 
 ### Prerequisite Entries
 

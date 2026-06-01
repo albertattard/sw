@@ -59,6 +59,10 @@ fn example_for_topic(topic: &str) -> Option<ExampleSnippet> {
             json: DISPLAY_FILE_EXAMPLE_JSON,
             yaml: DISPLAY_FILE_EXAMPLE_YAML,
         }),
+        "displayurl" => Some(ExampleSnippet {
+            json: DISPLAY_URL_EXAMPLE_JSON,
+            yaml: DISPLAY_URL_EXAMPLE_YAML,
+        }),
         "patch" => Some(ExampleSnippet {
             json: PATCH_EXAMPLE_JSON,
             yaml: PATCH_EXAMPLE_YAML,
@@ -225,6 +229,24 @@ transform:
   operations:
     - type: collapse_method_body
       name: initialize"#;
+
+const DISPLAY_URL_EXAMPLE_JSON: &str = r#"{
+  "type": "DisplayUrl",
+  "url": "https://raw.githubusercontent.com/albertattard/sw/refs/heads/main/docs/guides/entities.md",
+  "content_type": "markdown",
+  "timeout": "10 seconds",
+  "start_line": 1,
+  "line_count": 40,
+  "indent": 3
+}"#;
+
+const DISPLAY_URL_EXAMPLE_YAML: &str = r#"type: DisplayUrl
+url: https://raw.githubusercontent.com/albertattard/sw/refs/heads/main/docs/guides/entities.md
+content_type: markdown
+timeout: 10 seconds
+start_line: 1
+line_count: 40
+indent: 3"#;
 
 const PATCH_EXAMPLE_JSON: &str = r#"{
   "type": "Patch",

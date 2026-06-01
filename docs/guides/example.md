@@ -23,6 +23,12 @@ Print a display-file entry example:
 sw example DisplayFile
 ```
 
+Print a display-url entry example:
+
+```shell
+sw example DisplayUrl
+```
+
 Print a breakpoint entry example:
 
 ```shell
@@ -38,7 +44,7 @@ sw example Command --output-format json
 ## Notes
 
 - Supported topics currently include `Breakpoint`, `Command`, `DisplayFile`,
-  `Patch`, and `Prerequisite`.
+  `DisplayUrl`, `Patch`, and `Prerequisite`.
 - Topic matching is case-insensitive.
 - Example output is a starting point and may need editing before use.
 - Use `sw explain <topic>` for behavior and defaults, not `sw example`.

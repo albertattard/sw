@@ -153,7 +153,7 @@ fn explain_run_prints_concise_contract_summary() {
         "When those fields are provided as a string, `sw run` splits them on newline boundaries before rendering or execution and does not turn a terminal line break into an extra blank line."
     ));
     assert!(stdout.contains(
-        "`Markdown`, `DisplayFile`, `Patch`, and `Command` entries may declare `indent` to prefix each non-empty rendered line and keep nested Markdown structures readable."
+        "`Markdown`, `DisplayFile`, `DisplayUrl`, `Patch`, and `Command` entries may declare `indent` to prefix each non-empty rendered line and keep nested Markdown structures readable."
     ));
     assert!(stdout.contains(
         "`Command.working_directory` runs one command entry from a directory relative to the execution root; legacy `working_dir` remains accepted but new runbooks should use `working_directory`."
@@ -162,7 +162,10 @@ fn explain_run_prints_concise_contract_summary() {
         "A command entry that declares both `working_directory` and `working_dir` is invalid."
     ));
     assert!(stdout.contains(
-        "`DisplayFile.content_type` overrides fence detection; otherwise `.java`, `.md`, `.markdown`, `.sql`, and `.xml` are detected, with other extensions falling back to `text`."
+        "`DisplayFile.content_type` and `DisplayUrl.content_type` override fence detection; otherwise `.java`, `.md`, `.markdown`, `.sql`, and `.xml` are detected, with other extensions falling back to `text`."
+    ));
+    assert!(stdout.contains(
+        "`DisplayUrl` fetches remote content with a default `10 seconds` timeout unless the runbook sets `timeout`."
     ));
     assert!(stdout.contains(
         "Use `sw check` first if the question is whether prerequisites such as Java are available."
@@ -406,8 +409,15 @@ fn explain_example_mentions_command_fields_in_example() {
         "The `DisplayFile` example includes the Java `collapse_method_body` transform for collapsing method bodies."
     ));
     assert!(stdout.contains(
+        "The `DisplayUrl` example shows a raw remote Markdown URL with timeout and line slicing."
+    ));
+    assert!(stdout.contains(
         "Use `sw example DisplayFile` when you need the Java `collapse_method_body` transform shape."
     ));
+    assert!(
+        stdout
+            .contains("Use `sw example DisplayUrl` when you need to render a remote raw text URL.")
+    );
     assert!(
         stdout.contains("Use this when the question is \"what runbook snippet should I write?\"")
     );
@@ -455,7 +465,7 @@ fn explain_skill_prints_skill_document_to_stdout() {
     assert!(stdout.contains("sw explain --all"));
     assert!(stdout.contains("## Common Workflows"));
     assert!(stdout.contains(
-        "entries such as `Breakpoint`, `Command`, `DisplayFile`, `Patch`, or `Prerequisite`"
+        "entries such as `Breakpoint`, `Command`, `DisplayFile`, `DisplayUrl`, `Patch`, or `Prerequisite`"
     ));
     assert!(stdout.contains("Use `sw validate --input-file <runbook>` after editing a runbook."));
     assert!(stdout.contains(

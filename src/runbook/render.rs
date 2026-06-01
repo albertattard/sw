@@ -128,6 +128,7 @@ pub(crate) fn render_markdown(
                 lines: markdown_lines(entry)?,
             },
             "DisplayFile" => RenderSection::Ready(render_display_file(entry, execution_root)?),
+            "DisplayUrl" => RenderSection::Ready(render_display_url(entry)?),
             "Prerequisite" => RenderSection::Ready(render_prerequisite_entry(entry)?),
             "Breakpoint" => {
                 breakpoint_reached = true;
@@ -486,6 +487,7 @@ fn entry_summary(entry: &Value, execution_root: &Path) -> String {
         "Command" => first_non_empty_string_line(entry.get("commands"))
             .unwrap_or_else(|| "Command".to_string()),
         "DisplayFile" => display_file_summary(entry, execution_root),
+        "DisplayUrl" => display_url_summary(entry),
         "Prerequisite" => prerequisite_summary(entry),
         "Breakpoint" => breakpoint_summary(entry),
         "Patch" => patch_summary(entry, execution_root),
@@ -538,6 +540,23 @@ fn display_file_summary(entry: &Value, execution_root: &Path) -> String {
         }
         (Some(start), None) => format!("{} (from line {start})", display_path.display()),
         (None, _) => display_path.display().to_string(),
+    }
+}
+
+fn display_url_summary(entry: &Value) -> String {
+    let url = entry
+        .get("url")
+        .and_then(Value::as_str)
+        .unwrap_or("<missing url>");
+    let start_line = entry.get("start_line").and_then(Value::as_u64);
+    let line_count = entry.get("line_count").and_then(Value::as_u64);
+
+    match (start_line, line_count) {
+        (Some(start), Some(count)) => {
+            format!("{url} (lines {start}-{})", start + count.saturating_sub(1))
+        }
+        (Some(start), None) => format!("{url} (from line {start})"),
+        (None, _) => url.to_string(),
     }
 }
 
@@ -778,13 +797,109 @@ fn render_display_file(entry: &Value, execution_root: &Path) -> Result<String, R
         .and_then(Value::as_u64)
         .map(|value| value as usize);
     let contents = slice_display_file_contents(&contents, start_line, line_count, &display_path)?;
-    let contents = apply_display_file_offset(entry, contents)?;
+    let contents = apply_display_offset(entry, contents, "DisplayFile")?;
 
     let section = fenced_block(
         Some(display_file_fence_language(entry, &display_path)?),
         &contents,
     );
-    apply_display_file_indent(entry, section)
+    apply_display_indent(entry, section, "DisplayFile")
+}
+
+fn render_display_url(entry: &Value) -> Result<String, RenderError> {
+    let url = entry
+        .get("url")
+        .and_then(Value::as_str)
+        .ok_or_else(|| RenderError::Operational("DisplayUrl entry is missing url".to_string()))?;
+    let parsed_url = reqwest::Url::parse(url)
+        .map_err(|_| RenderError::Operational(format!("DisplayUrl url `{url}` is invalid")))?;
+
+    if !matches!(parsed_url.scheme(), "http" | "https") {
+        return Err(RenderError::Operational(format!(
+            "DisplayUrl url `{url}` must use http or https"
+        )));
+    }
+
+    let contents = fetch_display_url(entry, url)?;
+    let start_line = entry
+        .get("start_line")
+        .and_then(Value::as_u64)
+        .map(|value| value as usize)
+        .unwrap_or(1);
+    let line_count = entry
+        .get("line_count")
+        .and_then(Value::as_u64)
+        .map(|value| value as usize);
+    let contents = slice_display_contents("DisplayUrl", &contents, start_line, line_count, url)?;
+    let contents = apply_display_offset(entry, contents, "DisplayUrl")?;
+
+    let url_path = Path::new(parsed_url.path());
+    let section = fenced_block(
+        Some(display_fence_language(entry, url_path, "DisplayUrl")?),
+        &contents,
+    );
+    apply_display_indent(entry, section, "DisplayUrl")
+}
+
+fn fetch_display_url(entry: &Value, url: &str) -> Result<String, RenderError> {
+    let timeout = display_url_timeout(entry)?;
+    let client = reqwest::blocking::Client::builder()
+        .timeout(timeout)
+        .build()
+        .map_err(|err| {
+            RenderError::Operational(format!("Failed to prepare DisplayUrl client: {err}"))
+        })?;
+    let response = client.get(url).send().map_err(|err| {
+        RenderError::Operational(format!("Failed to fetch DisplayUrl `{url}`: {err}"))
+    })?;
+    let status = response.status();
+    if !status.is_success() {
+        return Err(RenderError::Operational(format!(
+            "Failed to fetch DisplayUrl `{url}`: HTTP {status}"
+        )));
+    }
+
+    response.text().map_err(|err| {
+        RenderError::Operational(format!(
+            "Failed to read DisplayUrl `{url}` response body: {err}"
+        ))
+    })
+}
+
+fn display_url_timeout(entry: &Value) -> Result<StdDuration, RenderError> {
+    let Some(timeout) = entry.get("timeout") else {
+        return Ok(StdDuration::from_secs(10));
+    };
+    let timeout = timeout.as_str().ok_or_else(|| {
+        RenderError::Operational("DisplayUrl timeout must be a string".to_string())
+    })?;
+    parse_display_url_timeout(timeout).map_err(RenderError::Operational)
+}
+
+fn parse_display_url_timeout(timeout: &str) -> Result<StdDuration, String> {
+    let parts: Vec<_> = timeout.split_whitespace().collect();
+    if parts.len() != 2 {
+        return Err("DisplayUrl timeout must be a number followed by a unit".to_string());
+    }
+
+    let value: u64 = parts[0]
+        .parse()
+        .map_err(|_| "DisplayUrl timeout must start with a whole number".to_string())?;
+
+    let seconds = match parts[1].to_ascii_lowercase().as_str() {
+        "second" | "seconds" | "sec" | "secs" | "s" => value,
+        "minute" | "minutes" | "min" | "mins" | "m" => value
+            .checked_mul(60)
+            .ok_or_else(|| "DisplayUrl timeout is too large".to_string())?,
+        _ => {
+            return Err(
+                "DisplayUrl timeout unit must be seconds or minutes (or a common abbreviation)"
+                    .to_string(),
+            );
+        }
+    };
+
+    Ok(StdDuration::from_secs(seconds))
 }
 
 fn apply_display_file_transform(
@@ -1091,20 +1206,24 @@ fn skip_quoted_literal(bytes: &[u8], mut index: usize, quote: u8) -> usize {
     bytes.len().saturating_sub(1)
 }
 
-fn apply_display_file_indent(entry: &Value, contents: String) -> Result<String, RenderError> {
+fn apply_display_indent(
+    entry: &Value,
+    contents: String,
+    entry_name: &str,
+) -> Result<String, RenderError> {
     let Some(indent) = entry.get("indent") else {
         return Ok(contents);
     };
 
     let indent_width = match (indent.as_u64(), indent.as_i64()) {
         (Some(width), _) => usize::try_from(width)
-            .map_err(|_| RenderError::Operational("DisplayFile indent is too large".to_string()))?,
+            .map_err(|_| RenderError::Operational(format!("{entry_name} indent is too large")))?,
         (None, Some(width)) if width >= 0 => usize::try_from(width)
-            .map_err(|_| RenderError::Operational("DisplayFile indent is too large".to_string()))?,
+            .map_err(|_| RenderError::Operational(format!("{entry_name} indent is too large")))?,
         _ => {
-            return Err(RenderError::Operational(
-                "DisplayFile indent must be a non-negative integer".to_string(),
-            ));
+            return Err(RenderError::Operational(format!(
+                "{entry_name} indent must be a non-negative integer"
+            )));
         }
     };
 
@@ -1132,7 +1251,11 @@ fn apply_display_file_indent(entry: &Value, contents: String) -> Result<String, 
     Ok(adjusted)
 }
 
-fn apply_display_file_offset(entry: &Value, contents: String) -> Result<String, RenderError> {
+fn apply_display_offset(
+    entry: &Value,
+    contents: String,
+    entry_name: &str,
+) -> Result<String, RenderError> {
     let Some(offset) = entry.get("offset") else {
         return Ok(contents);
     };
@@ -1140,11 +1263,11 @@ fn apply_display_file_offset(entry: &Value, contents: String) -> Result<String, 
     let offset_width = match (offset.as_i64(), offset.as_u64()) {
         (Some(width), _) => width,
         (None, Some(width)) => i64::try_from(width)
-            .map_err(|_| RenderError::Operational("DisplayFile offset is too large".to_string()))?,
+            .map_err(|_| RenderError::Operational(format!("{entry_name} offset is too large")))?,
         _ => {
-            return Err(RenderError::Operational(
-                "DisplayFile offset must be an integer".to_string(),
-            ));
+            return Err(RenderError::Operational(format!(
+                "{entry_name} offset must be an integer"
+            )));
         }
     };
 
@@ -1192,14 +1315,28 @@ fn slice_display_file_contents(
     line_count: Option<usize>,
     display_path: &Path,
 ) -> Result<String, RenderError> {
+    slice_display_contents(
+        "DisplayFile",
+        contents,
+        start_line,
+        line_count,
+        &display_path.display().to_string(),
+    )
+}
+
+fn slice_display_contents(
+    entry_name: &str,
+    contents: &str,
+    start_line: usize,
+    line_count: Option<usize>,
+    display_name: &str,
+) -> Result<String, RenderError> {
     let lines: Vec<&str> = contents.lines().collect();
     let start_index = start_line.saturating_sub(1);
 
     if start_index >= lines.len() && !lines.is_empty() {
         return Err(RenderError::Operational(format!(
-            "DisplayFile start_line {} is beyond the end of {}",
-            start_line,
-            display_path.display()
+            "{entry_name} start_line {start_line} is beyond the end of {display_name}"
         )));
     }
 
@@ -3241,6 +3378,14 @@ fn display_file_content_type(path: &Path) -> &'static str {
 }
 
 fn display_file_fence_language(entry: &Value, path: &Path) -> Result<&'static str, RenderError> {
+    display_fence_language(entry, path, "DisplayFile")
+}
+
+fn display_fence_language(
+    entry: &Value,
+    path: &Path,
+    entry_name: &str,
+) -> Result<&'static str, RenderError> {
     match entry.get("content_type").and_then(Value::as_str) {
         Some("text") => Ok("text"),
         Some("json") => Ok("json"),
@@ -3249,7 +3394,7 @@ fn display_file_fence_language(entry: &Value, path: &Path) -> Result<&'static st
         Some("java") => Ok("java"),
         Some("markdown") => Ok("markdown"),
         Some(other) => Err(RenderError::Operational(format!(
-            "Unsupported DisplayFile content type `{other}`"
+            "Unsupported {entry_name} content type `{other}`"
         ))),
         None => Ok(display_file_content_type(path)),
     }

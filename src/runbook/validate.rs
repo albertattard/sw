@@ -92,6 +92,117 @@ fn validate_positive_integer(
     }
 }
 
+fn validate_non_negative_integer(
+    object: &Map<String, Value>,
+    key: &str,
+    path: &str,
+    errors: &mut Vec<ValidationIssue>,
+) {
+    let Some(value) = object.get(key) else {
+        return;
+    };
+
+    match (value.as_u64(), value.as_i64()) {
+        (Some(_), _) => {}
+        (None, Some(value)) if value >= 0 => {}
+        _ => push_error(
+            errors,
+            format!("{path}.{key}"),
+            "must be a non-negative integer",
+        ),
+    }
+}
+
+fn validate_integer(
+    object: &Map<String, Value>,
+    key: &str,
+    path: &str,
+    errors: &mut Vec<ValidationIssue>,
+) {
+    if let Some(value) = object.get(key)
+        && !value.is_i64()
+        && !value.is_u64()
+    {
+        push_error(errors, format!("{path}.{key}"), "must be an integer");
+    }
+}
+
+fn validate_display_content_type(
+    object: &Map<String, Value>,
+    path: &str,
+    errors: &mut Vec<ValidationIssue>,
+) {
+    match object.get("content_type") {
+        Some(Value::String(content_type))
+            if matches!(
+                content_type.as_str(),
+                "text" | "json" | "xml" | "html" | "java" | "markdown"
+            ) => {}
+        Some(_) => push_error(
+            errors,
+            format!("{path}.content_type"),
+            "must be one of `text`, `json`, `xml`, `html`, `java`, or `markdown`",
+        ),
+        None => {}
+    }
+}
+
+fn validate_display_line_range(
+    object: &Map<String, Value>,
+    path: &str,
+    errors: &mut Vec<ValidationIssue>,
+) {
+    validate_positive_integer(object, "start_line", path, errors);
+    validate_positive_integer(object, "line_count", path, errors);
+
+    if object.get("line_count").is_some() && object.get("start_line").is_none() {
+        push_error(
+            errors,
+            format!("{path}.line_count"),
+            "requires `start_line`",
+        );
+    }
+}
+
+fn validate_display_layout_fields(
+    object: &Map<String, Value>,
+    path: &str,
+    errors: &mut Vec<ValidationIssue>,
+) {
+    validate_display_line_range(object, path, errors);
+    validate_non_negative_integer(object, "indent", path, errors);
+    validate_integer(object, "offset", path, errors);
+    validate_display_content_type(object, path, errors);
+}
+
+fn validate_display_url_value(
+    value: Option<&Value>,
+    path: &str,
+    errors: &mut Vec<ValidationIssue>,
+) {
+    let Some(value) = value else {
+        push_error(errors, path.to_string(), "must be a string");
+        return;
+    };
+
+    let Some(url) = value.as_str() else {
+        push_error(errors, path.to_string(), "must be a string");
+        return;
+    };
+
+    let parsed = match reqwest::Url::parse(url) {
+        Ok(parsed) => parsed,
+        Err(_) => {
+            push_error(errors, path.to_string(), "must be an absolute URL");
+            return;
+        }
+    };
+
+    if !matches!(parsed.scheme(), "http" | "https") {
+        push_error(errors, path.to_string(), "must use `http` or `https`");
+    }
+}
+
 fn validate_string_array(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>) {
     if let Some(items) = as_array(value, path, errors) {
         for (index, item) in items.iter().enumerate() {
@@ -1111,52 +1222,7 @@ fn validate_entry(
             }
 
             require_string(object, "path", &path, &mut context.errors);
-            validate_positive_integer(object, "start_line", &path, &mut context.errors);
-            validate_positive_integer(object, "line_count", &path, &mut context.errors);
-            if let Some(indent) = object.get("indent") {
-                match (indent.as_u64(), indent.as_i64()) {
-                    (Some(_), _) => {}
-                    (None, Some(value)) if value >= 0 => {}
-                    _ => push_error(
-                        &mut context.errors,
-                        format!("{path}.indent"),
-                        "must be a non-negative integer",
-                    ),
-                }
-            }
-
-            if let Some(offset) = object.get("offset")
-                && !offset.is_i64()
-                && !offset.is_u64()
-            {
-                push_error(
-                    &mut context.errors,
-                    format!("{path}.offset"),
-                    "must be an integer",
-                );
-            }
-
-            match object.get("content_type") {
-                Some(Value::String(content_type))
-                    if matches!(
-                        content_type.as_str(),
-                        "text" | "json" | "xml" | "html" | "java" | "markdown"
-                    ) => {}
-                Some(_) => push_error(
-                    &mut context.errors,
-                    format!("{path}.content_type"),
-                    "must be one of `text`, `json`, `xml`, `html`, `java`, or `markdown`",
-                ),
-                None => {}
-            }
-
-            if object.get("line_count").is_some() && object.get("start_line").is_none() {
-                push_error(
-                    &mut context.errors,
-                    format!("{path}.line_count"),
-                    "requires `start_line`",
-                );
-            }
+            validate_display_layout_fields(object, &path, &mut context.errors);
 
             if let Some(transform) = object.get("transform") {
                 validate_display_file_transform(
@@ -1172,6 +1238,36 @@ fn validate_entry(
                 &mut context.warnings,
                 execution_root,
             );
+        }
+        "DisplayUrl" => {
+            for key in object.keys() {
+                if key != "type"
+                    && key != "url"
+                    && key != "timeout"
+                    && key != "start_line"
+                    && key != "line_count"
+                    && key != "indent"
+                    && key != "offset"
+                    && key != "content_type"
+                {
+                    push_error(
+                        &mut context.errors,
+                        format!("{path}.{key}"),
+                        "is not a supported DisplayUrl property",
+                    );
+                }
+            }
+
+            validate_display_url_value(
+                object.get("url"),
+                &format!("{path}.url"),
+                &mut context.errors,
+            );
+            validate_display_layout_fields(object, &path, &mut context.errors);
+
+            if let Some(timeout) = object.get("timeout") {
+                validate_timeout(timeout, &format!("{path}.timeout"), &mut context.errors);
+            }
         }
         "Prerequisite" => match object.get("checks") {
             Some(checks) => {

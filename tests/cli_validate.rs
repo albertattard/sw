@@ -1521,6 +1521,73 @@ fn display_file_content_type_is_validated() {
 }
 
 #[test]
+fn display_url_fields_are_validated() {
+    let valid = run_in_dir_with_stdin(
+        &["validate", "--input-file=-", "--input-format", "yaml"],
+        &prepare_workspace(),
+        "entries:\n  - type: DisplayUrl\n    url: https://example.com/SKILL.md\n    timeout: 10 seconds\n    content_type: markdown\n    start_line: 1\n    line_count: 5\n    indent: 2\n    offset: -1\n",
+    );
+    assert!(valid.status.success());
+
+    let invalid_scheme = run_in_dir_with_stdin(
+        &[
+            "validate",
+            "--input-file=-",
+            "--input-format",
+            "yaml",
+            "--output-format",
+            "json",
+        ],
+        &prepare_workspace(),
+        "entries:\n  - type: DisplayUrl\n    url: file:///tmp/SKILL.md\n",
+    );
+    assert_eq!(invalid_scheme.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&invalid_scheme.stdout);
+    assert!(stdout.contains("\"path\": \"entries[0].url\""));
+    assert!(stdout.contains("must use `http` or `https`"));
+
+    let missing_url = run_in_dir_with_stdin(
+        &[
+            "validate",
+            "--input-file=-",
+            "--input-format",
+            "yaml",
+            "--output-format",
+            "json",
+        ],
+        &prepare_workspace(),
+        "entries:\n  - type: DisplayUrl\n    content_type: markdown\n",
+    );
+    assert_eq!(missing_url.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&missing_url.stdout);
+    assert!(stdout.contains("\"path\": \"entries[0].url\""));
+    assert!(stdout.contains("must be a string"));
+}
+
+#[test]
+fn display_url_rejects_unknown_properties_and_bad_line_ranges() {
+    let output = run_in_dir_with_stdin(
+        &[
+            "validate",
+            "--input-file=-",
+            "--input-format",
+            "yaml",
+            "--output-format",
+            "json",
+        ],
+        &prepare_workspace(),
+        "entries:\n  - type: DisplayUrl\n    url: https://example.com/SKILL.md\n    path: ./local.md\n    line_count: 3\n",
+    );
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"path\": \"entries[0].path\""));
+    assert!(stdout.contains("is not a supported DisplayUrl property"));
+    assert!(stdout.contains("\"path\": \"entries[0].line_count\""));
+    assert!(stdout.contains("requires `start_line`"));
+}
+
+#[test]
 fn negative_markdown_indent_returns_validation_failure() {
     let output = run(&[
         "validate",

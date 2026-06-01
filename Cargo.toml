@@ -14,6 +14,7 @@ regex = "1.12"
 chrono = { version = "0.4", default-features = false, features = ["clock"] }
 sha2 = "0.11"
 libc = "0.2"
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "rustls-tls"] }
 
 [[bin]]
 name = "sw"

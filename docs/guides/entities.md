@@ -129,6 +129,24 @@ code is more important than the implementation details:
         name: initialize
 ```
 
+## DisplayUrl
+
+Use `DisplayUrl` to show remote text content without treating URLs as local
+file paths.
+
+```yaml
+- type: DisplayUrl
+  url: https://raw.githubusercontent.com/albertattard/sw/refs/heads/main/docs/guides/entities.md
+  content_type: markdown
+  timeout: 10 seconds
+  start_line: 1
+  line_count: 40
+```
+
+`DisplayUrl` supports `http` and `https` URLs. It renders fetched content in a
+fenced block and supports `start_line`, `line_count`, `indent`, `offset`, and
+`content_type` like `DisplayFile`.
+
 ## Breakpoint
 
 Use `Breakpoint` to stop a runbook at a known point while troubleshooting.
@@ -413,6 +431,7 @@ sw explain --all
 sw example Command
 sw example Breakpoint
 sw example DisplayFile
+sw example DisplayUrl
 sw example Prerequisite
 sw example Patch
 ```
