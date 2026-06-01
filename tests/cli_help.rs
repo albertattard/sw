@@ -59,9 +59,11 @@ fn help_subcommand_for_known_topic_prints_targeted_help() {
     assert!(stdout.contains("--working-directory"));
     assert!(stdout.contains("changes the execution root"));
     assert!(stdout.contains(
-        "`Markdown`, `DisplayFile`, `Patch`, and `Command` entries may declare `indent`"
+        "`Markdown`, `DisplayFile`, `DisplayUrl`, `Patch`, and `Command` entries may declare `indent`"
     ));
-    assert!(stdout.contains("`DisplayFile.content_type` overrides fence detection"));
+    assert!(stdout.contains(
+        "`DisplayFile.content_type` and `DisplayUrl.content_type` override fence detection"
+    ));
     assert!(stdout.contains("`Breakpoint` entries stop processing successfully"));
     assert!(stdout.contains("`Patch.patch` may be authored as a YAML block scalar"));
     assert!(stdout.contains("File-based runbooks default to YAML"));
@@ -136,6 +138,7 @@ fn example_help_prints_help() {
     assert!(stdout.contains("The `Command` example includes current nested output fields"));
     assert!(stdout.contains("sw example Breakpoint"));
     assert!(stdout.contains("sw example DisplayFile"));
+    assert!(stdout.contains("sw example DisplayUrl"));
     assert!(stdout.contains("collapse_method_body"));
 }
 
@@ -236,8 +239,11 @@ fn run_help_prints_help() {
     assert!(stdout.contains("`Command` entries default to a `30 seconds` timeout"));
     assert!(stdout.contains("prerequisite checks default to `5 seconds`"));
     assert!(stdout.contains(
-        "`DisplayFile.content_type` overrides fence detection; otherwise `.java`, `.md`, `.markdown`, `.sql`, and `.xml` are detected"
+        "`DisplayFile.content_type` and `DisplayUrl.content_type` override fence detection; otherwise `.java`, `.md`, `.markdown`, `.sql`, and `.xml` are detected"
     ));
+    assert!(
+        stdout.contains("`DisplayUrl` fetches remote content with a default `10 seconds` timeout")
+    );
     assert!(stdout.contains("SSH-safe line-based progress output"));
     assert!(stdout.contains("sw example Command"));
     assert!(stdout.contains("--output-format json"));

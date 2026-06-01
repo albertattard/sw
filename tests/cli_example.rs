@@ -171,6 +171,26 @@ fn display_file_example_prints_valid_yaml_entry() {
 }
 
 #[test]
+fn display_url_example_prints_valid_yaml_entry() {
+    let output = run(&["example", "DisplayUrl"]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let value: serde_json::Value =
+        serde_norway::from_str(&stdout).expect("example output should be valid yaml");
+    assert_eq!(value["type"], "DisplayUrl");
+    assert_eq!(
+        value["url"],
+        "https://raw.githubusercontent.com/albertattard/sw/refs/heads/main/docs/guides/entities.md"
+    );
+    assert_eq!(value["content_type"], "markdown");
+    assert_eq!(value["timeout"], "10 seconds");
+    assert_eq!(value["start_line"], 1);
+    assert_eq!(value["line_count"], 40);
+    assert_eq!(value["indent"], 3);
+}
+
+#[test]
 fn patch_example_prints_valid_yaml_entry() {
     let output = run(&["example", "Patch"]);
 

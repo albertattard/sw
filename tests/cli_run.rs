@@ -1,5 +1,6 @@
 use std::fs;
-use std::io::Write;
+use std::io::{Read, Write};
+use std::net::TcpListener;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -99,6 +100,30 @@ fn write_runbook(dir: &Path, fixture_name: &str, target_name: &str) -> PathBuf {
     let contents = fs::read_to_string(source).expect("failed to read fixture");
     fs::write(&target, contents).expect("failed to write fixture");
     target
+}
+
+fn serve_one_http_response(path: &str, status: &str, body: &str) -> String {
+    let listener = TcpListener::bind("127.0.0.1:0").expect("failed to bind test server");
+    let address = listener
+        .local_addr()
+        .expect("failed to read test server address");
+    let body = body.to_string();
+    let status = status.to_string();
+
+    thread::spawn(move || {
+        let (mut stream, _) = listener.accept().expect("failed to accept test request");
+        let mut buffer = [0_u8; 2048];
+        let _ = stream.read(&mut buffer);
+        let response = format!(
+            "HTTP/1.1 {status}\r\nContent-Length: {}\r\nContent-Type: text/plain; charset=utf-8\r\nConnection: close\r\n\r\n{body}",
+            body.len()
+        );
+        stream
+            .write_all(response.as_bytes())
+            .expect("failed to write test response");
+    });
+
+    format!("http://{address}{path}")
 }
 
 fn create_fake_java_home(dir: &Path, folder_name: &str, version: &str) -> PathBuf {
@@ -3338,6 +3363,67 @@ fn display_file_unknown_extension_falls_back_to_text() {
     assert!(output.status.success());
     let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
     assert!(readme.contains("```text\nsome notes\n```"));
+}
+
+#[test]
+fn display_url_fetches_and_renders_remote_markdown() {
+    let dir = prepare_workspace();
+    let url = serve_one_http_response(
+        "/skills/create-scope/SKILL.md",
+        "200 OK",
+        "# Create Scope\n\n  Use this skill.\n  Keep this hidden.\n",
+    );
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        format!(
+            "entries:\n  - type: DisplayUrl\n    url: {url}\n    timeout: 10 seconds\n    start_line: 1\n    line_count: 3\n    indent: 3\n    offset: -2\n"
+        ),
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("   ```markdown\n   # Create Scope\n\n   Use this skill.\n   ```"));
+    assert!(!readme.contains("Keep this hidden"));
+}
+
+#[test]
+fn display_url_content_type_overrides_url_extension() {
+    let dir = prepare_workspace();
+    let url = serve_one_http_response("/remote/example.txt", "200 OK", "class Example {}\n");
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        format!("entries:\n  - type: DisplayUrl\n    url: {url}\n    content_type: java\n"),
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```java\nclass Example {}\n```"));
+    assert!(!readme.contains("```text\nclass Example {}\n```"));
+}
+
+#[test]
+fn display_url_http_error_returns_operational_error() {
+    let dir = prepare_workspace();
+    let url = serve_one_http_response("/missing.md", "404 Not Found", "missing");
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        format!("entries:\n  - type: DisplayUrl\n    url: {url}\n"),
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert_eq!(output.status.code(), Some(1));
+    assert!(!dir.join("README.md").exists());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("Failed to fetch DisplayUrl"));
+    assert!(stderr.contains("HTTP 404"));
 }
 
 #[test]
