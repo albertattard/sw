@@ -1,4 +1,4 @@
-# Runbook Entity Editing Guide
+# Runbook Entry Reference
 
 This guide explains the runbook entry types you use when editing
 `sw-runbook.yaml` by hand.

@@ -84,6 +84,9 @@ This creates `sw-runbook.yaml`, the editable source for the documentation
 workflow. Alternatively, use `sw init` to create a more complete starter
 runbook.
 
+For the full set of supported runbook entry types, start with the
+[runbook entry reference](./docs/guides/entities.md).
+
 ```shell
 sw init
 ```
@@ -155,9 +158,9 @@ runbook authoring workflows.
 
 Start with the [human guides](./docs/guides/README.md) for practical usage
 and examples. Each supported subcommand has its own guide page, and the
-[runbook entity editing guide](./docs/guides/entities.md) explains how to
-choose and edit entries such as `Markdown`, `DisplayFile`, `Prerequisite`,
-`Breakpoint`, `Patch`, and `Command`.
+[runbook entry reference](./docs/guides/entities.md) explains how to
+choose and edit entries such as `Markdown`, `DisplayFile`, `DisplayUrl`,
+`Prerequisite`, `Breakpoint`, `Patch`, and `Command`.
 
 AI agents should discover the current product contract from the installed
 binary:
