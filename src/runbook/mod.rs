@@ -4,7 +4,7 @@ mod validate;
 
 use crate::cli::InputFormat;
 use serde::Serialize;
-use serde_json::Value;
+use serde_json::{Map, Value};
 use std::fs;
 use std::io::{self, Read};
 use std::path::{Component, Path, PathBuf};
@@ -176,6 +176,91 @@ pub fn serialize(document: &Value, format: RunbookFormat) -> Result<String, Stri
     }
 }
 
+pub(crate) fn normalize_document_for_yaml_authoring(document: &Value) -> Value {
+    let mut normalized = document.clone();
+    normalize_scalar_capable_fields(&mut normalized);
+    normalized
+}
+
+fn normalize_scalar_capable_fields(value: &mut Value) {
+    match value {
+        Value::Object(map) => normalize_scalar_capable_fields_in_object(map),
+        Value::Array(items) => {
+            for item in items {
+                normalize_scalar_capable_fields(item);
+            }
+        }
+        _ => {}
+    }
+}
+
+fn normalize_scalar_capable_fields_in_object(map: &mut Map<String, Value>) {
+    let entry_type = map
+        .get("type")
+        .and_then(Value::as_str)
+        .map(ToString::to_string);
+
+    if let Some(entry_type) = entry_type.as_deref() {
+        match entry_type {
+            "Markdown" => normalize_string_array_field(map, "contents"),
+            "Command" => {
+                normalize_string_array_field(map, "commands");
+                normalize_string_array_field(map, "cleanup");
+            }
+            "Patch" => normalize_string_array_field(map, "patch"),
+            "Prerequisite" => {
+                if let Some(Value::Array(checks)) = map.get_mut("checks") {
+                    for check in checks {
+                        normalize_prerequisite_check(check);
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+
+    for (key, child) in map.iter_mut() {
+        if entry_type.as_deref() == Some("Prerequisite") && key == "checks" {
+            continue;
+        }
+        normalize_scalar_capable_fields(child);
+    }
+}
+
+fn normalize_prerequisite_check(value: &mut Value) {
+    let Value::Object(map) = value else {
+        return;
+    };
+
+    normalize_string_array_field(map, "contents");
+    normalize_string_array_field(map, "commands");
+
+    for child in map.values_mut() {
+        normalize_scalar_capable_fields(child);
+    }
+}
+
+fn normalize_string_array_field(map: &mut Map<String, Value>, key: &str) {
+    let Some(value) = map.get_mut(key) else {
+        return;
+    };
+
+    let Value::Array(lines) = value else {
+        return;
+    };
+
+    if lines.is_empty() || !lines.iter().all(|line| line.is_string()) {
+        return;
+    }
+
+    let scalar = lines
+        .iter()
+        .map(|line| line.as_str().unwrap_or_default())
+        .collect::<Vec<_>>()
+        .join("\n");
+    *value = Value::String(scalar);
+}
+
 fn serialize_yaml(document: &Value) -> Result<String, String> {
     let mut output = String::new();
     write_yaml_document(&mut output, document, 0)?;
@@ -242,7 +327,49 @@ fn write_yaml_field(
         return write_yaml_mapping(output, map, indent + 2);
     }
 
+    if let Some(value) = value.as_str()
+        && value.contains('\n')
+    {
+        return write_yaml_block_scalar_field(output, indent, key, value);
+    }
+
     write_yaml_scalar_lines(output, indent, Some(key), &yaml_scalar_value(value)?)
+}
+
+fn write_yaml_block_scalar_field(
+    output: &mut String,
+    indent: usize,
+    key: &str,
+    value: &str,
+) -> Result<(), String> {
+    output.push_str(&" ".repeat(indent));
+    output.push_str(key);
+    if value.ends_with('\n') {
+        output.push_str(": |\n");
+    } else {
+        output.push_str(": |-\n");
+    }
+    write_yaml_block_scalar_body(output, indent + 2, value)
+}
+
+fn write_yaml_block_scalar_body(
+    output: &mut String,
+    indent: usize,
+    value: &str,
+) -> Result<(), String> {
+    let body = value.strip_suffix('\n').unwrap_or(value);
+
+    for line in body.split('\n') {
+        if line.is_empty() {
+            output.push('\n');
+        } else {
+            output.push_str(&" ".repeat(indent));
+            output.push_str(line);
+            output.push('\n');
+        }
+    }
+
+    Ok(())
 }
 
 fn write_yaml_array(

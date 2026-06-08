@@ -88,6 +88,12 @@ Output:
   `entries:\n  - ...`.
 - YAML output inserts a single blank line between adjacent items in the
   top-level `entries` list.
+- YAML output renders multiline strings as literal block scalars so authored
+  prose remains readable instead of becoming quoted text with escaped newline
+  sequences.
+- YAML output may normalize fields whose documented input contract accepts
+  either a string or an array of strings into literal block scalars, matching
+  the JSON-to-YAML conversion contract for those fields.
 - Property order is preserved exactly as it appears in the input file.
 - String contents are preserved semantically, aside from format-specific
   escaping or block-scalar representation required by serialization.
@@ -132,6 +138,9 @@ Output:
 - [x] Given a YAML runbook with sequences nested under mapping keys, `sw format`
       rewrites the file so those sequence item markers are indented by two
       spaces beneath their owning keys.
+- [x] Given a YAML runbook with multiline scalar-capable prose such as
+      `Prerequisite.checks[*].contents`, `sw format` writes that prose as a
+      literal block scalar instead of a quoted string with escaped newlines.
 
 ## Non-goals
 
