@@ -71,6 +71,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-161: Support Dockerfile DisplayFile Content Type](display-file/TASK-161-support-dockerfile-display-file-content-type.md)
 - [x] [TASK-160: Support DisplayUrl Entries](display-file/TASK-160-support-display-url-entries.md)
 - [x] [TASK-159: Include Failing Command Entry in Assertion Errors](run/TASK-159-include-failing-command-entry-in-assertion-errors.md)
 - [x] [TASK-157: Support Java EPP Prerequisites](prerequisite/TASK-157-support-java-epp-prerequisites.md)

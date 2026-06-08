@@ -3185,6 +3185,46 @@ fn display_file_markdown_uses_markdown_fenced_block() {
 }
 
 #[test]
+fn display_file_dockerfile_name_uses_dockerfile_fenced_block() {
+    let dir = prepare_workspace();
+    fs::create_dir_all(dir.join("containers")).expect("failed to create containers directory");
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        "entries:\n  - type: DisplayFile\n    path: containers/Dockerfile-Java8\n",
+    )
+    .expect("failed to write runbook");
+    fs::write(
+        dir.join("containers/Dockerfile-Java8"),
+        "FROM eclipse-temurin:8\nRUN java -version\n",
+    )
+    .expect("failed to write Dockerfile-Java8");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```Dockerfile\nFROM eclipse-temurin:8\nRUN java -version\n```"));
+}
+
+#[test]
+fn display_file_dockerfile_content_type_overrides_unrecognized_extension() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        "entries:\n  - type: DisplayFile\n    path: ./ContainerSpec\n    content_type: Dockerfile\n",
+    )
+    .expect("failed to write runbook");
+    fs::write(dir.join("ContainerSpec"), "FROM debian:stable-slim\n")
+        .expect("failed to write ContainerSpec");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```Dockerfile\nFROM debian:stable-slim\n```"));
+}
+
+#[test]
 fn display_file_java_transform_can_collapse_a_method_body() {
     let dir = prepare_workspace();
     write_runbook(
