@@ -28,7 +28,15 @@ pub fn run(args: FormatArgs) -> ExitCode {
         return ExitCode::from(2);
     }
 
-    let rendered = match runbook::serialize(&runbook, format) {
+    let normalized_runbook;
+    let render_input = if format == runbook::RunbookFormat::Yaml {
+        normalized_runbook = runbook::normalize_document_for_yaml_authoring(&runbook);
+        &normalized_runbook
+    } else {
+        &runbook
+    };
+
+    let rendered = match runbook::serialize(render_input, format) {
         Ok(rendered) => rendered,
         Err(message) => {
             eprintln!("{message}");

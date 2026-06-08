@@ -120,8 +120,71 @@ fn format_indents_nested_yaml_sequences_under_keys() {
 
     let contents = fs::read_to_string(path).expect("missing formatted file");
     assert!(contents.contains("entries:\n  - type: Command\n"));
-    assert!(contents.contains("commands:\n      - echo hello\n"));
+    assert!(contents.contains("commands: echo hello\n"));
     assert!(contents.contains("caption:\n        - Observed output\n"));
+}
+
+#[test]
+fn format_keeps_prerequisite_contents_as_literal_block_scalar() {
+    let dir = prepare_workspace();
+    let path = write_file(
+        &dir,
+        "sw-runbook.yaml",
+        r#"entries:
+  - type: Prerequisite
+    checks:
+      - kind: java
+        name: Java 8
+        version: "8"
+        contents: |
+          - [Oracle Java 8](https://www.oracle.com/java/technologies/downloads/#java8) is 
+            required to run the baseline application before the migration starts.
+        help: Download and install Oracle Java 8, then make it the default `java` version in the shell running this runbook.
+"#,
+    );
+
+    let output = run_in_dir(&["format"], &dir);
+
+    assert!(output.status.success());
+    let contents = fs::read_to_string(path).expect("missing formatted file");
+    let value: serde_json::Value =
+        serde_norway::from_str(&contents).expect("formatted yaml should be valid");
+    assert_eq!(
+        value["entries"][0]["checks"][0]["contents"],
+        "- [Oracle Java 8](https://www.oracle.com/java/technologies/downloads/#java8) is \n  required to run the baseline application before the migration starts.\n"
+    );
+    assert!(contents.contains("contents: |\n"));
+    assert!(contents.contains(
+        "          - [Oracle Java 8](https://www.oracle.com/java/technologies/downloads/#java8) is \n"
+    ));
+    assert!(contents.contains(
+        "            required to run the baseline application before the migration starts.\n"
+    ));
+    assert!(!contents.contains("contents: \"- [Oracle Java 8]"));
+}
+
+#[test]
+fn format_normalizes_prerequisite_contents_array_to_literal_block_scalar() {
+    let dir = prepare_workspace();
+    let path = write_file(
+        &dir,
+        "sw-runbook.yaml",
+        "entries:\n  - type: Prerequisite\n    checks:\n      - kind: java\n        name: Java 8\n        version: '8'\n        contents:\n          - Install Java 8.\n          - Export JAVA_HOME.\n",
+    );
+
+    let output = run_in_dir(&["format"], &dir);
+
+    assert!(output.status.success());
+    let contents = fs::read_to_string(path).expect("missing formatted file");
+    let value: serde_json::Value =
+        serde_norway::from_str(&contents).expect("formatted yaml should be valid");
+    assert_eq!(
+        value["entries"][0]["checks"][0]["contents"],
+        "Install Java 8.\nExport JAVA_HOME."
+    );
+    assert!(
+        contents.contains("contents: |-\n          Install Java 8.\n          Export JAVA_HOME.\n")
+    );
 }
 
 #[test]
