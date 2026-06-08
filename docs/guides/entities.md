@@ -108,12 +108,19 @@ the whole fenced block in the generated Markdown.
 Use `content_type` when the file extension is missing or should not control
 the generated fenced-code label. When `content_type` is omitted, `DisplayFile`
 recognizes common file extensions such as `.java`, `.md`, `.markdown`, `.sql`,
-and `.xml`. Unknown extensions render as text.
+and `.xml`, plus Dockerfile names such as `Dockerfile` and
+`Dockerfile-Java8`. Unknown extensions render as text.
 
 ```yaml
 - type: DisplayFile
   path: ./src/main/java/demo/GeneratedExample
   content_type: java
+```
+
+```yaml
+- type: DisplayFile
+  path: containers/Dockerfile-Java8
+  content_type: Dockerfile
 ```
 
 For Java examples, `transform` can collapse method bodies when the surrounding

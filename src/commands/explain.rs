@@ -358,7 +358,7 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "Command execution and rendering are part of the same workflow.",
                 "Machine-readable contracts live in the runbook input, not in stdout.",
                 "`Markdown`, `DisplayFile`, `DisplayUrl`, `Patch`, and `Command` entries may declare `indent` to prefix each non-empty rendered line and keep nested Markdown structures readable.",
-                "`DisplayFile.content_type` and `DisplayUrl.content_type` override fence detection; otherwise `.java`, `.md`, `.markdown`, `.sql`, and `.xml` are detected, with other extensions falling back to `text`.",
+                "`DisplayFile.content_type` and `DisplayUrl.content_type` override fence detection; otherwise `.java`, `.md`, `.markdown`, `.sql`, `.xml`, `Dockerfile`, and `Dockerfile-*` are detected, with other extensions falling back to `text`.",
                 "`DisplayUrl` fetches remote content with a default `10 seconds` timeout unless the runbook sets `timeout`.",
                 "Command output can render `stdout`, `stderr`, or `combined` with `output.stream`; if omitted, rendered output defaults to `combined`.",
                 "Command output content types currently support `text`, `json`, `xml`, `html`, `java`, and `markdown`.",

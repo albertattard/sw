@@ -162,7 +162,7 @@ fn explain_run_prints_concise_contract_summary() {
         "A command entry that declares both `working_directory` and `working_dir` is invalid."
     ));
     assert!(stdout.contains(
-        "`DisplayFile.content_type` and `DisplayUrl.content_type` override fence detection; otherwise `.java`, `.md`, `.markdown`, `.sql`, and `.xml` are detected, with other extensions falling back to `text`."
+        "`DisplayFile.content_type` and `DisplayUrl.content_type` override fence detection; otherwise `.java`, `.md`, `.markdown`, `.sql`, `.xml`, `Dockerfile`, and `Dockerfile-*` are detected, with other extensions falling back to `text`."
     ));
     assert!(stdout.contains(
         "`DisplayUrl` fetches remote content with a default `10 seconds` timeout unless the runbook sets `timeout`."

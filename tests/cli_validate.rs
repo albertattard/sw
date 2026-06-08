@@ -1497,7 +1497,7 @@ fn display_file_content_type_is_validated() {
     let valid = run_in_dir_with_stdin(
         &["validate", "--input-file=-", "--input-format", "yaml"],
         &dir,
-        "entries:\n  - type: DisplayFile\n    path: ./Example\n    content_type: java\n",
+        "entries:\n  - type: DisplayFile\n    path: ./Example\n    content_type: Dockerfile\n",
     );
     assert!(valid.status.success());
 
@@ -1517,7 +1517,9 @@ fn display_file_content_type_is_validated() {
     let stdout = String::from_utf8_lossy(&invalid.stdout);
     assert!(stdout.contains("\"valid\": false"));
     assert!(stdout.contains("\"path\": \"entries[0].content_type\""));
-    assert!(stdout.contains("must be one of `text`, `json`, `xml`, `html`, `java`, or `markdown`"));
+    assert!(stdout.contains(
+        "must be one of `text`, `json`, `xml`, `html`, `java`, `markdown`, or `Dockerfile`"
+    ));
 }
 
 #[test]

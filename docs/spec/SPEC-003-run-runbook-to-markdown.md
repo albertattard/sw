@@ -313,10 +313,12 @@ in the runbook.
 - In this increment, recognized `DisplayFile` extensions include `.java`,
   which renders as `java`, `.md` and `.markdown`, which render as `markdown`,
   `.sql`, which renders as `sql`, and `.xml`, which renders as `xml`.
+- Recognized `DisplayFile` file names include `Dockerfile` and
+  `Dockerfile-*`, which render as `Dockerfile`.
 - If the `DisplayFile` extension is not recognized, the generated Markdown
   uses a `text` fenced block.
 - In this increment, supported `DisplayFile.content_type` values are `text`,
-  `json`, `xml`, `html`, `java`, and `markdown`.
+  `json`, `xml`, `html`, `java`, `markdown`, and `Dockerfile`.
 
 ### DisplayUrl Entries
 
@@ -357,12 +359,13 @@ in the runbook.
   uses that value as its language label.
 - If `DisplayUrl.content_type` is omitted, fenced blocks use a detected
   content type when the URL path extension is recognized.
-- Recognized `DisplayUrl` path extensions match `DisplayFile`: `.java`,
-  `.md`, `.markdown`, `.sql`, and `.xml`.
+- Recognized `DisplayUrl` path extensions and file names match `DisplayFile`:
+  `.java`, `.md`, `.markdown`, `.sql`, `.xml`, `Dockerfile`, and
+  `Dockerfile-*`.
 - If the `DisplayUrl` extension is not recognized, the generated Markdown uses
   a `text` fenced block.
 - Supported `DisplayUrl.content_type` values match `DisplayFile`: `text`,
-  `json`, `xml`, `html`, `java`, and `markdown`.
+  `json`, `xml`, `html`, `java`, `markdown`, and `Dockerfile`.
 
 ### Prerequisite Entries
 
