@@ -21,6 +21,7 @@ pub fn run(cli: Cli) -> ExitCode {
         debug,
         default_run_input,
         default_run_output,
+        default_run_debug,
         command,
     } = cli;
 
@@ -33,7 +34,11 @@ pub fn run(cli: Cli) -> ExitCode {
             verbose,
             verbose_mode,
             debug,
+            default_run_debug,
         ),
+        Some(Commands::Run(args)) => {
+            run::run(args, verbose, verbose_mode, debug, default_run_debug)
+        }
         Some(_) if default_run_input.has_values() => {
             eprintln!(
                 "Run input options such as --input-file, --input-format, and --working-directory must be used with implicit `sw` or after the target subcommand"
@@ -50,6 +55,13 @@ pub fn run(cli: Cli) -> ExitCode {
             eprintln!("Try `sw run --output-file <path>` instead.");
             ExitCode::from(1)
         }
+        Some(_) if default_run_debug.has_values() => {
+            eprintln!(
+                "Run debugging options such as --preserve-on-failure and --start-at must be used with implicit `sw` or with `sw run`"
+            );
+            eprintln!("Try `sw run --preserve-on-failure --start-at <entry-number>` instead.");
+            ExitCode::from(1)
+        }
         Some(Commands::Help(args)) => run_help(args),
         Some(Commands::Check(args)) => check::run(args),
         Some(Commands::Convert(args)) => run_convert(args),
@@ -58,7 +70,6 @@ pub fn run(cli: Cli) -> ExitCode {
         Some(Commands::Format(args)) => run_format(args),
         Some(Commands::Init(args)) => init::run(args),
         Some(Commands::Import(args)) => run_import(args),
-        Some(Commands::Run(args)) => run::run(args, verbose, verbose_mode, debug),
         Some(Commands::Version) => version::run(),
         Some(Commands::Validate(args)) => validate::run(args),
     }

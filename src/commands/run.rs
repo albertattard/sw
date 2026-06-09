@@ -1,9 +1,15 @@
-use crate::cli::{RunArgs, RunOutputFormat, VerboseMode};
+use crate::cli::{RunArgs, RunDebugArgs, RunOutputFormat, VerboseMode};
 use crate::runbook;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
-pub fn run(args: RunArgs, verbose: bool, verbose_mode: VerboseMode, debug: bool) -> ExitCode {
+pub fn run(
+    args: RunArgs,
+    verbose: bool,
+    verbose_mode: VerboseMode,
+    debug: bool,
+    run_debug: RunDebugArgs,
+) -> ExitCode {
     let output_path = args
         .output
         .output_file
@@ -40,8 +46,15 @@ pub fn run(args: RunArgs, verbose: bool, verbose_mode: VerboseMode, debug: bool)
         .unwrap_or(RunOutputFormat::Markdown)
     {
         RunOutputFormat::Markdown => {
-            match runbook::render_markdown(&runbook, &execution_root, verbose, verbose_mode, debug)
-            {
+            let options = runbook::RenderOptions {
+                verbose,
+                verbose_mode,
+                debug,
+                preserve_on_failure: run_debug.preserve_on_failure,
+                start_at: run_debug.start_at,
+            };
+
+            match runbook::render_markdown(&runbook, &execution_root, options) {
                 Ok(markdown) => markdown,
                 Err(runbook::RenderError::Operational(message)) => {
                     eprintln!("{message}");

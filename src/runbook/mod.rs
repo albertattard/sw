@@ -9,7 +9,7 @@ use std::fs;
 use std::io::{self, Read};
 use std::path::{Component, Path, PathBuf};
 
-pub(crate) use render::{check_prerequisites, render_markdown};
+pub(crate) use render::{RenderOptions, check_prerequisites, render_markdown};
 pub use validate::{validate, validate_with_execution_root};
 
 #[derive(Debug, Serialize)]

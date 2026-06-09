@@ -16,6 +16,8 @@ fn help_flag_prints_help() {
     assert!(stdout.contains("Sociable Weaver (SW)"));
     assert!(stdout.contains("--version"));
     assert!(stdout.contains("--verbose-mode"));
+    assert!(stdout.contains("--preserve-on-failure"));
+    assert!(stdout.contains("--start-at"));
     assert!(stdout.contains("--output-format"));
     assert!(stdout.contains("--output-file"));
     assert!(stdout.contains("--working-directory"));
@@ -32,6 +34,8 @@ fn help_subcommand_prints_help() {
     assert!(stdout.contains("--verbose"));
     assert!(stdout.contains("--verbose-mode"));
     assert!(stdout.contains("--debug"));
+    assert!(stdout.contains("--preserve-on-failure"));
+    assert!(stdout.contains("--start-at"));
     assert!(stdout.contains("--output-file"));
     assert!(stdout.contains("--working-directory"));
     assert!(stdout.contains("check"));
@@ -58,6 +62,10 @@ fn help_subcommand_for_known_topic_prints_targeted_help() {
     assert!(stdout.contains("Ignored unless `--input-file=-` is used"));
     assert!(stdout.contains("--working-directory"));
     assert!(stdout.contains("changes the execution root"));
+    assert!(stdout.contains("--preserve-on-failure"));
+    assert!(stdout.contains("--start-at"));
+    assert!(stdout.contains("leave registered cleanup and patch restore state"));
+    assert!(stdout.contains("partial debug run at a 1-based entry number"));
     assert!(stdout.contains(
         "`Markdown`, `DisplayFile`, `DisplayUrl`, `Patch`, and `Command` entries may declare `indent`"
     ));
@@ -223,6 +231,8 @@ fn run_help_prints_help() {
     assert!(stdout.contains("--verbose"));
     assert!(stdout.contains("--verbose-mode"));
     assert!(stdout.contains("--debug"));
+    assert!(stdout.contains("--preserve-on-failure"));
+    assert!(stdout.contains("--start-at"));
     assert!(stdout.contains("--input-file"));
     assert!(stdout.contains("Use `-` to read from stdin"));
     assert!(stdout.contains("--input-format"));

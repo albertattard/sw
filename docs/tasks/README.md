@@ -71,6 +71,8 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-164: Start Runbook At Entry](run/TASK-164-start-runbook-at-entry.md)
+- [x] [TASK-163: Preserve Run State On Failure](run/TASK-163-preserve-run-state-on-failure.md)
 - [x] [TASK-162: Preserve Scalar Prose Blocks During Format](format/TASK-162-preserve-scalar-prose-blocks-during-format.md)
 - [x] [TASK-161: Support Dockerfile DisplayFile Content Type](display-file/TASK-161-support-dockerfile-display-file-content-type.md)
 - [x] [TASK-160: Support DisplayUrl Entries](display-file/TASK-160-support-display-url-entries.md)
