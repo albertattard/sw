@@ -39,9 +39,11 @@
     `git branch -d`, and only uses `git branch -D` when `git diff --quiet main
     <branch>` and `git cherry -v main <branch>` prove that no unique work would
     be lost after a squash or rebase merge.
+  - After successful branch deletion, the cleanup tool runs
+    `cargo build --release` so the local `sw` binary reflects current `main`.
   - Report whether the branch was deleted safely with `git branch -d` or force
     deleted after the tool verified that the branch patch was already present
-    on current `main`.
+    on current `main`, and report that the local release binary was rebuilt.
 - Before `commit changes`, run `./tools/verify.sh`.
 - `./tools/verify.sh` runs `cargo fmt` first, then the standard lint, test,
   and release-build checks. This reduces avoidable retry cycles in interactive
