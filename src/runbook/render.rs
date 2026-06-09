@@ -85,12 +85,19 @@ fn emit_debug_lines(enabled: bool, lines: &[String]) {
     }
 }
 
+#[derive(Clone, Copy)]
+pub(crate) struct RenderOptions {
+    pub(crate) verbose: bool,
+    pub(crate) verbose_mode: VerboseMode,
+    pub(crate) debug: bool,
+    pub(crate) preserve_on_failure: bool,
+    pub(crate) start_at: Option<usize>,
+}
+
 pub(crate) fn render_markdown(
     runbook: &Value,
     execution_root: &Path,
-    verbose: bool,
-    verbose_mode: VerboseMode,
-    debug: bool,
+    options: RenderOptions,
 ) -> Result<String, RenderError> {
     let entries = runbook
         .get("entries")
@@ -98,6 +105,7 @@ pub(crate) fn render_markdown(
         .ok_or_else(|| {
             RenderError::Operational("Runbook is missing an entries array".to_string())
         })?;
+    let start_index = start_index_for(entries, options.start_at)?;
 
     let mut sections = Vec::new();
     let mut cleanups: Vec<CleanupBlock> = Vec::new();
@@ -109,13 +117,13 @@ pub(crate) fn render_markdown(
     let mut state = RenderState {
         datetime_anchors: HashMap::new(),
         captured_values: HashMap::new(),
-        debug_all_entries: debug,
+        debug_all_entries: options.debug,
     };
-    let mut progress = ProgressReporter::new(entries.len(), verbose, verbose_mode);
+    let mut progress = ProgressReporter::new(entries.len(), options.verbose, options.verbose_mode);
 
-    run_prerequisite_checks(entries, execution_root)?;
+    run_prerequisite_checks(&entries[start_index..], execution_root)?;
 
-    for (index, entry) in entries.iter().enumerate() {
+    for (index, entry) in entries.iter().enumerate().skip(start_index) {
         let entry_type = entry.get("type").and_then(Value::as_str).ok_or_else(|| {
             RenderError::Operational("Runbook entry is missing a type".to_string())
         })?;
@@ -155,7 +163,13 @@ pub(crate) fn render_markdown(
                     entry_debug_enabled(entry, state.debug_all_entries),
                 )?;
 
-                match render_command(entry, execution_root, &mut state, cleanup.as_ref()) {
+                let timeout_cleanup = if options.preserve_on_failure {
+                    None
+                } else {
+                    cleanup.as_ref()
+                };
+
+                match render_command(entry, execution_root, &mut state, timeout_cleanup) {
                     Ok(section) => {
                         if let Some(cleanup) = cleanup {
                             cleanups.push(cleanup);
@@ -214,13 +228,18 @@ pub(crate) fn render_markdown(
         output.push('\n');
     }
 
-    let cleanup_failures = run_cleanup_blocks(&cleanups);
-    let patch_restore_failures = run_patch_restores(&patch_restore_stack, &patch_snapshots);
-    let cleanup_message = post_run_failure_message("Cleanup failed", &cleanup_failures);
-    let patch_restore_message =
-        post_run_failure_message("Patch restore failed", &patch_restore_failures);
-    let post_run_message =
-        combine_optional_messages(cleanup_message.as_deref(), patch_restore_message.as_deref());
+    let run_failed = failure.is_some();
+    let post_run_message = if options.preserve_on_failure && run_failed {
+        preserved_state_message(cleanups.len(), patch_restore_stack.len())
+    } else {
+        let cleanup_failures = run_cleanup_blocks(&cleanups);
+        let patch_restore_failures = run_patch_restores(&patch_restore_stack, &patch_snapshots);
+        let cleanup_message = post_run_failure_message("Cleanup failed", &cleanup_failures);
+        let patch_restore_message =
+            post_run_failure_message("Patch restore failed", &patch_restore_failures);
+
+        combine_optional_messages(cleanup_message.as_deref(), patch_restore_message.as_deref())
+    };
     progress.finish_run(run_started_at.elapsed());
 
     match failure {
@@ -244,6 +263,44 @@ pub(crate) fn render_markdown(
             None => Ok(output),
         },
     }
+}
+
+fn start_index_for(entries: &[Value], start_at: Option<usize>) -> Result<usize, RenderError> {
+    let Some(entry_number) = start_at else {
+        return Ok(0);
+    };
+
+    if entry_number == 0 {
+        return Err(RenderError::Operational(
+            "--start-at must be a 1-based runbook entry number".to_string(),
+        ));
+    }
+
+    if entry_number > entries.len() {
+        return Err(RenderError::Operational(format!(
+            "--start-at {entry_number} is outside the runbook entry range 1..={}",
+            entries.len()
+        )));
+    }
+
+    Ok(entry_number - 1)
+}
+
+fn preserved_state_message(cleanup_count: usize, patch_restore_count: usize) -> Option<String> {
+    if cleanup_count == 0 && patch_restore_count == 0 {
+        return None;
+    }
+
+    let cleanup_label = pluralize(cleanup_count, "cleanup block", "cleanup blocks");
+    let patch_restore_label = pluralize(patch_restore_count, "patch restore", "patch restores");
+
+    Some(format!(
+        "Preserved run state after failure; skipped {cleanup_count} {cleanup_label} and {patch_restore_count} {patch_restore_label}."
+    ))
+}
+
+fn pluralize<'a>(count: usize, singular: &'a str, plural: &'a str) -> &'a str {
+    if count == 1 { singular } else { plural }
 }
 
 #[derive(Clone, Copy)]

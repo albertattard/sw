@@ -538,6 +538,33 @@ fn breakpoint_preserves_unresolved_placeholders_from_skipped_later_captures() {
 }
 
 #[test]
+fn preserve_on_failure_does_not_change_breakpoint_cleanup_behavior() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Command
+    commands: |
+      printf 'before\n' > sequence.txt
+    cleanup: |
+      printf 'cleanup\n' > cleanup.txt
+
+  - type: Breakpoint
+    message: Stop after setup
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run", "--preserve-on-failure"], &dir);
+
+    assert!(output.status.success());
+    assert_eq!(
+        fs::read_to_string(dir.join("cleanup.txt")).expect("missing cleanup"),
+        "cleanup\n"
+    );
+}
+
+#[test]
 fn run_command_accepts_scalar_prose_contents_in_yaml_input_file() {
     let dir = prepare_workspace();
     write_runbook(&dir, "sw-runbook-scalar-prose.yaml", "example.yaml");
@@ -718,6 +745,135 @@ fn verbose_run_reports_total_time_after_command_failure() {
     assert_eq!(output.status.code(), Some(2));
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(stderr.contains("Total run time: "));
+}
+
+#[test]
+fn start_at_skips_entries_before_selected_entry() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Command
+    commands: |
+      printf 'first\n' > sequence.txt
+
+  - type: Command
+    commands: |
+      printf 'second\n' > sequence.txt
+
+  - type: Markdown
+    contents: Rendered from entry three.
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run", "--start-at", "2"], &dir);
+
+    assert!(output.status.success());
+    assert_eq!(
+        fs::read_to_string(dir.join("sequence.txt")).expect("missing sequence"),
+        "second\n"
+    );
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(!readme.contains("first"));
+    assert!(readme.contains("second"));
+    assert!(readme.contains("Rendered from entry three."));
+}
+
+#[test]
+fn start_at_before_subcommand_uses_default_run_behavior() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Command
+    commands: |
+      printf 'first\n' > sequence.txt
+
+  - type: Command
+    commands: |
+      printf 'second\n' > sequence.txt
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["--start-at", "2"], &dir);
+
+    assert!(output.status.success());
+    assert_eq!(
+        fs::read_to_string(dir.join("sequence.txt")).expect("missing sequence"),
+        "second\n"
+    );
+}
+
+#[test]
+fn start_at_rejects_zero() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-run-success.json", "sw-runbook.json");
+
+    let output = run_in_dir(&["run", "--start-at", "0"], &dir);
+
+    assert_eq!(output.status.code(), Some(1));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("--start-at must be a 1-based runbook entry number"));
+}
+
+#[test]
+fn start_at_rejects_entry_after_end() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-run-success.json", "sw-runbook.json");
+
+    let output = run_in_dir(&["run", "--start-at", "6"], &dir);
+
+    assert_eq!(output.status.code(), Some(1));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("--start-at 6 is outside the runbook entry range 1..=5"));
+}
+
+#[test]
+fn start_at_preserves_verbose_entry_numbers_and_total() {
+    let dir = prepare_workspace();
+    write_runbook(&dir, "sw-runbook-run-success.json", "sw-runbook.json");
+
+    let output = run_in_dir(&["run", "--start-at", "4", "--verbose"], &dir);
+
+    assert!(output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(!stderr.contains("[1/5]"));
+    assert!(stderr.contains("[4/5] Command: printf 'second\\n' >> sequence.txt"));
+    assert!(stderr.contains("[5/5] Command: printf 'Hello there\\n'"));
+}
+
+#[test]
+fn start_at_skips_prerequisites_before_selected_entry() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Prerequisite
+    checks:
+      - kind: command
+        name: Skipped prerequisite
+        contents:
+          - Skipped prerequisite
+        commands: |
+          exit 1
+        help: This skipped prerequisite should not fail the run.
+
+  - type: Command
+    commands: |
+      printf 'started\n' > sequence.txt
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run", "--start-at", "2"], &dir);
+
+    assert!(output.status.success());
+    assert_eq!(
+        fs::read_to_string(dir.join("sequence.txt")).expect("missing sequence"),
+        "started\n"
+    );
 }
 
 #[test]
@@ -1623,6 +1779,100 @@ fn cleanup_runs_after_command_failure() {
             .expect("missing cleanup-on-failure file"),
         "before failure\ncleanup after failure\n"
     );
+}
+
+#[test]
+fn preserve_on_failure_skips_cleanup_after_command_failure() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-cleanup-on-failure.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run", "--preserve-on-failure"], &dir);
+
+    assert_eq!(output.status.code(), Some(2));
+    assert_eq!(
+        fs::read_to_string(dir.join("cleanup-on-failure.txt"))
+            .expect("missing cleanup-on-failure file"),
+        "before failure\n"
+    );
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains(
+        "Preserved run state after failure; skipped 1 cleanup block and 0 patch restores."
+    ));
+}
+
+#[test]
+fn preserve_on_failure_before_subcommand_uses_default_run_behavior() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-cleanup-on-failure.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["--preserve-on-failure"], &dir);
+
+    assert_eq!(output.status.code(), Some(2));
+    assert_eq!(
+        fs::read_to_string(dir.join("cleanup-on-failure.txt"))
+            .expect("missing cleanup-on-failure file"),
+        "before failure\n"
+    );
+}
+
+#[test]
+fn preserve_on_failure_still_runs_cleanup_after_success() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-cleanup-success.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run", "--preserve-on-failure"], &dir);
+
+    assert!(output.status.success());
+    assert_eq!(
+        fs::read_to_string(dir.join("cleanup-order.txt")).expect("missing cleanup order file"),
+        "A main\nB main\nB cleanup\nA cleanup\n"
+    );
+}
+
+#[test]
+fn preserve_on_failure_skips_patch_restore_after_failure() {
+    let dir = prepare_workspace();
+    fs::write(dir.join("demo.txt"), "before\n").expect("failed to write demo");
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Patch
+    path: ./demo.txt
+    patch: |
+      @@ -1 +1 @@
+      -before
+      +after
+
+  - type: Command
+    commands: |
+      exit 1
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run", "--preserve-on-failure"], &dir);
+
+    assert_eq!(output.status.code(), Some(2));
+    assert_eq!(
+        fs::read_to_string(dir.join("demo.txt")).expect("missing demo"),
+        "after\n"
+    );
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains(
+        "Preserved run state after failure; skipped 0 cleanup blocks and 1 patch restore."
+    ));
 }
 
 #[test]
