@@ -49,5 +49,24 @@ pub fn run(args: CheckArgs) -> ExitCode {
             eprintln!("{message}");
             ExitCode::from(2)
         }
+        Err(runbook::RenderError::FailedAt { error, .. }) => match *error {
+            runbook::RenderError::Operational(message) => {
+                eprintln!("{message}");
+                ExitCode::from(1)
+            }
+            runbook::RenderError::CommandFailed(message) => {
+                eprintln!("{message}");
+                ExitCode::from(2)
+            }
+            runbook::RenderError::CleanupFailed { message, .. } => {
+                eprintln!("{message}");
+                ExitCode::from(2)
+            }
+            runbook::RenderError::Timeout { message, .. } => {
+                eprintln!("{message}");
+                ExitCode::from(2)
+            }
+            runbook::RenderError::FailedAt { .. } => unreachable!(),
+        },
     }
 }
