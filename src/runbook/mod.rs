@@ -33,6 +33,10 @@ pub enum RenderError {
         message: String,
         markdown: String,
     },
+    FailedAt {
+        entry_number: usize,
+        error: Box<RenderError>,
+    },
     Timeout {
         message: String,
         partial_markdown: String,

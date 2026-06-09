@@ -1252,6 +1252,7 @@ fn failing_prerequisite_stops_before_main_workflow_and_reports_help() {
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(stderr.contains("Prerequisite failed: Docker daemon"));
     assert!(stderr.contains("Start Docker Desktop before running this example."));
+    assert!(stderr.contains("Run: sw run --start-at 1 to resume from this entry"));
 }
 
 #[test]
@@ -1435,6 +1436,8 @@ fn invalid_runbook_returns_validation_failure_without_output_file() {
     assert!(stdout.contains("Offending block:"));
     assert!(stdout.contains("\"name\": \"jq\""));
     assert!(stdout.contains("\"help\": ["));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(!stderr.contains("to resume from this entry"));
 }
 
 #[test]
@@ -1663,6 +1666,93 @@ fn file_sha256_assertion_failure_stops_the_run_without_partial_output() {
 }
 
 #[test]
+fn failed_command_prints_resume_hint_for_failed_entry() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Heading
+    level: H1
+    title: Resume hint
+
+  - type: Command
+    commands: |
+      exit 1
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("Run: sw run --start-at 2 to resume from this entry"));
+}
+
+#[test]
+fn failed_command_resume_hint_preserves_debugging_flags() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Heading
+    level: H1
+    title: Resume hint
+
+  - type: Command
+    commands: |
+      exit 1
+    cleanup: |
+      printf 'cleanup\n' > cleanup.txt
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run", "--verbose", "--preserve-on-failure"], &dir);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains(
+        "Run: sw run --verbose --preserve-on-failure --start-at 2 to resume from this entry"
+    ));
+}
+
+#[test]
+fn failed_command_resume_hint_preserves_run_options() {
+    let dir = prepare_workspace();
+    fs::create_dir_all(dir.join("workspace")).expect("failed to create workspace");
+    fs::write(
+        dir.join("custom runbook.yaml"),
+        r#"entries:
+  - type: Command
+    commands: |
+      exit 1
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(
+        &[
+            "run",
+            "--input-file",
+            "custom runbook.yaml",
+            "--input-format=yaml",
+            "--working-directory",
+            "workspace",
+            "--output-file",
+            "custom output.md",
+        ],
+        &dir,
+    );
+
+    assert_eq!(output.status.code(), Some(2));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains(
+        "Run: sw run --input-file 'custom runbook.yaml' --input-format=yaml --working-directory workspace --output-file 'custom output.md' --start-at 1 to resume from this entry"
+    ));
+}
+
+#[test]
 fn command_with_timeout_completing_in_time_succeeds() {
     let dir = prepare_workspace();
     write_runbook(
@@ -1699,6 +1789,7 @@ fn timed_out_command_is_terminated_and_preserves_partial_output() {
 
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(stderr.contains("Command timed out after 1 second"));
+    assert!(stderr.contains("Run: sw run --start-at 2 to resume from this entry"));
 }
 
 #[test]
@@ -1736,6 +1827,9 @@ fn timeout_still_applies_while_background_process_holds_command_pipes_open() {
     assert_eq!(output.status.code(), Some(2));
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(stderr.contains("Command timed out after 1 second"));
+    assert!(stderr.contains(
+        "Run: sw run --input-file sw-runbook.yaml --start-at 2 to resume from this entry"
+    ));
 
     let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
     assert!(readme.contains("# Timeout lifecycle"));
@@ -1802,6 +1896,9 @@ fn preserve_on_failure_skips_cleanup_after_command_failure() {
     assert!(stderr.contains(
         "Preserved run state after failure; skipped 1 cleanup block and 0 patch restores."
     ));
+    assert!(
+        stderr.contains("Run: sw run --preserve-on-failure --start-at 2 to resume from this entry")
+    );
 }
 
 #[test]

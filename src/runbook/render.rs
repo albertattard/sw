@@ -121,7 +121,7 @@ pub(crate) fn render_markdown(
     };
     let mut progress = ProgressReporter::new(entries.len(), options.verbose, options.verbose_mode);
 
-    run_prerequisite_checks(&entries[start_index..], execution_root)?;
+    run_prerequisite_checks(&entries[start_index..], execution_root, start_index)?;
 
     for (index, entry) in entries.iter().enumerate().skip(start_index) {
         let entry_type = entry.get("type").and_then(Value::as_str).ok_or_else(|| {
@@ -152,7 +152,7 @@ pub(crate) fn render_markdown(
                 Ok(section) => RenderSection::Ready(section),
                 Err(err) => {
                     progress.finish_entry(progress_line);
-                    failure = Some(err);
+                    failure = Some(failed_at(index, err));
                     break;
                 }
             },
@@ -182,10 +182,13 @@ pub(crate) fn render_markdown(
                     }) => {
                         progress.finish_entry(progress_line);
                         sections.push(RenderSection::Ready(partial_markdown));
-                        failure = Some(RenderError::Timeout {
-                            message,
-                            partial_markdown: String::new(),
-                        });
+                        failure = Some(failed_at(
+                            index,
+                            RenderError::Timeout {
+                                message,
+                                partial_markdown: String::new(),
+                            },
+                        ));
                         break;
                     }
                     Err(err) => {
@@ -193,7 +196,7 @@ pub(crate) fn render_markdown(
                             cleanups.push(cleanup);
                         }
                         progress.finish_entry(progress_line);
-                        failure = Some(err);
+                        failure = Some(failed_at(index, err));
                         break;
                     }
                 }
@@ -254,6 +257,17 @@ pub(crate) fn render_markdown(
             &message,
             post_run_message.as_deref(),
         ))),
+        Some(RenderError::FailedAt {
+            entry_number,
+            error,
+        }) => Err(RenderError::FailedAt {
+            entry_number,
+            error: Box::new(combine_failure_message(
+                *error,
+                post_run_message.as_deref(),
+                &output,
+            )),
+        }),
         Some(RenderError::CleanupFailed { .. }) => unreachable!(),
         None => match post_run_message {
             Some(message) => Err(RenderError::CleanupFailed {
@@ -262,6 +276,40 @@ pub(crate) fn render_markdown(
             }),
             None => Ok(output),
         },
+    }
+}
+
+fn failed_at(index: usize, error: RenderError) -> RenderError {
+    RenderError::FailedAt {
+        entry_number: index + 1,
+        error: Box::new(error),
+    }
+}
+
+fn combine_failure_message(
+    error: RenderError,
+    post_run_message: Option<&str>,
+    partial_output: &str,
+) -> RenderError {
+    match error {
+        RenderError::Timeout {
+            message,
+            partial_markdown,
+        } => RenderError::Timeout {
+            message: combine_messages(&message, post_run_message),
+            partial_markdown: if partial_markdown.is_empty() {
+                partial_output.to_string()
+            } else {
+                partial_markdown
+            },
+        },
+        RenderError::CommandFailed(message) => {
+            RenderError::CommandFailed(combine_messages(&message, post_run_message))
+        }
+        RenderError::Operational(message) => {
+            RenderError::Operational(combine_messages(&message, post_run_message))
+        }
+        RenderError::CleanupFailed { .. } | RenderError::FailedAt { .. } => error,
     }
 }
 
@@ -1884,11 +1932,15 @@ pub(crate) fn check_prerequisites(
         .ok_or_else(|| {
             RenderError::Operational("Runbook is missing an entries array".to_string())
         })?;
-    run_prerequisite_checks(entries, execution_root)
+    run_prerequisite_checks(entries, execution_root, 0)
 }
 
-fn run_prerequisite_checks(entries: &[Value], execution_root: &Path) -> Result<(), RenderError> {
-    for entry in entries {
+fn run_prerequisite_checks(
+    entries: &[Value],
+    execution_root: &Path,
+    base_index: usize,
+) -> Result<(), RenderError> {
+    for (index, entry) in entries.iter().enumerate() {
         if entry.get("type").and_then(Value::as_str) == Some("Breakpoint") {
             break;
         }
@@ -1905,7 +1957,9 @@ fn run_prerequisite_checks(entries: &[Value], execution_root: &Path) -> Result<(
             })?;
 
         for check in checks {
-            run_prerequisite_check(check, execution_root)?;
+            if let Err(err) = run_prerequisite_check(check, execution_root) {
+                return Err(failed_at(base_index + index, err));
+            }
         }
     }
 
