@@ -25,12 +25,18 @@ run_step() {
   "$@"
 }
 
+rebuild_local_binary() {
+  run_step cargo build --release
+  echo "Rebuilt local release binary from current main."
+}
+
 run_step git fetch --prune origin
 run_step git switch main
 run_step git pull --ff-only origin main
 
 if git branch -d "$branch"; then
   echo "Deleted local branch $branch with git branch -d."
+  rebuild_local_binary
   exit 0
 fi
 
@@ -57,3 +63,4 @@ fi
 
 run_step git branch -D "$branch"
 echo "Force deleted $branch because it has no content diff from main and git cherry reports no unapplied commits."
+rebuild_local_binary
