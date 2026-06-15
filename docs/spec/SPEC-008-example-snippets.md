@@ -4,7 +4,7 @@ title: Example Snippets Contract
 status: implemented
 priority: high
 owner: albertattard
-last_updated: 2026-04-25
+last_updated: 2026-06-15
 ---
 
 ## Goal
@@ -79,6 +79,8 @@ In this increment, supported entity types include:
   including Java `collapse_method_body` when implemented.
 - The `DisplayFile` example should reflect the current block-indentation
   contract by including `indent` when that field is supported.
+- The `DisplayFile` example should reflect the current content-offset contract
+  by including `offset` when that field is supported.
 - The `DisplayFile` example should reflect the current explicit fence-label
   contract by including `content_type` when that field is supported.
 - The `Prerequisite` example should prefer the built-in `java` prerequisite
@@ -114,6 +116,8 @@ In this increment, supported entity types include:
       `DisplayFile` entry.
 - [x] Given `sw example DisplayFile`, the example includes the implemented
       `indent` field for whole-block indentation.
+- [x] Given `sw example DisplayFile`, the example includes the implemented
+      `offset` field for copied-content indentation shifts.
 - [x] Given `sw example DisplayFile`, the example includes the implemented
       `content_type` field for explicit fenced-code labels.
 - [x] Given `sw example DisplayFile`, the example includes the implemented

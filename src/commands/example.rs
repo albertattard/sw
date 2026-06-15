@@ -207,6 +207,7 @@ const DISPLAY_FILE_EXAMPLE_JSON: &str = r#"{
   "start_line": 1,
   "line_count": 12,
   "indent": 3,
+  "offset": -12,
   "transform": {
     "language": "java",
     "operations": [
@@ -224,6 +225,7 @@ content_type: java
 start_line: 1
 line_count: 12
 indent: 3
+offset: -12
 transform:
   language: java
   operations:
