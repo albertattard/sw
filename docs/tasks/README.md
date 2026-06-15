@@ -71,6 +71,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-167: Surface DisplayFile Offset In Example Output](example/TASK-167-surface-display-file-offset-in-example.md)
 - [x] [TASK-166: Suggest Resume Command After Run Failure](run/TASK-166-suggest-resume-command-after-run-failure.md)
 - [x] [TASK-165: Rebuild Local Binary After Merge Cleanup](repo-process/TASK-165-rebuild-local-binary-after-merge-cleanup.md)
 - [x] [TASK-164: Start Runbook At Entry](run/TASK-164-start-runbook-at-entry.md)

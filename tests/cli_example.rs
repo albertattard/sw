@@ -162,6 +162,29 @@ fn display_file_example_prints_valid_yaml_entry() {
     assert_eq!(value["start_line"], 1);
     assert_eq!(value["line_count"], 12);
     assert_eq!(value["indent"], 3);
+    assert_eq!(value["offset"], -12);
+    assert_eq!(value["transform"]["language"], "java");
+    assert_eq!(
+        value["transform"]["operations"][0]["type"],
+        "collapse_method_body"
+    );
+    assert_eq!(value["transform"]["operations"][0]["name"], "initialize");
+}
+
+#[test]
+fn display_file_example_prints_valid_json_entry_when_requested() {
+    let output = run(&["example", "DisplayFile", "--output-format", "json"]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let value: serde_json::Value =
+        serde_json::from_str(&stdout).expect("example output should be valid json");
+    assert_eq!(value["type"], "DisplayFile");
+    assert_eq!(value["content_type"], "java");
+    assert_eq!(value["start_line"], 1);
+    assert_eq!(value["line_count"], 12);
+    assert_eq!(value["indent"], 3);
+    assert_eq!(value["offset"], -12);
     assert_eq!(value["transform"]["language"], "java");
     assert_eq!(
         value["transform"]["operations"][0]["type"],
