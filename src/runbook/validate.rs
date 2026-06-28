@@ -136,12 +136,19 @@ fn validate_display_content_type(
         Some(Value::String(content_type))
             if matches!(
                 content_type.as_str(),
-                "text" | "json" | "xml" | "html" | "java" | "markdown" | "Dockerfile"
+                "text"
+                    | "json"
+                    | "xml"
+                    | "html"
+                    | "java"
+                    | "markdown"
+                    | "dockerfile"
+                    | "Dockerfile"
             ) => {}
         Some(_) => push_error(
             errors,
             format!("{path}.content_type"),
-            "must be one of `text`, `json`, `xml`, `html`, `java`, `markdown`, or `Dockerfile`",
+            "must be one of `text`, `json`, `xml`, `html`, `java`, `markdown`, `dockerfile`, or `Dockerfile`",
         ),
         None => {}
     }

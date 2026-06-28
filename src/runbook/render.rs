@@ -3482,7 +3482,7 @@ fn display_file_content_type(path: &Path) -> &'static str {
     if let Some(file_name) = path.file_name().and_then(|file_name| file_name.to_str())
         && (file_name == "Dockerfile" || file_name.starts_with("Dockerfile-"))
     {
-        return "Dockerfile";
+        return "dockerfile";
     }
 
     match path.extension().and_then(|extension| extension.to_str()) {
@@ -3510,6 +3510,7 @@ fn display_fence_language(
         Some("html") => Ok("html"),
         Some("java") => Ok("java"),
         Some("markdown") => Ok("markdown"),
+        Some("dockerfile") => Ok("dockerfile"),
         Some("Dockerfile") => Ok("Dockerfile"),
         Some(other) => Err(RenderError::Operational(format!(
             "Unsupported {entry_name} content type `{other}`"
