@@ -1497,9 +1497,16 @@ fn display_file_content_type_is_validated() {
     let valid = run_in_dir_with_stdin(
         &["validate", "--input-file=-", "--input-format", "yaml"],
         &dir,
-        "entries:\n  - type: DisplayFile\n    path: ./Example\n    content_type: Dockerfile\n",
+        "entries:\n  - type: DisplayFile\n    path: ./Example\n    content_type: dockerfile\n",
     );
     assert!(valid.status.success());
+
+    let valid_uppercase_compatibility = run_in_dir_with_stdin(
+        &["validate", "--input-file=-", "--input-format", "yaml"],
+        &dir,
+        "entries:\n  - type: DisplayFile\n    path: ./Example\n    content_type: Dockerfile\n",
+    );
+    assert!(valid_uppercase_compatibility.status.success());
 
     let invalid = run_in_dir_with_stdin(
         &[
@@ -1518,7 +1525,7 @@ fn display_file_content_type_is_validated() {
     assert!(stdout.contains("\"valid\": false"));
     assert!(stdout.contains("\"path\": \"entries[0].content_type\""));
     assert!(stdout.contains(
-        "must be one of `text`, `json`, `xml`, `html`, `java`, `markdown`, or `Dockerfile`"
+        "must be one of `text`, `json`, `xml`, `html`, `java`, `markdown`, `dockerfile`, or `Dockerfile`"
     ));
 }
 

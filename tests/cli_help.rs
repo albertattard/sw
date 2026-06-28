@@ -249,7 +249,7 @@ fn run_help_prints_help() {
     assert!(stdout.contains("`Command` entries default to a `30 seconds` timeout"));
     assert!(stdout.contains("prerequisite checks default to `5 seconds`"));
     assert!(stdout.contains(
-        "`DisplayFile.content_type` and `DisplayUrl.content_type` override fence detection; otherwise `.java`, `.md`, `.markdown`, `.sql`, `.xml`, `Dockerfile`, and `Dockerfile-*` are detected"
+        "`DisplayFile.content_type` and `DisplayUrl.content_type` override fence detection; otherwise `.java`, `.md`, `.markdown`, `.sql`, `.xml`, `Dockerfile`, and `Dockerfile-*` are detected as lowercase `dockerfile`"
     ));
     assert!(
         stdout.contains("`DisplayUrl` fetches remote content with a default `10 seconds` timeout")

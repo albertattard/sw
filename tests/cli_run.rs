@@ -3550,11 +3550,29 @@ fn display_file_dockerfile_name_uses_dockerfile_fenced_block() {
 
     assert!(output.status.success());
     let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
-    assert!(readme.contains("```Dockerfile\nFROM eclipse-temurin:8\nRUN java -version\n```"));
+    assert!(readme.contains("```dockerfile\nFROM eclipse-temurin:8\nRUN java -version\n```"));
 }
 
 #[test]
-fn display_file_dockerfile_content_type_overrides_unrecognized_extension() {
+fn display_file_lowercase_dockerfile_content_type_overrides_unrecognized_extension() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        "entries:\n  - type: DisplayFile\n    path: ./ContainerSpec\n    content_type: dockerfile\n",
+    )
+    .expect("failed to write runbook");
+    fs::write(dir.join("ContainerSpec"), "FROM debian:stable-slim\n")
+        .expect("failed to write ContainerSpec");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```dockerfile\nFROM debian:stable-slim\n```"));
+}
+
+#[test]
+fn display_file_uppercase_dockerfile_content_type_preserves_requested_fence_label() {
     let dir = prepare_workspace();
     fs::write(
         dir.join("sw-runbook.yaml"),
@@ -3792,6 +3810,23 @@ fn display_url_content_type_overrides_url_extension() {
     let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
     assert!(readme.contains("```java\nclass Example {}\n```"));
     assert!(!readme.contains("```text\nclass Example {}\n```"));
+}
+
+#[test]
+fn display_url_dockerfile_content_type_uses_requested_fence_label() {
+    let dir = prepare_workspace();
+    let url = serve_one_http_response("/remote/example.txt", "200 OK", "FROM alpine:3.20\n");
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        format!("entries:\n  - type: DisplayUrl\n    url: {url}\n    content_type: dockerfile\n"),
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```dockerfile\nFROM alpine:3.20\n```"));
 }
 
 #[test]
