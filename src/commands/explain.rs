@@ -351,6 +351,8 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "`Command.cleanup` supports manual teardown as either a string or an array, and explicit `cleanup` replaces automatic process cleanup for that command entry.",
                 "`Command.working_directory` runs one command entry from a directory relative to the execution root; legacy `working_dir` remains accepted but new runbooks should use `working_directory`.",
                 "A command entry that declares both `working_directory` and `working_dir` is invalid.",
+                "`Command.execute_when` supports `fact: os` with `equals: macos|linux|windows`; non-matching commands still render their command block but do not execute or render command output.",
+                "Conditional commands do not add automatic skipped/executed markers to generated Markdown; add explicit `Markdown` entries when the document needs to explain platform choices.",
                 "`Command.debug` and `Patch.debug` enable diagnostics for one entry, while global `--debug` enables diagnostics for all supported debuggable entries.",
                 "A command entry remains active until the command shell has exited and the captured stdout and stderr streams have both closed, so background processes that inherit those pipes can keep the entry open until they exit or the timeout is reached.",
                 "Entries execute in runbook order.",

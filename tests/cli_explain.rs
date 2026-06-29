@@ -138,6 +138,12 @@ fn explain_run_prints_concise_contract_summary() {
         "`Command.cleanup` supports manual teardown as either a string or an array, and explicit `cleanup` replaces automatic process cleanup for that command entry."
     ));
     assert!(stdout.contains(
+        "`Command.execute_when` supports `fact: os` with `equals: macos|linux|windows`; non-matching commands still render their command block but do not execute or render command output."
+    ));
+    assert!(stdout.contains(
+        "Conditional commands do not add automatic skipped/executed markers to generated Markdown; add explicit `Markdown` entries when the document needs to explain platform choices."
+    ));
+    assert!(stdout.contains(
         "`Command.debug` and `Patch.debug` enable diagnostics for one entry, while global `--debug` enables diagnostics for all supported debuggable entries."
     ));
     assert!(stdout.contains(

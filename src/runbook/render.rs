@@ -1,4 +1,5 @@
 use super::RenderError;
+use super::conditions::command_should_execute;
 use super::execute::{
     CleanupBlock, CommandExecution, apply_patch_entry, cleanup_block, ensure_assertions,
     execute_command, format_command_failure, patch_target_path, patch_text_for, run_cleanup_blocks,
@@ -157,47 +158,51 @@ pub(crate) fn render_markdown(
                 }
             },
             "Command" => {
-                let cleanup = cleanup_block(
-                    entry,
-                    execution_root,
-                    entry_debug_enabled(entry, state.debug_all_entries),
-                )?;
-
-                let timeout_cleanup = if options.preserve_on_failure {
-                    None
+                if !command_should_execute(entry)? {
+                    RenderSection::Ready(render_skipped_command(entry, &state)?)
                 } else {
-                    cleanup.as_ref()
-                };
+                    let cleanup = cleanup_block(
+                        entry,
+                        execution_root,
+                        entry_debug_enabled(entry, state.debug_all_entries),
+                    )?;
 
-                match render_command(entry, execution_root, &mut state, timeout_cleanup) {
-                    Ok(section) => {
-                        if let Some(cleanup) = cleanup {
-                            cleanups.push(cleanup);
+                    let timeout_cleanup = if options.preserve_on_failure {
+                        None
+                    } else {
+                        cleanup.as_ref()
+                    };
+
+                    match render_command(entry, execution_root, &mut state, timeout_cleanup) {
+                        Ok(section) => {
+                            if let Some(cleanup) = cleanup {
+                                cleanups.push(cleanup);
+                            }
+                            RenderSection::Ready(section)
                         }
-                        RenderSection::Ready(section)
-                    }
-                    Err(RenderError::Timeout {
-                        message,
-                        partial_markdown,
-                    }) => {
-                        progress.finish_entry(progress_line);
-                        sections.push(RenderSection::Ready(partial_markdown));
-                        failure = Some(failed_at(
-                            index,
-                            RenderError::Timeout {
-                                message,
-                                partial_markdown: String::new(),
-                            },
-                        ));
-                        break;
-                    }
-                    Err(err) => {
-                        if let Some(cleanup) = cleanup {
-                            cleanups.push(cleanup);
+                        Err(RenderError::Timeout {
+                            message,
+                            partial_markdown,
+                        }) => {
+                            progress.finish_entry(progress_line);
+                            sections.push(RenderSection::Ready(partial_markdown));
+                            failure = Some(failed_at(
+                                index,
+                                RenderError::Timeout {
+                                    message,
+                                    partial_markdown: String::new(),
+                                },
+                            ));
+                            break;
                         }
-                        progress.finish_entry(progress_line);
-                        failure = Some(failed_at(index, err));
-                        break;
+                        Err(err) => {
+                            if let Some(cleanup) = cleanup {
+                                cleanups.push(cleanup);
+                            }
+                            progress.finish_entry(progress_line);
+                            failure = Some(failed_at(index, err));
+                            break;
+                        }
                     }
                 }
             }
@@ -1756,6 +1761,25 @@ fn render_command(
         MissingCaptureBehavior::Error,
     )?;
     apply_indent(entry, section, "Command")
+}
+
+fn render_skipped_command(entry: &Value, state: &RenderState) -> Result<String, RenderError> {
+    let commands = entry
+        .get("commands")
+        .ok_or_else(|| RenderError::Operational("Command entry is missing commands".to_string()))?;
+    let command_lines = string_lines(
+        commands,
+        "Command commands must be a string or an array of strings",
+        "Command list must contain only strings",
+    )?;
+    let resolved_command_lines = interpolate_command_lines(&command_lines, &state.captured_values)?;
+    let command_text = resolved_command_lines.join("\n");
+    let rendered_command_text = render_command_text(entry, &command_text)?;
+    apply_indent(
+        entry,
+        fenced_block(Some("shell"), &rendered_command_text),
+        "Command",
+    )
 }
 
 fn render_command_text(entry: &Value, command_text: &str) -> Result<String, RenderError> {

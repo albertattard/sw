@@ -102,6 +102,19 @@ fn write_runbook(dir: &Path, fixture_name: &str, target_name: &str) -> PathBuf {
     target
 }
 
+fn current_os_condition_value() -> &'static str {
+    std::env::consts::OS
+}
+
+fn different_os_condition_value() -> &'static str {
+    match std::env::consts::OS {
+        "linux" => "macos",
+        "macos" => "linux",
+        "windows" => "linux",
+        _ => "linux",
+    }
+}
+
 fn serve_one_http_response(path: &str, status: &str, body: &str) -> String {
     let listener = TcpListener::bind("127.0.0.1:0").expect("failed to bind test server");
     let address = listener
@@ -124,6 +137,48 @@ fn serve_one_http_response(path: &str, status: &str, body: &str) -> String {
     });
 
     format!("http://{address}{path}")
+}
+
+#[test]
+fn run_executes_only_matching_execute_when_os_command_but_renders_both() {
+    let dir = prepare_workspace();
+    let matching_os = current_os_condition_value();
+    let skipped_os = different_os_condition_value();
+    let runbook = format!(
+        r#"entries:
+  - type: Command
+    execute_when:
+      fact: os
+      equals: {matching_os}
+    commands: |
+      printf executed > matching.txt
+    output:
+      stream: stdout
+
+  - type: Command
+    execute_when:
+      fact: os
+      equals: {skipped_os}
+    commands: |
+      printf skipped > skipped.txt
+    output:
+      stream: stdout
+"#
+    );
+    fs::write(dir.join("sw-runbook.yaml"), runbook).expect("failed to write runbook");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    assert_eq!(
+        fs::read_to_string(dir.join("matching.txt")).expect("missing matching side effect"),
+        "executed"
+    );
+    assert!(!dir.join("skipped.txt").exists());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing README");
+    assert!(readme.contains("printf executed > matching.txt"));
+    assert!(readme.contains("printf skipped > skipped.txt"));
+    assert!(!readme.contains("Skipped:"));
 }
 
 fn create_fake_java_home(dir: &Path, folder_name: &str, version: &str) -> PathBuf {
