@@ -2638,8 +2638,13 @@ fn output_caption_interpolates_same_command_and_earlier_captures() {
       caption: |
         @{collector_name} ran @{gc_count} times.
         Literal syntax: @@{gc_count}
+        Digest syntax: image:tag\@@{digest}
     capture:
       - name: gc_count
+        source: stdout
+        stage: raw
+        pattern: 'GC\((\d+)\)'
+      - name: digest
         source: stdout
         stage: raw
         pattern: 'GC\((\d+)\)'
@@ -2653,7 +2658,7 @@ fn output_caption_interpolates_same_command_and_earlier_captures() {
     let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
     assert!(
         readme.contains(
-            "G1 ran 42 times.\nLiteral syntax: @{gc_count}\n\n```\nGC(42) Pause Young\n```"
+            "G1 ran 42 times.\nLiteral syntax: @{gc_count}\nDigest syntax: image:tag@42\n\n```\nGC(42) Pause Young\n```"
         )
     );
 }
@@ -3026,6 +3031,39 @@ fn command_capture_raw_stage_supports_later_command_interpolation_and_escape() {
     let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
     assert!(readme.contains("printf '%s\\n' '/tmp/sw-demo-raw/file.txt' > captured-raw.txt"));
     assert!(readme.contains("printf '%s\\n' '@{generated_path}' > captured-literal.txt"));
+}
+
+#[test]
+fn command_interpolation_supports_literal_at_before_capture() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("example.yaml"),
+        r#"entries:
+  - type: Command
+    commands: |
+      printf '%s\n' 'sha256:abc123'
+    capture:
+      - name: digest
+        source: stdout
+        stage: raw
+        pattern: .+
+
+  - type: Command
+    commands: |
+      printf '%s\n' 'image:tag\@@{digest}' > image.txt
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run", "--input-file", "example.yaml"], &dir);
+
+    assert!(output.status.success());
+    assert_eq!(
+        fs::read_to_string(dir.join("image.txt")).expect("missing image.txt"),
+        "image:tag@sha256:abc123\n"
+    );
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("printf '%s\\n' 'image:tag@sha256:abc123' > image.txt"));
 }
 
 #[test]
@@ -3416,6 +3454,35 @@ fn markdown_interpolates_earlier_captured_values_and_preserves_escaped_literals(
     let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
     assert!(readme.contains("Captured file: `audio_20770427_123500.mp3`"));
     assert!(readme.contains("Literal example: `@{audio_file_1}`"));
+}
+
+#[test]
+fn markdown_interpolation_supports_literal_at_before_capture() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("example.yaml"),
+        r#"entries:
+  - type: Command
+    commands: |
+      printf '%s\n' 'sha256:abc123'
+    capture:
+      - name: digest
+        source: stdout
+        stage: raw
+        pattern: .+
+
+  - type: Markdown
+    contents: |
+      FROM example.com/image:25.0.3\@@{digest}
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run", "--input-file", "example.yaml"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("FROM example.com/image:25.0.3@sha256:abc123"));
 }
 
 #[test]

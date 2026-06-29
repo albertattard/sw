@@ -73,6 +73,9 @@ Markdown can interpolate captured variables:
 Use `@@{name}` when you want the literal text `@{name}` in the generated
 Markdown.
 
+Use `\@@{name}` when the generated Markdown should contain a literal `@`
+immediately followed by the captured value, such as an image digest reference.
+
 Use `indent` when this entry should be nested inside a larger Markdown
 structure:
 

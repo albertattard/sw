@@ -8,7 +8,7 @@ use std::time::Duration;
 
 const CAPTURE_NAME_PATTERN: &str = r"^[A-Za-z_][A-Za-z0-9_]*$";
 const CAPTURE_REFERENCE_PATTERN: &str =
-    r"@@\{([A-Za-z_][A-Za-z0-9_]*)\}|@\{([A-Za-z_][A-Za-z0-9_]*)\}";
+    r"\\@|@@\{([A-Za-z_][A-Za-z0-9_]*)\}|@\{([A-Za-z_][A-Za-z0-9_]*)\}";
 
 fn push_error(
     errors: &mut Vec<ValidationIssue>,

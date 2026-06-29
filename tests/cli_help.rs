@@ -81,6 +81,7 @@ fn help_subcommand_for_known_topic_prints_targeted_help() {
     assert!(stdout.contains("cleanup"));
     assert!(stdout.contains("@{name}"));
     assert!(stdout.contains("@@{name}"));
+    assert!(stdout.contains("\\@@{name}"));
     assert!(stdout.contains("sw example Command"));
     assert!(stdout.contains("sw explain run"));
     assert!(stdout.contains("Total run time"));

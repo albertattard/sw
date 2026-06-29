@@ -28,7 +28,7 @@ const RFC3339_PATTERN: &str =
 const RFC1123_PATTERN: &str = r"[A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4} \d{2}:\d{2}:\d{2} GMT";
 const CAPTURE_NAME_PATTERN: &str = r"^[A-Za-z_][A-Za-z0-9_]*$";
 const CAPTURE_INTERPOLATION_PATTERN: &str =
-    r"@@\{([A-Za-z_][A-Za-z0-9_]*)\}|@\{([A-Za-z_][A-Za-z0-9_]*)\}";
+    r"\\@|@@\{([A-Za-z_][A-Za-z0-9_]*)\}|@\{([A-Za-z_][A-Za-z0-9_]*)\}";
 
 struct RenderState {
     datetime_anchors: HashMap<String, DatetimeShiftAnchor>,
@@ -2595,7 +2595,9 @@ fn interpolate_captured_variables_with_context(
         let matched = captures.get(0).expect("full regex match");
         output.push_str(&input[last_end..matched.start()]);
 
-        if let Some(escaped_name) = captures.get(1) {
+        if matched.as_str() == r"\@" {
+            output.push('@');
+        } else if let Some(escaped_name) = captures.get(1) {
             output.push_str(&format!("@{{{}}}", escaped_name.as_str()));
         } else if let Some(name) = captures.get(2) {
             if let Some(value) = captured_values.get(name.as_str()) {
