@@ -1785,6 +1785,46 @@ fn invalid_capture_forward_reference_returns_validation_failure() {
 }
 
 #[test]
+fn invalid_literal_at_capture_reference_returns_validation_failure() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Command
+    commands: |
+      printf '%s\n' 'image:tag\@@{digest}'
+
+  - type: Command
+    commands: |
+      printf '%s\n' 'sha256:abc123'
+    capture:
+      - name: digest
+        source: stdout
+        stage: raw
+        pattern: .+
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(
+        &[
+            "validate",
+            "--input-file",
+            "sw-runbook.yaml",
+            "--output-format",
+            "json",
+        ],
+        &dir,
+    );
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"valid\": false"));
+    assert!(stdout.contains("\"path\": \"entries[0].commands[0]\""));
+    assert!(stdout.contains("references capture variable before it is defined: `@{digest}`"));
+}
+
+#[test]
 fn capture_source_stderr_returns_validation_success() {
     let dir = prepare_workspace();
     fs::write(

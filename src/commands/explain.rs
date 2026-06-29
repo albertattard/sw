@@ -371,7 +371,7 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "`Command.capture` rules use `source: stdout` or `source: stderr`; `stage: raw` captures before `output.rewrite`, and `stage: rewritten` captures from the selected source after `output.rewrite`.",
                 "`Command.capture.pattern` stores the first regex capture group when present, otherwise it stores the full regex match.",
                 "Command output can trim outer empty lines with `output.trim_empty_lines` using `leading_trailing`, `leading`, `trailing`, or `none`.",
-                "Markdown may interpolate captured variables with `@{name}` and preserve the literal syntax with `@@{name}`.",
+                "Markdown may interpolate captured variables with `@{name}`, preserve the literal syntax with `@@{name}`, and prefix an interpolation with a literal at sign using `\\@@{name}`.",
                 "Markdown interpolation may reference values captured earlier or later in the runbook.",
                 "`Command.output.caption` may interpolate captures available when the command output is rendered, including captures produced by the same command.",
                 "Command-based prerequisite checks use a shorter default timeout of `5 seconds` unless they declare `timeout`.",

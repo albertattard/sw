@@ -98,7 +98,7 @@ fn explain_run_prints_concise_contract_summary() {
         "`Command.capture.pattern` stores the first regex capture group when present, otherwise it stores the full regex match."
     ));
     assert!(stdout.contains(
-        "Markdown may interpolate captured variables with `@{name}` and preserve the literal syntax with `@@{name}`."
+        "Markdown may interpolate captured variables with `@{name}`, preserve the literal syntax with `@@{name}`, and prefix an interpolation with a literal at sign using `\\@@{name}`."
     ));
     assert!(stdout.contains(
         "Markdown interpolation may reference values captured earlier or later in the runbook."

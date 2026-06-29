@@ -132,6 +132,8 @@ successfully before later entries:
 - Markdown can interpolate captured variables with `@{name}`.
 - Use `@@{name}` when the generated Markdown should contain a literal
   `@{name}`.
+- Use `\@@{name}` when the generated Markdown should contain a literal `@`
+  immediately followed by the captured value.
 - `datetime_shift.id` and `datetime_shift.use` reuse a shared timeline.
 - Rewrite `capture_as` exposes original and rewritten values for later use.
 

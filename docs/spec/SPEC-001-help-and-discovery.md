@@ -82,9 +82,9 @@ Exit codes:
       `sw example Command` and `sw explain run` for runbook-authored output
       fields such as `trim_empty_lines`, `stream`, and `cleanup`.
 - [x] `sw help run` makes it clear that captured variables can be referenced
-      from Markdown using `@{name}` and escaped with `@@{name}`, while
-      directing users to `sw explain run` for the wider interpolation
-      contract.
+      from Markdown using `@{name}`, escaped with `@@{name}`, and prefixed
+      with a literal at sign using `\@@{name}`, while directing users to
+      `sw explain run` for the wider interpolation contract.
 - [x] `sw help run`, `sw help check`, and `sw help validate` document
       `--input-file=-` for stdin-backed runbook input and `--input-format` for
       explicit YAML stdin input.

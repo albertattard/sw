@@ -750,6 +750,9 @@ in the runbook.
   `@{name}` syntax.
 - `@@{name}` escapes that syntax and leaves a literal `@{name}` in the command
   or Markdown content.
+- `\@` renders a literal `@`, allowing `\@@{name}` to render a literal `@`
+  followed by the captured value while preserving `@@{name}` as the escape for
+  literal placeholder syntax.
 - Markdown entries may interpolate arithmetic expressions using
   `@{= expression }` syntax.
 - `expression` may reference captured variables by name without the `@{...}`
@@ -1035,6 +1038,8 @@ in the runbook.
 - [x] Markdown entries may interpolate `@{name}` when that variable is
       captured anywhere in the runbook.
 - [x] `@@{name}` in Markdown content preserves the literal `@{name}`.
+- [x] `\@@{name}` in Markdown content renders a literal `@` followed by the
+      captured value.
 - [x] Markdown entries may interpolate values captured later in the runbook.
 - [x] A Markdown entry that references a variable that is never captured
       anywhere in the runbook causes the run to fail.
@@ -1380,6 +1385,8 @@ in the runbook.
       cannot be parsed under the declared parsing rules, the run fails.
 - [x] Given `@@{name}` in command or Markdown content, the literal `@{name}`
       is preserved without interpolation.
+- [x] Given `\@@{name}` in command or Markdown content, the output includes a
+      literal `@` followed by the captured value.
 
 ### Command Output Rendering
 
