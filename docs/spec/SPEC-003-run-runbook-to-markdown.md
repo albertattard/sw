@@ -4,7 +4,7 @@ title: Run Runbook to Markdown
 status: in_progress
 priority: high
 owner: albertattard
-last_updated: 2026-04-23
+last_updated: 2026-06-29
 ---
 
 ## Problem
@@ -588,6 +588,39 @@ in the runbook.
   displayed command fails safely if the directory change fails.
 - `sw format` and `sw convert` preserve whichever compatible field name is
   authored; they do not silently migrate `working_dir` to `working_directory`.
+- A `Command` entry may declare `execute_when` to make command execution
+  conditional while still rendering the command block.
+- If `execute_when` is omitted, the command always executes.
+- If `execute_when` evaluates to true, the command executes normally.
+- If `execute_when` evaluates to false, the command block is rendered but the
+  command body is not executed.
+- Skipped commands do not render an automatic skipped/executed marker in the
+  generated Markdown. Runbook authors who want the document to describe
+  platform-specific choices should add surrounding `Markdown` entries.
+- `execute_when` applies only to command execution. The rendered command text
+  remains the same as it would be without `execute_when`.
+- In this increment, `execute_when` supports a single OS fact comparison:
+  `fact: os` with `equals`.
+- `execute_when.fact` must be `os`.
+- `execute_when.equals` must be one of `macos`, `linux`, or `windows`.
+- The `os` fact is evaluated from the operating system where `sw run` is
+  running.
+- `macos` matches Rust target OS `macos`.
+- `linux` matches Rust target OS `linux`.
+- `windows` matches Rust target OS `windows`.
+- Unknown `execute_when` properties are invalid.
+- Unknown `fact` values are invalid.
+- Unknown `equals` values for `fact: os` are invalid.
+- A skipped command does not evaluate `preconditions`, does not start a shell,
+  does not run assertions, does not capture values, does not render command
+  output, and does not register cleanup.
+- Because skipped commands do not capture values, later `Command` entries must
+  not reference captures that can only be produced by a conditionally skipped
+  command.
+- A skipped command is not a failure and does not change the run exit code.
+- `execute_when` is intentionally structured so later increments can add
+  additional facts or boolean composition without introducing shell-specific
+  condition expressions.
 - A `Command` entry may declare `indent`.
 - If `indent` is present, the rendered command section is prefixed with that
   number of leading spaces on each rendered line.

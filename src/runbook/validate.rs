@@ -1,3 +1,4 @@
+use super::conditions::{has_execute_when, validate_execute_when};
 use super::{ValidationIssue, ValidationResult};
 use regex::Regex;
 use serde_json::{Map, Value};
@@ -1378,6 +1379,7 @@ fn validate_entry(
                     && key != "working_directory"
                     && key != "indent"
                     && key != "debug"
+                    && key != "execute_when"
                     && key != "output"
                     && key != "assert"
                     && key != "timeout"
@@ -1445,6 +1447,15 @@ fn validate_entry(
                 );
             }
 
+            let command_is_conditional = has_execute_when(object);
+            if let Some(execute_when) = object.get("execute_when") {
+                validate_execute_when(
+                    execute_when,
+                    &format!("{path}.execute_when"),
+                    &mut context.errors,
+                );
+            }
+
             if let Some(output) = object.get("output") {
                 validate_output_with_context(
                     output,
@@ -1454,10 +1465,12 @@ fn validate_entry(
                     &mut context.global_capture_names,
                     &context.available_capture_names,
                 );
-                register_rewrite_generated_capture_names(
-                    output,
-                    &mut context.available_capture_names,
-                );
+                if !command_is_conditional {
+                    register_rewrite_generated_capture_names(
+                        output,
+                        &mut context.available_capture_names,
+                    );
+                }
             }
 
             if let Some(assertion) = object.get("assert") {
@@ -1484,7 +1497,7 @@ fn validate_entry(
                     &mut context.global_capture_names,
                 );
 
-                if let Some(captures) = capture.as_array() {
+                if !command_is_conditional && let Some(captures) = capture.as_array() {
                     for capture in captures {
                         if let Some(name) = capture.get("name").and_then(Value::as_str) {
                             context.available_capture_names.insert(name.to_string());

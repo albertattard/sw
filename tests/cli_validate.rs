@@ -61,11 +61,93 @@ fn write_runbook(dir: &Path, fixture_name: &str, target_name: &str) -> PathBuf {
     target
 }
 
+fn write_inline_runbook(dir: &Path, contents: &str) -> PathBuf {
+    let target = dir.join("sw-runbook.yaml");
+    fs::write(&target, contents).expect("failed to write runbook");
+    target
+}
+
 fn run(args: &[&str]) -> std::process::Output {
     Command::new(env!("CARGO_BIN_EXE_sw"))
         .args(args)
         .output()
         .expect("failed to execute sw")
+}
+
+#[test]
+fn validate_accepts_command_execute_when_os() {
+    let dir = prepare_workspace();
+    write_inline_runbook(
+        &dir,
+        r#"entries:
+  - type: Command
+    execute_when:
+      fact: os
+      equals: linux
+    commands: echo linux
+"#,
+    );
+
+    let output = run_in_dir(&["validate"], &dir);
+
+    assert!(output.status.success());
+}
+
+#[test]
+fn validate_rejects_invalid_command_execute_when() {
+    let dir = prepare_workspace();
+    write_inline_runbook(
+        &dir,
+        r#"entries:
+  - type: Command
+    execute_when:
+      fact: arch
+      equals: arm64
+      extra: value
+    commands: echo invalid
+"#,
+    );
+
+    let output = run_in_dir(&["validate"], &dir);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("entries[0].execute_when.fact"));
+    assert!(stdout.contains("must be `os`"));
+    assert!(stdout.contains("entries[0].execute_when.equals"));
+    assert!(stdout.contains("must be one of `macos`, `linux`, `windows`"));
+    assert!(stdout.contains("entries[0].execute_when.extra"));
+    assert!(stdout.contains("is not a supported execute_when property"));
+}
+
+#[test]
+fn validate_rejects_reference_to_conditional_command_capture() {
+    let dir = prepare_workspace();
+    write_inline_runbook(
+        &dir,
+        r#"entries:
+  - type: Command
+    execute_when:
+      fact: os
+      equals: linux
+    commands: echo token
+    capture:
+      - name: token
+        source: stdout
+        stage: raw
+        pattern: token
+
+  - type: Command
+    commands: echo @{token}
+"#,
+    );
+
+    let output = run_in_dir(&["validate"], &dir);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("entries[1].commands[0]"));
+    assert!(stdout.contains("references capture variable before it is defined: `@{token}`"));
 }
 
 #[test]

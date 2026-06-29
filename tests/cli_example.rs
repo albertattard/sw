@@ -20,6 +20,8 @@ fn command_example_defaults_to_valid_yaml_entry() {
     assert_eq!(value["debug"], true);
     assert_eq!(value["working_directory"], "demo");
     assert!(value.get("working_dir").is_none());
+    assert_eq!(value["execute_when"]["fact"], "os");
+    assert_eq!(value["execute_when"]["equals"], "linux");
     assert!(value["commands"].is_array());
     assert!(value["assert"].is_object());
     assert_eq!(value["output"]["stream"], "combined");
@@ -78,6 +80,8 @@ fn command_example_prints_valid_json_entry_when_requested() {
     assert_eq!(value["debug"], true);
     assert_eq!(value["working_directory"], "demo");
     assert!(value.get("working_dir").is_none());
+    assert_eq!(value["execute_when"]["fact"], "os");
+    assert_eq!(value["execute_when"]["equals"], "linux");
     assert!(value["commands"].is_array());
     assert!(value["assert"].is_object());
     assert_eq!(value["output"]["stream"], "combined");
