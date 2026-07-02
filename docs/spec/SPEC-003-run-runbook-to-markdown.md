@@ -958,6 +958,8 @@ in the runbook.
 - If `pattern` and `custom_format` are used together, the matched output is
   parsed and rewritten using that custom format while preserving the same
   textual style.
+- A custom format that includes a numeric UTC offset such as `%z` preserves
+  and renders that offset in the rewritten output.
 - If `pattern` and `custom_format` describe a time-only value without a date,
   `datetime_shift` borrows the date and offset from the configured or inherited
   base timestamp, applies the shared shift, and then renders only the original
@@ -1572,6 +1574,8 @@ in the runbook.
 - [x] Given a `datetime_shift` rewrite rule with `pattern` and
       `custom_format`, matched datetimes are rewritten while preserving that
       custom textual format.
+- [x] Given a `datetime_shift` rewrite rule whose `custom_format` includes
+      `%z`, the rewritten datetime retains and renders its numeric UTC offset.
 - [x] Given a `datetime_shift` rewrite rule with `pattern` and
       `custom_format` that describe a time-only value, the value is shifted
       using the date and offset from the configured or inherited base

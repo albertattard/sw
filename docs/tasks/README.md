@@ -71,6 +71,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-170: Preserve Custom Datetime Shift Offsets](rewrite/TASK-170-preserve-custom-datetime-shift-offsets.md)
 - [x] [TASK-169: Support Command Execute When OS](run/TASK-169-support-command-execute-when-os.md)
 - [x] [TASK-168: Support Lowercase Dockerfile Fence Label](display-file/TASK-168-support-lowercase-dockerfile-fence-label.md)
 - [x] [TASK-167: Surface DisplayFile Offset In Example Output](example/TASK-167-surface-display-file-offset-in-example.md)
