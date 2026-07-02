@@ -1,0 +1,21 @@
+{
+  "entries": [
+    {
+      "type": "Command",
+      "commands": [
+        "printf '[12/Mar/2026:13:53:47 +0100] GET /health\\n'"
+      ],
+      "output": {
+        "caption": "Shifted access log",
+        "rewrite": [
+          {
+            "type": "datetime_shift",
+            "pattern": "\\[\\d{2}/[A-Za-z]{3}/\\d{4}:\\d{2}:\\d{2}:\\d{2} [+-]\\d{4}\\]",
+            "custom_format": "[%d/%b/%Y:%H:%M:%S %z]",
+            "base": "2077-04-27T12:34:56.789+01:00"
+          }
+        ]
+      }
+    }
+  ]
+}

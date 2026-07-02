@@ -3378,9 +3378,7 @@ fn format_shift_datetime(
         DatetimeShiftMatcher::BuiltIn(DatetimeShiftFormat::Rfc1123) => {
             datetime.format("%a, %d %b %Y %H:%M:%S GMT").to_string()
         }
-        DatetimeShiftMatcher::Custom(custom_format) => {
-            datetime.naive_local().format(custom_format).to_string()
-        }
+        DatetimeShiftMatcher::Custom(custom_format) => datetime.format(custom_format).to_string(),
     }
 }
 

@@ -3033,6 +3033,22 @@ fn output_rewrite_datetime_shift_supports_time_only_custom_formats() {
 }
 
 #[test]
+fn output_rewrite_datetime_shift_supports_custom_formats_with_numeric_offsets() {
+    let dir = prepare_workspace();
+    write_runbook(
+        &dir,
+        "sw-runbook-run-output-rewrite-datetime-shift-custom-offset.json",
+        "sw-runbook.json",
+    );
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("[27/Apr/2077:12:34:56 +0100] GET /health"));
+}
+
+#[test]
 fn output_rewrite_datetime_shift_time_only_can_reuse_shared_anchor() {
     let dir = prepare_workspace();
     write_runbook(
