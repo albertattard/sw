@@ -1,9 +1,10 @@
 use super::RenderError;
 use super::conditions::command_should_execute;
 use super::execute::{
-    CleanupBlock, CommandExecution, apply_patch_entry, cleanup_block, ensure_assertions,
-    execute_command, format_command_failure, patch_target_path, patch_text_for, run_cleanup_blocks,
-    run_patch_restores, snapshot_patch_target, timeout_label,
+    CleanupBlock, CommandExecution, apply_patch_entry, change_command_directory,
+    cleanup_block_in_directory, ensure_assertions, ensure_assertions_in_directory, execute_command,
+    execute_command_in_directory, format_command_failure, patch_target_path, patch_text_for,
+    run_cleanup_blocks, run_patch_restores, snapshot_patch_target, timeout_label,
 };
 use crate::cli::VerboseMode;
 use chrono::Timelike;
@@ -13,7 +14,7 @@ use serde_json::Value;
 use std::collections::HashMap;
 use std::fs;
 use std::io::{self, IsTerminal, Write};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::{
     Arc,
@@ -107,6 +108,8 @@ pub(crate) fn render_markdown(
             RenderError::Operational("Runbook is missing an entries array".to_string())
         })?;
     let start_index = start_index_for(entries, options.start_at)?;
+    let mut active_command_dir =
+        active_command_directory_before(entries, start_index, execution_root)?;
 
     let mut sections = Vec::new();
     let mut cleanups: Vec<CleanupBlock> = Vec::new();
@@ -136,6 +139,14 @@ pub(crate) fn render_markdown(
                 entry: entry.clone(),
                 lines: markdown_lines(entry)?,
             },
+            "ChangeDirectory" => {
+                active_command_dir =
+                    change_command_directory(entry, execution_root, &active_command_dir)?;
+                RenderSection::DeferredMarkdown {
+                    entry: entry.clone(),
+                    lines: change_directory_lines(entry, execution_root, &active_command_dir)?,
+                }
+            }
             "DisplayFile" => RenderSection::Ready(render_display_file(entry, execution_root)?),
             "DisplayUrl" => RenderSection::Ready(render_display_url(entry)?),
             "Prerequisite" => RenderSection::Ready(render_prerequisite_entry(entry)?),
@@ -161,9 +172,10 @@ pub(crate) fn render_markdown(
                 if !command_should_execute(entry)? {
                     RenderSection::Ready(render_skipped_command(entry, &state)?)
                 } else {
-                    let cleanup = cleanup_block(
+                    let cleanup = cleanup_block_in_directory(
                         entry,
                         execution_root,
+                        &active_command_dir,
                         entry_debug_enabled(entry, state.debug_all_entries),
                     )?;
 
@@ -173,7 +185,13 @@ pub(crate) fn render_markdown(
                         cleanup.as_ref()
                     };
 
-                    match render_command(entry, execution_root, &mut state, timeout_cleanup) {
+                    match render_command(
+                        entry,
+                        execution_root,
+                        &active_command_dir,
+                        &mut state,
+                        timeout_cleanup,
+                    ) {
                         Ok(section) => {
                             if let Some(cleanup) = cleanup {
                                 cleanups.push(cleanup);
@@ -337,6 +355,21 @@ fn start_index_for(entries: &[Value], start_at: Option<usize>) -> Result<usize, 
     }
 
     Ok(entry_number - 1)
+}
+
+fn active_command_directory_before(
+    entries: &[Value],
+    start_index: usize,
+    execution_root: &Path,
+) -> Result<PathBuf, RenderError> {
+    let mut active_command_dir = execution_root.to_path_buf();
+    for entry in &entries[..start_index] {
+        if entry.get("type").and_then(Value::as_str) == Some("ChangeDirectory") {
+            active_command_dir =
+                change_command_directory(entry, execution_root, &active_command_dir)?;
+        }
+    }
+    Ok(active_command_dir)
 }
 
 fn preserved_state_message(cleanup_count: usize, patch_restore_count: usize) -> Option<String> {
@@ -594,6 +627,11 @@ fn entry_summary(entry: &Value, execution_root: &Path) -> String {
             .to_string(),
         "Markdown" => first_non_empty_string_line(entry.get("contents"))
             .unwrap_or_else(|| "Markdown".to_string()),
+        "ChangeDirectory" => entry
+            .get("path")
+            .and_then(Value::as_str)
+            .map(|path| format!("directory {path}"))
+            .unwrap_or_else(|| "directory".to_string()),
         "Command" => first_non_empty_string_line(entry.get("commands"))
             .unwrap_or_else(|| "Command".to_string()),
         "DisplayFile" => display_file_summary(entry, execution_root),
@@ -1515,6 +1553,33 @@ fn markdown_lines(entry: &Value) -> Result<Vec<String>, RenderError> {
     )
 }
 
+fn change_directory_lines(
+    entry: &Value,
+    execution_root: &Path,
+    active_command_dir: &Path,
+) -> Result<Vec<String>, RenderError> {
+    let mut lines = match entry.get("contents") {
+        Some(contents) => prose_lines(
+            contents,
+            "ChangeDirectory contents must be a string or an array of strings",
+            "ChangeDirectory contents must contain only strings",
+        )?,
+        None => Vec::new(),
+    };
+
+    if !lines.is_empty() {
+        lines.push(String::new());
+    }
+    let relative_path = active_command_dir
+        .strip_prefix(execution_root)
+        .unwrap_or(active_command_dir);
+    lines.push(format!(
+        "> Working directory: `{}/`",
+        relative_path.display()
+    ));
+    Ok(lines)
+}
+
 fn render_sections(
     sections: &[RenderSection],
     captured_values: &HashMap<String, String>,
@@ -1619,6 +1684,7 @@ fn render_patch(
 fn render_command(
     entry: &Value,
     execution_root: &Path,
+    active_command_dir: &Path,
     state: &mut RenderState,
     timeout_cleanup: Option<&CleanupBlock>,
 ) -> Result<String, RenderError> {
@@ -1635,7 +1701,13 @@ fn render_command(
     let command_text = resolved_command_lines.join("\n");
     let rendered_command_text = render_command_text(entry, &command_text)?;
     let mut section = fenced_block(Some("shell"), &rendered_command_text);
-    let execution = execute_command(entry, &command_text, execution_root, timeout_cleanup)?;
+    let execution = execute_command_in_directory(
+        entry,
+        &command_text,
+        execution_root,
+        active_command_dir,
+        timeout_cleanup,
+    )?;
     let debug_enabled = entry_debug_enabled(entry, state.debug_all_entries);
     let mut debug_lines = Vec::new();
     if debug_enabled {
@@ -1726,7 +1798,7 @@ fn render_command(
         });
     }
 
-    ensure_assertions(entry, &execution, execution_root)?;
+    ensure_assertions_in_directory(entry, &execution, execution_root, active_command_dir)?;
     if let Err(err) = extract_captured_values(
         entry,
         &execution.stdout,

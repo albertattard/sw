@@ -106,6 +106,24 @@ fn format_inserts_blank_lines_between_yaml_entries() {
 }
 
 #[test]
+fn format_keeps_change_directory_contents_as_a_literal_block_scalar() {
+    let dir = prepare_workspace();
+    let path = write_file(
+        &dir,
+        "sw-runbook.yaml",
+        "entries:\n  - {type: ChangeDirectory, path: demo, contents: \"Work in the fork.\\nThen run the application.\"}\n",
+    );
+
+    let output = run_in_dir(&["format"], &dir);
+
+    assert!(output.status.success());
+    let contents = fs::read_to_string(path).expect("missing formatted file");
+    assert!(contents.contains("type: ChangeDirectory"));
+    assert!(contents.contains("contents: |-"));
+    assert!(contents.contains("Work in the fork."));
+}
+
+#[test]
 fn format_indents_nested_yaml_sequences_under_keys() {
     let dir = prepare_workspace();
     let path = write_file(

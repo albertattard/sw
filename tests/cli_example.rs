@@ -154,6 +154,19 @@ fn breakpoint_example_prints_valid_json_entry_when_requested() {
 }
 
 #[test]
+fn change_directory_example_prints_valid_yaml_entry() {
+    let output = run(&["example", "ChangeDirectory"]);
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let value: serde_json::Value =
+        serde_norway::from_str(&stdout).expect("example output should be valid yaml");
+    assert_eq!(value["type"], "ChangeDirectory");
+    assert_eq!(value["path"], "demo-supermarket");
+    assert!(value["contents"].as_str().is_some());
+}
+
+#[test]
 fn display_file_example_prints_valid_yaml_entry() {
     let output = run(&["example", "DisplayFile"]);
 

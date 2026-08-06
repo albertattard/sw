@@ -33,6 +33,8 @@ sw example Command
   workflow runs.
 - Use `Breakpoint` to intentionally stop a run while debugging or developing a
   runbook.
+- Use `ChangeDirectory` to establish a directory for later normal command
+  entries without showing shell `cd` plumbing in the generated document.
 - Use `Patch` to temporarily modify a file during a run and restore it
   afterward.
 - Use `Command` to run shell commands and render verified output.
@@ -85,6 +87,25 @@ structure:
   contents: |
     This line is rendered with two leading spaces.
 ```
+
+## ChangeDirectory
+
+Use `ChangeDirectory` when several following normal commands should run from a
+project subdirectory while remaining distinct, readable documentation steps.
+
+```yaml
+- type: ChangeDirectory
+  path: demo-supermarket
+  contents: |
+    Work in the cloned fork for the remaining application steps.
+```
+
+`path` is relative to the active command directory, must already exist when the
+entry runs, and must stay within the runbook execution root. The generated
+document renders the optional `contents` followed by a visible working-directory
+note. Later commands run there unless they declare their own
+`working_directory`. `ChangeDirectory` does not affect prerequisite checks,
+display entries, or patches.
 
 ## DisplayFile
 

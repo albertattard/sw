@@ -20,7 +20,7 @@ source of truth for the command contract. For exact command-line syntax, use
 
 - [Runbook entry reference](./entities.md): choose which `entries:` item to
   write, including `Heading`, `Markdown`, `DisplayFile`, `DisplayUrl`,
-  `Prerequisite`, `Breakpoint`, `Patch`, and `Command`.
+  `Prerequisite`, `Breakpoint`, `ChangeDirectory`, `Patch`, and `Command`.
 
 ## Subcommand Guides
 

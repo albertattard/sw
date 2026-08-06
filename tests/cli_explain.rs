@@ -471,7 +471,7 @@ fn explain_skill_prints_skill_document_to_stdout() {
     assert!(stdout.contains("sw explain --all"));
     assert!(stdout.contains("## Common Workflows"));
     assert!(stdout.contains(
-        "entries such as `Breakpoint`, `Command`, `DisplayFile`, `DisplayUrl`, `Patch`, or `Prerequisite`"
+        "entries such as `Breakpoint`, `ChangeDirectory`, `Command`, `DisplayFile`, `DisplayUrl`, `Patch`, or `Prerequisite`"
     ));
     assert!(stdout.contains("Use `sw validate --input-file <runbook>` after editing a runbook."));
     assert!(stdout.contains(

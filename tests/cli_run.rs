@@ -862,6 +862,96 @@ fn start_at_before_subcommand_uses_default_run_behavior() {
 }
 
 #[test]
+fn change_directory_sets_command_cleanup_and_assertion_context_without_rendering_shell_cd() {
+    let dir = prepare_workspace();
+    fs::create_dir_all(dir.join("project")).expect("failed to create project directory");
+    fs::create_dir_all(dir.join("override")).expect("failed to create override directory");
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: ChangeDirectory
+    path: project
+    contents: |
+      Commands run from @{directory}.
+
+  - type: Command
+    commands: |
+      pwd
+      printf command > command-marker.txt
+    capture:
+      - name: directory
+        source: stdout
+        stage: raw
+        pattern: "(.+)"
+    assert:
+      checks:
+        - source: file
+          path: command-marker.txt
+          exists: true
+    cleanup: |
+      printf cleanup > cleanup-marker.txt
+
+  - type: Command
+    working_directory: override
+    commands: |
+      printf override > override-marker.txt
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    assert_eq!(
+        fs::read_to_string(dir.join("project/command-marker.txt")).expect("missing command marker"),
+        "command"
+    );
+    assert_eq!(
+        fs::read_to_string(dir.join("project/cleanup-marker.txt")).expect("missing cleanup marker"),
+        "cleanup"
+    );
+    assert_eq!(
+        fs::read_to_string(dir.join("override/override-marker.txt"))
+            .expect("missing override marker"),
+        "override"
+    );
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("> Working directory: `project/`"));
+    assert!(readme.contains("Commands run from"));
+    assert!(readme.contains("project"));
+    assert!(!readme.contains("cd project"));
+}
+
+#[test]
+fn start_at_reconstructs_change_directory_context() {
+    let dir = prepare_workspace();
+    fs::create_dir_all(dir.join("project")).expect("failed to create project directory");
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: ChangeDirectory
+    path: project
+    contents: This entry is skipped.
+
+  - type: Command
+    commands: |
+      printf resumed > resumed-marker.txt
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run", "--start-at", "2"], &dir);
+
+    assert!(output.status.success());
+    assert_eq!(
+        fs::read_to_string(dir.join("project/resumed-marker.txt")).expect("missing resumed marker"),
+        "resumed"
+    );
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(!readme.contains("This entry is skipped."));
+}
+
+#[test]
 fn start_at_rejects_zero() {
     let dir = prepare_workspace();
     write_runbook(&dir, "sw-runbook-run-success.json", "sw-runbook.json");
