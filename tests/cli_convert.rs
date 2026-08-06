@@ -83,6 +83,24 @@ fn convert_auto_detects_yaml_default_and_writes_json() {
 }
 
 #[test]
+fn convert_preserves_change_directory_contents() {
+    let dir = prepare_workspace();
+    write_file(
+        &dir,
+        "sw-runbook.json",
+        r#"{"entries":[{"type":"ChangeDirectory","path":"demo","contents":["Work in the fork.","Then run the application."]}]}"#,
+    );
+
+    let output = run_in_dir(&["convert"], &dir);
+
+    assert!(output.status.success());
+    let converted = fs::read_to_string(dir.join("sw-runbook.yaml")).expect("missing yaml output");
+    assert!(converted.contains("type: ChangeDirectory"));
+    assert!(converted.contains("contents: |-"));
+    assert!(converted.contains("Work in the fork."));
+}
+
+#[test]
 fn convert_uses_yml_input_and_writes_json() {
     let dir = prepare_workspace();
     write_file(

@@ -1210,6 +1210,42 @@ fn validate_entry(
                 "is required",
             ),
         },
+        "ChangeDirectory" => {
+            for key in object.keys() {
+                if key != "type" && key != "path" && key != "contents" {
+                    push_error(
+                        &mut context.errors,
+                        format!("{path}.{key}"),
+                        "is not a supported ChangeDirectory property",
+                    );
+                }
+            }
+
+            require_string(object, "path", &path, &mut context.errors);
+            if let Some(path_value) = object.get("path").and_then(Value::as_str)
+                && std::path::Path::new(path_value).is_absolute()
+            {
+                push_error(
+                    &mut context.errors,
+                    format!("{path}.path"),
+                    "must be a relative path",
+                );
+            }
+
+            if let Some(contents) = object.get("contents") {
+                validate_string_or_string_array(
+                    contents,
+                    &format!("{path}.contents"),
+                    &mut context.errors,
+                );
+                validate_capture_references(
+                    contents,
+                    &format!("{path}.contents"),
+                    &mut context.errors,
+                    &context.all_capture_names,
+                );
+            }
+        }
         "DisplayFile" => {
             for key in object.keys() {
                 if key != "type"

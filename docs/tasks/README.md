@@ -71,6 +71,8 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-172: Avoid Duplicate Feature Branch CI](repo-process/TASK-172-avoid-duplicate-feature-branch-ci.md)
+- [x] [TASK-171: Support ChangeDirectory Entry](run/TASK-171-support-change-directory-entry.md)
 - [x] [TASK-170: Preserve Custom Datetime Shift Offsets](rewrite/TASK-170-preserve-custom-datetime-shift-offsets.md)
 - [x] [TASK-169: Support Command Execute When OS](run/TASK-169-support-command-execute-when-os.md)
 - [x] [TASK-168: Support Lowercase Dockerfile Fence Label](display-file/TASK-168-support-lowercase-dockerfile-fence-label.md)

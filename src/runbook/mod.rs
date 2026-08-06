@@ -208,6 +208,7 @@ fn normalize_scalar_capable_fields_in_object(map: &mut Map<String, Value>) {
     if let Some(entry_type) = entry_type.as_deref() {
         match entry_type {
             "Markdown" => normalize_string_array_field(map, "contents"),
+            "ChangeDirectory" => normalize_string_array_field(map, "contents"),
             "Command" => {
                 normalize_string_array_field(map, "commands");
                 normalize_string_array_field(map, "cleanup");

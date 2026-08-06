@@ -3,7 +3,7 @@ name: Dependency Hygiene
 on:
   push:
     branches:
-      - "**"
+      - main
     paths:
       - "Cargo.toml"
       - "Cargo.lock"
@@ -11,6 +11,8 @@ on:
       - "rust-toolchain.toml"
       - ".github/workflows/dependency-hygiene.yml"
   pull_request:
+    branches:
+      - main
     paths:
       - "Cargo.toml"
       - "Cargo.lock"

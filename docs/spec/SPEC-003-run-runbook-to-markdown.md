@@ -4,7 +4,7 @@ title: Run Runbook to Markdown
 status: in_progress
 priority: high
 owner: albertattard
-last_updated: 2026-06-29
+last_updated: 2026-08-06
 ---
 
 ## Problem
@@ -109,6 +109,8 @@ in the runbook.
   `DisplayFile.path`, `Patch.path`, `Command.working_directory`, legacy
   `Command.working_dir`, command execution, explicit command cleanup, and
   command file assertions.
+- `ChangeDirectory.path` is resolved from the active command directory and
+  establishes that directory for later normal `Command` entries.
 - If `--verbose` is not provided, progress output is suppressed.
 - If `--verbose-mode` is not provided, it defaults to `auto`.
 - If `--verbose` is not provided, `--verbose-mode` has no effect.
@@ -173,6 +175,7 @@ in the runbook.
 - `DisplayFile` entry summaries use the file path and any declared line range.
 - `Prerequisite` entry summaries identify that prerequisite checks are being
   processed.
+- `ChangeDirectory` entry summaries identify the selected directory.
 - Summaries are single-line and may be truncated for readability.
 - Verbose progress output does not print full long-form Markdown content or
   full multi-line command blocks.
@@ -556,6 +559,38 @@ in the runbook.
   registered patch restores even if an earlier restore step fails.
 - A run with one or more patch restore failures is considered failed.
 
+### ChangeDirectory Entries
+
+- A `ChangeDirectory` entry changes the active command directory for later
+  normal `Command` entries without running a shell command.
+- `ChangeDirectory.path` is required and must be a string.
+- `ChangeDirectory.path` is relative to the active command directory, which
+  starts as the execution root.
+- The resolved directory must already exist, be a directory, and remain within
+  the execution-root directory tree after normalization.
+- Absolute paths are not supported.
+- `ChangeDirectory.contents` is optional Markdown that explains the transition.
+- `contents` may be either a single string or an array of strings. Scalar
+  contents use the same newline normalization and capture interpolation rules
+  as `Markdown.contents`.
+- The entry renders its `contents`, when present, followed by the note
+  `> Working directory: \`<path>/\``. The note is always rendered so the
+  generated document keeps command context visible.
+- The path in the rendered note is relative to the execution root.
+- A later `Command` with no `working_directory` or legacy `working_dir` runs in
+  the active command directory. Its explicit cleanup block and file assertions
+  use that same directory.
+- A `Command.working_directory` or legacy `Command.working_dir` remains an
+  execution-root-relative explicit override; its existing behavior does not
+  change.
+- `ChangeDirectory` does not affect `DisplayFile`, `DisplayUrl`, `Patch`, or
+  `Prerequisite` entries. Prerequisite checks run before normal command
+  processing and continue to use the execution root or their existing explicit
+  configuration.
+- When `--start-at` skips earlier entries, `sw run` applies preceding
+  `ChangeDirectory` entries to reconstruct the active command directory. It
+  does not render their contents or execute skipped entries.
+
 ### Command Entries
 
 - `Command` entries render their `commands` as fenced shell code blocks.
@@ -576,7 +611,8 @@ in the runbook.
 - `working_directory` is resolved relative to the execution root.
 - `working_directory` applies to command execution, that command entry's
   explicit cleanup block, and file assertions for that command entry.
-- If `working_directory` is omitted, command execution uses the execution root.
+- If `working_directory` is omitted, command execution uses the active command
+  directory, initially the execution root.
 - `working_directory` must remain within the execution root directory tree
   after normalization.
 - Absolute `working_directory` paths are not supported in this increment.

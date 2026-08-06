@@ -2052,3 +2052,45 @@ fn invalid_markdown_reference_without_capture_returns_validation_failure() {
     assert!(stdout.contains("\"valid\": false"));
     assert!(stdout.contains("\"path\": \"entries[0].contents[0]\""));
 }
+
+#[test]
+fn change_directory_accepts_scalar_contents_and_rejects_absolute_paths() {
+    let dir = prepare_workspace();
+    let runbook = write_inline_runbook(
+        &dir,
+        r#"entries:
+  - type: ChangeDirectory
+    path: project
+    contents: Work in @{directory}.
+
+  - type: Command
+    commands: pwd
+    capture:
+      - name: directory
+        source: stdout
+        stage: raw
+        pattern: "(.+)"
+"#,
+    );
+
+    let output = run_in_dir(
+        &["validate", "--input-file", runbook.to_str().expect("path")],
+        &dir,
+    );
+    assert!(output.status.success());
+
+    fs::write(
+        &runbook,
+        r#"entries:
+  - type: ChangeDirectory
+    path: /tmp
+"#,
+    )
+    .expect("failed to write invalid runbook");
+    let output = run_in_dir(
+        &["validate", "--input-file", runbook.to_str().expect("path")],
+        &dir,
+    );
+    assert_eq!(output.status.code(), Some(2));
+    assert!(String::from_utf8_lossy(&output.stdout).contains("must be a relative path"));
+}

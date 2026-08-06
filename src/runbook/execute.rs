@@ -109,9 +109,10 @@ fn uses_automatic_process_cleanup(entry: &Value) -> bool {
     entry.get("cleanup").is_none()
 }
 
-pub(crate) fn cleanup_block(
+pub(crate) fn cleanup_block_in_directory(
     entry: &Value,
     execution_root: &Path,
+    active_command_dir: &Path,
     debug_enabled: bool,
 ) -> Result<Option<CleanupBlock>, RenderError> {
     let Some(cleanup) = entry.get("cleanup") else {
@@ -125,7 +126,11 @@ pub(crate) fn cleanup_block(
             "Command cleanup must be a string or an array of strings",
             "Command cleanup must contain only strings",
         )?,
-        working_dir: resolve_command_working_dir(entry, execution_root)?,
+        working_dir: resolve_command_working_dir_in_directory(
+            entry,
+            execution_root,
+            active_command_dir,
+        )?,
         debug_enabled,
     }))
 }
@@ -165,9 +170,26 @@ pub(crate) fn execute_command(
     execution_root: &Path,
     timeout_cleanup: Option<&CleanupBlock>,
 ) -> Result<CommandExecution, RenderError> {
+    execute_command_in_directory(
+        entry,
+        command,
+        execution_root,
+        execution_root,
+        timeout_cleanup,
+    )
+}
+
+pub(crate) fn execute_command_in_directory(
+    entry: &Value,
+    command: &str,
+    execution_root: &Path,
+    active_command_dir: &Path,
+    timeout_cleanup: Option<&CleanupBlock>,
+) -> Result<CommandExecution, RenderError> {
     let timeout = timeout_for_entry(entry)?;
     let auto_cleanup_processes = uses_automatic_process_cleanup(entry);
-    let working_dir = resolve_command_working_dir(entry, execution_root)?;
+    let working_dir =
+        resolve_command_working_dir_in_directory(entry, execution_root, active_command_dir)?;
 
     let mut process = Command::new("sh");
     process.arg("-lc").arg(command);
@@ -352,6 +374,17 @@ pub(crate) fn ensure_assertions(
 ) -> Result<(), RenderError> {
     ensure_expected_exit_code(entry, execution)?;
     ensure_assert_checks(entry, execution, execution_root)?;
+    Ok(())
+}
+
+pub(crate) fn ensure_assertions_in_directory(
+    entry: &Value,
+    execution: &CommandExecution,
+    execution_root: &Path,
+    active_command_dir: &Path,
+) -> Result<(), RenderError> {
+    ensure_expected_exit_code(entry, execution)?;
+    ensure_assert_checks_in_directory(entry, execution, execution_root, active_command_dir)?;
     Ok(())
 }
 
@@ -631,6 +664,35 @@ fn ensure_assert_checks(
     Ok(())
 }
 
+fn ensure_assert_checks_in_directory(
+    entry: &Value,
+    execution: &CommandExecution,
+    execution_root: &Path,
+    active_command_dir: &Path,
+) -> Result<(), RenderError> {
+    let Some(assertion) = entry.get("assert") else {
+        return Ok(());
+    };
+    let Some(checks) = assertion.get("checks") else {
+        return Ok(());
+    };
+    let checks = checks.as_array().ok_or_else(|| {
+        RenderError::Operational("Command assert.checks must be an array".to_string())
+    })?;
+
+    for check in checks {
+        ensure_assert_check_in_directory(
+            entry,
+            check,
+            execution,
+            execution_root,
+            active_command_dir,
+        )?;
+    }
+
+    Ok(())
+}
+
 fn ensure_assert_check(
     entry: &Value,
     check: &Value,
@@ -644,6 +706,32 @@ fn ensure_assert_check(
     match source {
         "stdout" => ensure_stdout_assert_check(entry, check, execution),
         "file" => ensure_file_assert_check(entry, check, execution, execution_root),
+        _ => Err(RenderError::Operational(format!(
+            "Unsupported assertion check source `{source}`"
+        ))),
+    }
+}
+
+fn ensure_assert_check_in_directory(
+    entry: &Value,
+    check: &Value,
+    execution: &CommandExecution,
+    execution_root: &Path,
+    active_command_dir: &Path,
+) -> Result<(), RenderError> {
+    let source = check.get("source").and_then(Value::as_str).ok_or_else(|| {
+        RenderError::Operational("Assertion check source must be a string".to_string())
+    })?;
+
+    match source {
+        "stdout" => ensure_stdout_assert_check(entry, check, execution),
+        "file" => ensure_file_assert_check_in_directory(
+            entry,
+            check,
+            execution,
+            execution_root,
+            active_command_dir,
+        ),
         _ => Err(RenderError::Operational(format!(
             "Unsupported assertion check source `{source}`"
         ))),
@@ -692,6 +780,31 @@ fn ensure_file_assert_check(
 
     let expected = check.get("sha256").and_then(Value::as_str).ok_or_else(|| {
         RenderError::Operational("Assertion check sha256 must be a string".to_string())
+    })?;
+
+    ensure_file_sha256_assertion(entry, execution, &assertion_path, path, expected)
+}
+
+fn ensure_file_assert_check_in_directory(
+    entry: &Value,
+    check: &Value,
+    execution: &CommandExecution,
+    execution_root: &Path,
+    active_command_dir: &Path,
+) -> Result<(), RenderError> {
+    let path = check.get("path").and_then(Value::as_str).ok_or_else(|| {
+        RenderError::Operational("Assertion check path must be a string".to_string())
+    })?;
+
+    let assertion_path =
+        resolve_assertion_path_in_directory(entry, execution_root, active_command_dir, path)?;
+
+    if check.get("exists").is_some() {
+        return ensure_file_exists_assertion(entry, execution, &assertion_path, path);
+    }
+
+    let expected = check.get("sha256").and_then(Value::as_str).ok_or_else(|| {
+        RenderError::Operational("Command assert.checks sha256 must be a string".to_string())
     })?;
 
     ensure_file_sha256_assertion(entry, execution, &assertion_path, path, expected)
@@ -881,6 +994,56 @@ fn resolve_command_working_dir(
     Ok(resolved_dir)
 }
 
+pub(crate) fn resolve_command_working_dir_in_directory(
+    entry: &Value,
+    execution_root: &Path,
+    active_command_dir: &Path,
+) -> Result<PathBuf, RenderError> {
+    if entry.get("working_directory").is_some() || entry.get("working_dir").is_some() {
+        return resolve_command_working_dir(entry, execution_root);
+    }
+
+    normalize_to_absolute(active_command_dir)
+}
+
+pub(crate) fn change_command_directory(
+    entry: &Value,
+    execution_root: &Path,
+    active_command_dir: &Path,
+) -> Result<PathBuf, RenderError> {
+    let path = entry.get("path").and_then(Value::as_str).ok_or_else(|| {
+        RenderError::Operational("ChangeDirectory path must be a string".to_string())
+    })?;
+    let path = Path::new(path);
+    if path.is_absolute() {
+        return Err(RenderError::Operational(
+            "ChangeDirectory path must be a relative path".to_string(),
+        ));
+    }
+
+    let execution_root = normalize_to_absolute(execution_root)?;
+    let resolved_dir = normalize_to_absolute(&active_command_dir.join(path))?;
+    if !resolved_dir.starts_with(&execution_root) {
+        return Err(RenderError::Operational(
+            "ChangeDirectory path must stay within the working directory".to_string(),
+        ));
+    }
+    if !resolved_dir.exists() {
+        return Err(RenderError::Operational(format!(
+            "ChangeDirectory path `{}` did not exist",
+            path.display()
+        )));
+    }
+    if !resolved_dir.is_dir() {
+        return Err(RenderError::Operational(format!(
+            "ChangeDirectory path `{}` was not a directory",
+            path.display()
+        )));
+    }
+
+    Ok(resolved_dir)
+}
+
 fn resolve_assertion_path(
     entry: &Value,
     execution_root: &Path,
@@ -892,6 +1055,23 @@ fn resolve_assertion_path(
     }
 
     Ok(resolve_command_working_dir(entry, execution_root)?.join(path))
+}
+
+fn resolve_assertion_path_in_directory(
+    entry: &Value,
+    execution_root: &Path,
+    active_command_dir: &Path,
+    assertion_path: &str,
+) -> Result<PathBuf, RenderError> {
+    let path = Path::new(assertion_path);
+    if path.is_absolute() {
+        return Ok(path.to_path_buf());
+    }
+
+    Ok(
+        resolve_command_working_dir_in_directory(entry, execution_root, active_command_dir)?
+            .join(path),
+    )
 }
 
 fn parse_timeout(timeout: &str) -> Result<Duration, String> {
@@ -1024,9 +1204,9 @@ fn terminate_process_group(process_group_id: u32) -> Result<bool, RenderError> {
 #[cfg(test)]
 mod tests {
     use super::{
-        cleanup_block, cleanup_chunks, cleanup_script, patch_text_for, resolve_assertion_path,
-        resolve_command_working_dir, run_patch_restores, split_multiline_string, timeout_for_entry,
-        timeout_label,
+        cleanup_block_in_directory, cleanup_chunks, cleanup_script, patch_text_for,
+        resolve_assertion_path, resolve_command_working_dir, run_patch_restores,
+        split_multiline_string, timeout_for_entry, timeout_label,
     };
     use serde_json::json;
     use std::collections::HashMap;
@@ -1128,10 +1308,11 @@ mod tests {
             "cleanup": "first\n\n"
         });
 
-        let cleanup = match cleanup_block(&entry, Path::new("."), false) {
-            Ok(cleanup) => cleanup,
-            Err(_) => panic!("cleanup block should parse"),
-        };
+        let cleanup =
+            match cleanup_block_in_directory(&entry, Path::new("."), Path::new("."), false) {
+                Ok(cleanup) => cleanup,
+                Err(_) => panic!("cleanup block should parse"),
+            };
 
         assert_eq!(
             cleanup.map(|cleanup| cleanup.lines),

@@ -55,6 +55,10 @@ fn example_for_topic(topic: &str) -> Option<ExampleSnippet> {
             json: COMMAND_EXAMPLE_JSON,
             yaml: COMMAND_EXAMPLE_YAML,
         }),
+        "changedirectory" => Some(ExampleSnippet {
+            json: CHANGE_DIRECTORY_EXAMPLE_JSON,
+            yaml: CHANGE_DIRECTORY_EXAMPLE_YAML,
+        }),
         "displayfile" => Some(ExampleSnippet {
             json: DISPLAY_FILE_EXAMPLE_JSON,
             yaml: DISPLAY_FILE_EXAMPLE_YAML,
@@ -82,6 +86,17 @@ const BREAKPOINT_EXAMPLE_JSON: &str = r#"{
 
 const BREAKPOINT_EXAMPLE_YAML: &str = r#"type: Breakpoint
 message: Stop here while debugging this runbook"#;
+
+const CHANGE_DIRECTORY_EXAMPLE_JSON: &str = r#"{
+  "type": "ChangeDirectory",
+  "path": "demo-supermarket",
+  "contents": "Work in the cloned fork for the remaining application steps."
+}"#;
+
+const CHANGE_DIRECTORY_EXAMPLE_YAML: &str = r#"type: ChangeDirectory
+path: demo-supermarket
+contents: |
+  Work in the cloned fork for the remaining application steps."#;
 
 const COMMAND_EXAMPLE_JSON: &str = r#"{
   "type": "Command",
