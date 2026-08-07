@@ -132,7 +132,7 @@ the whole fenced block in the generated Markdown.
 Use `content_type` when the file extension is missing or should not control
 the generated fenced-code label. When `content_type` is omitted, `DisplayFile`
 recognizes common file extensions such as `.java`, `.md`, `.markdown`, `.sql`,
-and `.xml`, plus Dockerfile names such as `Dockerfile` and
+`.sh`, and `.xml`, plus Dockerfile names such as `Dockerfile` and
 `Dockerfile-Java8`, which render as `dockerfile`. Unknown extensions render as
 text.
 

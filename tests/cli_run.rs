@@ -3760,6 +3760,24 @@ fn display_file_markdown_uses_markdown_fenced_block() {
 }
 
 #[test]
+fn display_file_shell_script_uses_shell_fenced_block() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        "entries:\n  - type: DisplayFile\n    path: ./setup.sh\n",
+    )
+    .expect("failed to write runbook");
+    fs::write(dir.join("setup.sh"), "#!/usr/bin/env sh\necho ready\n")
+        .expect("failed to write setup.sh");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```shell\n#!/usr/bin/env sh\necho ready\n```"));
+}
+
+#[test]
 fn display_file_dockerfile_name_uses_dockerfile_fenced_block() {
     let dir = prepare_workspace();
     fs::create_dir_all(dir.join("containers")).expect("failed to create containers directory");
@@ -4020,6 +4038,27 @@ fn display_url_fetches_and_renders_remote_markdown() {
     let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
     assert!(readme.contains("   ```markdown\n   # Create Scope\n\n   Use this skill.\n   ```"));
     assert!(!readme.contains("Keep this hidden"));
+}
+
+#[test]
+fn display_url_shell_script_uses_shell_fenced_block() {
+    let dir = prepare_workspace();
+    let url = serve_one_http_response(
+        "/scripts/setup.sh",
+        "200 OK",
+        "#!/usr/bin/env sh\necho ready\n",
+    );
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        format!("entries:\n  - type: DisplayUrl\n    url: {url}\n"),
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```shell\n#!/usr/bin/env sh\necho ready\n```"));
 }
 
 #[test]
