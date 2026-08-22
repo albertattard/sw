@@ -3060,9 +3060,9 @@ fn apply_keep_between_rule(rule: &Value, rendered: &str) -> Result<RewriteRuleRe
         return Ok(RewriteRuleResult {
             rendered: String::new(),
             generated_capture: None,
-            debug_lines: vec![format!(
-                "[debug] Rewrite keep_between resolved to an empty slice"
-            )],
+            debug_lines: vec![
+                "[debug] Rewrite keep_between resolved to an empty slice".to_string(),
+            ],
         });
     };
 
@@ -3070,9 +3070,9 @@ fn apply_keep_between_rule(rule: &Value, rendered: &str) -> Result<RewriteRuleRe
         return Ok(RewriteRuleResult {
             rendered: String::new(),
             generated_capture: None,
-            debug_lines: vec![format!(
-                "[debug] Rewrite keep_between resolved to an empty slice"
-            )],
+            debug_lines: vec![
+                "[debug] Rewrite keep_between resolved to an empty slice".to_string(),
+            ],
         });
     }
 
@@ -3584,6 +3584,7 @@ fn display_file_content_type(path: &Path) -> &'static str {
     match path.extension().and_then(|extension| extension.to_str()) {
         Some("java") => "java",
         Some("md") | Some("markdown") => "markdown",
+        Some("yaml") | Some("yml") => "yaml",
         Some("sh") => "shell",
         Some("sql") => "sql",
         Some("xml") => "xml",
@@ -3607,6 +3608,7 @@ fn display_fence_language(
         Some("html") => Ok("html"),
         Some("java") => Ok("java"),
         Some("markdown") => Ok("markdown"),
+        Some("yaml") => Ok("yaml"),
         Some("dockerfile") => Ok("dockerfile"),
         Some("Dockerfile") => Ok("Dockerfile"),
         Some(other) => Err(RenderError::Operational(format!(

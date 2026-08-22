@@ -1590,6 +1590,13 @@ fn display_file_content_type_is_validated() {
     );
     assert!(valid_uppercase_compatibility.status.success());
 
+    let valid_yaml = run_in_dir_with_stdin(
+        &["validate", "--input-file=-", "--input-format", "yaml"],
+        &dir,
+        "entries:\n  - type: DisplayFile\n    path: ./Example\n    content_type: yaml\n",
+    );
+    assert!(valid_yaml.status.success());
+
     let invalid = run_in_dir_with_stdin(
         &[
             "validate",
@@ -1600,14 +1607,14 @@ fn display_file_content_type_is_validated() {
             "json",
         ],
         &dir,
-        "entries:\n  - type: DisplayFile\n    path: ./Example\n    content_type: yaml\n",
+        "entries:\n  - type: DisplayFile\n    path: ./Example\n    content_type: toml\n",
     );
     assert_eq!(invalid.status.code(), Some(2));
     let stdout = String::from_utf8_lossy(&invalid.stdout);
     assert!(stdout.contains("\"valid\": false"));
     assert!(stdout.contains("\"path\": \"entries[0].content_type\""));
     assert!(stdout.contains(
-        "must be one of `text`, `json`, `xml`, `html`, `java`, `markdown`, `dockerfile`, or `Dockerfile`"
+        "must be one of `text`, `json`, `xml`, `html`, `java`, `markdown`, `yaml`, `dockerfile`, or `Dockerfile`"
     ));
 }
 

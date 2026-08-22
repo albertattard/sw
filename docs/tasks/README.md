@@ -71,6 +71,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-174: Recognize YAML DisplayFile Fences](display-file/TASK-174-recognize-yaml-display-file-fences.md)
 - [x] [TASK-173: Recognize Shell DisplayFile Fences](display-file/TASK-173-recognize-shell-display-file-fences.md)
 - [x] [TASK-172: Avoid Duplicate Feature Branch CI](repo-process/TASK-172-avoid-duplicate-feature-branch-ci.md)
 - [x] [TASK-171: Support ChangeDirectory Entry](run/TASK-171-support-change-directory-entry.md)

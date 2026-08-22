@@ -377,16 +377,18 @@ in the runbook.
   content type when the file extension is recognized.
 - In this increment, recognized `DisplayFile` extensions include `.java`,
   which renders as `java`, `.md` and `.markdown`, which render as `markdown`,
-  `.sh`, which renders as `shell`, `.sql`, which renders as `sql`, and `.xml`,
-  which renders as `xml`.
+  `.sh`, which renders as `shell`, `.sql`, which renders as `sql`, `.xml`,
+  which renders as `xml`, and `.yaml` and `.yml`, which render as `yaml`.
 - Recognized `DisplayFile` file names include `Dockerfile` and
   `Dockerfile-*`, which render as `dockerfile`.
 - If the `DisplayFile` extension is not recognized, the generated Markdown
   uses a `text` fenced block.
 - In this increment, supported `DisplayFile.content_type` values are `text`,
-  `json`, `xml`, `html`, `java`, `markdown`, `dockerfile`, and `Dockerfile`.
+  `json`, `xml`, `html`, `java`, `markdown`, `yaml`, `dockerfile`, and
+  `Dockerfile`.
 - `DisplayFile.content_type: dockerfile` renders a `dockerfile` fenced block.
 - `DisplayFile.content_type: Dockerfile` renders a `Dockerfile` fenced block.
+- `DisplayFile.content_type: yaml` renders a `yaml` fenced block.
 
 ### DisplayUrl Entries
 
@@ -428,12 +430,13 @@ in the runbook.
 - If `DisplayUrl.content_type` is omitted, fenced blocks use a detected
   content type when the URL path extension is recognized.
 - Recognized `DisplayUrl` path extensions and file names match `DisplayFile`:
-  `.java`, `.md`, `.markdown`, `.sh`, `.sql`, `.xml`, `Dockerfile`, and
-  `Dockerfile-*`.
+  `.java`, `.md`, `.markdown`, `.sh`, `.sql`, `.xml`, `.yaml`, `.yml`,
+  `Dockerfile`, and `Dockerfile-*`.
 - If the `DisplayUrl` extension is not recognized, the generated Markdown uses
   a `text` fenced block.
 - Supported `DisplayUrl.content_type` values match `DisplayFile`: `text`,
-  `json`, `xml`, `html`, `java`, `markdown`, `dockerfile`, and `Dockerfile`.
+  `json`, `xml`, `html`, `java`, `markdown`, `yaml`, `dockerfile`, and
+  `Dockerfile`.
 
 ### Prerequisite Entries
 
@@ -1138,10 +1141,14 @@ in the runbook.
       the generated Markdown uses a `markdown` fenced block.
 - [x] Given a `DisplayFile` entry that references a `.sh` file, the generated
       Markdown uses a `shell` fenced block.
+- [x] Given a `DisplayFile` entry that references a `.yaml` or `.yml` file,
+      the generated Markdown uses a `yaml` fenced block.
 - [x] Given a `DisplayFile` entry whose extension is not recognized, the
       generated Markdown uses a `text` fenced block.
 - [x] Given a `DisplayFile` entry with `content_type`, the generated Markdown
       uses that fenced block language instead of the file extension.
+- [x] Given a `DisplayFile` entry with `content_type: yaml`, the generated
+      Markdown uses a `yaml` fenced block.
 - [x] Given a `DisplayFile` entry without `content_type`, the generated
       Markdown continues to use extension-based fence detection.
 - [x] Given a `DisplayFile` entry with `start_line`, rendering begins at that
@@ -1171,6 +1178,10 @@ in the runbook.
       Markdown uses URL path extension-based fence detection.
 - [x] Given a `DisplayUrl` entry whose URL path ends in `.sh`, the generated
       Markdown uses a `shell` fenced block.
+- [x] Given a `DisplayUrl` entry whose URL path ends in `.yaml` or `.yml`, the
+      generated Markdown uses a `yaml` fenced block.
+- [x] Given a `DisplayUrl` entry with `content_type: yaml`, the generated
+      Markdown uses a `yaml` fenced block.
 - [x] Given a `DisplayUrl` entry with `start_line` and `line_count`, only the
       requested response body slice is rendered.
 - [x] Given a `DisplayUrl` entry with `indent`, the opening fence, copied
