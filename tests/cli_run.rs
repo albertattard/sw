@@ -3778,6 +3778,27 @@ fn display_file_shell_script_uses_shell_fenced_block() {
 }
 
 #[test]
+fn display_file_yaml_extensions_use_yaml_fenced_blocks() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        "entries:\n  - type: DisplayFile\n    path: ./application.yaml\n  - type: DisplayFile\n    path: ./application.yml\n",
+    )
+    .expect("failed to write runbook");
+    fs::write(dir.join("application.yaml"), "server:\n  port: 8080\n")
+        .expect("failed to write application.yaml");
+    fs::write(dir.join("application.yml"), "logging:\n  level: info\n")
+        .expect("failed to write application.yml");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```yaml\nserver:\n  port: 8080\n```"));
+    assert!(readme.contains("```yaml\nlogging:\n  level: info\n```"));
+}
+
+#[test]
 fn display_file_dockerfile_name_uses_dockerfile_fenced_block() {
     let dir = prepare_workspace();
     fs::create_dir_all(dir.join("containers")).expect("failed to create containers directory");
@@ -3923,6 +3944,25 @@ fn display_file_content_type_overrides_unrecognized_extension() {
 }
 
 #[test]
+fn display_file_yaml_content_type_overrides_unrecognized_extension() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        "entries:\n  - type: DisplayFile\n    path: ./application\n    content_type: yaml\n",
+    )
+    .expect("failed to write runbook");
+    fs::write(dir.join("application"), "server:\n  port: 8080\n")
+        .expect("failed to write application");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```yaml\nserver:\n  port: 8080\n```"));
+    assert!(!readme.contains("```text\nserver:\n  port: 8080\n```"));
+}
+
+#[test]
 fn display_file_content_type_takes_precedence_over_extension() {
     let dir = prepare_workspace();
     fs::write(
@@ -4062,6 +4102,27 @@ fn display_url_shell_script_uses_shell_fenced_block() {
 }
 
 #[test]
+fn display_url_yaml_extension_uses_yaml_fenced_block() {
+    let dir = prepare_workspace();
+    let url = serve_one_http_response(
+        "/config/application.yml",
+        "200 OK",
+        "server:\n  port: 8080\n",
+    );
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        format!("entries:\n  - type: DisplayUrl\n    url: {url}\n"),
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```yaml\nserver:\n  port: 8080\n```"));
+}
+
+#[test]
 fn display_url_content_type_overrides_url_extension() {
     let dir = prepare_workspace();
     let url = serve_one_http_response("/remote/example.txt", "200 OK", "class Example {}\n");
@@ -4077,6 +4138,28 @@ fn display_url_content_type_overrides_url_extension() {
     let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
     assert!(readme.contains("```java\nclass Example {}\n```"));
     assert!(!readme.contains("```text\nclass Example {}\n```"));
+}
+
+#[test]
+fn display_url_yaml_content_type_overrides_url_extension() {
+    let dir = prepare_workspace();
+    let url = serve_one_http_response(
+        "/remote/application.txt",
+        "200 OK",
+        "server:\n  port: 8080\n",
+    );
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        format!("entries:\n  - type: DisplayUrl\n    url: {url}\n    content_type: yaml\n"),
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```yaml\nserver:\n  port: 8080\n```"));
+    assert!(!readme.contains("```text\nserver:\n  port: 8080\n```"));
 }
 
 #[test]

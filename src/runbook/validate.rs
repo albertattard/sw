@@ -143,13 +143,14 @@ fn validate_display_content_type(
                     | "html"
                     | "java"
                     | "markdown"
+                    | "yaml"
                     | "dockerfile"
                     | "Dockerfile"
             ) => {}
         Some(_) => push_error(
             errors,
             format!("{path}.content_type"),
-            "must be one of `text`, `json`, `xml`, `html`, `java`, `markdown`, `dockerfile`, or `Dockerfile`",
+            "must be one of `text`, `json`, `xml`, `html`, `java`, `markdown`, `yaml`, `dockerfile`, or `Dockerfile`",
         ),
         None => {}
     }
