@@ -4,7 +4,7 @@ title: Explain Feature Contract
 status: implemented
 priority: high
 owner: albertattard
-last_updated: 2026-04-25
+last_updated: 2026-08-23
 ---
 
 ## Problem
@@ -194,15 +194,36 @@ When `--output-format=skill` is selected:
   `~/.codex/skills/sw/SKILL.md`.
 - The skill content is a compact operating guide rather than an embedded
   contract dump.
-- The skill content should direct agents to start with `sw explain --all` when
-  they need the current authoritative command contract.
+- The opening skill guidance should describe `sw` as an authoring and
+  execution tool for tested, executable documentation runbooks, explaining
+  that it checks prerequisites, runs documented workflows, and incorporates
+  real command output into generated Markdown documentation.
+- The skill content should direct agents to use `sw explain <topic>` for
+  focused behaviour and defaults, `sw help <command>` for exact invocation
+  syntax, and `sw example <EntryType>` for unfamiliar entry shapes.
+- The skill content should reserve `sw explain --all` for broad discovery of
+  the current authoritative command contract rather than require it for every
+  `sw` task.
+- The skill content should link to the repository's runbook entry guide as an
+  optional cross-entry reference, while making clear that the installed binary
+  remains authoritative for current behaviour.
 - The skill content should treat `sw` output as authoritative over cached
   assumptions.
 - The skill content should summarize when to use `sw`, common workflows,
   authoring defaults, and agent rules that prevent common runbook mistakes.
+- The generated user skill should not include repository-contributor process
+  rules that do not apply to users authoring runbooks in other projects.
 - The skill content should warn agents that providing `Command.cleanup`
   disables automatic process cleanup for that command entry, so explicit
   cleanup must stop processes that should not keep running.
+- The skill content should describe `sw run`'s default `./README.md` output
+  target and advise agents to pass `--output-file` when that target is not
+  intended.
+- The skill content should state that `sw format` rewrites its input file in
+  place.
+- The skill content should treat `sw run` as command execution: agents may
+  proceed when the user explicitly asks to run a runbook, within that request's
+  scope; otherwise they should inspect the runbook and ask for confirmation.
 - The skill content should not duplicate every topic, option, field, enum, or
   subcommand contract from `sw explain --all`.
 - The output should remain deterministic so repeated exports produce stable
