@@ -71,6 +71,12 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-180: Add Runbook Execution Consent Guidance](explain/TASK-180-add-runbook-execution-consent-guidance.md)
+- [x] [TASK-179: Add Generated Skill Write Safety Guidance](explain/TASK-179-add-generated-skill-write-safety-guidance.md)
+- [x] [TASK-178: Remove Repository Process Rule From Skill](explain/TASK-178-remove-repository-process-rule-from-skill.md)
+- [x] [TASK-177: Describe Tested Documentation Purpose In Skill](explain/TASK-177-describe-tested-documentation-purpose-in-skill.md)
+- [x] [TASK-176: Link Runbook Entry Guide From Skill](explain/TASK-176-link-runbook-entry-guide-from-skill.md)
+- [x] [TASK-175: Use Targeted Skill Discovery](explain/TASK-175-use-targeted-skill-discovery.md)
 - [x] [TASK-174: Recognize YAML DisplayFile Fences](display-file/TASK-174-recognize-yaml-display-file-fences.md)
 - [x] [TASK-173: Recognize Shell DisplayFile Fences](display-file/TASK-173-recognize-shell-display-file-fences.md)
 - [x] [TASK-172: Avoid Duplicate Feature Branch CI](repo-process/TASK-172-avoid-duplicate-feature-branch-ci.md)

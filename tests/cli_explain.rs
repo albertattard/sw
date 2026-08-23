@@ -465,17 +465,38 @@ fn explain_skill_prints_skill_document_to_stdout() {
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.starts_with(
-        "---\nname: sw\ndescription: Use this skill when the user needs help authoring, validating, converting, or running Sociable Weaver (`sw`) runbooks.\n---\n\n# sw\n"
+        "---\nname: sw\ndescription: Use this skill when the user needs help authoring or executing Sociable Weaver (`sw`) tested documentation runbooks.\n---\n\n# sw\n"
     ));
-    assert!(stdout.contains("## First Step"));
-    assert!(stdout.contains("sw explain --all"));
+    assert!(stdout.contains(
+        "`sw` is an authoring and execution tool for tested, executable documentation runbooks."
+    ));
+    assert!(stdout.contains(
+        "It checks prerequisites, runs documented workflows, and incorporates real command output into generated Markdown documentation."
+    ));
+    assert!(stdout.contains("## Discovery"));
+    assert!(stdout.contains("sw explain <topic>      # behaviour and defaults"));
+    assert!(stdout.contains("sw help <command>       # exact invocation syntax"));
+    assert!(stdout.contains("sw example <EntryType>  # unfamiliar runbook entry shapes"));
+    assert!(stdout.contains(
+        "Use `sw explain --all` only when you need broad discovery of the current command contract."
+    ));
+    assert!(stdout.contains("## Further Reference"));
+    assert!(stdout.contains(
+        "[runbook entry guide](https://github.com/albertattard/sw/blob/main/docs/guides/entities.md)"
+    ));
+    assert!(stdout.contains(
+        "Prefer `sw explain` and `sw example` when you need the contract for the currently installed binary."
+    ));
     assert!(stdout.contains("## Common Workflows"));
     assert!(stdout.contains(
         "entries such as `Breakpoint`, `ChangeDirectory`, `Command`, `DisplayFile`, `DisplayUrl`, `Patch`, or `Prerequisite`"
     ));
     assert!(stdout.contains("Use `sw validate --input-file <runbook>` after editing a runbook."));
     assert!(stdout.contains(
-        "Use `sw run --input-file <runbook>` to execute the runbook and generate Markdown output."
+        "Use `sw run --input-file <runbook>` to execute the runbook and generate Markdown output. It writes `./README.md` by default; pass `--output-file` when that target is not intended."
+    ));
+    assert!(stdout.contains(
+        "Use `sw format --input-file <runbook>` to rewrite a runbook in place using canonical formatting."
     ));
     assert!(stdout.contains("## Authoring Defaults"));
     assert!(stdout.contains("Prefer YAML for file-based runbooks."));
@@ -485,13 +506,20 @@ fn explain_skill_prints_skill_document_to_stdout() {
         )
     );
     assert!(stdout.contains("Stdin input via `--input-file=-` defaults to JSON unless `--input-format yaml` is provided."));
+    assert!(
+        stdout.contains(
+            "If more than one default runbook file exists, pass `--input-file` explicitly."
+        )
+    );
     assert!(stdout.contains("## Agent Rules"));
     assert!(stdout.contains(
         "Before inventing a field, run `sw explain <topic>` or `sw example <EntryType>`."
     ));
-    assert!(
-        stdout.contains("Treat that output, `sw help`, and the repository specs as authoritative.")
-    );
+    assert!(stdout.contains(
+        "Treat `sw run` as command execution. If the user explicitly asks to run a runbook, proceed within that request's scope. Otherwise, inspect the runbook and ask for confirmation before running it."
+    ));
+    assert!(!stdout.contains("Before changing user-visible behavior in this repository"));
+    assert!(stdout.contains("Treat `sw` output and the repository specs as authoritative;"));
     assert!(!stdout.contains("## Command Map"));
     assert!(!stdout.contains("### run"));
 }
@@ -513,10 +541,16 @@ fn explain_skill_output_file_without_value_writes_to_default_codex_path() {
     assert!(stdout.contains(&format!("Wrote explain skill to {}", output_path.display())));
     let skill = fs::read_to_string(&output_path).expect("missing skill output");
     assert!(skill.starts_with(
-        "---\nname: sw\ndescription: Use this skill when the user needs help authoring, validating, converting, or running Sociable Weaver (`sw`) runbooks.\n---\n\n# sw\n"
+        "---\nname: sw\ndescription: Use this skill when the user needs help authoring or executing Sociable Weaver (`sw`) tested documentation runbooks.\n---\n\n# sw\n"
     ));
     assert!(skill.contains("## Common Workflows"));
-    assert!(skill.contains("sw explain --all"));
+    assert!(skill.contains("sw explain <topic>      # behaviour and defaults"));
+    assert!(skill.contains(
+        "Use `sw explain --all` only when you need broad discovery of the current command contract."
+    ));
+    assert!(skill.contains(
+        "[runbook entry guide](https://github.com/albertattard/sw/blob/main/docs/guides/entities.md)"
+    ));
     assert!(skill.contains(
         "either omit `cleanup` so `sw run` can terminate remaining processes automatically, or provide `cleanup` that stops them explicitly"
     ));
@@ -537,7 +571,7 @@ fn explain_skill_output_file_with_explicit_path_writes_to_requested_location() {
     assert!(output.status.success());
     let skill = fs::read_to_string(&output_path).expect("missing skill output");
     assert!(skill.starts_with(
-        "---\nname: sw\ndescription: Use this skill when the user needs help authoring, validating, converting, or running Sociable Weaver (`sw`) runbooks.\n---\n\n# sw\n"
+        "---\nname: sw\ndescription: Use this skill when the user needs help authoring or executing Sociable Weaver (`sw`) tested documentation runbooks.\n---\n\n# sw\n"
     ));
     assert!(skill.contains("## Authoring Defaults"));
     assert!(
@@ -590,7 +624,7 @@ fn explain_skill_force_overwrites_existing_file() {
     assert!(output.status.success());
     let skill = fs::read_to_string(&output_path).expect("missing overwritten skill");
     assert!(skill.starts_with(
-        "---\nname: sw\ndescription: Use this skill when the user needs help authoring, validating, converting, or running Sociable Weaver (`sw`) runbooks.\n---\n\n# sw\n"
+        "---\nname: sw\ndescription: Use this skill when the user needs help authoring or executing Sociable Weaver (`sw`) tested documentation runbooks.\n---\n\n# sw\n"
     ));
     assert!(!skill.contains("existing skill"));
 }
