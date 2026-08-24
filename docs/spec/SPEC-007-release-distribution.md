@@ -4,7 +4,7 @@ title: Release Distribution Contract
 status: in_progress
 priority: high
 owner: albertattard
-last_updated: 2026-05-25
+last_updated: 2026-08-24
 ---
 
 ## Goal
@@ -30,8 +30,16 @@ but it does not perform the full official release build matrix.
 
 Each official release publishes:
 
-- A release binary asset for the supported target platform(s).
+- A compressed release archive for each supported target platform.
+- A `SHA256SUMS` asset covering every published release archive.
 - A release `README.md` file describing what the artifact contains.
+
+The supported release targets are:
+
+- `aarch64-apple-darwin` (Apple Silicon macOS)
+- `x86_64-unknown-linux-musl` (portable 64-bit Linux)
+
+Windows and Intel macOS are not supported release targets in this increment.
 
 The full supported-platform build matrix runs only for tagged releases. Normal
 CI runs should not pay the cost of building official assets for every release
@@ -97,6 +105,10 @@ release binary and release README.
 - Official downloadable builds are the assets attached to GitHub Releases.
 - A tagged release produces version-specific assets for all supported release
   platforms.
+- Each platform archive includes the `sw` executable, `LICENSE`, and the
+  repository `README.md`.
+- Asset names identify the release tag and Rust target triple.
+- `SHA256SUMS` lets users verify downloaded archives before extracting them.
 - The latest release path always points to the newest published GitHub Release.
 - Asset naming should remain stable enough that users can identify the correct
   binary for a given platform.
@@ -110,6 +122,10 @@ release binary and release README.
 - [ ] The published release includes the binary asset and a release README.
 - [ ] Given a tagged release build, the pipeline builds official assets for all
       supported release platforms.
+- [ ] A tagged release publishes a SHA-256 checksum file for its platform
+      archives.
+- [ ] The release contains only the declared Apple Silicon macOS and portable
+      Linux targets.
 - [ ] For non-initial releases, the published release README includes the
       commit subjects between the nearest previous reachable `v*` tag and the
       current release tag.
@@ -126,6 +142,7 @@ release binary and release README.
 
 - Defining a package manager distribution strategy in this increment.
 - Supporting every OS/architecture combination immediately.
+- Supporting Windows, Intel macOS, RPM, or other native Linux package formats.
 - Replacing CI artifact uploads that are useful for debugging.
 
 ## Edge Cases
