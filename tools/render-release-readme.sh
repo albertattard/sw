@@ -38,16 +38,20 @@ This release contains the official downloadable build published from a tagged Gi
 
 ## Contents
 
-- \`sw-linux-x86_64\`: release binary built with \`cargo build --release\`
-- \`sw-macos\`: release binary built with \`cargo build --release\`
-- \`sw-windows-x86_64.exe\`: release binary built with \`cargo build --release\`
+- \`sw-${tag_name}-aarch64-apple-darwin.tar.gz\`: Apple Silicon macOS archive
+- \`sw-${tag_name}-x86_64-unknown-linux-musl.tar.gz\`: portable 64-bit Linux archive
+- \`SHA256SUMS\`: SHA-256 checksums for the platform archives
+- \`README.md\`: release notes and build metadata
+
+Each platform archive contains the \`sw\` executable, \`LICENSE\`, and the
+repository \`README.md\`.
 
 ## Build Metadata
 
 - Tag: \`${tag_name}\`
 - Commit: \`${commit_sha}\`
 - Summary: \`${commit_subject}\`
-- Platforms: \`linux-x86_64\`, \`macos\`, \`windows-x86_64\`
+- Platforms: \`aarch64-apple-darwin\`, \`x86_64-unknown-linux-musl\`
 - Profile: \`release\`
 
 EOF

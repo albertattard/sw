@@ -61,6 +61,7 @@ Expected task directories:
 
 ## Pending
 
+- [ ] [TASK-181: Publish Apple Silicon And Portable Linux Release Archives](release/TASK-181-publish-apple-silicon-and-portable-linux-archives.md)
 - [ ] [TASK-158: Publish And Validate Official Release Distribution](release/TASK-158-publish-first-official-release.md)
 - [ ] [TASK-127: Support Numeric Captures And Markdown Arithmetic](run/TASK-127-support-numeric-captures-and-markdown-arithmetic.md)
 - [ ] [TASK-121: Support Command Preconditions And Port Checks](run/TASK-121-support-command-preconditions-and-port-checks.md)
