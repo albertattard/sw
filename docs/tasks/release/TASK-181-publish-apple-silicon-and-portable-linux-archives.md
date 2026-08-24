@@ -1,7 +1,7 @@
 ---
 id: TASK-181
 title: Publish Apple Silicon And Portable Linux Release Archives
-status: pending
+status: done
 category: release
 related_features:
   - SPEC-007
@@ -28,14 +28,14 @@ that Sociable Weaver currently supports: Apple Silicon macOS and portable
 
 ## Acceptance Criteria
 
-- [ ] A `v*` tag publishes `sw-<tag>-aarch64-apple-darwin.tar.gz`.
-- [ ] A `v*` tag publishes `sw-<tag>-x86_64-unknown-linux-musl.tar.gz`.
-- [ ] Each archive contains `sw`, `LICENSE`, and `README.md`.
-- [ ] The release publishes `SHA256SUMS` covering both archives.
-- [ ] The tagged-release matrix does not build or publish a Windows asset.
-- [ ] The generated release README describes the two supported targets and the
+- [x] A `v*` tag publishes `sw-<tag>-aarch64-apple-darwin.tar.gz`.
+- [x] A `v*` tag publishes `sw-<tag>-x86_64-unknown-linux-musl.tar.gz`.
+- [x] Each archive contains `sw`, `LICENSE`, and `README.md`.
+- [x] The release publishes `SHA256SUMS` covering both archives.
+- [x] The tagged-release matrix does not build or publish a Windows asset.
+- [x] The generated release README describes the two supported targets and the
       checksum asset.
-- [ ] The two archives install and run on their intended platforms.
+- [x] The two archives install and run on their intended platforms.
 
 ## Non-goals
 
@@ -49,3 +49,12 @@ that Sociable Weaver currently supports: Apple Silicon macOS and portable
 - Push a test `v*` tag only when release publication is intentionally
   authorised, then verify the GitHub Release assets and checksums on the two
   supported platforms.
+
+## Completion Notes
+
+- `v0.1.0` published both target archives, the generated release README, and
+  `SHA256SUMS`.
+- The Apple Silicon archive passed checksum verification and ran `sw version`
+  on an ARM64 macOS host.
+- The portable Linux archive passed checksum verification and ran `sw version`
+  on Oracle Linux.
