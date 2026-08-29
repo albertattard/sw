@@ -2116,11 +2116,13 @@ fn run_command_prerequisite_check(
 fn run_java_prerequisite_check(check: &Value, name: &str) -> Result<(), RenderError> {
     let version = check
         .get("version")
-        .and_then(Value::as_str)
+        .and_then(java_version_requirement_value)
         .ok_or_else(|| {
-            RenderError::Operational("Prerequisite Java version must be a string".to_string())
+            RenderError::Operational(
+                "Prerequisite Java version must be a string or a non-negative integer".to_string(),
+            )
         })?;
-    let requirement = parse_java_version_requirement(version).ok_or_else(|| {
+    let requirement = parse_java_version_requirement(&version).ok_or_else(|| {
         RenderError::Operational("Prerequisite Java version must be like `17` or `24+`".to_string())
     })?;
     let executable = resolve_prerequisite_java_executable(check).map_err(|detail| {
@@ -2170,6 +2172,14 @@ fn run_java_prerequisite_check(check: &Value, name: &str) -> Result<(), RenderEr
     }
 
     Ok(())
+}
+
+fn java_version_requirement_value(value: &Value) -> Option<String> {
+    match value {
+        Value::String(value) => Some(value.clone()),
+        Value::Number(value) => value.as_u64().map(|major| major.to_string()),
+        _ => None,
+    }
 }
 
 fn ensure_java_distribution(distribution: &str, version_output: &str) -> Result<(), String> {

@@ -87,6 +87,9 @@ Default input behavior:
   of strings.
 - `Prerequisite.checks[*].commands` may be either a single string or an array
   of strings.
+- A `java` prerequisite exact `version` may be a string such as `"17"` or a
+  non-negative integer such as `17`. Minimum rules such as `"24+"` remain
+  strings because the `+` operator is part of the value.
 - When any of those fields are provided as a string, validation accepts that
   as shorthand for the existing line-array model.
 - If `--output-format` is not provided, default to `human`.

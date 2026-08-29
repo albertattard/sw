@@ -67,10 +67,11 @@ Expected task directories:
 
 ## In Progress
 
-- (none)
+- [ ] [TASK-182: Publish Homebrew Tap Formula](release/TASK-182-publish-homebrew-tap-formula.md)
 
 ## Done
 
+- [x] [TASK-183: Accept Numeric Java Prerequisite Versions](prerequisite/TASK-183-accept-numeric-java-prerequisite-versions.md)
 - [x] [TASK-181: Publish Apple Silicon And Portable Linux Release Archives](release/TASK-181-publish-apple-silicon-and-portable-linux-archives.md)
 - [x] [TASK-180: Add Runbook Execution Consent Guidance](explain/TASK-180-add-runbook-execution-consent-guidance.md)
 - [x] [TASK-179: Add Generated Skill Write Safety Guidance](explain/TASK-179-add-generated-skill-write-safety-guidance.md)

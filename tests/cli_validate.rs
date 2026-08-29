@@ -818,6 +818,55 @@ fn valid_java_prerequisite_returns_success() {
 }
 
 #[test]
+fn numeric_exact_java_version_is_valid_but_non_integer_values_are_rejected() {
+    let dir = prepare_workspace();
+    let valid = run_in_dir_with_stdin(
+        &[
+            "validate",
+            "--input-file=-",
+            "--input-format=yaml",
+            "--output-format=json",
+        ],
+        &dir,
+        "entries:\n  - type: Prerequisite\n    checks:\n      - kind: java\n        name: Java 25\n        version: 25\n        contents: Java 25 is required.\n",
+    );
+    assert!(valid.status.success());
+
+    let minimum = run_in_dir_with_stdin(
+        &[
+            "validate",
+            "--input-file=-",
+            "--input-format=yaml",
+            "--output-format=json",
+        ],
+        &dir,
+        "entries:\n  - type: Prerequisite\n    checks:\n      - kind: java\n        name: Java 25 or newer\n        version: 25+\n        contents: Java 25 or newer is required.\n",
+    );
+    assert!(minimum.status.success());
+
+    for version in ["25.0", "-25", "true", "[25]"] {
+        let runbook = format!(
+            "entries:\n  - type: Prerequisite\n    checks:\n      - kind: java\n        name: Java\n        version: {version}\n        contents: Java is required.\n"
+        );
+        let invalid = run_in_dir_with_stdin(
+            &[
+                "validate",
+                "--input-file=-",
+                "--input-format=yaml",
+                "--output-format=json",
+            ],
+            &dir,
+            &runbook,
+        );
+        assert_eq!(
+            invalid.status.code(),
+            Some(2),
+            "version {version} should be rejected"
+        );
+    }
+}
+
+#[test]
 fn valid_patch_returns_success() {
     let output = run(&[
         "validate",

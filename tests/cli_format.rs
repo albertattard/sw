@@ -86,6 +86,31 @@ fn format_rewrites_valid_yaml_in_place() {
 }
 
 #[test]
+fn format_normalizes_numeric_java_versions_to_strings_in_yaml_and_json() {
+    let yaml_dir = prepare_workspace();
+    let yaml_path = write_file(
+        &yaml_dir,
+        "sw-runbook.yaml",
+        "entries:\n  - type: Prerequisite\n    checks:\n      - kind: java\n        name: Java 25\n        version: 25\n        contents: Java 25 is required.\n",
+    );
+    let yaml_output = run_in_dir(&["format"], &yaml_dir);
+    assert!(yaml_output.status.success());
+    let yaml_contents = fs::read_to_string(yaml_path).expect("missing formatted YAML file");
+    assert!(yaml_contents.contains("version: '25'"));
+
+    let json_dir = prepare_workspace();
+    let json_path = write_file(
+        &json_dir,
+        "sw-runbook.json",
+        r#"{"entries":[{"type":"Prerequisite","checks":[{"kind":"java","name":"Java 25","version":25,"contents":"Java 25 is required."}]}]}"#,
+    );
+    let json_output = run_in_dir(&["format"], &json_dir);
+    assert!(json_output.status.success());
+    let json_contents = fs::read_to_string(json_path).expect("missing formatted JSON file");
+    assert!(json_contents.contains("\"version\": \"25\""));
+}
+
+#[test]
 fn format_inserts_blank_lines_between_yaml_entries() {
     let dir = prepare_workspace();
     let path = write_file(

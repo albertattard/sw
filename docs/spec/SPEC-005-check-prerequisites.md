@@ -83,6 +83,9 @@ Default input behavior:
   of strings.
 - `Prerequisite.checks[*].commands` may be either a single string or an array
   of strings.
+- A `java` prerequisite exact `version` may be a string such as `"17"` or a
+  non-negative integer such as `17`; a minimum version such as `"24+"` must
+  be a string.
 - `Markdown.contents` may be either a single string or an array of strings,
   and `sw check` applies the same valid-input contract before executing
   prerequisite checks.

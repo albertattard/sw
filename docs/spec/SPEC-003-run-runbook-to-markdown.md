@@ -474,7 +474,8 @@ in the runbook.
 - A `java` prerequisite check performs a built-in Java runtime validation
   without requiring runbook-authored shell parsing.
 - A `java` prerequisite check declares `version`.
-- `version` supports an exact major version such as `17`.
+- `version` supports an exact major version as a string such as `"17"` or an
+  integer such as `17`.
 - `version` supports a minimum major version such as `24+`.
 - If a `java` prerequisite check omits both `java_home` and `java_home_env`,
   the Java executable is resolved from `PATH`.

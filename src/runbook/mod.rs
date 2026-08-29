@@ -187,6 +187,12 @@ pub(crate) fn normalize_document_for_yaml_authoring(document: &Value) -> Value {
     normalized
 }
 
+pub(crate) fn normalize_java_versions_for_authoring(document: &Value) -> Value {
+    let mut normalized = document.clone();
+    normalize_java_versions(&mut normalized);
+    normalized
+}
+
 fn normalize_scalar_capable_fields(value: &mut Value) {
     match value {
         Value::Object(map) => normalize_scalar_capable_fields_in_object(map),
@@ -233,6 +239,38 @@ fn normalize_scalar_capable_fields_in_object(map: &mut Map<String, Value>) {
     }
 }
 
+fn normalize_java_versions(value: &mut Value) {
+    match value {
+        Value::Object(map) => normalize_java_versions_in_object(map),
+        Value::Array(items) => {
+            for item in items {
+                normalize_java_versions(item);
+            }
+        }
+        _ => {}
+    }
+}
+
+fn normalize_java_versions_in_object(map: &mut Map<String, Value>) {
+    let is_prerequisite = map.get("type").and_then(Value::as_str) == Some("Prerequisite");
+
+    if is_prerequisite && let Some(Value::Array(checks)) = map.get_mut("checks") {
+        for check in checks {
+            let Value::Object(check) = check else {
+                continue;
+            };
+            normalize_java_version_field(check);
+        }
+    }
+
+    for (key, child) in map.iter_mut() {
+        if is_prerequisite && key == "checks" {
+            continue;
+        }
+        normalize_java_versions(child);
+    }
+}
+
 fn normalize_prerequisite_check(value: &mut Value) {
     let Value::Object(map) = value else {
         return;
@@ -240,10 +278,27 @@ fn normalize_prerequisite_check(value: &mut Value) {
 
     normalize_string_array_field(map, "contents");
     normalize_string_array_field(map, "commands");
+    normalize_java_version_field(map);
 
     for child in map.values_mut() {
         normalize_scalar_capable_fields(child);
     }
+}
+
+fn normalize_java_version_field(map: &mut Map<String, Value>) {
+    if map.get("kind").and_then(Value::as_str) != Some("java") {
+        return;
+    }
+
+    let Some(version) = map.get_mut("version") else {
+        return;
+    };
+
+    let Some(major) = version.as_u64() else {
+        return;
+    };
+
+    *version = Value::String(major.to_string());
 }
 
 fn normalize_string_array_field(map: &mut Map<String, Value>, key: &str) {
