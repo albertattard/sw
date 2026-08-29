@@ -204,8 +204,10 @@ later prerequisite entries after a breakpoint.
 Use `Prerequisite` to document and verify tools required by the runbook.
 
 Java prerequisites validate the resolved runtime's major version. Use an exact
-version such as `'17'` when only that major version is acceptable, or a minimum
-version such as `'25+'` when newer Java versions are acceptable.
+version such as `'17'` (or the numeric YAML shorthand `17`) when only that
+major version is acceptable, or a minimum string value such as `'25+'` when
+newer Java versions are acceptable. `sw format` canonicalizes numeric exact
+versions to quoted strings.
 
 Use `distribution` when a Java runtime must match a supported distribution in
 addition to the major version. In this increment, `epp` checks that

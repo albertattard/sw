@@ -1706,14 +1706,20 @@ fn validate_java_prerequisite_check(
         }
     }
 
-    match object.get("version").and_then(Value::as_str) {
-        Some(version) if is_valid_java_version_requirement(version) => {}
-        Some(_) => push_error(
+    match object.get("version") {
+        Some(Value::String(version)) if is_valid_java_version_requirement(version) => {}
+        Some(Value::Number(version)) if version.as_u64().is_some() => {}
+        Some(Value::String(_)) | Some(Value::Number(_)) => push_error(
             errors,
             format!("{path}.version"),
             "must be a Java version like `17` or `24+`",
         ),
-        None => push_error(errors, format!("{path}.version"), "must be a string"),
+        Some(_) => push_error(
+            errors,
+            format!("{path}.version"),
+            "must be a Java version string or a non-negative integer",
+        ),
+        None => push_error(errors, format!("{path}.version"), "is required"),
     }
 
     if let Some(java_home) = object.get("java_home")

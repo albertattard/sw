@@ -96,6 +96,27 @@ https://github.com/<owner>/<repo>/releases/latest
 The latest release page must expose the current release assets, including the
 release binary and release README.
 
+## Homebrew Distribution
+
+Sociable Weaver is available from the maintained upstream tap using:
+
+```text
+brew install albertattard/tap/sw
+```
+
+The tap formula installs the immutable, checksummed GitHub Release archive for
+the user's supported platform. It does not compile Rust on the user's machine.
+
+The supported Homebrew platforms match the official release targets:
+
+- Apple Silicon macOS
+- x86_64 Linux, including tested Oracle Linux environments
+
+Unsupported architectures must fail during formula selection rather than
+downloading an archive for a different target. The formula lives in the
+separate `albertattard/homebrew-tap` repository and is updated for every
+published release after its target archives have been verified.
+
 ## Release Contract
 
 - CI artifacts remain useful for workflow diagnostics but are not the official
@@ -109,6 +130,8 @@ release binary and release README.
   repository `README.md`.
 - Asset names identify the release tag and Rust target triple.
 - `SHA256SUMS` lets users verify downloaded archives before extracting them.
+- The maintained Homebrew formula installs only the matching official release
+  archive and preserves the same supported-platform boundary.
 - The latest release path always points to the newest published GitHub Release.
 - Asset naming should remain stable enough that users can identify the correct
   binary for a given platform.
@@ -135,6 +158,8 @@ release binary and release README.
 - [ ] A user can download a specific version from the versioned release path.
 - [ ] A user can navigate to the latest release path and obtain the newest
       published build.
+- [ ] A user on a supported platform can install the current release with
+      `brew install albertattard/tap/sw` without installing Rust.
 - [ ] The official release mechanism is documented separately from transient CI
       artifacts.
 
@@ -143,6 +168,7 @@ release binary and release README.
 - Defining a package manager distribution strategy in this increment.
 - Supporting every OS/architecture combination immediately.
 - Supporting Windows, Intel macOS, RPM, or other native Linux package formats.
+- Adding Sociable Weaver to `homebrew/core` in this increment.
 - Replacing CI artifact uploads that are useful for debugging.
 
 ## Edge Cases

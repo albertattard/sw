@@ -180,6 +180,25 @@ fn check_accepts_yaml_input_file() {
 }
 
 #[test]
+fn check_accepts_numeric_exact_java_version() {
+    let dir = prepare_workspace();
+    let java_home = create_fake_java_home(&dir, "jdk-25", "25");
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        format!(
+            "entries:\n  - type: Prerequisite\n    checks:\n      - kind: java\n        name: Java 25\n        version: 25\n        java_home: {}\n        contents: Java 25 is required.\n",
+            java_home.display()
+        ),
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["check"], &dir);
+
+    assert!(output.status.success());
+    assert!(String::from_utf8_lossy(&output.stdout).contains("All prerequisite checks passed"));
+}
+
+#[test]
 fn check_working_directory_sets_execution_root_for_command_prerequisites() {
     let dir = prepare_workspace();
     let runbook_dir = dir.join("runbook");

@@ -45,6 +45,11 @@ that the runbook passes the same structural validation contract as
 `sw validate`. If parsing or validation fails, the command does not rewrite the
 file.
 
+For a Java prerequisite, `sw format` normalizes an integer exact `version` to
+its quoted-string form. For example, `version: 25` becomes `version: "25"` in
+JSON and `version: '25'` in YAML. This gives authors a single canonical output
+while still accepting the convenient numeric YAML input.
+
 ## Inputs/Outputs
 
 Input:
