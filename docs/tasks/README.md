@@ -68,6 +68,7 @@ Expected task directories:
 ## In Progress
 
 - [ ] [TASK-182: Publish Homebrew Tap Formula](release/TASK-182-publish-homebrew-tap-formula.md)
+- [ ] [TASK-185: Synchronize Homebrew Tap On Release](release/TASK-185-synchronize-homebrew-tap-on-release.md)
 
 ## Done
 
