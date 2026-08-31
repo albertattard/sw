@@ -2295,17 +2295,10 @@ fn prerequisite_failure(name: &str, help: Option<&str>, detail: &str) -> RenderE
     RenderError::CommandFailed(message)
 }
 
-fn output_fence_language(output: &Value) -> Result<Option<&'static str>, RenderError> {
+fn output_fence_language(output: &Value) -> Result<Option<&str>, RenderError> {
     match output.get("content_type").and_then(Value::as_str) {
         Some("text") | None => Ok(None),
-        Some("json") => Ok(Some("json")),
-        Some("xml") => Ok(Some("xml")),
-        Some("html") => Ok(Some("html")),
-        Some("java") => Ok(Some("java")),
-        Some("markdown") => Ok(Some("markdown")),
-        Some(other) => Err(RenderError::Operational(format!(
-            "Unsupported output content type `{other}`"
-        ))),
+        Some(content_type) => Ok(Some(content_type)),
     }
 }
 

@@ -885,8 +885,10 @@ in the runbook.
   unlabeled fenced block.
 - If `output.content_type` is present, the generated Markdown fenced block uses
   the declared content type.
-- In this increment, supported `output.content_type` values are `text`, `json`,
-  `xml`, `html`, `java`, and `markdown`.
+- `output.content_type` is a Markdown fence label, not a parser or execution
+  mode. `text` is the special label that produces an unlabeled fence; every
+  other non-empty label matching `[A-Za-z0-9][A-Za-z0-9_+.-]*` is rendered
+  verbatim, including `diff`.
 - If `output.trim_empty_lines` is omitted, the captured output trims leading
   and trailing empty lines.
 - `output.trim_empty_lines` accepts `leading_trailing`, `leading`, `trailing`,
@@ -1503,6 +1505,10 @@ in the runbook.
       Markdown uses a `java` fenced block for captured output.
 - [x] Given a `Command` entry with `output.content_type: markdown`, the
       generated Markdown uses a `markdown` fenced block for captured output.
+- [x] Given a `Command` entry with `output.content_type: diff`, the generated
+      Markdown uses a `diff` fenced block for captured output.
+- [x] Given an `output.content_type` with whitespace, an empty value, or other
+      unsafe fence-label characters, validation rejects the runbook.
 - [x] Given a `Command` entry with `output` but no `content_type`, the
       generated Markdown uses an unlabeled fenced block for captured output.
 - [x] Given a `Command` entry with `output.content_type: text`, the generated
@@ -1773,9 +1779,10 @@ in the runbook.
 - Command writes to stderr but exits successfully.
 - Command caption supplied as a string or array of strings.
 - Output content type omitted and defaults to `text`.
-- Output content type uses a supported rendering value such as `json`, `xml`,
-  `html`, or `markdown`.
-- Output content type uses an unsupported value.
+- Output content type uses a valid fence label such as `json`, `diff`, or
+  `toml`.
+- Output content type uses whitespace, an empty string, or an unsafe fence
+  label character.
 - Command output is large.
 - `working_directory` points outside the execution root via `..`.
 - `working_directory` resolves to a path that does not exist.

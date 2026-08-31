@@ -371,7 +371,7 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "`DisplayFile.content_type` and `DisplayUrl.content_type` override fence detection; otherwise `.java`, `.md`, `.markdown`, `.sh`, `.sql`, `.xml`, `.yaml`, `.yml`, `Dockerfile`, and `Dockerfile-*` are detected as lowercase `dockerfile`, with other extensions falling back to `text`.",
                 "`DisplayUrl` fetches remote content with a default `10 seconds` timeout unless the runbook sets `timeout`.",
                 "Command output can render `stdout`, `stderr`, or `combined` with `output.stream`; if omitted, rendered output defaults to `combined`.",
-                "Command output content types currently support `text`, `json`, `xml`, `html`, `java`, and `markdown`.",
+                "Command output content types are Markdown fence labels: use `text` for an unlabeled fence, or a non-empty label containing letters, digits, `_`, `+`, `-`, or `.` such as `json`, `diff`, or `toml`.",
                 "`output.stream` changes rendered output only and does not change explicit capture or assertion sources.",
                 "`datetime_shift.id` establishes a shared shift anchor, and `datetime_shift.use` reuses an earlier anchor so later rewrite rules follow the same synthetic timeline.",
                 "Command output can be shortened with `output.rewrite` rule `type: limit_lines`, using `first`, `last`, and optional `show_trim_marker`.",
