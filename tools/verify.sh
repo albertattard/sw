@@ -15,3 +15,4 @@ run_step cargo fmt
 run_step cargo clippy --all-targets --all-features -- -D warnings
 run_step cargo test
 run_step cargo build --release
+run_step bash tests/render-homebrew-formula.sh

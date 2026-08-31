@@ -40,6 +40,9 @@ jobs:
       - name: Build release
         run: cargo build --release --verbose
 
+      - name: Test release formula generation
+        run: bash tests/render-homebrew-formula.sh
+
       - name: Prepare CI artifact
         run: |
           COMMIT_SUBJECT="$(git log -1 --pretty=%s)"
@@ -151,6 +154,12 @@ jobs:
           cd release
           sha256sum sw-*.tar.gz > SHA256SUMS
 
+      - name: Upload Homebrew formula inputs
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-formula-inputs
+          path: release/SHA256SUMS
+
       - name: Publish GitHub Release assets
         uses: softprops/action-gh-release@v3
         with:
@@ -158,3 +167,59 @@ jobs:
             release/sw-*.tar.gz
             release/SHA256SUMS
             release/README.md
+
+  sync_homebrew_tap:
+    name: Synchronize Homebrew Tap
+    needs: release
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    concurrency:
+      group: homebrew-tap-sync
+      cancel-in-progress: false
+
+    steps:
+      - name: Require tap credential
+        env:
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          if [[ -z "$HOMEBREW_TAP_TOKEN" ]]; then
+            echo "HOMEBREW_TAP_TOKEN must grant contents write access to albertattard/homebrew-tap" >&2
+            exit 1
+          fi
+
+      - name: Checkout release source
+        uses: actions/checkout@v7
+
+      - name: Download release formula inputs
+        uses: actions/download-artifact@v8
+        with:
+          pattern: release-*
+          path: release
+          merge-multiple: true
+
+      - name: Checkout Homebrew tap
+        uses: actions/checkout@v7
+        with:
+          repository: albertattard/homebrew-tap
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          path: homebrew-tap
+
+      - name: Render Homebrew formula
+        run: |
+          ./tools/render-homebrew-formula.sh \
+            "$GITHUB_REF_NAME" \
+            release/SHA256SUMS \
+            homebrew-tap/Formula/sw.rb
+
+      - name: Commit formula update
+        working-directory: homebrew-tap
+        run: |
+          if git diff --quiet -- Formula/sw.rb; then
+            echo "Homebrew formula already matches $GITHUB_REF_NAME"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Formula/sw.rb
+          git commit -m "Update sw to $GITHUB_REF_NAME"
+          git push origin HEAD:main

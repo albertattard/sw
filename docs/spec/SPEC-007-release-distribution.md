@@ -117,6 +117,14 @@ downloading an archive for a different target. The formula lives in the
 separate `albertattard/homebrew-tap` repository and is updated for every
 published release after its target archives have been verified.
 
+The tagged-release workflow synchronizes `Formula/sw.rb` after it publishes
+the GitHub Release assets. The synchronization uses the current tag and the
+generated `SHA256SUMS` file; it must not rely on GitHub's mutable latest-release
+download URL. A repository secret named `HOMEBREW_TAP_TOKEN` grants the
+workflow write access only to the maintained tap. If formula synchronization
+fails, the release workflow fails so maintainers can correct the mismatch and
+rerun it.
+
 ## Release Contract
 
 - CI artifacts remain useful for workflow diagnostics but are not the official
@@ -132,6 +140,9 @@ published release after its target archives have been verified.
 - `SHA256SUMS` lets users verify downloaded archives before extracting them.
 - The maintained Homebrew formula installs only the matching official release
   archive and preserves the same supported-platform boundary.
+- The tagged-release workflow derives the tap formula's versioned archive URLs
+  and SHA-256 values from the same release tag and generated checksum file
+  that it publishes.
 - The latest release path always points to the newest published GitHub Release.
 - Asset naming should remain stable enough that users can identify the correct
   binary for a given platform.
@@ -160,6 +171,9 @@ published release after its target archives have been verified.
       published build.
 - [ ] A user on a supported platform can install the current release with
       `brew install albertattard/tap/sw` without installing Rust.
+- [ ] Given a tagged release and configured tap credential, the pipeline
+      updates the tap formula to the release's versioned archives and
+      checksums.
 - [ ] The official release mechanism is documented separately from transient CI
       artifacts.
 

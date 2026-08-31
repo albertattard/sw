@@ -197,6 +197,8 @@ The main project records are:
   for pending, in-progress, and completed work.
 - [`docs/decisions/README.md`](./docs/decisions/README.md): architecture
   decision records and technical tradeoffs.
+- [`docs/release/README.md`](./docs/release/README.md): official release and
+  Homebrew distribution process.
 - [`ADR-0001`](./docs/decisions/ADR-0001-specification-driven-development-with-ai.md):
   why this project uses specification-driven development with AI assistance.
 
