@@ -68,11 +68,11 @@ Expected task directories:
 ## In Progress
 
 - [ ] [TASK-182: Publish Homebrew Tap Formula](release/TASK-182-publish-homebrew-tap-formula.md)
-- [ ] [TASK-185: Synchronize Homebrew Tap On Release](release/TASK-185-synchronize-homebrew-tap-on-release.md)
-- [ ] [TASK-186: Publish Homebrew-Synchronized v0.1.1 Release](release/TASK-186-publish-homebrew-synchronized-v0-1-1-release.md)
 
 ## Done
 
+- [x] [TASK-186: Publish Homebrew-Synchronized v0.1.1 Release](release/TASK-186-publish-homebrew-synchronized-v0-1-1-release.md)
+- [x] [TASK-185: Synchronize Homebrew Tap On Release](release/TASK-185-synchronize-homebrew-tap-on-release.md)
 - [x] [TASK-184: Allow Safe Command Output Fence Labels](run/TASK-184-allow-safe-command-output-fence-labels.md)
 - [x] [TASK-183: Accept Numeric Java Prerequisite Versions](prerequisite/TASK-183-accept-numeric-java-prerequisite-versions.md)
 - [x] [TASK-181: Publish Apple Silicon And Portable Linux Release Archives](release/TASK-181-publish-apple-silicon-and-portable-linux-archives.md)
