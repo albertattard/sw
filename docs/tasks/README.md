@@ -69,6 +69,7 @@ Expected task directories:
 
 - [ ] [TASK-182: Publish Homebrew Tap Formula](release/TASK-182-publish-homebrew-tap-formula.md)
 - [ ] [TASK-185: Synchronize Homebrew Tap On Release](release/TASK-185-synchronize-homebrew-tap-on-release.md)
+- [ ] [TASK-186: Publish Homebrew-Synchronized v0.1.1 Release](release/TASK-186-publish-homebrew-synchronized-v0-1-1-release.md)
 
 ## Done
 
