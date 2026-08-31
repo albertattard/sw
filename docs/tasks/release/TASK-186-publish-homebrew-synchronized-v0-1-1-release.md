@@ -1,7 +1,7 @@
 ---
 id: TASK-186
 title: Publish Homebrew-Synchronized v0.1.1 Release
-status: in_progress
+status: done
 category: release
 related_features:
   - SPEC-007
@@ -26,15 +26,26 @@ development build.
 
 ## Acceptance Criteria
 
-- [ ] `sw version` reports 0.1.1 from the tagged release archive.
-- [ ] GitHub Release `v0.1.1` contains the declared archives, `SHA256SUMS`,
+- [x] `sw version` reports 0.1.1 from the tagged release archive.
+- [x] GitHub Release `v0.1.1` contains the declared archives, `SHA256SUMS`,
       and generated release README.
-- [ ] The tagged workflow updates `albertattard/homebrew-tap` to v0.1.1 using
+- [x] The tagged workflow updates `albertattard/homebrew-tap` to v0.1.1 using
       the published archive checksums.
-- [ ] `brew upgrade albertattard/tap/sw` installs v0.1.1 without Rust.
+- [x] `brew upgrade albertattard/tap/sw` installs v0.1.1 without Rust.
 
 ## Verification
 
 - Run `./tools/verify.sh` before creating the version-bump commit.
 - Inspect the tagged release workflow and tap update after the tag is pushed.
 - Run `brew update`, `brew upgrade albertattard/tap/sw`, and `sw version`.
+
+## Completion Notes
+
+- Tag `v0.1.1` triggered a successful release workflow, including Apple Silicon
+  macOS and portable x86_64 Linux archive builds, GitHub Release publication,
+  and Homebrew tap synchronization.
+- The release README identifies `v0.1.0` as the previous reachable release and
+  lists the commit subjects through the v0.1.1 release commit.
+- On Apple Silicon macOS, `brew update` followed by
+  `brew upgrade albertattard/tap/sw` upgraded `sw` from 0.1.0 to 0.1.1;
+  `sw version` reported `sw 0.1.1 (9279014)`.
