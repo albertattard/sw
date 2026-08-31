@@ -991,11 +991,37 @@ fn invalid_output_content_type_returns_validation_failure() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("\"valid\": false"));
     assert!(stdout.contains("\"path\": \"entries[0].output.content_type\""));
-    assert!(stdout.contains("must be one of `text`, `json`, `xml`, `html`, `java`, or `markdown`"));
+    assert!(stdout.contains(
+        "must be a non-empty Markdown fence label containing only letters, digits, `_`, `+`, `-`, or `.`"
+    ));
 }
 
 #[test]
-fn markdown_output_content_type_validates_successfully() {
+fn empty_and_unsafe_output_content_types_return_validation_failure() {
+    let dir = prepare_workspace();
+
+    for content_type in ["", "git diff", "diff`"] {
+        write_inline_runbook(
+            &dir,
+            &format!(
+                "entries:\n  - type: Command\n    commands: echo output\n    output:\n      content_type: \"{content_type}\"\n"
+            ),
+        );
+
+        let output = run_in_dir(&["validate", "--input-file", "sw-runbook.yaml"], &dir);
+
+        assert_eq!(
+            output.status.code(),
+            Some(2),
+            "content type: {content_type:?}"
+        );
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        assert!(stdout.contains("entries[0].output.content_type"));
+    }
+}
+
+#[test]
+fn arbitrary_safe_output_content_type_validates_successfully() {
     let dir = prepare_workspace();
     fs::write(
         dir.join("sw-runbook.yaml"),
@@ -1004,7 +1030,7 @@ fn markdown_output_content_type_validates_successfully() {
     commands: |
       printf '# Generated\n'
     output:
-      content_type: markdown
+      content_type: toml
 "#,
     )
     .expect("failed to write runbook");

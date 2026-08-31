@@ -2549,6 +2549,34 @@ fn markdown_output_content_type_uses_markdown_fenced_block() {
 }
 
 #[test]
+fn diff_output_content_type_uses_diff_fenced_block() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        r#"entries:
+  - type: Command
+    commands: |
+      printf '%s\n' '--- a/docs/tasks/TASK-004.md' '+++ b/docs/tasks/TASK-004.md' '+Ready'
+    output:
+      content_type: diff
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains(
+        r#"```diff
+--- a/docs/tasks/TASK-004.md
++++ b/docs/tasks/TASK-004.md
++Ready
+```"#
+    ));
+}
+
+#[test]
 fn output_without_content_type_uses_text_fenced_block() {
     let dir = prepare_workspace();
     write_runbook(&dir, "sw-runbook-run-success.json", "sw-runbook.json");

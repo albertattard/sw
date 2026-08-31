@@ -6,7 +6,7 @@
         "echo 'hello'"
       ],
       "output": {
-        "content_type": "yaml"
+        "content_type": "git diff"
       }
     }
   ]

@@ -344,6 +344,11 @@ Use `output` when command output should appear in the generated Markdown:
     stream: stdout
 ```
 
+`output.content_type` is a Markdown fence label. Use `text` for an unlabeled
+fence, or labels such as `json`, `diff`, and `toml` for syntax highlighting.
+Labels must be non-empty and contain only letters, digits, `_`, `+`, `-`, or
+`.`.
+
 Use `working_directory` when the command should run from a directory relative
 to the effective execution root. By default that root is the runbook file's
 directory; `sw run --working-directory <path>` can override it from the CLI.

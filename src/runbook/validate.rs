@@ -385,12 +385,12 @@ fn validate_output_with_context(
         None => {}
     }
 
-    match object.get("content_type").and_then(Value::as_str) {
-        Some("text" | "json" | "xml" | "html" | "java" | "markdown") => {}
+    match object.get("content_type") {
+        Some(Value::String(content_type)) if is_safe_output_fence_label(content_type) => {}
         Some(_) => push_error(
             errors,
             format!("{path}.content_type"),
-            "must be one of `text`, `json`, `xml`, `html`, `java`, or `markdown`",
+            "must be a non-empty Markdown fence label containing only letters, digits, `_`, `+`, `-`, or `.`",
         ),
         None => {}
     }
@@ -425,6 +425,14 @@ fn validate_output_with_context(
             available_capture_names,
         );
     }
+}
+
+fn is_safe_output_fence_label(label: &str) -> bool {
+    let mut characters = label.bytes();
+    matches!(characters.next(), Some(character) if character.is_ascii_alphanumeric())
+        && characters.all(|character| {
+            character.is_ascii_alphanumeric() || matches!(character, b'_' | b'+' | b'-' | b'.')
+        })
 }
 
 fn validate_regex_value(value: &Value, path: String, errors: &mut Vec<ValidationIssue>) {

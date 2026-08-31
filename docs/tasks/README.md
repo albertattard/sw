@@ -71,6 +71,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-184: Allow Safe Command Output Fence Labels](run/TASK-184-allow-safe-command-output-fence-labels.md)
 - [x] [TASK-183: Accept Numeric Java Prerequisite Versions](prerequisite/TASK-183-accept-numeric-java-prerequisite-versions.md)
 - [x] [TASK-181: Publish Apple Silicon And Portable Linux Release Archives](release/TASK-181-publish-apple-silicon-and-portable-linux-archives.md)
 - [x] [TASK-180: Add Runbook Execution Consent Guidance](explain/TASK-180-add-runbook-execution-consent-guidance.md)
