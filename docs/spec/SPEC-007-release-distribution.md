@@ -4,7 +4,7 @@ title: Release Distribution Contract
 status: in_progress
 priority: high
 owner: albertattard
-last_updated: 2026-08-24
+last_updated: 2026-09-01
 ---
 
 ## Goal
@@ -147,6 +147,17 @@ rerun it.
 - Asset naming should remain stable enough that users can identify the correct
   binary for a given platform.
 
+### Release Versioning
+
+- A release-preparation pull request updates the package version in
+  `Cargo.toml` before the release tag is created.
+- The release tag must use the same semantic version with a `v` prefix; for
+  example, package version `0.1.2` is released as tag `v0.1.2`.
+- The release tag is created only from the merged, verified release-preparation
+  commit on `main`.
+- The tagged workflow publishes the archives, checksums, release README, and
+  Homebrew formula update as one release transaction.
+
 ## Acceptance Criteria
 
 - [ ] Given a tagged release build, the pipeline publishes release assets to a
@@ -174,6 +185,8 @@ rerun it.
 - [ ] Given a tagged release and configured tap credential, the pipeline
       updates the tap formula to the release's versioned archives and
       checksums.
+- [ ] Given a release-preparation pull request that sets package version
+      `0.1.2`, tag `v0.1.2` is created from its merged commit on `main`.
 - [ ] The official release mechanism is documented separately from transient CI
       artifacts.
 
