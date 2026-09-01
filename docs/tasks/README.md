@@ -67,11 +67,11 @@ Expected task directories:
 
 ## In Progress
 
-- [ ] [TASK-188: Publish Homebrew-Synchronized v0.1.2 Release](release/TASK-188-publish-homebrew-synchronized-v0-1-2-release.md)
 - [ ] [TASK-182: Publish Homebrew Tap Formula](release/TASK-182-publish-homebrew-tap-formula.md)
 
 ## Done
 
+- [x] [TASK-188: Publish Homebrew-Synchronized v0.1.2 Release](release/TASK-188-publish-homebrew-synchronized-v0-1-2-release.md)
 - [x] [TASK-187: Default Display Line Count To First Line](display-file/TASK-187-default-display-line-count-to-first-line.md)
 - [x] [TASK-186: Publish Homebrew-Synchronized v0.1.1 Release](release/TASK-186-publish-homebrew-synchronized-v0-1-1-release.md)
 - [x] [TASK-185: Synchronize Homebrew Tap On Release](release/TASK-185-synchronize-homebrew-tap-on-release.md)

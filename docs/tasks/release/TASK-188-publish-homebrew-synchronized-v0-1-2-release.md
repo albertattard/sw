@@ -1,7 +1,7 @@
 ---
 id: TASK-188
 title: Publish Homebrew-Synchronized v0.1.2 Release
-status: in_progress
+status: done
 category: release
 related_features:
   - SPEC-007
@@ -32,10 +32,25 @@ the official GitHub Release and maintained Homebrew tap.
 
 ## Acceptance Criteria
 
-- [ ] The merged release-preparation commit sets the package version to 0.1.2.
-- [ ] GitHub Release `v0.1.2` contains the supported archives, `SHA256SUMS`,
+- [x] The merged release-preparation commit sets the package version to 0.1.2.
+- [x] GitHub Release `v0.1.2` contains the supported archives, `SHA256SUMS`,
       and generated release README.
-- [ ] The tagged workflow updates `albertattard/homebrew-tap` to v0.1.2 using
+- [x] The tagged workflow updates `albertattard/homebrew-tap` to v0.1.2 using
       the published archive checksums.
-- [ ] `brew upgrade albertattard/tap/sw` installs v0.1.2 without Rust.
-- [ ] Release and Homebrew verification evidence is recorded in this task.
+- [x] `brew upgrade albertattard/tap/sw` installs v0.1.2 without Rust.
+- [x] Release and Homebrew verification evidence is recorded in this task.
+
+## Completion Notes
+
+- Merged release-preparation PR #64 at commit `302b3a6`, with package version
+  0.1.2, then created and pushed tag `v0.1.2` from that same commit.
+- Tagged workflow [33527953008](https://github.com/albertattard/sw/actions/runs/33527953008)
+  completed successfully: Quality, both platform archive builds, GitHub Release
+  publication, and Homebrew tap synchronization all passed.
+- GitHub Release `v0.1.2` published the Apple Silicon archive, portable Linux
+  archive, `SHA256SUMS`, and generated release README.
+- The synchronized formula references the v0.1.2 archive URLs and their
+  published SHA-256 values.
+- On Apple Silicon macOS, `brew update` followed by
+  `brew upgrade albertattard/tap/sw` upgraded `sw` from 0.1.1 to 0.1.2;
+  `sw version` reported `sw 0.1.2 (302b3a6)`.
