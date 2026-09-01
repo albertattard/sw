@@ -4,7 +4,7 @@ title: Run Runbook to Markdown
 status: in_progress
 priority: high
 owner: albertattard
-last_updated: 2026-08-06
+last_updated: 2026-09-01
 ---
 
 ## Problem
@@ -355,6 +355,8 @@ in the runbook.
   from `start_line` to the end of the file.
 - If `line_count` is present, only that many lines are rendered starting from
   `start_line`.
+- If `line_count` is present and `start_line` is omitted, rendering starts
+  from line 1.
 - If `indent` is present, it is a non-negative integer.
 - `indent` applies to the whole rendered fenced block, including the opening
   fence, inner content lines, and closing fence.
@@ -369,7 +371,6 @@ in the runbook.
 - If `offset` is negative and one or more non-empty copied file content lines
   have fewer leading spaces than requested, validation may emit a non-blocking
   warning that the negative offset cannot be fully applied to all lines.
-- `line_count` without `start_line` is invalid.
 - `DisplayFile` rendering does not execute the referenced file.
 - If `DisplayFile.content_type` is present, the generated Markdown fenced
   block uses that value as its language label.
@@ -409,6 +410,8 @@ in the runbook.
   from `start_line` to the end of the fetched response body.
 - If `line_count` is present, only that many lines are rendered starting from
   `start_line`.
+- If `line_count` is present and `start_line` is omitted, rendering starts
+  from line 1.
 - If `indent` is present, it is a non-negative integer.
 - `indent` applies to the whole rendered fenced block, including the opening
   fence, inner content lines, and closing fence.
@@ -419,7 +422,6 @@ in the runbook.
 - If `offset` is negative, up to that many leading spaces are removed from
   each non-empty copied response body line.
 - Empty copied response body lines are preserved when `offset` is applied.
-- `line_count` without `start_line` is invalid.
 - `DisplayUrl` rendering performs an HTTP GET and does not execute the fetched
   content.
 - Rendering follows redirects supported by the HTTP client.
@@ -1160,6 +1162,8 @@ in the runbook.
       requested slice is rendered.
 - [x] Given a `DisplayFile` entry with `start_line` and no `line_count`,
       rendering continues from that line to the end of the file.
+- [x] Given a `DisplayFile` entry with `line_count` and no `start_line`,
+      validation succeeds and rendering starts from line 1.
 - [x] Given a `DisplayFile` entry with `indent`, the opening fence, copied
       content lines, and closing fence are all prefixed with that many spaces.
 - [x] Given a `DisplayFile` entry with a positive `offset`, each non-empty
@@ -1187,6 +1191,8 @@ in the runbook.
       Markdown uses a `yaml` fenced block.
 - [x] Given a `DisplayUrl` entry with `start_line` and `line_count`, only the
       requested response body slice is rendered.
+- [x] Given a `DisplayUrl` entry with `line_count` and no `start_line`,
+      validation succeeds and rendering starts from line 1.
 - [x] Given a `DisplayUrl` entry with `indent`, the opening fence, copied
       content lines, and closing fence are all prefixed with that many spaces.
 - [x] Given a `DisplayUrl` entry with an unsupported URL scheme, validation
@@ -1674,7 +1680,7 @@ in the runbook.
 - `DisplayFile` uses an unrecognized extension and falls back to `text`.
 - `DisplayFile` uses `start_line` less than `1`.
 - `DisplayFile` uses `line_count` less than `1`.
-- `DisplayFile` uses `line_count` without `start_line`.
+- `DisplayFile` uses `line_count` without `start_line` and renders from line 1.
 - `DisplayFile` uses `start_line` beyond the end of the file.
 - `DisplayFile` uses positive `indent` to nest a snippet more deeply.
 - `DisplayFile` uses negative `indent` to remove surrounding code indentation

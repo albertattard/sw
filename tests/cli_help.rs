@@ -70,6 +70,9 @@ fn help_subcommand_for_known_topic_prints_targeted_help() {
         "`Markdown`, `DisplayFile`, `DisplayUrl`, `Patch`, and `Command` entries may declare `indent`"
     ));
     assert!(stdout.contains(
+        "`DisplayFile` and `DisplayUrl` use line 1 when `line_count` is set without `start_line`"
+    ));
+    assert!(stdout.contains(
         "`DisplayFile.content_type` and `DisplayUrl.content_type` override fence detection"
     ));
     assert!(stdout.contains("`Breakpoint` entries stop processing successfully"));

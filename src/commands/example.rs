@@ -226,7 +226,6 @@ const DISPLAY_FILE_EXAMPLE_JSON: &str = r#"{
   "type": "DisplayFile",
   "path": "./src/main/java/demo/Example.java",
   "content_type": "java",
-  "start_line": 1,
   "line_count": 12,
   "indent": 3,
   "offset": -12,
@@ -244,7 +243,6 @@ const DISPLAY_FILE_EXAMPLE_JSON: &str = r#"{
 const DISPLAY_FILE_EXAMPLE_YAML: &str = r#"type: DisplayFile
 path: ./src/main/java/demo/Example.java
 content_type: java
-start_line: 1
 line_count: 12
 indent: 3
 offset: -12
@@ -259,7 +257,6 @@ const DISPLAY_URL_EXAMPLE_JSON: &str = r#"{
   "url": "https://raw.githubusercontent.com/albertattard/sw/refs/heads/main/docs/guides/entities.md",
   "content_type": "markdown",
   "timeout": "10 seconds",
-  "start_line": 1,
   "line_count": 40,
   "indent": 3
 }"#;
@@ -268,7 +265,6 @@ const DISPLAY_URL_EXAMPLE_YAML: &str = r#"type: DisplayUrl
 url: https://raw.githubusercontent.com/albertattard/sw/refs/heads/main/docs/guides/entities.md
 content_type: markdown
 timeout: 10 seconds
-start_line: 1
 line_count: 40
 indent: 3"#;
 

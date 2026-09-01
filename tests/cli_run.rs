@@ -3931,6 +3931,25 @@ fn display_file_can_render_a_bounded_line_range() {
 }
 
 #[test]
+fn display_file_line_count_without_start_line_renders_from_the_first_line() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        "entries:\n  - type: DisplayFile\n    path: ./Example.java\n    line_count: 2\n",
+    )
+    .expect("failed to write runbook");
+    fs::write(dir.join("Example.java"), "line 1\nline 2\nline 3\n")
+        .expect("failed to write Example.java");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```java\nline 1\nline 2\n```"));
+    assert!(!readme.contains("line 3"));
+}
+
+#[test]
 fn display_file_can_render_from_start_line_to_end_of_file() {
     let dir = prepare_workspace();
     write_runbook(
@@ -4095,7 +4114,7 @@ fn display_url_fetches_and_renders_remote_markdown() {
     fs::write(
         dir.join("sw-runbook.yaml"),
         format!(
-            "entries:\n  - type: DisplayUrl\n    url: {url}\n    timeout: 10 seconds\n    start_line: 1\n    line_count: 3\n    indent: 3\n    offset: -2\n"
+            "entries:\n  - type: DisplayUrl\n    url: {url}\n    timeout: 10 seconds\n    line_count: 3\n    indent: 3\n    offset: -2\n"
         ),
     )
     .expect("failed to write runbook");

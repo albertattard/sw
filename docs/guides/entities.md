@@ -114,12 +114,12 @@ Use `DisplayFile` to show file contents without executing them.
 ```yaml
 - type: DisplayFile
   path: ./src/main/java/demo/Example.java
-  start_line: 1
   line_count: 12
 ```
 
-Use line ranges when only part of a file is relevant. Use `indent` to indent
-the whole fenced block in the generated Markdown.
+Use `line_count` alone to display that many lines from the beginning of a file.
+Add `start_line` only when the excerpt begins later. Use `indent` to indent the
+whole fenced block in the generated Markdown.
 
 ```yaml
 - type: DisplayFile
@@ -177,13 +177,13 @@ file paths.
   url: https://raw.githubusercontent.com/albertattard/sw/refs/heads/main/docs/guides/entities.md
   content_type: markdown
   timeout: 10 seconds
-  start_line: 1
   line_count: 40
 ```
 
 `DisplayUrl` supports `http` and `https` URLs. It renders fetched content in a
 fenced block and supports `start_line`, `line_count`, `indent`, `offset`, and
-`content_type` like `DisplayFile`.
+`content_type` like `DisplayFile`; `line_count` without `start_line` starts at
+line 1.
 
 ## Breakpoint
 
