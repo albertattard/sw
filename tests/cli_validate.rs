@@ -1580,7 +1580,7 @@ fn invalid_display_file_returns_validation_failure() {
 }
 
 #[test]
-fn invalid_display_file_line_count_without_start_line_returns_validation_failure() {
+fn display_file_line_count_without_start_line_is_valid() {
     let output = run(&[
         "validate",
         "--input-file",
@@ -1589,11 +1589,9 @@ fn invalid_display_file_line_count_without_start_line_returns_validation_failure
         "json",
     ]);
 
-    assert_eq!(output.status.code(), Some(2));
+    assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(stdout.contains("\"valid\": false"));
-    assert!(stdout.contains("\"path\": \"entries[0].line_count\""));
-    assert!(stdout.contains("requires `start_line`"));
+    assert!(stdout.contains("\"valid\": true"));
 }
 
 #[test]
@@ -1698,7 +1696,7 @@ fn display_url_fields_are_validated() {
     let valid = run_in_dir_with_stdin(
         &["validate", "--input-file=-", "--input-format", "yaml"],
         &prepare_workspace(),
-        "entries:\n  - type: DisplayUrl\n    url: https://example.com/SKILL.md\n    timeout: 10 seconds\n    content_type: markdown\n    start_line: 1\n    line_count: 5\n    indent: 2\n    offset: -1\n",
+        "entries:\n  - type: DisplayUrl\n    url: https://example.com/SKILL.md\n    timeout: 10 seconds\n    content_type: markdown\n    line_count: 5\n    indent: 2\n    offset: -1\n",
     );
     assert!(valid.status.success());
 
@@ -1756,8 +1754,6 @@ fn display_url_rejects_unknown_properties_and_bad_line_ranges() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("\"path\": \"entries[0].path\""));
     assert!(stdout.contains("is not a supported DisplayUrl property"));
-    assert!(stdout.contains("\"path\": \"entries[0].line_count\""));
-    assert!(stdout.contains("requires `start_line`"));
 }
 
 #[test]

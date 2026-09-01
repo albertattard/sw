@@ -163,14 +163,6 @@ fn validate_display_line_range(
 ) {
     validate_positive_integer(object, "start_line", path, errors);
     validate_positive_integer(object, "line_count", path, errors);
-
-    if object.get("line_count").is_some() && object.get("start_line").is_none() {
-        push_error(
-            errors,
-            format!("{path}.line_count"),
-            "requires `start_line`",
-        );
-    }
 }
 
 fn validate_display_layout_fields(

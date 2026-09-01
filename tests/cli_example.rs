@@ -176,7 +176,7 @@ fn display_file_example_prints_valid_yaml_entry() {
         serde_norway::from_str(&stdout).expect("example output should be valid yaml");
     assert_eq!(value["type"], "DisplayFile");
     assert_eq!(value["content_type"], "java");
-    assert_eq!(value["start_line"], 1);
+    assert!(value.get("start_line").is_none());
     assert_eq!(value["line_count"], 12);
     assert_eq!(value["indent"], 3);
     assert_eq!(value["offset"], -12);
@@ -198,7 +198,7 @@ fn display_file_example_prints_valid_json_entry_when_requested() {
         serde_json::from_str(&stdout).expect("example output should be valid json");
     assert_eq!(value["type"], "DisplayFile");
     assert_eq!(value["content_type"], "java");
-    assert_eq!(value["start_line"], 1);
+    assert!(value.get("start_line").is_none());
     assert_eq!(value["line_count"], 12);
     assert_eq!(value["indent"], 3);
     assert_eq!(value["offset"], -12);
@@ -225,7 +225,7 @@ fn display_url_example_prints_valid_yaml_entry() {
     );
     assert_eq!(value["content_type"], "markdown");
     assert_eq!(value["timeout"], "10 seconds");
-    assert_eq!(value["start_line"], 1);
+    assert!(value.get("start_line").is_none());
     assert_eq!(value["line_count"], 40);
     assert_eq!(value["indent"], 3);
 }

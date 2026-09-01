@@ -87,7 +87,6 @@ fn sample_runbook() -> Value {
             {
                 "type": "DisplayFile",
                 "path": "./src/main/java/demo/Example.java",
-                "start_line": 1,
                 "line_count": 12
             },
             {
