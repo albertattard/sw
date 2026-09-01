@@ -185,7 +185,7 @@ rerun it.
 - [ ] Given a tagged release and configured tap credential, the pipeline
       updates the tap formula to the release's versioned archives and
       checksums.
-- [ ] Given a release-preparation pull request that sets package version
+- [x] Given a release-preparation pull request that sets package version
       `0.1.2`, tag `v0.1.2` is created from its merged commit on `main`.
 - [ ] The official release mechanism is documented separately from transient CI
       artifacts.
