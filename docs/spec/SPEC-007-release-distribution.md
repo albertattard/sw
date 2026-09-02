@@ -4,7 +4,7 @@ title: Release Distribution Contract
 status: in_progress
 priority: high
 owner: albertattard
-last_updated: 2026-09-01
+last_updated: 2026-09-02
 ---
 
 ## Goal
@@ -186,7 +186,7 @@ rerun it.
       updates the tap formula to the release's versioned archives and
       checksums.
 - [x] Given a release-preparation pull request that sets package version
-      `0.1.2`, tag `v0.1.2` is created from its merged commit on `main`.
+      `0.1.3`, tag `v0.1.3` is created from its merged commit on `main`.
 - [ ] The official release mechanism is documented separately from transient CI
       artifacts.
 
