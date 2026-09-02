@@ -1,21 +1,20 @@
 # Repository Guidelines
 
-## Trigger phrases
+## Change Delivery
+
+Follow the canonical maintainer procedure in
+[`docs/release/README.md`](docs/release/README.md) for preparing a branch,
+verification, commit, pull request, merge, cleanup, and optional release.
+
+### Trigger phrase
+
 - `commit changes`
-  - If the current branch is `main`, create and switch to a short
-    feature branch before committing, named from the intended change, for
-    example `clarify-cleanup-ownership`
-  - Run `./tools/verify.sh` on the branch that will receive the commit
-  - Stage all staged and unstaged changes with `git add .`
-  - Create a commit using the commit message format in this file
-  - Push the commit to `origin` on the current branch; do not push directly to
-    `main`
-  - Open a pull request to `main` with `gh pr create` when the pushed branch is
-    not `main` and the GitHub CLI is available; otherwise report the exact
-    command the user can run
-  - Do not delete local branches as part of this trigger; after the pull
-    request is merged, use the conservative post-merge cleanup flow in the Git
-    workflow section
+  - Authorizes the agent to perform the commit, push, and pull-request steps
+    in the delivery guide.
+  - Stage all staged and unstaged changes with `git add .` before committing.
+  - Open a pull request to `main` with `gh pr create` when the GitHub CLI is
+    available; otherwise report the exact command the user can run.
+  - Do not delete local branches as part of this trigger.
   - Report the result in this format:
     - A short summary sentence, for example `Committed and pushed the current changes.`
     - `Verification run before commit:` followed by the non-git verification and build commands that were executed, listed as bullets in the order they were executed
@@ -26,49 +25,29 @@
     - `Commit message used:` followed by the full commit message with a blank line between subject and body
     - If unrelated local changes were intentionally left uncommitted, list them under `I left unrelated local changes uncommitted:`
 
-## Git workflow
+- `release changes as v<version>`
+  - Authorizes the complete guarded release flow in the delivery guide,
+    including merging the pull request, creating and pushing the specified tag,
+    and verifying the GitHub Release and Homebrew tap update.
+  - Requires an explicit version tag such as `v0.1.3`; never infer a release
+    version from the change.
+  - Stop and report the failure if local verification, required PR checks,
+    merging, release publication, tap synchronization, or Homebrew upgrade
+    verification fails.
+  - Report the pull request, merge commit, tag, release URL, tap verification,
+    and installed `sw version` when the flow succeeds.
+
+### Authorization Boundaries
+
 - Only create a commit when the user explicitly asks.
 - Only push when the user explicitly asks.
 - Treat `commit changes` as explicit permission to push the resulting branch
   and, when the branch is not `main`, open a pull request to `main`.
+- Treat `release changes as v<version>` as explicit permission to merge the
+  release pull request and push that exact release tag after the required
+  checks pass.
 - Do not push directly to `main`; branch protection requires the `Quality`
   check to run through a pull request.
-- After a pull request is merged, clean up local branches conservatively:
-  - Run `./tools/cleanup-merged-branch.sh <branch>`.
-  - The cleanup tool fetches and fast-forwards `main`, tries safe deletion with
-    `git branch -d`, and only uses `git branch -D` when `git diff --quiet main
-    <branch>` and `git cherry -v main <branch>` prove that no unique work would
-    be lost after a squash or rebase merge.
-  - After successful branch deletion, the cleanup tool runs
-    `cargo build --release` so the local `sw` binary reflects current `main`.
-  - Report whether the branch was deleted safely with `git branch -d` or force
-    deleted after the tool verified that the branch patch was already present
-    on current `main`, and report that the local release binary was rebuilt.
-- Before `commit changes`, run `./tools/verify.sh`.
-- `./tools/verify.sh` runs `cargo fmt` first, then the standard lint, test,
-  and release-build checks. This reduces avoidable retry cycles in interactive
-  sessions, but it may reformat modified Rust files in a dirty worktree before
-  the commit is created.
-- If formatting, linting, tests, or the release build fail, stop and report the failure instead of committing.
-- Write commit messages in this format:
-  - Subject line: imperative verb + outcome
-  - Example: `Add validate subcommand`
-- After the subject, include a short business-oriented description explaining why the change was made.
-- Focus the description on product intent, maintainability, usability, or future growth, not on low-level code mechanics.
-- The description may mention structural decisions when they support future capabilities.
-- Avoid code-centric summaries as the primary explanation.
-
-Example:
-
-```text
-Add validate subcommand
-
-Allow users and agents to verify that a runbook is structurally valid before
-trying to execute it. This also reorganizes the CLI so new commands can be
-added cleanly as the application grows, instead of concentrating behavior in
-main.rs. An anonymised fixture is included to support realistic testing without
-tying the test suite to a specific project.
-```
 
 ## Engineering rules
 - Follow spec-driven delivery for user-visible features.

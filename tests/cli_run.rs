@@ -3784,7 +3784,9 @@ fn display_file_markdown_uses_markdown_fenced_block() {
     assert!(output.status.success());
     let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
     assert!(readme.contains("# Display Markdown file"));
-    assert!(readme.contains("   ```markdown\n   ---\n   name: create-scope\n   ---\n   ```"));
+    assert!(
+        readme.contains("   ```markdown\n   ---\n   name: create-scope\n   ---\n   ...\n   ```")
+    );
 }
 
 #[test]
@@ -3925,7 +3927,7 @@ fn display_file_can_render_a_bounded_line_range() {
 
     assert!(output.status.success());
     let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
-    assert!(readme.contains("```java\nline 2\nline 3\n```"));
+    assert!(readme.contains("```java\n...\nline 2\nline 3\n...\n```"));
     assert!(!readme.contains("line 1"));
     assert!(!readme.contains("line 4"));
 }
@@ -3945,8 +3947,85 @@ fn display_file_line_count_without_start_line_renders_from_the_first_line() {
 
     assert!(output.status.success());
     let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
-    assert!(readme.contains("```java\nline 1\nline 2\n```"));
+    assert!(readme.contains("```java\nline 1\nline 2\n...\n```"));
     assert!(!readme.contains("line 3"));
+}
+
+#[test]
+fn display_file_line_range_marks_each_omitted_boundary_by_default() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        "entries:\n  - type: DisplayFile\n    path: ./Example.java\n    start_line: 2\n    line_count: 2\n",
+    )
+    .expect("failed to write runbook");
+    fs::write(
+        dir.join("Example.java"),
+        "line 1\nline 2\nline 3\nline 4\nline 5\n",
+    )
+    .expect("failed to write Example.java");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```java\n...\nline 2\nline 3\n...\n```"));
+}
+
+#[test]
+fn display_file_trim_markers_can_be_suppressed() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        "entries:\n  - type: DisplayFile\n    path: ./Example.java\n    start_line: 2\n    line_count: 2\n    show_trim_markers: false\n",
+    )
+    .expect("failed to write runbook");
+    fs::write(dir.join("Example.java"), "line 1\nline 2\nline 3\nline 4\n")
+        .expect("failed to write Example.java");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```java\nline 2\nline 3\n```"));
+    assert!(!readme.contains("..."));
+}
+
+#[test]
+fn display_file_start_line_trim_marker_can_be_suppressed() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        "entries:\n  - type: DisplayFile\n    path: ./Example.java\n    start_line: 2\n    show_trim_markers: false\n",
+    )
+    .expect("failed to write runbook");
+    fs::write(dir.join("Example.java"), "line 1\nline 2\nline 3\n")
+        .expect("failed to write Example.java");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```java\nline 2\nline 3\n```"));
+    assert!(!readme.contains("..."));
+}
+
+#[test]
+fn display_file_does_not_mark_a_range_that_reaches_both_file_boundaries() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        "entries:\n  - type: DisplayFile\n    path: ./Example.java\n    line_count: 2\n",
+    )
+    .expect("failed to write runbook");
+    fs::write(dir.join("Example.java"), "line 1\nline 2\n").expect("failed to write Example.java");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```java\nline 1\nline 2\n```"));
+    assert!(!readme.contains("..."));
 }
 
 #[test]
@@ -3964,7 +4043,7 @@ fn display_file_can_render_from_start_line_to_end_of_file() {
 
     assert!(output.status.success());
     let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
-    assert!(readme.contains("```java\nline 2\nline 3\nline 4\n```"));
+    assert!(readme.contains("```java\n...\nline 2\nline 3\nline 4\n```"));
     assert!(!readme.contains("line 1"));
 }
 
@@ -4064,7 +4143,7 @@ fn display_file_negative_offset_can_remove_leading_spaces() {
     assert!(output.status.success());
     let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
     assert!(readme.contains(
-        "```java\npublic void demo() {\n    if (ready) {\n        work();\n    }\n}\n```"
+        "```java\n...\npublic void demo() {\n    if (ready) {\n        work();\n    }\n}\n...\n```"
     ));
 }
 
@@ -4123,8 +4202,48 @@ fn display_url_fetches_and_renders_remote_markdown() {
 
     assert!(output.status.success());
     let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
-    assert!(readme.contains("   ```markdown\n   # Create Scope\n\n   Use this skill.\n   ```"));
+    assert!(
+        readme.contains("   ```markdown\n   # Create Scope\n\n   Use this skill.\n   ...\n   ```")
+    );
     assert!(!readme.contains("Keep this hidden"));
+}
+
+#[test]
+fn display_url_line_range_marks_each_omitted_boundary_by_default() {
+    let dir = prepare_workspace();
+    let url = serve_one_http_response("/content.txt", "200 OK", "line 1\nline 2\nline 3\nline 4\n");
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        format!(
+            "entries:\n  - type: DisplayUrl\n    url: {url}\n    timeout: 10 seconds\n    start_line: 2\n    line_count: 2\n"
+        ),
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```text\n...\nline 2\nline 3\n...\n```"));
+}
+
+#[test]
+fn display_url_start_line_marks_leading_omitted_content() {
+    let dir = prepare_workspace();
+    let url = serve_one_http_response("/content.txt", "200 OK", "line 1\nline 2\nline 3\n");
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        format!(
+            "entries:\n  - type: DisplayUrl\n    url: {url}\n    timeout: 10 seconds\n    start_line: 2\n"
+        ),
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```text\n...\nline 2\nline 3\n```"));
 }
 
 #[test]

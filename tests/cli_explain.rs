@@ -162,7 +162,7 @@ fn explain_run_prints_concise_contract_summary() {
         "`Markdown`, `DisplayFile`, `DisplayUrl`, `Patch`, and `Command` entries may declare `indent` to prefix each non-empty rendered line and keep nested Markdown structures readable."
     ));
     assert!(stdout.contains(
-        "`DisplayFile` and `DisplayUrl` start at line 1 when `line_count` is set without `start_line`."
+        "`DisplayFile` and `DisplayUrl` start at line 1 when `line_count` is set without `start_line`; `show_trim_markers` defaults to `true` and adds `...` at omitted boundaries."
     ));
     assert!(stdout.contains(
         "`Command.working_directory` runs one command entry from a directory relative to the execution root; legacy `working_dir` remains accepted but new runbooks should use `working_directory`."

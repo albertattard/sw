@@ -118,8 +118,11 @@ Use `DisplayFile` to show file contents without executing them.
 ```
 
 Use `line_count` alone to display that many lines from the beginning of a file.
-Add `start_line` only when the excerpt begins later. Use `indent` to indent the
-whole fenced block in the generated Markdown.
+When the selected range omits content, the generated fenced block adds `...`
+at each omitted boundary to mark the excerpt as incomplete. A `start_line`
+after line 1 adds a leading marker, even without `line_count`. Set
+`show_trim_markers: false` to suppress those markers. Use `indent` to indent
+the whole fenced block in the generated Markdown.
 
 ```yaml
 - type: DisplayFile
@@ -183,7 +186,9 @@ file paths.
 `DisplayUrl` supports `http` and `https` URLs. It renders fetched content in a
 fenced block and supports `start_line`, `line_count`, `indent`, `offset`, and
 `content_type` like `DisplayFile`; `line_count` without `start_line` starts at
-line 1.
+line 1. `show_trim_markers` also works like `DisplayFile`: it defaults to
+`true` and adds `...` at each boundary where the selected range omitted
+response content.
 
 ## Breakpoint
 
