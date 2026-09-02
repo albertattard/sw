@@ -122,7 +122,9 @@ When the selected range omits content, the generated fenced block adds `...`
 at each omitted boundary to mark the excerpt as incomplete. A `start_line`
 after line 1 adds a leading marker, even without `line_count`. Set
 `show_trim_markers: false` to suppress those markers. Use `indent` to indent
-the whole fenced block in the generated Markdown.
+the whole fenced block in the generated Markdown. Use `offset` to add or remove
+spaces from copied non-empty content lines without moving the fence or its trim
+markers.
 
 ```yaml
 - type: DisplayFile
@@ -131,6 +133,12 @@ the whole fenced block in the generated Markdown.
   line_count: 18
   indent: 2
 ```
+
+For a complete, copyable `DisplayFile` entry that combines line slicing,
+fence indentation, copied-content de-indentation, an explicit content type,
+and a Java transform, run `sw example DisplayFile`. The `start_line` and
+`line_count` in that example deliberately demonstrate an excerpt rather than
+silently defaulting to the first line of the file.
 
 Use `content_type` when the file extension is missing or should not control
 the generated fenced-code label. When `content_type` is omitted, `DisplayFile`

@@ -71,6 +71,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-195: Complete DisplayFile Example Discovery](example/TASK-195-complete-display-file-example-discovery.md)
 - [x] [TASK-194: Publish Homebrew-Synchronized v0.1.3 Release](release/TASK-194-publish-homebrew-synchronized-v0-1-3-release.md)
 - [x] [TASK-193: Add One Flow Release Trigger](repo-process/TASK-193-add-one-flow-release-trigger.md)
 - [x] [TASK-192: Link Agent Git Guidance To Delivery Guide](repo-process/TASK-192-link-agent-git-guidance-to-delivery-guide.md)
