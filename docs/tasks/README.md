@@ -67,10 +67,16 @@ Expected task directories:
 
 ## In Progress
 
+- [ ] [TASK-194: Publish Homebrew-Synchronized v0.1.3 Release](release/TASK-194-publish-homebrew-synchronized-v0-1-3-release.md)
 - [ ] [TASK-182: Publish Homebrew Tap Formula](release/TASK-182-publish-homebrew-tap-formula.md)
 
 ## Done
 
+- [x] [TASK-193: Add One Flow Release Trigger](repo-process/TASK-193-add-one-flow-release-trigger.md)
+- [x] [TASK-192: Link Agent Git Guidance To Delivery Guide](repo-process/TASK-192-link-agent-git-guidance-to-delivery-guide.md)
+- [x] [TASK-191: Consolidate Change Delivery Guide](repo-process/TASK-191-consolidate-change-delivery-guide.md)
+- [x] [TASK-190: Mark Start Line Display Excerpts](display-file/TASK-190-mark-start-line-display-excerpts.md)
+- [x] [TASK-189: Mark Truncated Display Excerpts](display-file/TASK-189-mark-truncated-display-excerpts.md)
 - [x] [TASK-188: Publish Homebrew-Synchronized v0.1.2 Release](release/TASK-188-publish-homebrew-synchronized-v0-1-2-release.md)
 - [x] [TASK-187: Default Display Line Count To First Line](display-file/TASK-187-default-display-line-count-to-first-line.md)
 - [x] [TASK-186: Publish Homebrew-Synchronized v0.1.1 Release](release/TASK-186-publish-homebrew-synchronized-v0-1-1-release.md)

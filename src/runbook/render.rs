@@ -944,8 +944,15 @@ fn render_display_file(entry: &Value, execution_root: &Path) -> Result<String, R
         .get("line_count")
         .and_then(Value::as_u64)
         .map(|value| value as usize);
-    let contents = slice_display_file_contents(&contents, start_line, line_count, &display_path)?;
-    let contents = apply_display_offset(entry, contents, "DisplayFile")?;
+    let slice = slice_display_file_contents(&contents, start_line, line_count, &display_path)?;
+    let contents = apply_display_offset(entry, slice.contents, "DisplayFile")?;
+    let contents = apply_display_trim_markers(
+        entry,
+        contents,
+        slice.leading_omitted,
+        slice.trailing_omitted,
+        "DisplayFile",
+    )?;
 
     let section = fenced_block(
         Some(display_file_fence_language(entry, &display_path)?),
@@ -978,8 +985,15 @@ fn render_display_url(entry: &Value) -> Result<String, RenderError> {
         .get("line_count")
         .and_then(Value::as_u64)
         .map(|value| value as usize);
-    let contents = slice_display_contents("DisplayUrl", &contents, start_line, line_count, url)?;
-    let contents = apply_display_offset(entry, contents, "DisplayUrl")?;
+    let slice = slice_display_contents("DisplayUrl", &contents, start_line, line_count, url)?;
+    let contents = apply_display_offset(entry, slice.contents, "DisplayUrl")?;
+    let contents = apply_display_trim_markers(
+        entry,
+        contents,
+        slice.leading_omitted,
+        slice.trailing_omitted,
+        "DisplayUrl",
+    )?;
 
     let url_path = Path::new(parsed_url.path());
     let section = fenced_block(
@@ -1462,7 +1476,7 @@ fn slice_display_file_contents(
     start_line: usize,
     line_count: Option<usize>,
     display_path: &Path,
-) -> Result<String, RenderError> {
+) -> Result<DisplayContentSlice, RenderError> {
     slice_display_contents(
         "DisplayFile",
         contents,
@@ -1472,13 +1486,19 @@ fn slice_display_file_contents(
     )
 }
 
+struct DisplayContentSlice {
+    contents: String,
+    leading_omitted: bool,
+    trailing_omitted: bool,
+}
+
 fn slice_display_contents(
     entry_name: &str,
     contents: &str,
     start_line: usize,
     line_count: Option<usize>,
     display_name: &str,
-) -> Result<String, RenderError> {
+) -> Result<DisplayContentSlice, RenderError> {
     let lines: Vec<&str> = contents.lines().collect();
     let start_index = start_line.saturating_sub(1);
 
@@ -1498,7 +1518,44 @@ fn slice_display_contents(
         sliced.push('\n');
     }
 
-    Ok(sliced)
+    Ok(DisplayContentSlice {
+        contents: sliced,
+        leading_omitted: start_index > 0,
+        trailing_omitted: line_count.is_some() && end_index < lines.len(),
+    })
+}
+
+fn apply_display_trim_markers(
+    entry: &Value,
+    contents: String,
+    leading_omitted: bool,
+    trailing_omitted: bool,
+    entry_name: &str,
+) -> Result<String, RenderError> {
+    let show_trim_markers = match entry.get("show_trim_markers") {
+        None => true,
+        Some(value) => value.as_bool().ok_or_else(|| {
+            RenderError::Operational(format!("{entry_name} show_trim_markers must be a boolean"))
+        })?,
+    };
+
+    if !show_trim_markers || (!leading_omitted && !trailing_omitted) {
+        return Ok(contents);
+    }
+
+    let mut marked = String::new();
+    if leading_omitted {
+        marked.push_str("...\n");
+    }
+    marked.push_str(&contents);
+    if trailing_omitted {
+        if !marked.is_empty() && !marked.ends_with('\n') {
+            marked.push('\n');
+        }
+        marked.push_str("...");
+    }
+
+    Ok(marked)
 }
 
 fn render_heading(entry: &Value) -> Result<String, RenderError> {

@@ -174,6 +174,15 @@ fn validate_display_layout_fields(
     validate_non_negative_integer(object, "indent", path, errors);
     validate_integer(object, "offset", path, errors);
     validate_display_content_type(object, path, errors);
+    if let Some(show_trim_markers) = object.get("show_trim_markers")
+        && !show_trim_markers.is_boolean()
+    {
+        push_error(
+            errors,
+            format!("{path}.show_trim_markers"),
+            "must be a boolean",
+        );
+    }
 }
 
 fn validate_display_url_value(
@@ -1253,6 +1262,7 @@ fn validate_entry(
                     && key != "path"
                     && key != "start_line"
                     && key != "line_count"
+                    && key != "show_trim_markers"
                     && key != "indent"
                     && key != "offset"
                     && key != "content_type"
@@ -1291,6 +1301,7 @@ fn validate_entry(
                     && key != "timeout"
                     && key != "start_line"
                     && key != "line_count"
+                    && key != "show_trim_markers"
                     && key != "indent"
                     && key != "offset"
                     && key != "content_type"

@@ -1595,6 +1595,45 @@ fn display_file_line_count_without_start_line_is_valid() {
 }
 
 #[test]
+fn display_file_show_trim_markers_must_be_a_boolean() {
+    let dir = prepare_workspace();
+    let input_file = write_inline_runbook(
+        &dir,
+        "entries:\n  - type: DisplayFile\n    path: ./Example.java\n    show_trim_markers: false\n",
+    );
+    let valid = run_in_dir(
+        &[
+            "validate",
+            "--input-file",
+            input_file.to_str().expect("non-UTF-8 input path"),
+            "--output-format",
+            "json",
+        ],
+        &dir,
+    );
+    assert!(valid.status.success());
+
+    fs::write(
+        &input_file,
+        "entries:\n  - type: DisplayFile\n    path: ./Example.java\n    show_trim_markers: \"false\"\n",
+    )
+    .expect("failed to write runbook");
+    let invalid = run_in_dir(
+        &[
+            "validate",
+            "--input-file",
+            input_file.to_str().expect("non-UTF-8 input path"),
+            "--output-format",
+            "json",
+        ],
+        &dir,
+    );
+    assert_eq!(invalid.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&invalid.stdout);
+    assert!(stdout.contains("\"path\": \"entries[0].show_trim_markers\""));
+}
+
+#[test]
 fn invalid_display_file_line_range_values_return_validation_failure() {
     let output = run(&[
         "validate",

@@ -346,6 +346,7 @@ in the runbook.
 - `DisplayFile.path` is resolved relative to the runbook location.
 - `DisplayFile` may declare `start_line`.
 - `DisplayFile` may declare `line_count`.
+- `DisplayFile` may declare `show_trim_markers`.
 - `DisplayFile` may declare `indent`.
 - `DisplayFile` may declare `offset`.
 - `DisplayFile` may declare `content_type`.
@@ -357,6 +358,13 @@ in the runbook.
   `start_line`.
 - If `line_count` is present and `start_line` is omitted, rendering starts
   from line 1.
+- `show_trim_markers` defaults to `true`.
+- When `show_trim_markers` is `true`, rendering adds a leading `...` marker
+  inside the fenced block when `start_line` omits file lines before the range.
+- A bounded `line_count` range adds a trailing `...` marker when it omits file
+  lines after the range.
+- `show_trim_markers: false` suppresses those markers.
+- The `...` marker is presentation metadata and is not affected by `offset`.
 - If `indent` is present, it is a non-negative integer.
 - `indent` applies to the whole rendered fenced block, including the opening
   fence, inner content lines, and closing fence.
@@ -401,6 +409,7 @@ in the runbook.
 - If `timeout` is omitted, rendering uses `10 seconds`.
 - `DisplayUrl` may declare `start_line`.
 - `DisplayUrl` may declare `line_count`.
+- `DisplayUrl` may declare `show_trim_markers`.
 - `DisplayUrl` may declare `indent`.
 - `DisplayUrl` may declare `offset`.
 - `DisplayUrl` may declare `content_type`.
@@ -412,6 +421,14 @@ in the runbook.
   `start_line`.
 - If `line_count` is present and `start_line` is omitted, rendering starts
   from line 1.
+- `show_trim_markers` defaults to `true`.
+- When `show_trim_markers` is `true`, rendering adds a leading `...` marker
+  inside the fenced block when `start_line` omits response body lines before
+  the range.
+- A bounded `line_count` range adds a trailing `...` marker when it omits
+  response body lines after the range.
+- `show_trim_markers: false` suppresses those markers.
+- The `...` marker is presentation metadata and is not affected by `offset`.
 - If `indent` is present, it is a non-negative integer.
 - `indent` applies to the whole rendered fenced block, including the opening
   fence, inner content lines, and closing fence.
@@ -1164,6 +1181,16 @@ in the runbook.
       rendering continues from that line to the end of the file.
 - [x] Given a `DisplayFile` entry with `line_count` and no `start_line`,
       validation succeeds and rendering starts from line 1.
+- [x] Given a `DisplayFile` entry whose selected range omits leading and
+      trailing file lines, the generated fenced block has a `...` marker at
+      each omitted boundary.
+- [x] Given a `DisplayFile` entry with `start_line` that omits leading file
+      lines and no `line_count`, the generated fenced block has a leading
+      `...` marker.
+- [x] Given a `DisplayFile` entry whose selected range reaches a file
+      boundary, the generated fenced block has no marker at that boundary.
+- [x] Given `DisplayFile.show_trim_markers: false`, the generated fenced block
+      has no trim markers.
 - [x] Given a `DisplayFile` entry with `indent`, the opening fence, copied
       content lines, and closing fence are all prefixed with that many spaces.
 - [x] Given a `DisplayFile` entry with a positive `offset`, each non-empty
@@ -1193,6 +1220,16 @@ in the runbook.
       requested response body slice is rendered.
 - [x] Given a `DisplayUrl` entry with `line_count` and no `start_line`,
       validation succeeds and rendering starts from line 1.
+- [x] Given a `DisplayUrl` entry whose selected range omits leading and
+      trailing response body lines, the generated fenced block has a `...`
+      marker at each omitted boundary.
+- [x] Given a `DisplayUrl` entry with `start_line` that omits leading response
+      body lines and no `line_count`, the generated fenced block has a leading
+      `...` marker.
+- [x] Given a `DisplayUrl` entry whose selected range reaches a response body
+      boundary, the generated fenced block has no marker at that boundary.
+- [x] Given `DisplayUrl.show_trim_markers: false`, the generated fenced block
+      has no trim markers.
 - [x] Given a `DisplayUrl` entry with `indent`, the opening fence, copied
       content lines, and closing fence are all prefixed with that many spaces.
 - [x] Given a `DisplayUrl` entry with an unsupported URL scheme, validation
