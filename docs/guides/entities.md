@@ -136,9 +136,11 @@ markers.
 
 For a complete, copyable `DisplayFile` entry that combines line slicing,
 fence indentation, copied-content de-indentation, an explicit content type,
-and a Java transform, run `sw example DisplayFile`. The `start_line` and
-`line_count` in that example deliberately demonstrate an excerpt rather than
-silently defaulting to the first line of the file.
+marker suppression, and a Java transform, run `sw example DisplayFile`. The
+`start_line` and `line_count` in that example deliberately demonstrate an
+excerpt rather than silently defaulting to the first line, and
+`show_trim_markers: false` demonstrates the explicit alternative to the
+default omitted-content markers.
 
 Use `content_type` when the file extension is missing or should not control
 the generated fenced-code label. When `content_type` is omitted, `DisplayFile`

@@ -178,6 +178,7 @@ fn display_file_example_prints_valid_yaml_entry() {
     assert_eq!(value["content_type"], "java");
     assert_eq!(value["start_line"], 24);
     assert_eq!(value["line_count"], 12);
+    assert_eq!(value["show_trim_markers"], false);
     assert_eq!(value["indent"], 3);
     assert_eq!(value["offset"], -12);
     assert_eq!(value["transform"]["language"], "java");
@@ -200,6 +201,7 @@ fn display_file_example_prints_valid_json_entry_when_requested() {
     assert_eq!(value["content_type"], "java");
     assert_eq!(value["start_line"], 24);
     assert_eq!(value["line_count"], 12);
+    assert_eq!(value["show_trim_markers"], false);
     assert_eq!(value["indent"], 3);
     assert_eq!(value["offset"], -12);
     assert_eq!(value["transform"]["language"], "java");
