@@ -228,6 +228,7 @@ const DISPLAY_FILE_EXAMPLE_JSON: &str = r#"{
   "content_type": "java",
   "start_line": 24,
   "line_count": 12,
+  "show_trim_markers": false,
   "indent": 3,
   "offset": -12,
   "transform": {
@@ -246,6 +247,7 @@ path: ./src/main/java/demo/Example.java
 content_type: java
 start_line: 24
 line_count: 12
+show_trim_markers: false
 indent: 3
 offset: -12
 transform:

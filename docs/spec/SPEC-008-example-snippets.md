@@ -83,6 +83,8 @@ In this increment, supported entity types include:
   by including `offset` when that field is supported.
 - The `DisplayFile` example should reflect the current excerpt contract by
   including both `start_line` and `line_count` when line slicing is supported.
+- The `DisplayFile` example should make the non-default trim-marker
+  suppression choice discoverable with `show_trim_markers: false`.
 - The `DisplayFile` example should reflect the current explicit fence-label
   contract by including `content_type` when that field is supported.
 - The `Prerequisite` example should prefer the built-in `java` prerequisite
@@ -122,6 +124,9 @@ In this increment, supported entity types include:
       `offset` field for copied-content indentation shifts.
 - [x] Given `sw example DisplayFile`, the example includes `start_line` and
       `line_count` so the displayed range does not silently default to line 1.
+- [x] Given `sw example DisplayFile`, the example includes
+      `show_trim_markers: false` as the explicit alternative to the default
+      omitted-content markers.
 - [x] Given `sw example DisplayFile`, the example includes the implemented
       `content_type` field for explicit fenced-code labels.
 - [x] Given `sw example DisplayFile`, the example includes the implemented
