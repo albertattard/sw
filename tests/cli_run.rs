@@ -3829,6 +3829,30 @@ fn display_file_yaml_extensions_use_yaml_fenced_blocks() {
 }
 
 #[test]
+fn display_file_properties_content_type_uses_properties_fenced_block() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        "entries:\n  - type: DisplayFile\n    path: ./META-INF/MANIFEST.MF\n    content_type: properties\n",
+    )
+    .expect("failed to write runbook");
+    fs::create_dir_all(dir.join("META-INF")).expect("failed to create META-INF directory");
+    fs::write(
+        dir.join("META-INF/MANIFEST.MF"),
+        "Manifest-Version: 1.0\nMain-Class: demo.Application\n",
+    )
+    .expect("failed to write manifest");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(
+        readme.contains("```properties\nManifest-Version: 1.0\nMain-Class: demo.Application\n```")
+    );
+}
+
+#[test]
 fn display_file_dockerfile_name_uses_dockerfile_fenced_block() {
     let dir = prepare_workspace();
     fs::create_dir_all(dir.join("containers")).expect("failed to create containers directory");

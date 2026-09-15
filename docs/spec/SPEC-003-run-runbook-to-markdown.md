@@ -4,7 +4,7 @@ title: Run Runbook to Markdown
 status: in_progress
 priority: high
 owner: albertattard
-last_updated: 2026-09-01
+last_updated: 2026-09-15
 ---
 
 ## Problem
@@ -393,11 +393,12 @@ in the runbook.
 - If the `DisplayFile` extension is not recognized, the generated Markdown
   uses a `text` fenced block.
 - In this increment, supported `DisplayFile.content_type` values are `text`,
-  `json`, `xml`, `html`, `java`, `markdown`, `yaml`, `dockerfile`, and
-  `Dockerfile`.
+  `json`, `xml`, `html`, `java`, `markdown`, `yaml`, `properties`,
+  `dockerfile`, and `Dockerfile`.
 - `DisplayFile.content_type: dockerfile` renders a `dockerfile` fenced block.
 - `DisplayFile.content_type: Dockerfile` renders a `Dockerfile` fenced block.
 - `DisplayFile.content_type: yaml` renders a `yaml` fenced block.
+- `DisplayFile.content_type: properties` renders a `properties` fenced block.
 
 ### DisplayUrl Entries
 
@@ -454,8 +455,8 @@ in the runbook.
 - If the `DisplayUrl` extension is not recognized, the generated Markdown uses
   a `text` fenced block.
 - Supported `DisplayUrl.content_type` values match `DisplayFile`: `text`,
-  `json`, `xml`, `html`, `java`, `markdown`, `yaml`, `dockerfile`, and
-  `Dockerfile`.
+  `json`, `xml`, `html`, `java`, `markdown`, `yaml`, `properties`,
+  `dockerfile`, and `Dockerfile`.
 
 ### Prerequisite Entries
 

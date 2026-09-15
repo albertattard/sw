@@ -1709,6 +1709,13 @@ fn display_file_content_type_is_validated() {
     );
     assert!(valid_yaml.status.success());
 
+    let valid_properties = run_in_dir_with_stdin(
+        &["validate", "--input-file=-", "--input-format", "yaml"],
+        &dir,
+        "entries:\n  - type: DisplayFile\n    path: ./Example\n    content_type: properties\n",
+    );
+    assert!(valid_properties.status.success());
+
     let invalid = run_in_dir_with_stdin(
         &[
             "validate",
@@ -1726,7 +1733,7 @@ fn display_file_content_type_is_validated() {
     assert!(stdout.contains("\"valid\": false"));
     assert!(stdout.contains("\"path\": \"entries[0].content_type\""));
     assert!(stdout.contains(
-        "must be one of `text`, `json`, `xml`, `html`, `java`, `markdown`, `yaml`, `dockerfile`, or `Dockerfile`"
+        "must be one of `text`, `json`, `xml`, `html`, `java`, `markdown`, `yaml`, `properties`, `dockerfile`, or `Dockerfile`"
     ));
 }
 

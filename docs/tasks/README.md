@@ -71,6 +71,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-197: Support Properties DisplayFile Content Type](display-file/TASK-197-support-properties-display-file-content-type.md)
 - [x] [TASK-196: Surface DisplayFile Trim Marker Suppression](example/TASK-196-surface-display-file-trim-marker-suppression.md)
 - [x] [TASK-195: Complete DisplayFile Example Discovery](example/TASK-195-complete-display-file-example-discovery.md)
 - [x] [TASK-194: Publish Homebrew-Synchronized v0.1.3 Release](release/TASK-194-publish-homebrew-synchronized-v0-1-3-release.md)

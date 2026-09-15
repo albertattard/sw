@@ -3669,6 +3669,7 @@ fn display_fence_language(
         Some("java") => Ok("java"),
         Some("markdown") => Ok("markdown"),
         Some("yaml") => Ok("yaml"),
+        Some("properties") => Ok("properties"),
         Some("dockerfile") => Ok("dockerfile"),
         Some("Dockerfile") => Ok("Dockerfile"),
         Some(other) => Err(RenderError::Operational(format!(
