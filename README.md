@@ -15,6 +15,22 @@ checked locally and in CI.
 The broader product direction is described in the
 [`Product-Vision.md`](./docs/spec/Product-Vision.md).
 
+## Install `sw`
+
+Install Sociable Weaver from the maintained Homebrew tap:
+
+```shell
+brew install albertattard/tap/sw
+```
+
+Confirm the installation:
+
+```shell
+sw version
+```
+
+Homebrew distribution supports Apple Silicon macOS and x86_64 Linux.
+
 ## What You Can Do With `sw`
 
 `sw` currently supports these subcommands:

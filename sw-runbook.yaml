@@ -20,6 +20,26 @@ entries:
 
   - type: Heading
     level: H2
+    title: Install `sw`
+
+  - type: Markdown
+    contents: |
+      Install Sociable Weaver from the maintained Homebrew tap:
+
+      ```shell
+      brew install albertattard/tap/sw
+      ```
+
+      Confirm the installation:
+
+      ```shell
+      sw version
+      ```
+
+      Homebrew distribution supports Apple Silicon macOS and x86_64 Linux.
+
+  - type: Heading
+    level: H2
     title: What You Can Do With `sw`
 
   - type: Markdown
@@ -220,6 +240,8 @@ entries:
         for pending, in-progress, and completed work.
       - [`docs/decisions/README.md`](./docs/decisions/README.md): architecture
         decision records and technical tradeoffs.
+      - [`docs/release/README.md`](./docs/release/README.md): official release and
+        Homebrew distribution process.
       - [`ADR-0001`](./docs/decisions/ADR-0001-specification-driven-development-with-ai.md):
         why this project uses specification-driven development with AI assistance.
 
