@@ -471,7 +471,12 @@ fn validate_capture(
         };
 
         for key in object.keys() {
-            if key != "name" && key != "source" && key != "stage" && key != "pattern" {
+            if key != "name"
+                && key != "source"
+                && key != "stage"
+                && key != "pattern"
+                && key != "parse_as"
+            {
                 push_error(
                     errors,
                     format!("{capture_path}.{key}"),
@@ -535,6 +540,74 @@ fn validate_capture(
                 "must be a string",
             ),
         }
+
+        if let Some(parse_as) = object.get("parse_as") {
+            validate_numeric_parse_as(parse_as, &format!("{capture_path}.parse_as"), errors);
+        }
+    }
+}
+
+fn validate_numeric_parse_as(value: &Value, path: &str, errors: &mut Vec<ValidationIssue>) {
+    let Some(object) = as_object(value, path, errors) else {
+        return;
+    };
+    for key in object.keys() {
+        if key != "type"
+            && key != "locale"
+            && key != "decimal_separator"
+            && key != "grouping_separator"
+        {
+            push_error(
+                errors,
+                format!("{path}.{key}"),
+                "is not a supported parse_as property",
+            );
+        }
+    }
+    match object.get("type").and_then(Value::as_str) {
+        Some("number") => {}
+        Some(_) => push_error(errors, format!("{path}.type"), "must be `number`"),
+        None => push_error(errors, format!("{path}.type"), "must be a string"),
+    }
+    if let Some(locale) = object.get("locale")
+        && !locale.is_string()
+    {
+        push_error(errors, format!("{path}.locale"), "must be a string");
+    }
+    for key in ["decimal_separator", "grouping_separator"] {
+        if let Some(separator) = object.get(key) {
+            match separator.as_str() {
+                Some("none") if key == "grouping_separator" => {}
+                Some(value) if value.chars().count() == 1 => {}
+                Some(_) => push_error(
+                    errors,
+                    format!("{path}.{key}"),
+                    "must be a single character",
+                ),
+                None => push_error(errors, format!("{path}.{key}"), "must be a string"),
+            }
+        }
+    }
+    if object.contains_key("locale")
+        && (object.contains_key("decimal_separator") || object.contains_key("grouping_separator"))
+    {
+        push_error(
+            errors,
+            path,
+            "locale cannot be combined with decimal_separator or grouping_separator",
+        );
+    }
+    if let (Some(decimal), Some(grouping)) = (
+        object.get("decimal_separator").and_then(Value::as_str),
+        object.get("grouping_separator").and_then(Value::as_str),
+    ) && grouping != "none"
+        && decimal == grouping
+    {
+        push_error(
+            errors,
+            path,
+            "decimal_separator and grouping_separator must differ",
+        );
     }
 }
 

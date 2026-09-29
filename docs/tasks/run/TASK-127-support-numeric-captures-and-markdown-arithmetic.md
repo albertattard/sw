@@ -1,7 +1,7 @@
 ---
 id: TASK-127
 title: Support Numeric Captures And Markdown Arithmetic
-status: pending
+status: done
 category: run
 related_features:
   - SPEC-003
@@ -44,27 +44,27 @@ default parsing behavior depend on the host locale.
 
 ## Acceptance Criteria
 
-- [ ] Given `capture.parse_as.type: number` with no other parsing options, the
+- [x] Given `capture.parse_as.type: number` with no other parsing options, the
       capture is parsed using decimal `.` and no grouping separator.
-- [ ] Given `capture.parse_as.locale: system`, the capture is parsed using the
+- [x] Given `capture.parse_as.locale: system`, the capture is parsed using the
       locale under which `sw` is running.
-- [ ] Given `capture.parse_as.locale: "en"` or another explicit locale, the
+- [x] Given `capture.parse_as.locale: "en"` or another explicit locale, the
       capture is parsed using that locale.
-- [ ] Given explicit `decimal_separator` and `grouping_separator`, the capture
+- [x] Given explicit `decimal_separator` and `grouping_separator`, the capture
       is parsed using those symbols.
-- [ ] Given `capture.parse_as.locale` together with explicit separators,
+- [x] Given `capture.parse_as.locale` together with explicit separators,
       validation rejects the runbook.
-- [ ] Given a numeric capture, plain `@{name}` interpolation still renders the
+- [x] Given a numeric capture, plain `@{name}` interpolation still renders the
       original captured string.
-- [ ] Given Markdown content with `@{= g1_8g_throughput * g1_8g_time_taken }`,
+- [x] Given Markdown content with `@{= g1_8g_throughput * g1_8g_time_taken }`,
       the rendered Markdown includes the computed numeric result.
-- [ ] Given Markdown arithmetic expressions, supported operators include `+`,
+- [x] Given Markdown arithmetic expressions, supported operators include `+`,
       `-`, `*`, `/`, and parentheses.
-- [ ] Given Markdown arithmetic expressions, computed results render as
+- [x] Given Markdown arithmetic expressions, computed results render as
       canonical numeric output without locale-specific grouping separators.
-- [ ] Given a Markdown arithmetic expression that references a variable
+- [x] Given a Markdown arithmetic expression that references a variable
       without a parsed numeric value, the run fails clearly.
-- [ ] Given a numeric parse rule whose matched text does not conform to the
+- [x] Given a numeric parse rule whose matched text does not conform to the
       declared parsing rules, the run fails clearly.
 
 ## Notes

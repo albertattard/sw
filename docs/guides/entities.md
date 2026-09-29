@@ -420,6 +420,39 @@ match the selected stream after rewrite rules have been applied. When
 `pattern` contains a regex capture group, `sw` stores the first captured group;
 otherwise it stores the full match.
 
+To use a captured value in Markdown arithmetic, add `parse_as.type: number`.
+The plain `@{name}` interpolation remains the captured text; arithmetic uses
+`@{= expression }` and renders canonical numeric output:
+
+```yaml
+- type: Command
+  commands: |
+    printf 'before=1250 after=980\n'
+  capture:
+    - name: before
+      source: stdout
+      stage: raw
+      pattern: 'before=(\d+)'
+      parse_as:
+        type: number
+    - name: after
+      source: stdout
+      stage: raw
+      pattern: 'after=(\d+)'
+      parse_as:
+        type: number
+
+- type: Markdown
+  contents: 'Difference: @{= before - after }'
+```
+
+Bare numeric parsing is deterministic: `.` is the decimal separator and no
+grouping separator is accepted. Use `parse_as.locale: system`, an explicit
+locale such as `en` or `de`, or `decimal_separator` and
+`grouping_separator` when the captured format requires it. `locale` cannot be
+combined with explicit separators. Markdown expressions support `+`, `-`,
+`*`, `/`, and parentheses.
+
 For example, this captures `109` from `Computed in 109 ms`:
 
 ```yaml

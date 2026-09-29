@@ -249,6 +249,8 @@ fn run_help_prints_help() {
     assert!(stdout.contains("stream"));
     assert!(stdout.contains("cleanup"));
     assert!(stdout.contains("working_directory"));
+    assert!(stdout.contains("`parse_as.type: number`"));
+    assert!(stdout.contains("`@{= left - right }`"));
     assert!(stdout.contains("regex `start_pattern`/`end_pattern` boundaries"));
     assert!(stdout.contains("`Command` entries default to a `30 seconds` timeout"));
     assert!(stdout.contains("prerequisite checks default to `5 seconds`"));
