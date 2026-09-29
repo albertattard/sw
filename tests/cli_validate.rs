@@ -121,6 +121,34 @@ fn validate_rejects_invalid_command_execute_when() {
 }
 
 #[test]
+fn validate_rejects_numeric_capture_locale_with_explicit_separators() {
+    let dir = prepare_workspace();
+    write_inline_runbook(
+        &dir,
+        r#"entries:
+  - type: Command
+    commands: echo value
+    capture:
+      - name: value
+        source: stdout
+        stage: raw
+        pattern: value
+        parse_as:
+          type: number
+          locale: en
+          decimal_separator: .
+"#,
+    );
+
+    let output = run_in_dir(&["validate"], &dir);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("entries[0].capture[0].parse_as"));
+    assert!(stdout.contains("locale cannot be combined"));
+}
+
+#[test]
 fn validate_rejects_reference_to_conditional_command_capture() {
     let dir = prepare_workspace();
     write_inline_runbook(

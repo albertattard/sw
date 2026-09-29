@@ -6,6 +6,7 @@ use super::execute::{
     execute_command_in_directory, format_command_failure, patch_target_path, patch_text_for,
     run_cleanup_blocks, run_patch_restores, snapshot_patch_target, timeout_label,
 };
+use super::numeric::{evaluate_expression, parse_capture_value};
 use crate::cli::VerboseMode;
 use chrono::Timelike;
 use chrono::{DateTime, Duration, FixedOffset, NaiveDateTime, NaiveTime, TimeZone};
@@ -31,10 +32,12 @@ const RFC1123_PATTERN: &str = r"[A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4} \d{2}:\
 const CAPTURE_NAME_PATTERN: &str = r"^[A-Za-z_][A-Za-z0-9_]*$";
 const CAPTURE_INTERPOLATION_PATTERN: &str =
     r"\\@|@@\{([A-Za-z_][A-Za-z0-9_]*)\}|@\{([A-Za-z_][A-Za-z0-9_]*)\}";
+const ARITHMETIC_INTERPOLATION_PATTERN: &str = r"@\{=\s*([^}]*)\}";
 
 struct RenderState {
     datetime_anchors: HashMap<String, DatetimeShiftAnchor>,
     captured_values: HashMap<String, String>,
+    numeric_capture_values: HashMap<String, f64>,
     debug_all_entries: bool,
 }
 
@@ -121,6 +124,7 @@ pub(crate) fn render_markdown(
     let mut state = RenderState {
         datetime_anchors: HashMap::new(),
         captured_values: HashMap::new(),
+        numeric_capture_values: HashMap::new(),
         debug_all_entries: options.debug,
     };
     let mut progress = ProgressReporter::new(entries.len(), options.verbose, options.verbose_mode);
@@ -239,11 +243,18 @@ pub(crate) fn render_markdown(
         }
     }
 
-    let rendered_sections = render_sections(
+    let rendered_sections = match render_sections(
         &sections,
         &state.captured_values,
+        &state.numeric_capture_values,
         failure.is_none() && !breakpoint_reached,
-    )?;
+    ) {
+        Ok(sections) => sections,
+        Err(err) => {
+            failure = Some(err);
+            Vec::new()
+        }
+    };
 
     let mut output = GENERATED_MARKER.to_string();
     if !rendered_sections.is_empty() {
@@ -1640,6 +1651,7 @@ fn change_directory_lines(
 fn render_sections(
     sections: &[RenderSection],
     captured_values: &HashMap<String, String>,
+    numeric_capture_values: &HashMap<String, f64>,
     strict_markdown: bool,
 ) -> Result<Vec<String>, RenderError> {
     let missing_behavior = if strict_markdown {
@@ -1652,9 +1664,13 @@ fn render_sections(
         .iter()
         .map(|section| match section {
             RenderSection::Ready(rendered) => Ok(rendered.clone()),
-            RenderSection::DeferredMarkdown { entry, lines } => {
-                render_markdown_lines(entry, lines, captured_values, missing_behavior)
-            }
+            RenderSection::DeferredMarkdown { entry, lines } => render_markdown_lines(
+                entry,
+                lines,
+                captured_values,
+                numeric_capture_values,
+                missing_behavior,
+            ),
         })
         .collect()
 }
@@ -1663,11 +1679,17 @@ fn render_markdown_lines(
     entry: &Value,
     lines: &[String],
     captured_values: &HashMap<String, String>,
+    numeric_capture_values: &HashMap<String, f64>,
     missing_behavior: MissingCaptureBehavior,
 ) -> Result<String, RenderError> {
-    interpolate_lines(lines, captured_values, "Markdown", missing_behavior)
-        .map(|lines| lines.join("\n"))
-        .and_then(|section| apply_indent(entry, section, "Markdown"))
+    interpolate_markdown_lines(
+        lines,
+        captured_values,
+        numeric_capture_values,
+        missing_behavior,
+    )
+    .map(|lines| lines.join("\n"))
+    .and_then(|section| apply_indent(entry, section, "Markdown"))
 }
 
 fn interpolate_command_lines(
@@ -1862,7 +1884,7 @@ fn render_command(
         rewritten_stdout.as_deref(),
         &execution.stderr,
         rewritten_stderr.as_deref(),
-        &mut state.captured_values,
+        state,
         &mut debug_lines,
     ) {
         emit_debug_lines(debug_enabled, &debug_lines);
@@ -2620,7 +2642,7 @@ fn extract_captured_values(
     rewritten_stdout: Option<&str>,
     raw_stderr: &str,
     rewritten_stderr: Option<&str>,
-    captured_values: &mut HashMap<String, String>,
+    state: &mut RenderState,
     debug_lines: &mut Vec<String>,
 ) -> Result<(), RenderError> {
     let Some(capture) = entry.get("capture") else {
@@ -2695,7 +2717,17 @@ fn extract_captured_values(
 
         match matches.len() {
             1 => {
-                captured_values.insert(name.to_string(), matches[0].clone());
+                state
+                    .captured_values
+                    .insert(name.to_string(), matches[0].clone());
+                if let Some(value) = parse_capture_value(rule, &matches[0]).map_err(|detail| {
+                    RenderError::CommandFailed(format!(
+                        "Command capture `{name}` could not parse numeric value `{}`: {detail}",
+                        matches[0]
+                    ))
+                })? {
+                    state.numeric_capture_values.insert(name.to_string(), value);
+                }
                 debug_lines.push(format!(
                     "[debug] Capture {name} ({source}/{stage}) = {}",
                     matches[0]
@@ -2715,6 +2747,59 @@ fn extract_captured_values(
     }
 
     Ok(())
+}
+
+fn interpolate_markdown_lines(
+    lines: &[String],
+    captured_values: &HashMap<String, String>,
+    numeric_capture_values: &HashMap<String, f64>,
+    missing_behavior: MissingCaptureBehavior,
+) -> Result<Vec<String>, RenderError> {
+    lines
+        .iter()
+        .map(|line| {
+            interpolate_arithmetic_expressions(line, numeric_capture_values, missing_behavior)
+                .and_then(|line| {
+                    interpolate_captured_variables_with_context(
+                        &line,
+                        captured_values,
+                        "Markdown",
+                        missing_behavior,
+                    )
+                })
+        })
+        .collect()
+}
+
+fn interpolate_arithmetic_expressions(
+    input: &str,
+    numeric_capture_values: &HashMap<String, f64>,
+    missing_behavior: MissingCaptureBehavior,
+) -> Result<String, RenderError> {
+    let regex =
+        Regex::new(ARITHMETIC_INTERPOLATION_PATTERN).expect("valid arithmetic interpolation regex");
+    let mut output = String::with_capacity(input.len());
+    let mut last_end = 0;
+
+    for captures in regex.captures_iter(input) {
+        let matched = captures.get(0).expect("full arithmetic match");
+        let expression = captures.get(1).expect("arithmetic expression").as_str();
+        output.push_str(&input[last_end..matched.start()]);
+        match evaluate_expression(expression, numeric_capture_values) {
+            Ok(value) => output.push_str(&value),
+            Err(detail) => match missing_behavior {
+                MissingCaptureBehavior::Error => {
+                    return Err(RenderError::CommandFailed(format!(
+                        "Markdown arithmetic expression `{expression}` failed: {detail}"
+                    )));
+                }
+                MissingCaptureBehavior::Preserve => output.push_str(matched.as_str()),
+            },
+        }
+        last_end = matched.end();
+    }
+    output.push_str(&input[last_end..]);
+    Ok(output)
 }
 
 fn interpolate_lines(

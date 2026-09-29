@@ -3692,6 +3692,209 @@ fn markdown_interpolates_later_captured_values() {
 }
 
 #[test]
+fn markdown_arithmetic_interpolates_numeric_captures_with_operator_precedence() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("example.yaml"),
+        r#"entries:
+  - type: Markdown
+    contents: |
+      Difference: @{= end - start }
+      Total: @{= (end - start) * 2 + 1 }
+      Half: @{= bare / 2 }
+      Original: @{start}
+
+  - type: Command
+    commands: printf '%s\n' 'start=1,234.5 end=1,300.25 bare=5.5'
+    capture:
+      - name: start
+        source: stdout
+        stage: raw
+        pattern: 'start=([^ ]+)'
+        parse_as:
+          type: number
+          locale: en
+      - name: end
+        source: stdout
+        stage: raw
+        pattern: 'end=([^ ]+)'
+        parse_as:
+          type: number
+          decimal_separator: .
+          grouping_separator: ','
+      - name: bare
+        source: stdout
+        stage: raw
+        pattern: 'bare=(.+)'
+        parse_as:
+          type: number
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run", "--input-file", "example.yaml"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("Difference: 65.75"));
+    assert!(readme.contains("Total: 132.5"));
+    assert!(readme.contains("Half: 2.75"));
+    assert!(readme.contains("Original: 1,234.5"));
+}
+
+#[test]
+fn markdown_arithmetic_supports_german_numeric_captures() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("example.yaml"),
+        r#"entries:
+  - type: Command
+    commands: printf '%s\n' 'left=1.234,50 right=234,25'
+    capture:
+      - name: left
+        source: stdout
+        stage: raw
+        pattern: 'left=([^ ]+)'
+        parse_as:
+          type: number
+          locale: de
+      - name: right
+        source: stdout
+        stage: raw
+        pattern: 'right=([^ ]+)'
+        parse_as:
+          type: number
+          locale: de-DE
+  - type: Markdown
+    contents: 'Difference: @{= left - right }'
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run", "--input-file", "example.yaml"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("Difference: 1000.25"));
+}
+
+#[test]
+fn markdown_arithmetic_uses_the_explicit_system_numeric_locale() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("example.yaml"),
+        r#"entries:
+  - type: Command
+    commands: printf '%s\n' 'value=1.5'
+    capture:
+      - name: value
+        source: stdout
+        stage: raw
+        pattern: 'value=(.+)'
+        parse_as:
+          type: number
+          locale: system
+  - type: Markdown
+    contents: 'Result: @{= value + 1 }'
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = Command::new(env!("CARGO_BIN_EXE_sw"))
+        .args(["run", "--input-file", "example.yaml"])
+        .current_dir(&dir)
+        .env("LC_NUMERIC", "C")
+        .env_remove("LC_ALL")
+        .output()
+        .expect("failed to execute sw");
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("Result: 2.5"));
+}
+
+#[test]
+fn markdown_arithmetic_fails_for_capture_without_numeric_parsing() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("example.yaml"),
+        r#"entries:
+  - type: Command
+    commands: printf '%s\n' 'value=5'
+    capture:
+      - name: value
+        source: stdout
+        stage: raw
+        pattern: 'value=(.+)'
+  - type: Markdown
+    contents: 'Difference: @{= value - 1 }'
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run", "--input-file", "example.yaml"], &dir);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("`value` has no parsed numeric value"));
+}
+
+#[test]
+fn numeric_capture_fails_when_value_does_not_match_declared_parsing_rules() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("example.yaml"),
+        r#"entries:
+  - type: Command
+    commands: printf '%s\n' 'value=1,5'
+    capture:
+      - name: value
+        source: stdout
+        stage: raw
+        pattern: 'value=(.+)'
+        parse_as:
+          type: number
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run", "--input-file", "example.yaml"], &dir);
+
+    assert_eq!(output.status.code(), Some(2));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("could not parse numeric value `1,5`"));
+}
+
+#[test]
+fn markdown_arithmetic_failure_runs_registered_cleanup() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("example.yaml"),
+        r#"entries:
+  - type: Command
+    commands: printf '%s\n' 'value=5'
+    cleanup: printf 'cleaned\n' > cleanup-marker.txt
+    capture:
+      - name: value
+        source: stdout
+        stage: raw
+        pattern: 'value=(.+)'
+  - type: Markdown
+    contents: 'Difference: @{= value - 1 }'
+"#,
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run", "--input-file", "example.yaml"], &dir);
+
+    assert_eq!(output.status.code(), Some(2));
+    assert_eq!(
+        fs::read_to_string(dir.join("cleanup-marker.txt")).expect("missing cleanup marker"),
+        "cleaned\n"
+    );
+}
+
+#[test]
 fn xml_output_content_type_uses_xml_fenced_block() {
     let dir = prepare_workspace();
     write_runbook(&dir, "sw-runbook-run-output-xml.json", "sw-runbook.json");

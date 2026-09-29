@@ -62,7 +62,6 @@ Expected task directories:
 ## Pending
 
 - [ ] [TASK-158: Publish And Validate Official Release Distribution](release/TASK-158-publish-first-official-release.md)
-- [ ] [TASK-127: Support Numeric Captures And Markdown Arithmetic](run/TASK-127-support-numeric-captures-and-markdown-arithmetic.md)
 - [ ] [TASK-121: Support Command Preconditions And Port Checks](run/TASK-121-support-command-preconditions-and-port-checks.md)
 
 ## In Progress
@@ -71,6 +70,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-127: Support Numeric Captures And Markdown Arithmetic](run/TASK-127-support-numeric-captures-and-markdown-arithmetic.md)
 - [x] [TASK-197: Support Properties DisplayFile Content Type](display-file/TASK-197-support-properties-display-file-content-type.md)
 - [x] [TASK-196: Surface DisplayFile Trim Marker Suppression](example/TASK-196-surface-display-file-trim-marker-suppression.md)
 - [x] [TASK-195: Complete DisplayFile Example Discovery](example/TASK-195-complete-display-file-example-discovery.md)

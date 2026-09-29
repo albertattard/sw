@@ -1141,13 +1141,13 @@ in the runbook.
 - [x] Markdown entries may interpolate values captured later in the runbook.
 - [x] A Markdown entry that references a variable that is never captured
       anywhere in the runbook causes the run to fail.
-- [ ] Markdown entries may interpolate arithmetic expressions using
+- [x] Markdown entries may interpolate arithmetic expressions using
       `@{= variable_a * variable_b }`.
-- [ ] Markdown arithmetic expressions support `+`, `-`, `*`, `/`, and
+- [x] Markdown arithmetic expressions support `+`, `-`, `*`, `/`, and
       parentheses.
-- [ ] Markdown arithmetic expressions render canonical numeric output without
+- [x] Markdown arithmetic expressions render canonical numeric output without
       locale-specific grouping separators.
-- [ ] A Markdown arithmetic expression that references a variable without a
+- [x] A Markdown arithmetic expression that references a variable without a
       parsed numeric value causes the run to fail.
 
 ### DisplayFile Entries
