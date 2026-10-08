@@ -375,6 +375,8 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "Command output content types are Markdown fence labels: use `text` for an unlabeled fence, or a non-empty label containing letters, digits, `_`, `+`, `-`, or `.` such as `json`, `diff`, or `toml`.",
                 "`output.stream` changes rendered output only and does not change explicit capture or assertion sources.",
                 "`datetime_shift.id` establishes a shared shift anchor, and `datetime_shift.use` reuses an earlier anchor so later rewrite rules follow the same synthetic timeline.",
+                "`datetime_shift.id` is reserved once per executed rule, even with no matches; skipped commands reserve nothing. `use` requires an anchor established earlier in the current run.",
+                "Repeated `datetime_shift.id` declarations are valid; uniqueness is enforced among executed rules at runtime. `use` must reference an ID declared earlier in the runbook.",
                 "Command output can be shortened with `output.rewrite` rule `type: limit_lines`, using `first`, `last`, and optional `show_trim_marker`.",
                 "`keep_between` supports literal `start`/`end` boundaries and regex `start_pattern`/`end_pattern` boundaries.",
                 "Rewrite `capture_as` creates `@{<capture_as>_original}` and `@{<capture_as>_rewritten}` variables so later entries can reuse the matched original and rewritten values.",

@@ -70,6 +70,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-198: Enforce Datetime Anchor Uniqueness At Runtime](rewrite/TASK-198-enforce-datetime-anchor-uniqueness-at-runtime.md)
 - [x] [TASK-127: Support Numeric Captures And Markdown Arithmetic](run/TASK-127-support-numeric-captures-and-markdown-arithmetic.md)
 - [x] [TASK-197: Support Properties DisplayFile Content Type](display-file/TASK-197-support-properties-display-file-content-type.md)
 - [x] [TASK-196: Surface DisplayFile Trim Marker Suppression](example/TASK-196-surface-display-file-trim-marker-suppression.md)

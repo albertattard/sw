@@ -313,3 +313,21 @@ fn version_subcommand_matches_version_flag() {
     assert!(command_output.status.success());
     assert_eq!(flag_output.stdout, command_output.stdout);
 }
+
+#[test]
+fn datetime_anchor_help_describes_validation_and_runtime_contracts() {
+    for (topic, guidance) in [
+        (
+            "run",
+            "`datetime_shift.id` is reserved once per executed rule, even with no matches; skipped commands reserve nothing. `use` requires an anchor established earlier in the current run.",
+        ),
+        (
+            "validate",
+            "Repeated `datetime_shift.id` declarations are valid; uniqueness is enforced among executed rules at runtime. `use` must reference an ID declared earlier in the runbook.",
+        ),
+    ] {
+        let output = run(&["help", topic]);
+        assert!(output.status.success());
+        assert!(String::from_utf8_lossy(&output.stdout).contains(guidance));
+    }
+}
