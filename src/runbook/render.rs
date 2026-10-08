@@ -12,7 +12,7 @@ use chrono::Timelike;
 use chrono::{DateTime, Duration, FixedOffset, NaiveDateTime, NaiveTime, TimeZone};
 use regex::Regex;
 use serde_json::Value;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::io::{self, IsTerminal, Write};
 use std::path::{Path, PathBuf};
@@ -34,8 +34,14 @@ const CAPTURE_INTERPOLATION_PATTERN: &str =
     r"\\@|@@\{([A-Za-z_][A-Za-z0-9_]*)\}|@\{([A-Za-z_][A-Za-z0-9_]*)\}";
 const ARITHMETIC_INTERPOLATION_PATTERN: &str = r"@\{=\s*([^}]*)\}";
 
+#[derive(Clone, Default)]
+struct DatetimeRewriteState {
+    declarations: HashSet<String>,
+    anchors: HashMap<String, DatetimeShiftAnchor>,
+}
+
 struct RenderState {
-    datetime_anchors: HashMap<String, DatetimeShiftAnchor>,
+    datetime_anchors: DatetimeRewriteState,
     captured_values: HashMap<String, String>,
     numeric_capture_values: HashMap<String, f64>,
     debug_all_entries: bool,
@@ -122,7 +128,7 @@ pub(crate) fn render_markdown(
     let mut breakpoint_reached = false;
     let run_started_at = Instant::now();
     let mut state = RenderState {
-        datetime_anchors: HashMap::new(),
+        datetime_anchors: DatetimeRewriteState::default(),
         captured_values: HashMap::new(),
         numeric_capture_values: HashMap::new(),
         debug_all_entries: options.debug,
@@ -1798,6 +1804,9 @@ fn render_command(
         debug_lines.push(format_command_stream_for_debug(&execution.stderr));
     }
     let output_stream = rendered_output_stream(entry)?;
+    // Replays count declarations from before this command, while retaining
+    // the anchors established by rendering. Only rendering updates run state.
+    let datetime_declarations_before_rewrites = state.datetime_anchors.declarations.clone();
     let render_rewrite_result = match rendered_output_for_entry(entry, &execution, state) {
         Ok(result) => result,
         Err(err) => {
@@ -1807,7 +1816,13 @@ fn render_command(
     };
     let rewritten_stdout =
         if capture_rules_require_rewritten_source(entry, CommandCaptureSource::Stdout) {
-            match rewritten_stream_for_capture(entry, &execution, &execution.stdout, state) {
+            match rewritten_stream_for_capture(
+                entry,
+                &execution,
+                &execution.stdout,
+                state,
+                &datetime_declarations_before_rewrites,
+            ) {
                 Ok(result) => Some(result.rendered),
                 Err(err) => {
                     emit_debug_lines(debug_enabled, &debug_lines);
@@ -1819,7 +1834,13 @@ fn render_command(
         };
     let rewritten_stderr =
         if capture_rules_require_rewritten_source(entry, CommandCaptureSource::Stderr) {
-            match rewritten_stream_for_capture(entry, &execution, &execution.stderr, state) {
+            match rewritten_stream_for_capture(
+                entry,
+                &execution,
+                &execution.stderr,
+                state,
+                &datetime_declarations_before_rewrites,
+            ) {
                 Ok(result) => Some(result.rendered),
                 Err(err) => {
                     emit_debug_lines(debug_enabled, &debug_lines);
@@ -2447,7 +2468,7 @@ fn normalize_rendered_output(
     output: &Value,
     execution: &CommandExecution,
     source_output: &str,
-    datetime_anchors: &mut HashMap<String, DatetimeShiftAnchor>,
+    datetime_anchors: &mut DatetimeRewriteState,
     captured_values: &HashMap<String, String>,
 ) -> Result<RewriteResult, RenderError> {
     let rewrite_result = apply_rewrite_rules(
@@ -2481,6 +2502,7 @@ fn rewritten_stream_for_capture(
     execution: &CommandExecution,
     source_output: &str,
     state: &mut RenderState,
+    datetime_declarations_before_rewrites: &HashSet<String>,
 ) -> Result<RewriteResult, RenderError> {
     let Some(output) = entry.get("output") else {
         return Ok(RewriteResult {
@@ -2491,6 +2513,7 @@ fn rewritten_stream_for_capture(
     };
 
     let mut local_datetime_anchors = state.datetime_anchors.clone();
+    local_datetime_anchors.declarations = datetime_declarations_before_rewrites.clone();
     normalize_rendered_output(
         entry,
         output,
@@ -2530,7 +2553,7 @@ fn apply_rewrite_rules(
     output: &Value,
     execution: &CommandExecution,
     source_output: &str,
-    datetime_anchors: &mut HashMap<String, DatetimeShiftAnchor>,
+    datetime_anchors: &mut DatetimeRewriteState,
     captured_values: &HashMap<String, String>,
 ) -> Result<RewriteResult, RenderError> {
     let Some(rules) = output.get("rewrite") else {
@@ -2546,7 +2569,7 @@ fn apply_rewrite_rules(
     let mut rendered = source_output.to_string();
     let mut generated_captures = Vec::new();
     let mut debug_lines = Vec::new();
-    for rule in rules {
+    for (rule_index, rule) in rules.iter().enumerate() {
         let result = apply_rewrite_rule(
             entry,
             execution,
@@ -2554,7 +2577,14 @@ fn apply_rewrite_rules(
             &rendered,
             datetime_anchors,
             captured_values,
-        )?;
+        )
+        .map_err(|err| match err {
+            RenderError::Operational(message) if rule.get("type").and_then(Value::as_str) == Some("datetime_shift") => RenderError::Operational(format!(
+                "{message}\nRewrite rule output.rewrite[{rule_index}]: {rule}\nOffending entry:\n{}",
+                format_entry_for_debug(entry)
+            )),
+            other => other,
+        })?;
         rendered = result.rendered;
         if let Some(capture) = result.generated_capture {
             generated_captures.push(capture);
@@ -2868,7 +2898,7 @@ fn apply_rewrite_rule(
     execution: &CommandExecution,
     rule: &Value,
     rendered: &str,
-    datetime_anchors: &mut HashMap<String, DatetimeShiftAnchor>,
+    datetime_anchors: &mut DatetimeRewriteState,
     captured_values: &HashMap<String, String>,
 ) -> Result<RewriteRuleResult, RenderError> {
     let rule_type = rule.get("type").and_then(Value::as_str).ok_or_else(|| {
@@ -2955,9 +2985,16 @@ fn apply_datetime_shift_rule(
     execution: &CommandExecution,
     rule: &Value,
     rendered: &str,
-    datetime_anchors: &mut HashMap<String, DatetimeShiftAnchor>,
+    datetime_anchors: &mut DatetimeRewriteState,
 ) -> Result<RewriteRuleResult, RenderError> {
     let config = datetime_shift_config(rule)?;
+    if let Some(anchor_id) = config.anchor_id
+        && !datetime_anchors.declarations.insert(anchor_id.to_string())
+    {
+        return Err(RenderError::Operational(format!(
+            "Duplicate datetime_shift id `{anchor_id}`: already declared by an executed rewrite rule"
+        )));
+    }
     let regex = Regex::new(config.pattern).map_err(|err| {
         RenderError::Operational(format!(
             "Invalid output rewrite pattern `{}`: {err}",
@@ -2971,9 +3008,9 @@ fn apply_datetime_shift_rule(
         ))
     })?;
     let shared_anchor = match config.use_anchor {
-        Some(anchor_id) => Some(datetime_anchors.get(anchor_id).ok_or_else(|| {
+        Some(anchor_id) => Some(datetime_anchors.anchors.get(anchor_id).ok_or_else(|| {
             RenderError::Operational(format!(
-                "Command output datetime_shift uses unknown anchor `{anchor_id}`"
+                "Command output datetime_shift uses unavailable anchor `{anchor_id}`"
             ))
         })?),
         None => None,
@@ -3014,7 +3051,7 @@ fn apply_datetime_shift_rule(
     result.push_str(&rendered[last_end..]);
 
     if let (Some(anchor_id), Some(first_original)) = (config.anchor_id, first_original) {
-        datetime_anchors.insert(
+        datetime_anchors.anchors.insert(
             anchor_id.to_string(),
             DatetimeShiftAnchor {
                 first_original,
@@ -3820,5 +3857,60 @@ fn combine_optional_messages(first: Option<&str>, second: Option<&str>) -> Optio
         (Some(first), None) => Some(first.to_string()),
         (None, Some(second)) => Some(second.to_string()),
         (None, None) => None,
+    }
+}
+
+#[cfg(test)]
+mod datetime_anchor_tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn duplicate_declaration_preserves_the_established_anchor() {
+        let execution = CommandExecution {
+            exit_code: 0,
+            stdout: String::new(),
+            stderr: String::new(),
+            timed_out: false,
+            timeout_cleanup_failure: None,
+        };
+        let entry = json!({"type": "Command", "commands": ["echo timestamp"]});
+        let rule = json!({"type": "datetime_shift", "id": "timeline", "format": "rfc3339"});
+        let mut state = DatetimeRewriteState::default();
+        apply_datetime_shift_rule(
+            &entry,
+            &execution,
+            &rule,
+            "2026-03-12T12:00:00Z",
+            &mut state,
+        )
+        .unwrap_or_else(|_| panic!("expected successful datetime rewrite"));
+        let first_anchor = state.anchors["timeline"].clone();
+        for text in ["2020-01-01T00:00:00Z", "no timestamps"] {
+            let mut duplicate = rule.clone();
+            duplicate["base"] = json!("2099-01-01T00:00:00Z");
+            assert!(matches!(
+                apply_datetime_shift_rule(&entry, &execution, &duplicate, text, &mut state),
+                Err(RenderError::Operational(_))
+            ));
+            assert_eq!(
+                state.anchors["timeline"].first_original,
+                first_anchor.first_original
+            );
+            assert_eq!(
+                state.anchors["timeline"].base_timestamp,
+                first_anchor.base_timestamp
+            );
+        }
+        let use_rule = json!({"type": "datetime_shift", "use": "timeline", "format": "rfc3339"});
+        let result = apply_datetime_shift_rule(
+            &entry,
+            &execution,
+            &use_rule,
+            "2026-03-12T12:00:02Z",
+            &mut state,
+        )
+        .unwrap_or_else(|_| panic!("expected successful datetime rewrite"));
+        assert_eq!(result.rendered, "2077-04-27T11:34:58Z");
     }
 }

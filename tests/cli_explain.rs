@@ -642,3 +642,12 @@ fn explain_skill_force_without_output_file_returns_usage_error() {
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(stderr.contains("only accepts --force when --output-file is used"));
 }
+
+#[test]
+fn explain_run_describes_datetime_anchor_runtime_contract() {
+    let output = run(&["explain", "run"]);
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("`datetime_shift.id` is reserved once per executed rule, even with no matches; skipped commands reserve nothing. `use` requires an anchor established earlier in the current run."));
+    assert!(stdout.contains("Repeated `datetime_shift.id` declarations are valid; uniqueness is enforced among executed rules at runtime. `use` must reference an ID declared earlier in the runbook."));
+}

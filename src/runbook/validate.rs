@@ -985,13 +985,7 @@ fn validate_rewrite_rule(
             if let Some(id) = object.get("id") {
                 match id.as_str() {
                     Some(id) => {
-                        if !global_datetime_anchor_ids.insert(id.to_string()) {
-                            push_error(
-                                errors,
-                                format!("{path}.id"),
-                                format!("duplicate datetime_shift id `{id}`"),
-                            );
-                        }
+                        global_datetime_anchor_ids.insert(id.to_string());
                     }
                     None => push_error(errors, format!("{path}.id"), "must be a string"),
                 }
@@ -1005,7 +999,7 @@ fn validate_rewrite_rule(
                                 errors,
                                 format!("{path}.use"),
                                 format!(
-                                    "must reference an anchor established earlier in the runbook: `{use_id}`"
+                                    "must reference an anchor declared earlier in the runbook: `{use_id}`"
                                 ),
                             );
                         }

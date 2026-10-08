@@ -4657,3 +4657,255 @@ fn display_file_transform_missing_method_returns_render_failure() {
     assert!(stderr.contains("DisplayFile transform failed"));
     assert!(stderr.contains("missingMethod"));
 }
+
+fn datetime_anchor_command(text: &str, rule: serde_json::Value) -> serde_json::Value {
+    serde_json::json!({
+        "type": "Command",
+        "commands": [format!("printf '%s\\n' '{text}'")],
+        "output": {"rewrite": [rule]}
+    })
+}
+
+fn datetime_anchor_rule(property: &str) -> serde_json::Value {
+    serde_json::json!({"type": "datetime_shift", property: "timeline", "format": "rfc3339"})
+}
+
+fn write_datetime_anchor_runbook(dir: &Path, entries: Vec<serde_json::Value>) {
+    fs::write(
+        dir.join("sw-runbook.json"),
+        serde_json::to_string(&serde_json::json!({"entries": entries})).unwrap(),
+    )
+    .unwrap();
+}
+
+#[test]
+fn datetime_anchor_duplicates_fail_with_and_without_matches_in_blocks_and_commands() {
+    for same_block in [false, true] {
+        for first_matches in [false, true] {
+            for second_matches in [false, true] {
+                let dir = prepare_workspace();
+                let first_text = if first_matches {
+                    "2026-03-12T12:00:00Z"
+                } else {
+                    "hello"
+                };
+                let second_text = if second_matches {
+                    "2026-03-12T12:00:01Z"
+                } else {
+                    "hello"
+                };
+                let mut first = datetime_anchor_command(first_text, datetime_anchor_rule("id"));
+                let entries = if same_block {
+                    // Separate patterns let either rule independently match nothing.
+                    first["commands"] =
+                        serde_json::json!([format!("printf '%s\\n' '{first_text} {second_text}'")]);
+                    let mut first_rule = datetime_anchor_rule("id");
+                    let mut second_rule = datetime_anchor_rule("id");
+                    for (rule, matches, pattern) in [
+                        (&mut first_rule, first_matches, "2026-03-12T12:00:00Z"),
+                        (&mut second_rule, second_matches, "2026-03-12T12:00:01Z"),
+                    ] {
+                        rule.as_object_mut().unwrap().remove("format");
+                        rule["pattern"] =
+                            serde_json::json!(if matches { pattern } else { "never-matches" });
+                        rule["custom_format"] = serde_json::json!("%Y-%m-%dT%H:%M:%SZ");
+                    }
+                    first["output"]["rewrite"] = serde_json::json!([first_rule, second_rule]);
+                    vec![first]
+                } else {
+                    vec![
+                        first,
+                        datetime_anchor_command(second_text, datetime_anchor_rule("id")),
+                    ]
+                };
+                write_datetime_anchor_runbook(&dir, entries);
+                let output = run_in_dir(&["run"], &dir);
+                assert_eq!(output.status.code(), Some(1));
+                let stderr = String::from_utf8_lossy(&output.stderr);
+                assert!(
+                    stderr.contains("Duplicate datetime_shift id `timeline`"),
+                    "{stderr}"
+                );
+                assert!(stderr.contains(if same_block {
+                    "output.rewrite[1]"
+                } else {
+                    "output.rewrite[0]"
+                }));
+                assert!(stderr.contains("Offending entry:"));
+                assert!(stderr.contains(second_text));
+                assert!(!dir.join("README.md").exists());
+            }
+        }
+    }
+}
+
+#[test]
+fn datetime_anchor_os_alternatives_share_an_executed_timeline() {
+    for active_first in [false, true] {
+        let dir = prepare_workspace();
+        let mut active =
+            datetime_anchor_command("2026-03-12T12:00:00Z", datetime_anchor_rule("id"));
+        active["execute_when"] =
+            serde_json::json!({"fact": "os", "equals": current_os_condition_value()});
+        let mut skipped =
+            datetime_anchor_command("2020-01-01T00:00:00Z", datetime_anchor_rule("id"));
+        skipped["execute_when"] =
+            serde_json::json!({"fact": "os", "equals": different_os_condition_value()});
+        let mut entries = if active_first {
+            vec![active, skipped]
+        } else {
+            vec![skipped, active]
+        };
+        entries.push(datetime_anchor_command(
+            "2026-03-12T12:00:02Z",
+            datetime_anchor_rule("use"),
+        ));
+        write_datetime_anchor_runbook(&dir, entries);
+        let validation = run_in_dir(&["validate"], &dir);
+        assert!(validation.status.success());
+        let output = run_in_dir(&["run"], &dir);
+        assert!(
+            output.status.success(),
+            "{}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        let readme = fs::read_to_string(dir.join("README.md")).unwrap();
+        assert!(readme.contains("2077-04-27T11:34:58Z"));
+    }
+}
+
+#[test]
+fn datetime_anchor_unavailable_use_fails_even_without_consuming_matches() {
+    for skipped_by in ["os", "start-at", "no-match"] {
+        for consumer_matches in [false, true] {
+            let dir = prepare_workspace();
+            let mut declaration = datetime_anchor_command(
+                if skipped_by == "no-match" {
+                    "hello"
+                } else {
+                    "2026-03-12T12:00:00Z"
+                },
+                datetime_anchor_rule("id"),
+            );
+            if skipped_by == "os" {
+                declaration["execute_when"] =
+                    serde_json::json!({"fact": "os", "equals": different_os_condition_value()});
+            }
+            write_datetime_anchor_runbook(
+                &dir,
+                vec![
+                    declaration,
+                    datetime_anchor_command(
+                        if consumer_matches {
+                            "2026-03-12T12:00:01Z"
+                        } else {
+                            "hello"
+                        },
+                        datetime_anchor_rule("use"),
+                    ),
+                ],
+            );
+            let args = if skipped_by == "start-at" {
+                vec!["run", "--start-at", "2"]
+            } else {
+                vec!["run"]
+            };
+            let output = run_in_dir(&args, &dir);
+            assert_eq!(output.status.code(), Some(1));
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            assert!(stderr.contains("unavailable anchor `timeline`"), "{stderr}");
+            assert!(stderr.contains("output.rewrite[0]"));
+            assert!(stderr.contains("Offending entry:"));
+        }
+    }
+}
+
+#[test]
+fn datetime_anchor_start_at_skips_declarations_and_run_state_is_fresh() {
+    let dir = prepare_workspace();
+    write_datetime_anchor_runbook(
+        &dir,
+        vec![
+            datetime_anchor_command("2020-01-01T00:00:00Z", datetime_anchor_rule("id")),
+            datetime_anchor_command("2026-03-12T12:00:00Z", datetime_anchor_rule("id")),
+            datetime_anchor_command("2026-03-12T12:00:02Z", datetime_anchor_rule("use")),
+        ],
+    );
+    for _ in 0..2 {
+        let output = run_in_dir(&["run", "--start-at", "2"], &dir);
+        assert!(
+            output.status.success(),
+            "{}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        assert!(
+            fs::read_to_string(dir.join("README.md"))
+                .unwrap()
+                .contains("2077-04-27T11:34:58Z")
+        );
+    }
+}
+
+#[test]
+fn datetime_anchor_capture_reprocessing_does_not_reserve_ids_again() {
+    for stream in ["stdout", "stderr", "combined"] {
+        let dir = prepare_workspace();
+        let mut declaration = datetime_anchor_command("unused", datetime_anchor_rule("id"));
+        declaration["commands"] = serde_json::json!([
+            "printf '%s\\n' '2026-03-12T12:00:00Z'; printf '%s\\n' '2026-03-12T12:00:00Z' >&2"
+        ]);
+        declaration["output"]["stream"] = serde_json::json!(stream);
+        declaration["capture"] = serde_json::json!([
+            {"name": "out", "source": "stdout", "stage": "rewritten", "pattern": "2077-[^\\n]+"},
+            {"name": "err", "source": "stderr", "stage": "rewritten", "pattern": "2077-[^\\n]+"}
+        ]);
+        write_datetime_anchor_runbook(
+            &dir,
+            vec![
+                declaration,
+                serde_json::json!({"type": "Markdown", "contents": ["Out: @{out}; Err: @{err}"]}),
+                datetime_anchor_command("2026-03-12T12:00:02Z", datetime_anchor_rule("use")),
+            ],
+        );
+        let output = run_in_dir(&["run"], &dir);
+        assert!(
+            output.status.success(),
+            "{}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        let readme = fs::read_to_string(dir.join("README.md")).unwrap();
+        assert!(readme.contains("Out: 2077-04-27T11:34:56Z"));
+        assert!(readme.contains("Err: 2077-04-27T11:34:56Z"));
+        assert!(readme.contains("2077-04-27T11:34:58Z"));
+    }
+}
+
+#[test]
+fn datetime_anchor_capture_can_use_anchor_from_another_rendered_stream() {
+    let dir = prepare_workspace();
+    write_datetime_anchor_runbook(
+        &dir,
+        vec![
+            serde_json::json!({
+                "type": "Command",
+                "commands": ["printf '%s\\n' 'Thu, 12 Mar 2026 12:00:00 GMT' >&2; printf '%s\\n' '2026-03-12T12:00:02Z'"],
+                "output": {"rewrite": [
+                    {"type": "datetime_shift", "id": "timeline", "format": "rfc1123"},
+                    {"type": "datetime_shift", "use": "timeline", "format": "rfc3339"}
+                ]},
+                "capture": [{"name": "timestamp", "source": "stdout", "stage": "rewritten", "pattern": "2077-[^\\n]+"}]
+            }),
+            serde_json::json!({"type": "Markdown", "contents": ["Captured: @{timestamp}"]}),
+            datetime_anchor_command("2026-03-12T12:00:04Z", datetime_anchor_rule("use")),
+        ],
+    );
+    let output = run_in_dir(&["run"], &dir);
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let readme = fs::read_to_string(dir.join("README.md")).unwrap();
+    assert!(readme.contains("Captured: 2077-04-27T11:34:58Z"));
+    assert!(readme.contains("2077-04-27T11:35:00Z"));
+}

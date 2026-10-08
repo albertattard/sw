@@ -1216,36 +1216,33 @@ fn invalid_output_rewrite_datetime_shift_pattern_requires_custom_format() {
 }
 
 #[test]
-fn invalid_output_rewrite_datetime_shift_duplicate_id_same_block_returns_validation_failure() {
+fn valid_output_rewrite_datetime_shift_duplicate_id_same_block_returns_success() {
     let output = run(&[
         "validate",
         "--input-file",
-        "tests/fixtures/sw-runbook-invalid-output-rewrite-datetime-shift-duplicate-id-same-block.json",
+        "tests/fixtures/sw-runbook-valid-output-rewrite-datetime-shift-duplicate-id-same-block.json",
         "--output-format",
         "json",
     ]);
 
-    assert_eq!(output.status.code(), Some(2));
+    assert_eq!(output.status.code(), Some(0));
     let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(stdout.contains("\"valid\": false"));
-    assert!(stdout.contains("\"path\": \"entries[0].output.rewrite[1].id\""));
+    assert!(stdout.contains("\"valid\": true"));
 }
 
 #[test]
-fn invalid_output_rewrite_datetime_shift_duplicate_id_different_commands_returns_validation_failure()
- {
+fn valid_output_rewrite_datetime_shift_duplicate_id_different_commands_returns_success() {
     let output = run(&[
         "validate",
         "--input-file",
-        "tests/fixtures/sw-runbook-invalid-output-rewrite-datetime-shift-duplicate-id-different-commands.json",
+        "tests/fixtures/sw-runbook-valid-output-rewrite-datetime-shift-duplicate-id-different-commands.json",
         "--output-format",
         "json",
     ]);
 
-    assert_eq!(output.status.code(), Some(2));
+    assert_eq!(output.status.code(), Some(0));
     let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(stdout.contains("\"valid\": false"));
-    assert!(stdout.contains("\"path\": \"entries[1].output.rewrite[0].id\""));
+    assert!(stdout.contains("\"valid\": true"));
 }
 
 #[test]
@@ -2245,4 +2242,20 @@ fn change_directory_accepts_scalar_contents_and_rejects_absolute_paths() {
     );
     assert_eq!(output.status.code(), Some(2));
     assert!(String::from_utf8_lossy(&output.stdout).contains("must be a relative path"));
+}
+
+#[test]
+fn datetime_shift_undeclared_use_returns_validation_failure() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.json"),
+        r#"{"entries":[{"type":"Command","commands":["echo hello"],"output":{"rewrite":[{"type":"datetime_shift","format":"rfc3339","use":"undeclared"}]}}]}"#,
+    ).unwrap();
+    let output = run_in_dir(&["validate", "--output-format", "json"], &dir);
+    assert_eq!(output.status.code(), Some(2));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("entries[0].output.rewrite[0].use"));
+    assert!(
+        stdout.contains("must reference an anchor declared earlier in the runbook: `undeclared`")
+    );
 }

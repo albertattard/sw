@@ -4,7 +4,7 @@ title: Run Runbook to Markdown
 status: in_progress
 priority: high
 owner: albertattard
-last_updated: 2026-09-15
+last_updated: 2026-10-08
 ---
 
 ## Problem
@@ -1031,17 +1031,39 @@ in the runbook.
   not use any special built-in time-only format name.
 - If `base` is omitted, `datetime_shift` uses the default base timestamp
   `2077-04-27T12:34:56.789+01:00`.
-- If `id` is used, the rule establishes the shift delta for that named anchor.
-- `datetime_shift.id` values must be unique across the whole runbook.
+- If `id` is used and at least one timestamp matches, the rule establishes
+  the shift delta for that named anchor.
+- Repeated `datetime_shift.id` declarations are allowed during validation,
+  including declarations in different commands or the same output block.
+  Validation does not attempt to prove that their conditions are mutually
+  exclusive or depend on the OS performing validation.
+- At runtime, each `datetime_shift.id` may be declared by only one executed
+  rewrite rule per run. When an executed rule declares `id`, that ID is
+  reserved even if the rule matches no timestamps. A later executed rule
+  declaring the same ID fails with an operational error (exit code `1`) that
+  identifies the duplicate ID and the offending entry and rewrite rule.
+- A duplicate declaration must not overwrite or reset an existing anchor.
+- Commands skipped by `execute_when` or `--start-at` do not reserve rewrite
+  IDs or establish datetime anchors. Mutually exclusive commands may therefore
+  declare the same ID, and whichever command executes may establish it.
+- An ID reserved by a rule with no matching timestamps has no usable anchor.
+  Reserving an ID and establishing its shift delta are distinct operations.
+- Internal reprocessing of the same executed rule for output rendering or
+  capture generation does not count as another declaration.
 - If `use` is used, the rule reuses the shift delta from the named anchor
   instead of establishing a new one.
 - A rule that uses `use` must not declare `base`.
 - A rule that uses `use` follows the timeline established by the referenced
   anchor, even when the matched datetime format differs.
-- A rule that uses `use` may reference an anchor established earlier anywhere
-  in the runbook.
-- Forward references are invalid: a rule may not use an anchor before that
-  anchor is established earlier in the runbook.
+- During validation, a rule that uses `use` must reference an ID declared
+  earlier anywhere in the runbook. Forward references and undeclared IDs
+  remain invalid, even though an earlier declaration may be conditional.
+- At runtime, an executed rule that uses `use` must reference an anchor
+  actually established earlier in the current run. If all earlier declarations
+  were skipped or matched no timestamps, the rule fails with an operational
+  error (exit code `1`) identifying the unavailable anchor and the offending
+  entry and rewrite rule. This requirement also applies when the consuming
+  rule matches no timestamps.
 - Rewrite rules affect rendered output only and do not change command
   execution or assertions.
 - If a `Command` entry does not contain an `output` property, command output is
@@ -1667,10 +1689,28 @@ in the runbook.
 - [x] Given multiple `datetime_shift` rewrite rules that share one anchor,
       matched datetimes in different supported formats preserve the same shared
       timeline shift.
-- [x] Given duplicate `datetime_shift.id` values anywhere in the runbook,
-      validation rejects the runbook.
-- [x] Given a `datetime_shift` rewrite rule that uses `use`, the referenced
-      anchor must have been established earlier in the runbook.
+- [x] Given duplicate `datetime_shift.id` declarations in different commands
+      or the same output block, validation accepts the otherwise valid runbook
+      independently of the validating host's OS.
+- [x] Given mutually exclusive macOS and Linux commands declaring the same
+      datetime ID, only the executed command reserves the ID and establishes
+      the anchor; a later executed `use` follows that command's timeline.
+- [x] Given two executed rewrite rules declaring the same datetime ID, the
+      second fails with exit code `1` and a diagnostic identifying the ID,
+      entry, and rewrite rule, without replacing the first anchor.
+- [x] Given an executed declaration with no timestamp matches followed by
+      another executed declaration of the same ID, the second still fails as
+      a duplicate, including when either or both rules match no timestamps.
+- [x] Given a `use` whose earlier declarations were skipped or matched no
+      timestamps, execution fails with exit code `1` and an unavailable-anchor
+      diagnostic, even if the consuming rule also matches no timestamps.
+- [x] Given an ID declaration skipped by `--start-at`, a later executed
+      declaration may reserve that ID, while `use` before an executed matching
+      declaration fails because the anchor is unavailable.
+- [x] Given output capture generation that internally reprocesses the same
+      executed rewrite rule, that rule does not conflict with its own ID.
+- [x] Given a `datetime_shift` rewrite rule that uses `use`, validation
+      requires an earlier declaration of the referenced ID in the runbook.
 - [x] Given a `datetime_shift` rewrite rule in a later command output block
       that uses an anchor established earlier in the runbook, the rule is
       valid and follows that shared timeline.
@@ -1749,7 +1789,12 @@ in the runbook.
 - A `datetime_shift` rule uses `pattern` instead of `format`.
 - A `datetime_shift` rule establishes a shared anchor with `id`.
 - Multiple `datetime_shift` rules reuse the same shared anchor with `use`.
-- The same `datetime_shift.id` is declared more than once in the runbook.
+- The same `datetime_shift.id` is declared in mutually exclusive commands.
+- The same `datetime_shift.id` is declared by multiple executed rules, within
+  one output block or across commands, including rules with no matches.
+- A shared datetime anchor is unavailable because its declaring command was
+  skipped or its rewrite matched no timestamps.
+- Internal output/capture reprocessing encounters the same datetime declaration.
 - A `datetime_shift` rule uses an anchor declared in an earlier command output
   block.
 - A `datetime_shift` rule uses an anchor before it is established earlier in
