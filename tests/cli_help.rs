@@ -190,6 +190,14 @@ fn format_help_prints_help() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("--input-file"));
     assert!(stdout.contains("Formats JSON and YAML runbooks in place"));
+    assert!(stdout.contains("Command fields use canonical order:"));
+    assert!(stdout.contains("DisplayFile fields place content_type immediately after path."));
+    assert!(stdout.contains("type, debug, execute_when, working_directory, working_dir (legacy), commands, assert, output, capture, cleanup, timeout, indent."));
+    assert!(
+        stdout.contains(
+            "All entry types use canonical field order; nested fields and array items retain their input order."
+        )
+    );
     assert!(stdout.contains("Default input candidates are `./sw-runbook.json`, `./sw-runbook.yaml`, and `./sw-runbook.yml`."));
     assert!(stdout.contains("does not accept `--input-file=-`"));
 }

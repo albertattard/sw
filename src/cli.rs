@@ -85,7 +85,7 @@ pub struct ConvertArgs {
 
 #[derive(Debug, clap::Args)]
 #[command(
-    after_help = "Formats JSON and YAML runbooks in place while preserving the existing file format.\nDefault input candidates are `./sw-runbook.json`, `./sw-runbook.yaml`, and `./sw-runbook.yml`.\nIf more than one default runbook file exists, `sw format` requires `--input-file`.\n`sw format` is file-based only and does not accept `--input-file=-`.\nUse `sw help validate` and `sw explain validate` when the question is about runbook correctness rather than formatting."
+    after_help = "Formats JSON and YAML runbooks in place while preserving the existing file format.\nCommand fields use canonical order: type, debug, execute_when, working_directory, working_dir (legacy), commands, assert, output, capture, cleanup, timeout, indent.\nDisplayFile fields place content_type immediately after path.\nAll entry types use canonical field order; nested fields and array items retain their input order.\nDefault input candidates are `./sw-runbook.json`, `./sw-runbook.yaml`, and `./sw-runbook.yml`.\nIf more than one default runbook file exists, `sw format` requires `--input-file`.\n`sw format` is file-based only and does not accept `--input-file=-`.\nUse `sw help validate` and `sw explain validate` when the question is about runbook correctness rather than formatting."
 )]
 pub struct FormatArgs {
     /// Path to the input runbook file.

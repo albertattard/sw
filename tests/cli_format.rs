@@ -39,6 +39,220 @@ fn write_file(dir: &Path, name: &str, contents: &str) -> PathBuf {
 }
 
 #[test]
+fn format_orders_all_entry_types_in_json_and_yaml() {
+    let original: serde_json::Value = serde_json::from_str(
+        r#"{"entries":[
+          {"z_extra":{"b":2,"a":1},"title":"Example","a_extra":"retained","level":"H1","type":"Heading"},
+          {"indent":3,"contents":"Prose","type":"Markdown"},
+          {"contents":"Work here","path":"demo","type":"ChangeDirectory"},
+          {"indent":3,"offset":0,"show_trim_markers":true,"content_type":"java",
+           "transform":{"operations":[{"replacement":"...","name":"main","type":"collapse_method_body"}],"language":"java"},
+           "line_count":5,"start_line":2,"path":"Main.java","type":"DisplayFile"},
+          {"indent":3,"offset":0,"show_trim_markers":true,"content_type":"text",
+           "line_count":5,"start_line":2,"timeout":"10 seconds","url":"https://example.com/demo.txt","type":"DisplayUrl"},
+          {"debug":true,"indent":3,"restore":"auto","patch":"@@ -1 +1 @@\n-old\n+new","path":"demo.txt","type":"Patch"},
+          {"checks":[{"help":"Install Java","contents":"Java prerequisite","version":"25","name":"Java","kind":"java"}],"type":"Prerequisite"},
+          {"message":"Stop","type":"Breakpoint"},
+          {"path":"minimal.txt","type":"DisplayFile"}
+        ]}"#,
+    ).unwrap();
+    let expected_orders: &[&[&str]] = &[
+        &["type", "level", "title", "z_extra", "a_extra"],
+        &["type", "contents", "indent"],
+        &["type", "path", "contents"],
+        &[
+            "type",
+            "path",
+            "content_type",
+            "start_line",
+            "line_count",
+            "transform",
+            "show_trim_markers",
+            "offset",
+            "indent",
+        ],
+        &[
+            "type",
+            "url",
+            "timeout",
+            "start_line",
+            "line_count",
+            "content_type",
+            "show_trim_markers",
+            "offset",
+            "indent",
+        ],
+        &["type", "path", "patch", "restore", "indent", "debug"],
+        &["type", "checks"],
+        &["type", "message"],
+        &["type", "path"],
+    ];
+    for extension in ["json", "yaml", "yml"] {
+        let dir = prepare_workspace();
+        let input = if extension == "json" {
+            serde_json::to_string(&original).unwrap()
+        } else {
+            serde_norway::to_string(&original).unwrap()
+        };
+        let path = write_file(&dir, &format!("sw-runbook.{extension}"), &input);
+        let output = run_in_dir(&["format"], &dir);
+        assert!(
+            output.status.success(),
+            "{extension}: {} {}",
+            String::from_utf8_lossy(&output.stdout),
+            String::from_utf8_lossy(&output.stderr)
+        );
+        let formatted = fs::read_to_string(&path).unwrap();
+        let parsed: serde_json::Value = if extension == "json" {
+            serde_json::from_str(&formatted).unwrap()
+        } else {
+            serde_norway::from_str(&formatted).unwrap()
+        };
+        assert_eq!(parsed, original);
+        for (index, expected) in expected_orders.iter().enumerate() {
+            let entry = parsed["entries"][index].as_object().unwrap();
+            let keys: Vec<_> = entry.keys().map(String::as_str).collect();
+            assert_eq!(keys, *expected, "{extension}: entry {index}");
+            for (field, value) in original["entries"][index].as_object().unwrap() {
+                assert_eq!(
+                    serde_json::to_string(&entry[field]).unwrap(),
+                    serde_json::to_string(value).unwrap(),
+                    "nested {field} order"
+                );
+            }
+        }
+        assert!(run_in_dir(&["format"], &dir).status.success());
+        assert_eq!(fs::read_to_string(path).unwrap(), formatted);
+        fs::remove_dir_all(dir).unwrap();
+    }
+}
+
+#[test]
+fn format_orders_command_fields_in_json_and_yaml_without_reordering_nested_values() {
+    let original: serde_json::Value = serde_json::from_str(
+        r#"{
+          "entries": [
+            {"title": "Example", "level": "H1", "type": "Heading"},
+            {
+              "indent": 3,
+              "timeout": "10 seconds",
+              "cleanup": "echo cleanup",
+              "capture": [
+                {"pattern": "(hello)", "stage": "raw", "source": "stdout", "name": "greeting"},
+                {"pattern": "(second)", "stage": "rewritten", "source": "stdout", "name": "result"}
+              ],
+              "output": {
+                "rewrite": [
+                  {"replacement": "first", "pattern": "hello", "type": "replace"},
+                  {"replacement": "second", "pattern": "first", "type": "replace"}
+                ],
+                "stream": "stdout",
+                "caption": ["One", "Two"]
+              },
+              "assert": {
+                "checks": [{"contains": "hello", "source": "stdout"}],
+                "exit_code": 0
+              },
+              "commands": "echo hello",
+              "working_directory": ".",
+              "execute_when": {"equals": "linux", "fact": "os"},
+              "debug": true,
+              "type": "Command"
+            },
+            {"commands": "echo legacy", "working_dir": ".", "type": "Command"},
+            {"commands": "echo minimal", "type": "Command"}
+          ]
+        }"#,
+    )
+    .expect("valid fixture");
+
+    for extension in ["json", "yaml", "yml"] {
+        let dir = prepare_workspace();
+        let input = if extension == "json" {
+            serde_json::to_string(&original).unwrap()
+        } else {
+            serde_norway::to_string(&original).unwrap()
+        };
+        let path = write_file(&dir, &format!("sw-runbook.{extension}"), &input);
+        let output = run_in_dir(&["format"], &dir);
+        assert!(
+            output.status.success(),
+            "{extension}: {} {}",
+            String::from_utf8_lossy(&output.stdout),
+            String::from_utf8_lossy(&output.stderr)
+        );
+        let formatted = fs::read_to_string(&path).unwrap();
+        let parsed: serde_json::Value = if extension == "json" {
+            serde_json::from_str(&formatted).unwrap()
+        } else {
+            serde_norway::from_str(&formatted).unwrap()
+        };
+        assert_eq!(parsed, original, "values must remain unchanged");
+        let expected_orders: &[&[&str]] = &[
+            &["type", "level", "title"],
+            &[
+                "type",
+                "debug",
+                "execute_when",
+                "working_directory",
+                "commands",
+                "assert",
+                "output",
+                "capture",
+                "cleanup",
+                "timeout",
+                "indent",
+            ],
+            &["type", "working_dir", "commands"],
+            &["type", "commands"],
+        ];
+        for (entry, expected) in parsed["entries"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .zip(expected_orders)
+        {
+            let keys: Vec<_> = entry
+                .as_object()
+                .unwrap()
+                .keys()
+                .map(String::as_str)
+                .collect();
+            assert_eq!(keys, *expected, "{extension}");
+        }
+        // Serialized nested values expose both mapping order and array order.
+        for field in ["execute_when", "assert", "capture", "output"] {
+            assert_eq!(
+                serde_json::to_string(&parsed["entries"][1][field]).unwrap(),
+                serde_json::to_string(&original["entries"][1][field]).unwrap(),
+                "{extension}: nested {field} order"
+            );
+        }
+        let second_run = run_in_dir(&["format"], &dir);
+        assert!(second_run.status.success());
+        assert_eq!(fs::read_to_string(&path).unwrap(), formatted);
+        fs::remove_dir_all(dir).unwrap();
+    }
+}
+
+#[test]
+fn format_does_not_reorder_invalid_command_entries() {
+    for extension in ["json", "yaml"] {
+        let dir = prepare_workspace();
+        let original = if extension == "json" {
+            r#"{"entries":[{"indent":3,"commands":"echo hello","type":"Command","unknown":true}]}"#
+        } else {
+            "entries:\n  - indent: 3\n    commands: echo hello\n    type: Command\n    unknown: true\n"
+        };
+        let path = write_file(&dir, &format!("sw-runbook.{extension}"), original);
+        let output = run_in_dir(&["format"], &dir);
+        assert_eq!(output.status.code(), Some(2));
+        assert_eq!(fs::read_to_string(path).unwrap(), original);
+        fs::remove_dir_all(dir).unwrap();
+    }
+}
+
+#[test]
 fn format_rewrites_valid_json_in_place() {
     let dir = prepare_workspace();
     let path = write_file(
@@ -56,7 +270,7 @@ fn format_rewrites_valid_json_in_place() {
     let contents = fs::read_to_string(path).expect("missing formatted file");
     assert_eq!(
         contents,
-        "{\n  \"entries\": [\n    {\n      \"title\": \"Example\",\n      \"type\": \"Heading\",\n      \"level\": \"H1\"\n    }\n  ]\n}\n"
+        "{\n  \"entries\": [\n    {\n      \"type\": \"Heading\",\n      \"level\": \"H1\",\n      \"title\": \"Example\"\n    }\n  ]\n}\n"
     );
 }
 

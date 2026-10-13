@@ -28,11 +28,12 @@ pub fn run(args: FormatArgs) -> ExitCode {
         return ExitCode::from(2);
     }
 
-    let normalized_runbook = if format == runbook::RunbookFormat::Yaml {
+    let mut normalized_runbook = if format == runbook::RunbookFormat::Yaml {
         runbook::normalize_document_for_yaml_authoring(&runbook)
     } else {
         runbook::normalize_java_versions_for_authoring(&runbook)
     };
+    runbook::order_entry_fields(&mut normalized_runbook);
 
     let rendered = match runbook::serialize(&normalized_runbook, format) {
         Ok(rendered) => rendered,
