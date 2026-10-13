@@ -4,7 +4,7 @@ title: Format Runbook Files
 status: implemented
 priority: medium
 owner: albertattard
-last_updated: 2026-04-16
+last_updated: 2026-10-13
 ---
 
 ## Problem
@@ -99,13 +99,60 @@ Output:
 - YAML output may normalize fields whose documented input contract accepts
   either a string or an array of strings into literal block scalars, matching
   the JSON-to-YAML conversion contract for those fields.
-- Property order is preserved exactly as it appears in the input file.
+- Property order is preserved exactly as it appears in the input file, except
+  for direct fields of all entries, which use the canonical orders below.
 - String contents are preserved semantically, aside from format-specific
   escaping or block-scalar representation required by serialization.
 - The formatted file ends with a trailing newline.
 - The command does not add, remove, or infer runbook fields.
 - The command does not make schema corrections; it only rewrites valid
   runbooks into the canonical layout for their current format.
+
+### Entry Field Orders (TASK-201)
+
+Direct fields of every supported entry type use the following order, omitting
+absent fields. Nested objects retain their input field order. Any extra fields
+accepted by validation are retained after the listed fields in their original
+relative order.
+
+| Entry type | Field order |
+|---|---|
+| `Heading` | `type`, `level`, `title` |
+| `Markdown` | `type`, `contents`, `indent` |
+| `ChangeDirectory` | `type`, `path`, `contents` |
+| `DisplayFile` | `type`, `path`, `content_type`, `start_line`, `line_count`, `transform`, `show_trim_markers`, `offset`, `indent` |
+| `DisplayUrl` | `type`, `url`, `timeout`, `start_line`, `line_count`, `content_type`, `show_trim_markers`, `offset`, `indent` |
+| `Patch` | `type`, `path`, `patch`, `restore`, `indent`, `debug` |
+| `Prerequisite` | `type`, `checks` |
+| `Breakpoint` | `type`, `message` |
+
+TASK-203 places `DisplayFile.content_type` immediately after `path` when present.
+
+### Command Field Order
+
+In both JSON and YAML, `sw format` orders the direct fields of each `Command`
+entry as follows, omitting fields that are absent:
+
+1. `type`
+2. `debug`
+3. `execute_when`
+4. `working_directory`
+5. `working_dir` (legacy spelling, when present)
+6. `commands`
+7. `assert`
+8. `output`
+9. `capture`
+10. `cleanup`
+11. `timeout`
+12. `indent`
+
+Formatting does not rename `working_dir`, add defaults, or reorder fields
+inside nested objects.
+Every array retains its original item order. Repeated formatting produces
+identical file contents. TASK-200 introduced Command ordering; TASK-202
+places `output` before `capture`. Field order does not control execution:
+`stage: raw` captures original stdout and `stage: rewritten` captures stdout
+after rewriting.
 
 ## Acceptance Criteria
 
@@ -135,8 +182,10 @@ Output:
 - [x] Given a file that is already formatted canonically, running `sw format`
       keeps the semantic content unchanged and leaves the file in the same
       canonical layout.
-- [x] Formatting preserves object property order from the input file.
-- [x] Formatting preserves mapping property order from the input YAML file.
+- [x] Formatting preserves object property order from the input file, except
+      for direct entry fields, which use their canonical order.
+- [x] Formatting preserves mapping property order from the input YAML file,
+      except for direct entry fields, which use their canonical order.
 - [x] Given a YAML runbook with two or more adjacent top-level `entries`,
       `sw format` rewrites the file so those adjacent entry items are
       separated by a single blank line.
@@ -147,9 +196,28 @@ Output:
       `Prerequisite.checks[*].contents`, `sw format` writes that prose as a
       literal block scalar instead of a quoted string with escaped newlines.
 
+### Command Ordering Increment
+
+- [x] JSON and YAML `Command` fields are written in the canonical order above,
+      regardless of their input order.
+- [x] Absent fields remain absent and the legacy `working_dir` spelling is
+      retained in its specified position.
+- [x] Nested object fields and array items retain their input order.
+- [x] Formatting an already ordered runbook produces identical file contents.
+- [x] CLI help and help-focused tests describe canonical `Command` field order.
+
+### All Entry Ordering Increment
+
+- [x] JSON and YAML direct fields of every supported entry type follow the
+      specified order, with absent fields omitted.
+- [x] Accepted extra fields are retained after known fields in input order.
+- [x] Nested objects, arrays, and semantic values are preserved, and repeated
+      formatting is byte-identical.
+- [x] Help and formatter guidance describe ordering for all entry types.
+
 ## Non-goals
 
-- Reordering runbook properties.
+- Reordering properties outside the direct fields of entries.
 - Repairing invalid JSON or invalid runbook structure.
 - Converting YAML to JSON or JSON to YAML.
 - Applying semantic runbook upgrades or migrations.
