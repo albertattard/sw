@@ -192,7 +192,7 @@ fn format_help_prints_help() {
     assert!(stdout.contains("Formats JSON and YAML runbooks in place"));
     assert!(stdout.contains("Command fields use canonical order:"));
     assert!(stdout.contains("DisplayFile fields place content_type immediately after path."));
-    assert!(stdout.contains("type, debug, execute_when, working_directory, working_dir (legacy), commands, assert, output, capture, cleanup, timeout, indent."));
+    assert!(stdout.contains("type, debug, execute_when, working_directory, working_dir (legacy), environment, commands, assert, output, capture, cleanup, timeout, indent."));
     assert!(
         stdout.contains(
             "All entry types use canonical field order; nested fields and array items retain their input order."
@@ -337,5 +337,41 @@ fn datetime_anchor_help_describes_validation_and_runtime_contracts() {
         let output = run(&["help", topic]);
         assert!(output.status.success());
         assert!(String::from_utf8_lossy(&output.stdout).contains(guidance));
+    }
+}
+
+#[test]
+fn secret_help_explains_reveal_and_lifetime() {
+    let output = std::process::Command::new(env!("CARGO_BIN_EXE_sw"))
+        .args(["help", "run"])
+        .output()
+        .unwrap();
+    let help = String::from_utf8(output.stdout).unwrap();
+    for expected in [
+        "--reveal-secrets",
+        "stderr may be captured in logs",
+        "generates fresh values",
+        "environment",
+        "transformed values",
+    ] {
+        assert!(help.contains(expected), "missing {expected}: {help}");
+    }
+}
+
+#[test]
+fn explain_run_describes_secret_bindings_and_lifetime() {
+    let output = std::process::Command::new(env!("CARGO_BIN_EXE_sw"))
+        .args(["explain", "run"])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let text = String::from_utf8(output.stdout).unwrap();
+    for expected in [
+        "Command.environment",
+        "--reveal-secrets",
+        "including --start-at",
+        "Assertions and captures use real values",
+    ] {
+        assert!(text.contains(expected), "missing {expected}");
     }
 }

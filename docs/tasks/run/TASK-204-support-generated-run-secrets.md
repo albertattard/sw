@@ -1,7 +1,7 @@
 ---
 id: TASK-204
 title: Support Generated Run Secrets
-status: pending
+status: done
 category: run
 related_features:
   - SPEC-013
@@ -42,5 +42,15 @@ masking output controlled by `sw`.
 
 ## Acceptance Criteria
 
-- [ ] SPEC-013 acceptance criteria are implemented and verified.
-- [ ] Existing runbooks and CLI output contracts continue to work unchanged.
+- [x] SPEC-013 acceptance criteria are implemented and verified.
+- [x] Existing runbooks and CLI output contracts continue to work unchanged.
+
+## Verification
+
+- `./tools/verify.sh` passed (formatting, Clippy, complete test suite, release
+  build, and Homebrew formula checks).
+- Dedicated CLI coverage includes binding isolation, cross-entry reuse,
+  cleanup and timeout failures, reveal ordering and formatting, captures,
+  split read chunks, validation, canonical formatting, and help.
+- Deterministic generation tests verify rejection sampling and random-source
+  failure propagation.

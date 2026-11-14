@@ -3,6 +3,8 @@ mod execute;
 mod format;
 mod numeric;
 mod render;
+mod secrets;
+pub(crate) use secrets::Secrets;
 mod validate;
 
 use crate::cli::InputFormat;

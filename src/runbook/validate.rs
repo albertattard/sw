@@ -1491,6 +1491,7 @@ fn validate_entry(
             for key in object.keys() {
                 if key != "type"
                     && key != "commands"
+                    && key != "environment"
                     && key != "working_dir"
                     && key != "working_directory"
                     && key != "indent"
@@ -1906,7 +1907,7 @@ pub fn validate_with_execution_root(runbook: &Value, execution_root: &Path) -> V
     };
 
     for key in object.keys() {
-        if key != "entries" {
+        if key != "entries" && key != "secrets" {
             push_error(
                 &mut context.errors,
                 format!("$.{key}"),
@@ -1914,6 +1915,8 @@ pub fn validate_with_execution_root(runbook: &Value, execution_root: &Path) -> V
             );
         }
     }
+
+    super::secrets::validate(runbook, &mut context.errors);
 
     match object.get("entries") {
         Some(entries) => {

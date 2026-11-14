@@ -61,7 +61,6 @@ Expected task directories:
 
 ## Pending
 
-- [ ] [TASK-204: Support Generated Run Secrets](run/TASK-204-support-generated-run-secrets.md)
 - [ ] [TASK-199: Evaluate AI Agent Use Of SW](discovery/TASK-199-evaluate-ai-agent-use-of-sw.md)
 - [ ] [TASK-158: Publish And Validate Official Release Distribution](release/TASK-158-publish-first-official-release.md)
 - [ ] [TASK-121: Support Command Preconditions And Port Checks](run/TASK-121-support-command-preconditions-and-port-checks.md)
@@ -72,6 +71,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-204: Support Generated Run Secrets](run/TASK-204-support-generated-run-secrets.md)
 - [x] [TASK-203: Place DisplayFile Content Type After Path](format/TASK-203-place-display-file-content-type-after-path.md)
 - [x] [TASK-202: Place Output Before Capture](format/TASK-202-place-output-before-capture.md)
 - [x] [TASK-201: Order Fields For All Entry Types](format/TASK-201-order-fields-for-all-entry-types.md)

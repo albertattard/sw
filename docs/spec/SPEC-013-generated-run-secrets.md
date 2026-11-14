@@ -1,7 +1,7 @@
 ---
 id: SPEC-013
 title: Generated Run Secrets
-status: planned
+status: implemented
 priority: medium
 owner: albertattard
 last_updated: 2026-11-14
@@ -105,29 +105,29 @@ the container configuration.
 
 ## Acceptance Criteria
 
-- [ ] A secret is generated once per invocation and shared by explicitly bound
+- [x] A secret is generated once per invocation and shared by explicitly bound
       command entries and their cleanup; a separate invocation generates anew.
-- [ ] Generated Markdown, verbose output, debug output, streamed output, and
+- [x] Generated Markdown, verbose output, debug output, streamed output, and
       failures mask exact values, including values split across stream chunks.
-- [ ] Assertions and captures operate on the appropriate real command output;
+- [x] Assertions and captures operate on the appropriate real command output;
       subsequent output cannot disclose a captured known secret.
-- [ ] A captured secret interpolated into later output is masked, and a secret
+- [x] A captured secret interpolated into later output is masked, and a secret
       split across streamed chunks is masked without leaking its fragments.
-- [ ] `--reveal-secrets` prints only the dedicated list to stderr, independently
+- [x] `--reveal-secrets` prints only the dedicated list to stderr, independently
       of debug, while all other output remains masked; failed generation prints
       no partial list.
-- [ ] Generation and the optional reveal list precede prerequisite checks;
+- [x] Generation and the optional reveal list precede prerequisite checks;
       a failed prerequisite still follows a successfully printed reveal list,
       and failed generation prevents prerequisite checks.
-- [ ] The reveal list follows the specified heading, line format, declaration
+- [x] The reveal list follows the specified heading, line format, declaration
       order, and empty case. Standalone `sw check` validates without generating
       or revealing secrets or injecting bindings into prerequisite checks.
-- [ ] Validation enforces the specified names, integer length bounds, mandatory
+- [x] Validation enforces the specified names, integer length bounds, mandatory
       `generate` mapping, empty mapping behavior, and binding constraints.
-- [ ] Generation uses the exact specified alphabet and uniform selection.
-- [ ] Formatting places `environment` immediately before `commands` in JSON
+- [x] Generation uses the exact specified alphabet and uniform selection.
+- [x] Formatting places `environment` immediately before `commands` in JSON
       and YAML, regardless of input order.
-- [ ] Help, examples, and run documentation explain binding, redaction limits,
+- [x] Help, examples, and run documentation explain binding, redaction limits,
       external exposure, and the `--start-at` lifetime limitation.
-- [ ] CLI integration tests cover execution, reuse, cleanup, masking, failure,
+- [x] CLI integration tests cover execution, reuse, cleanup, masking, failure,
       streamed output, reveal behavior, validation, and help.

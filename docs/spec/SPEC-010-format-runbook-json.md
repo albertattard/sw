@@ -138,7 +138,7 @@ entry as follows, omitting fields that are absent:
 3. `execute_when`
 4. `working_directory`
 5. `working_dir` (legacy spelling, when present)
-6. `environment` (planned in TASK-204)
+6. `environment`
 7. `commands`
 8. `assert`
 9. `output`
@@ -155,8 +155,8 @@ places `output` before `capture`. Field order does not control execution:
 `stage: raw` captures original stdout and `stage: rewritten` captures stdout
 after rewriting.
 
-TASK-204 will add `environment` immediately before `commands` when generated
-run secrets are implemented. Until then, this field is not supported.
+TASK-204 places `environment` immediately before `commands` for generated
+run secret bindings.
 
 ## Acceptance Criteria
 
@@ -204,7 +204,7 @@ run secrets are implemented. Until then, this field is not supported.
 
 - [x] Existing JSON and YAML `Command` fields are written in the canonical
       order above, regardless of their input order.
-- [ ] JSON and YAML `Command.environment` is placed immediately before
+- [x] JSON and YAML `Command.environment` is placed immediately before
       `commands` when present (TASK-204).
 - [x] Absent fields remain absent and the legacy `working_dir` spelling is
       retained in its specified position.

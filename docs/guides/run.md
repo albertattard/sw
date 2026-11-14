@@ -140,3 +140,58 @@ successfully before later entries:
 For exact syntax, run `sw help run`. For the behavior contract, run
 `sw explain run` or read
 [SPEC-003](../spec/SPEC-003-run-runbook-to-markdown.md).
+
+## Generated Run Secrets
+
+Declare temporary credentials once and bind them explicitly to each command
+([runnable example](../../tests/fixtures/sw-runbook-generated-secrets.yaml)):
+
+```yaml
+secrets:
+  password:
+    generate:
+      length: 32
+entries:
+  - type: Command
+    environment:
+      PASSWORD:
+        secret: password
+    commands: |
+      printf '%s\n' "$PASSWORD"
+    output:
+      stream: stdout
+    cleanup: |
+      test -n "$PASSWORD"
+```
+
+`generate: {}` defaults to 32 characters. Length must be an integer from 16
+through 256. Values use uniformly selected secure random ASCII letters and
+digits. Names match `[A-Za-z_][A-Za-z0-9_]*` and are case-sensitive.
+
+Each invocation generates independent values once, before prerequisites, and
+keeps them in memory through cleanup. Bindings override inherited environment
+variables only for the explicitly bound command and its cleanup; multiple
+commands can bind the same secret. Prerequisites never receive these bindings.
+Standalone `sw check` validates declarations and references without generation.
+
+Every invocation, including `--start-at`, generates fresh values. A partial run
+cannot reconnect using credentials from a previous invocation, including one
+that used `--preserve-on-failure`.
+
+Exact known values become `******` in output controlled by `sw`, including
+Markdown, diagnostics, verbose progress, debug, stdout, and stderr. Assertions,
+captures, execution, and cleanup use real values. Redaction covers complete
+values split across read chunks; it cannot detect arbitrary transformations
+or guarantee masking a substring printed alone.
+
+`sw run --reveal-secrets` prints a dedicated list to stderr in declaration
+order before prerequisites, independently of debug. No list is printed when
+there are no secrets or generation fails. A later prerequisite failure does
+not suppress the list. All other output stays masked. Stderr may be captured
+in logs, so use this option deliberately.
+
+Commands and external services can expose credentials through process arguments,
+environments, container configuration, files, and transformed output. For
+example, passing `--env PASSWORD="$PASSWORD"` to Docker exposes the expanded
+value in its arguments and stores it in the container configuration. `sw` does
+not persist generated secrets itself.
