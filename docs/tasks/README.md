@@ -61,6 +61,7 @@ Expected task directories:
 
 ## Pending
 
+- [ ] [TASK-204: Support Generated Run Secrets](run/TASK-204-support-generated-run-secrets.md)
 - [ ] [TASK-199: Evaluate AI Agent Use Of SW](discovery/TASK-199-evaluate-ai-agent-use-of-sw.md)
 - [ ] [TASK-158: Publish And Validate Official Release Distribution](release/TASK-158-publish-first-official-release.md)
 - [ ] [TASK-121: Support Command Preconditions And Port Checks](run/TASK-121-support-command-preconditions-and-port-checks.md)

@@ -138,13 +138,14 @@ entry as follows, omitting fields that are absent:
 3. `execute_when`
 4. `working_directory`
 5. `working_dir` (legacy spelling, when present)
-6. `commands`
-7. `assert`
-8. `output`
-9. `capture`
-10. `cleanup`
-11. `timeout`
-12. `indent`
+6. `environment` (planned in TASK-204)
+7. `commands`
+8. `assert`
+9. `output`
+10. `capture`
+11. `cleanup`
+12. `timeout`
+13. `indent`
 
 Formatting does not rename `working_dir`, add defaults, or reorder fields
 inside nested objects.
@@ -153,6 +154,9 @@ identical file contents. TASK-200 introduced Command ordering; TASK-202
 places `output` before `capture`. Field order does not control execution:
 `stage: raw` captures original stdout and `stage: rewritten` captures stdout
 after rewriting.
+
+TASK-204 will add `environment` immediately before `commands` when generated
+run secrets are implemented. Until then, this field is not supported.
 
 ## Acceptance Criteria
 
@@ -198,8 +202,10 @@ after rewriting.
 
 ### Command Ordering Increment
 
-- [x] JSON and YAML `Command` fields are written in the canonical order above,
-      regardless of their input order.
+- [x] Existing JSON and YAML `Command` fields are written in the canonical
+      order above, regardless of their input order.
+- [ ] JSON and YAML `Command.environment` is placed immediately before
+      `commands` when present (TASK-204).
 - [x] Absent fields remain absent and the legacy `working_dir` spelling is
       retained in its specified position.
 - [x] Nested object fields and array items retain their input order.
