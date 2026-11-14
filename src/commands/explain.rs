@@ -344,6 +344,11 @@ fn explanations() -> Vec<Explanation<'static>> {
             ],
             constraints: &[
                 "Run accepts JSON, YAML, and YML runbooks.",
+                "Document-level secrets require generate: {} (default length 32; integer range 16..256). Values use uniformly selected secure random ASCII letters and digits, generated once before prerequisites.",
+                "Command.environment maps environment names to { secret: name } bindings. Bindings override inherited values for that command and its cleanup only, never prerequisites.",
+                "Each invocation, including --start-at, generates fresh values; credentials from a previous or preserved run cannot be reused.",
+                "Exact known secret values are masked as ****** in sw output, including debug. Assertions and captures use real values. Transformed values and external exposure through arguments, environments, files, containers, or services are outside this protection.",
+                "--reveal-secrets independently prints a dedicated declaration-order stderr list before prerequisites. Other output remains masked; stderr may be captured in logs. Generation failure prints no partial list and prevents prerequisites.",
                 "`--input-file=-` reads the runbook from stdin.",
                 "For stdin input, JSON is the default format and piped YAML requires `--input-format=yaml`.",
                 "Without `--input-file=-`, `--input-format` keeps the existing file-backed defaults and does not override file-extension-based parsing.",

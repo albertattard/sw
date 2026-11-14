@@ -1,4 +1,4 @@
-use super::RenderError;
+use super::{RenderError, Secrets};
 use serde_json::Value;
 use sha2::{Digest, Sha256};
 use std::collections::HashMap;
@@ -23,6 +23,8 @@ pub(crate) struct CleanupBlock {
     pub(crate) lines: Vec<String>,
     pub(crate) working_dir: PathBuf,
     pub(crate) debug_enabled: bool,
+    pub(crate) environment: HashMap<String, String>,
+    pub(crate) secrets: Secrets,
 }
 
 pub(crate) struct PatchApplication {
@@ -132,6 +134,8 @@ pub(crate) fn cleanup_block_in_directory(
             active_command_dir,
         )?,
         debug_enabled,
+        environment: HashMap::new(),
+        secrets: Secrets::default(),
     }))
 }
 
@@ -170,21 +174,23 @@ pub(crate) fn execute_command(
     execution_root: &Path,
     timeout_cleanup: Option<&CleanupBlock>,
 ) -> Result<CommandExecution, RenderError> {
-    execute_command_in_directory(
+    execute_command_with_environment(
         entry,
         command,
         execution_root,
         execution_root,
         timeout_cleanup,
+        &HashMap::new(),
     )
 }
 
-pub(crate) fn execute_command_in_directory(
+pub(crate) fn execute_command_with_environment(
     entry: &Value,
     command: &str,
     execution_root: &Path,
     active_command_dir: &Path,
     timeout_cleanup: Option<&CleanupBlock>,
+    environment: &HashMap<String, String>,
 ) -> Result<CommandExecution, RenderError> {
     let timeout = timeout_for_entry(entry)?;
     let auto_cleanup_processes = uses_automatic_process_cleanup(entry);
@@ -194,6 +200,7 @@ pub(crate) fn execute_command_in_directory(
     let mut process = Command::new("sh");
     process.arg("-lc").arg(command);
     process.current_dir(&working_dir);
+    process.envs(environment);
     process.stdout(Stdio::piped()).stderr(Stdio::piped());
     #[cfg(unix)]
     {
@@ -440,6 +447,7 @@ fn run_cleanup_block(cleanup: &CleanupBlock) -> Result<(), String> {
         .arg("-lc")
         .arg(&script)
         .current_dir(&cleanup.working_dir)
+        .envs(&cleanup.environment)
         .output()
         .map_err(|err| format_cleanup_spawn_failure(cleanup, &script, &err))?;
 
@@ -497,18 +505,21 @@ fn emit_cleanup_debug(cleanup: &CleanupBlock, script: &str, stdout: &str, stderr
         return;
     }
 
-    eprintln!("[debug] Cleanup command entry:");
-    eprintln!("{}", format_command_entry(&cleanup.entry));
-    eprintln!(
+    macro_rules! masked_eprintln {
+        ($($args:tt)*) => { eprintln!("{}", cleanup.secrets.redact(&format!($($args)*))) };
+    }
+    masked_eprintln!("[debug] Cleanup command entry:");
+    masked_eprintln!("{}", format_command_entry(&cleanup.entry));
+    masked_eprintln!(
         "[debug] Cleanup working directory: {}",
         cleanup.working_dir.display()
     );
-    eprintln!("[debug] Cleanup script:");
-    eprintln!("{script}");
-    eprintln!("[debug] Cleanup stdout:");
-    eprintln!("{}", format_command_stream(stdout));
-    eprintln!("[debug] Cleanup stderr:");
-    eprintln!("{}", format_command_stream(stderr));
+    masked_eprintln!("[debug] Cleanup script:");
+    masked_eprintln!("{script}");
+    masked_eprintln!("[debug] Cleanup stdout:");
+    masked_eprintln!("{}", format_command_stream(stdout));
+    masked_eprintln!("[debug] Cleanup stderr:");
+    masked_eprintln!("{}", format_command_stream(stderr));
 }
 
 fn cleanup_script(cleanup: &[String]) -> String {

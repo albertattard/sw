@@ -1,12 +1,12 @@
-use super::RenderError;
 use super::conditions::command_should_execute;
 use super::execute::{
     CleanupBlock, CommandExecution, apply_patch_entry, change_command_directory,
     cleanup_block_in_directory, ensure_assertions, ensure_assertions_in_directory, execute_command,
-    execute_command_in_directory, format_command_failure, patch_target_path, patch_text_for,
+    execute_command_with_environment, format_command_failure, patch_target_path, patch_text_for,
     run_cleanup_blocks, run_patch_restores, snapshot_patch_target, timeout_label,
 };
 use super::numeric::{evaluate_expression, parse_capture_value};
+use super::{RenderError, Secrets};
 use crate::cli::VerboseMode;
 use chrono::Timelike;
 use chrono::{DateTime, Duration, FixedOffset, NaiveDateTime, NaiveTime, TimeZone};
@@ -45,6 +45,7 @@ struct RenderState {
     captured_values: HashMap<String, String>,
     numeric_capture_values: HashMap<String, f64>,
     debug_all_entries: bool,
+    secrets: Secrets,
 }
 
 struct RewriteCapturePair {
@@ -86,18 +87,19 @@ enum OutputStream {
     Combined,
 }
 
-fn emit_debug_lines(enabled: bool, lines: &[String]) {
+fn emit_debug_lines(secrets: &Secrets, enabled: bool, lines: &[String]) {
     if !enabled {
         return;
     }
 
     for line in lines {
-        eprintln!("{line}");
+        eprintln!("{}", secrets.redact(line));
     }
 }
 
 #[derive(Clone, Copy)]
-pub(crate) struct RenderOptions {
+pub(crate) struct RenderOptions<'a> {
+    pub(crate) secrets: &'a Secrets,
     pub(crate) verbose: bool,
     pub(crate) verbose_mode: VerboseMode,
     pub(crate) debug: bool,
@@ -108,7 +110,7 @@ pub(crate) struct RenderOptions {
 pub(crate) fn render_markdown(
     runbook: &Value,
     execution_root: &Path,
-    options: RenderOptions,
+    options: RenderOptions<'_>,
 ) -> Result<String, RenderError> {
     let entries = runbook
         .get("entries")
@@ -132,6 +134,7 @@ pub(crate) fn render_markdown(
         captured_values: HashMap::new(),
         numeric_capture_values: HashMap::new(),
         debug_all_entries: options.debug,
+        secrets: options.secrets.clone(),
     };
     let mut progress = ProgressReporter::new(entries.len(), options.verbose, options.verbose_mode);
 
@@ -141,7 +144,7 @@ pub(crate) fn render_markdown(
         let entry_type = entry.get("type").and_then(Value::as_str).ok_or_else(|| {
             RenderError::Operational("Runbook entry is missing a type".to_string())
         })?;
-        let progress_line = progress.start_entry(index, entry, execution_root);
+        let progress_line = progress.start_entry(index, entry, execution_root, options.secrets);
 
         let rendered = match entry_type {
             "Heading" => RenderSection::Ready(render_heading(entry)?),
@@ -170,6 +173,7 @@ pub(crate) fn render_markdown(
                 &mut patch_restore_stack,
                 &mut patch_snapshots,
                 state.debug_all_entries,
+                options.secrets,
             ) {
                 Ok(section) => RenderSection::Ready(section),
                 Err(err) => {
@@ -182,12 +186,17 @@ pub(crate) fn render_markdown(
                 if !command_should_execute(entry)? {
                     RenderSection::Ready(render_skipped_command(entry, &state)?)
                 } else {
-                    let cleanup = cleanup_block_in_directory(
+                    let mut cleanup = cleanup_block_in_directory(
                         entry,
                         execution_root,
                         &active_command_dir,
                         entry_debug_enabled(entry, state.debug_all_entries),
                     )?;
+
+                    if let Some(cleanup) = &mut cleanup {
+                        cleanup.environment = options.secrets.environment(entry);
+                        cleanup.secrets = options.secrets.clone();
+                    }
 
                     let timeout_cleanup = if options.preserve_on_failure {
                         None
@@ -314,7 +323,7 @@ pub(crate) fn render_markdown(
                 message,
                 markdown: output,
             }),
-            None => Ok(output),
+            None => Ok(options.secrets.redact(&output)),
         },
     }
 }
@@ -441,6 +450,7 @@ impl ProgressReporter {
         index: usize,
         entry: &Value,
         execution_root: &Path,
+        secrets: &Secrets,
     ) -> Option<EntryProgress> {
         match self.mode {
             ProgressMode::Off => None,
@@ -448,7 +458,7 @@ impl ProgressReporter {
                 let line = format_progress_line(
                     index + 1,
                     self.total_entries,
-                    entry_summary(entry, execution_root),
+                    entry_summary_with_secrets(entry, execution_root, secrets),
                 );
                 let timeout = verbose_timeout_label(entry);
                 let _ = writeln!(
@@ -469,7 +479,7 @@ impl ProgressReporter {
                 let line = format_progress_line(
                     index + 1,
                     self.total_entries,
-                    entry_summary(entry, execution_root),
+                    entry_summary_with_secrets(entry, execution_root, secrets),
                 );
                 let stop_signal = Arc::new(AtomicBool::new(false));
                 let thread_stop_signal = Arc::clone(&stop_signal);
@@ -634,7 +644,12 @@ fn format_progress_line(current: usize, total: usize, summary: String) -> String
     format!("[{current:>width$}/{total}] {summary}")
 }
 
+#[cfg(test)]
 fn entry_summary(entry: &Value, execution_root: &Path) -> String {
+    entry_summary_with_secrets(entry, execution_root, &Secrets::default())
+}
+
+fn entry_summary_with_secrets(entry: &Value, execution_root: &Path, secrets: &Secrets) -> String {
     let entry_type = entry.get("type").and_then(Value::as_str).unwrap_or("Entry");
     let summary = match entry_type {
         "Heading" => entry
@@ -659,7 +674,10 @@ fn entry_summary(entry: &Value, execution_root: &Path) -> String {
         other => other.to_string(),
     };
 
-    format!("{entry_type}: {}", truncate_progress_summary(&summary, 80))
+    format!(
+        "{entry_type}: {}",
+        truncate_progress_summary(&secrets.redact(&summary), 80)
+    )
 }
 
 fn first_non_empty_array_string(value: Option<&Value>) -> Option<String> {
@@ -1716,6 +1734,7 @@ fn render_patch(
     patch_restore_stack: &mut Vec<std::path::PathBuf>,
     patch_snapshots: &mut HashMap<std::path::PathBuf, Vec<u8>>,
     debug_all_entries: bool,
+    secrets: &Secrets,
 ) -> Result<String, RenderError> {
     let lines = entry
         .get("patch")
@@ -1745,7 +1764,7 @@ fn render_patch(
         ));
         debug_lines.push("[debug] Normalized patch text:".to_string());
         debug_lines.push(patch_text_for(&relative_path, &lines));
-        emit_debug_lines(true, &debug_lines);
+        emit_debug_lines(secrets, true, &debug_lines);
         debug_lines.clear();
     }
 
@@ -1759,7 +1778,7 @@ fn render_patch(
         debug_lines.push(format_command_stream_for_debug(&application.stdout));
         debug_lines.push("[debug] Patch command stderr:".to_string());
         debug_lines.push(format_command_stream_for_debug(&application.stderr));
-        emit_debug_lines(true, &debug_lines);
+        emit_debug_lines(secrets, true, &debug_lines);
     }
 
     let section = fenced_block(Some("diff"), &lines.join("\n"));
@@ -1786,12 +1805,13 @@ fn render_command(
     let command_text = resolved_command_lines.join("\n");
     let rendered_command_text = render_command_text(entry, &command_text)?;
     let mut section = fenced_block(Some("shell"), &rendered_command_text);
-    let execution = execute_command_in_directory(
+    let execution = execute_command_with_environment(
         entry,
         &command_text,
         execution_root,
         active_command_dir,
         timeout_cleanup,
+        &state.secrets.environment(entry),
     )?;
     let debug_enabled = entry_debug_enabled(entry, state.debug_all_entries);
     let mut debug_lines = Vec::new();
@@ -1810,7 +1830,7 @@ fn render_command(
     let render_rewrite_result = match rendered_output_for_entry(entry, &execution, state) {
         Ok(result) => result,
         Err(err) => {
-            emit_debug_lines(debug_enabled, &debug_lines);
+            emit_debug_lines(&state.secrets, debug_enabled, &debug_lines);
             return Err(err);
         }
     };
@@ -1825,7 +1845,7 @@ fn render_command(
             ) {
                 Ok(result) => Some(result.rendered),
                 Err(err) => {
-                    emit_debug_lines(debug_enabled, &debug_lines);
+                    emit_debug_lines(&state.secrets, debug_enabled, &debug_lines);
                     return Err(err);
                 }
             }
@@ -1843,7 +1863,7 @@ fn render_command(
             ) {
                 Ok(result) => Some(result.rendered),
                 Err(err) => {
-                    emit_debug_lines(debug_enabled, &debug_lines);
+                    emit_debug_lines(&state.secrets, debug_enabled, &debug_lines);
                     return Err(err);
                 }
             }
@@ -1881,7 +1901,7 @@ fn render_command(
     }
 
     if execution.timed_out {
-        emit_debug_lines(debug_enabled, &debug_lines);
+        emit_debug_lines(&state.secrets, debug_enabled, &debug_lines);
         append_output(
             entry,
             &rendered_output,
@@ -1908,7 +1928,7 @@ fn render_command(
         state,
         &mut debug_lines,
     ) {
-        emit_debug_lines(debug_enabled, &debug_lines);
+        emit_debug_lines(&state.secrets, debug_enabled, &debug_lines);
         return Err(err);
     }
     store_generated_rewrite_captures(&generated_captures, &mut state.captured_values);
@@ -1924,7 +1944,7 @@ fn render_command(
             ));
         }
     }
-    emit_debug_lines(debug_enabled, &debug_lines);
+    emit_debug_lines(&state.secrets, debug_enabled, &debug_lines);
     append_output(
         entry,
         &rendered_output,

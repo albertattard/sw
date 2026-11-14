@@ -42,6 +42,14 @@ pub fn run(
         return ExitCode::from(2);
     }
 
+    let secrets = match runbook::Secrets::generate(&runbook) {
+        Ok(secrets) => secrets,
+        Err(error) => return handle_render_error(error, &output_path, &resume_base_command),
+    };
+    if run_debug.reveal_secrets {
+        secrets.reveal();
+    }
+
     let markdown = match args
         .output
         .output_format
@@ -49,6 +57,7 @@ pub fn run(
     {
         RunOutputFormat::Markdown => {
             let options = runbook::RenderOptions {
+                secrets: &secrets,
                 verbose,
                 verbose_mode,
                 debug,
@@ -59,7 +68,11 @@ pub fn run(
             match runbook::render_markdown(&runbook, &execution_root, options) {
                 Ok(markdown) => markdown,
                 Err(error) => {
-                    return handle_render_error(error, &output_path, &resume_base_command);
+                    return handle_render_error(
+                        secrets.redact_error(error),
+                        &output_path,
+                        &resume_base_command,
+                    );
                 }
             }
         }
@@ -174,6 +187,9 @@ fn resume_base_command(
     if let Some(output_file) = &args.output.output_file {
         command.push("--output-file".to_string());
         command.push(shell_arg(&output_file.display().to_string()));
+    }
+    if run_debug.reveal_secrets {
+        command.push("--reveal-secrets".to_string());
     }
     if run_debug.preserve_on_failure {
         command.push("--preserve-on-failure".to_string());

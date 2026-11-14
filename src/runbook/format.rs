@@ -6,6 +6,7 @@ const COMMAND_FIELD_ORDER: &[&str] = &[
     "execute_when",
     "working_directory",
     "working_dir",
+    "environment",
     "commands",
     "assert",
     "output",
