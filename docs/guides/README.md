@@ -66,6 +66,10 @@ Execute the runbook and generate `README.md`:
 sw run
 ```
 
+## Maintainer Guides
+
+- [Dependency hygiene and temporary advisory exceptions](./dependency-hygiene.md)
+
 ## Agent Guidance
 
 AI agents should treat the installed `sw` binary as the discoverable interface:

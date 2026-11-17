@@ -33,7 +33,7 @@ pub fn run(args: FormatArgs) -> ExitCode {
     } else {
         runbook::normalize_java_versions_for_authoring(&runbook)
     };
-    runbook::order_entry_fields(&mut normalized_runbook);
+    runbook::order_schema_fields(&mut normalized_runbook);
 
     let rendered = match runbook::serialize(&normalized_runbook, format) {
         Ok(rendered) => rendered,

@@ -113,13 +113,6 @@ fn format_orders_all_entry_types_in_json_and_yaml() {
             let entry = parsed["entries"][index].as_object().unwrap();
             let keys: Vec<_> = entry.keys().map(String::as_str).collect();
             assert_eq!(keys, *expected, "{extension}: entry {index}");
-            for (field, value) in original["entries"][index].as_object().unwrap() {
-                assert_eq!(
-                    serde_json::to_string(&entry[field]).unwrap(),
-                    serde_json::to_string(value).unwrap(),
-                    "nested {field} order"
-                );
-            }
         }
         assert!(run_in_dir(&["format"], &dir).status.success());
         assert_eq!(fs::read_to_string(path).unwrap(), formatted);
@@ -128,7 +121,7 @@ fn format_orders_all_entry_types_in_json_and_yaml() {
 }
 
 #[test]
-fn format_orders_command_fields_in_json_and_yaml_without_reordering_nested_values() {
+fn format_orders_command_fields_in_json_and_yaml() {
     let original: serde_json::Value = serde_json::from_str(
         r#"{
           "entries": [
@@ -219,14 +212,6 @@ fn format_orders_command_fields_in_json_and_yaml_without_reordering_nested_value
                 .map(String::as_str)
                 .collect();
             assert_eq!(keys, *expected, "{extension}");
-        }
-        // Serialized nested values expose both mapping order and array order.
-        for field in ["execute_when", "assert", "capture", "output"] {
-            assert_eq!(
-                serde_json::to_string(&parsed["entries"][1][field]).unwrap(),
-                serde_json::to_string(&original["entries"][1][field]).unwrap(),
-                "{extension}: nested {field} order"
-            );
         }
         let second_run = run_in_dir(&["format"], &dir);
         assert!(second_run.status.success());
@@ -542,4 +527,228 @@ fn format_invalid_runbook_does_not_modify_file() {
         fs::read_to_string(path).expect("missing original file"),
         original
     );
+}
+
+#[test]
+fn format_orders_nested_schema_objects_and_preserves_user_maps() {
+    let original: serde_json::Value = serde_json::from_str(r#"{
+      "entries": [
+        {"type":"Prerequisite","checks":[
+          {"help":"Install Java","contents":"Java needed","java_home":"jdk","distribution":"epp","version":"25","name":"Java","kind":"java"},
+          {"contents":"Other Java","java_home_env":"JAVA_HOME","version":"21+","name":"Other","kind":"java"},
+          {"help":"Install tool","contents":"Tool needed","timeout":"5 seconds",
+           "assert":{"checks":[{"contains":"ok","source":"stdout"}],"exit_code":0},
+           "commands":"echo ok","name":"Tool","kind":"command"}
+        ]},
+        {"type":"Command","commands":"echo 123",
+         "execute_when":{"equals":"linux","fact":"os"},
+         "environment":{"Z_VAR":{"secret":"z_secret"},"A_VAR":{"secret":"a_secret"}},
+         "assert":{"checks":[
+           {"contains":"123","source":"stdout"},
+           {"exists":true,"path":"demo.txt","source":"file"},
+           {"sha256":"0000000000000000000000000000000000000000000000000000000000000000","path":"other.txt","source":"file"}
+         ],"exit_code":0},
+         "capture":[
+           {"parse_as":{"grouping_separator":",","decimal_separator":".","type":"number"},"pattern":"(123)","stage":"raw","source":"stdout","name":"z_number"},
+           {"parse_as":{"locale":"en-US","type":"number"},"pattern":"(123)","stage":"rewritten","source":"stdout","name":"a_number"}
+         ],
+         "output":{"rewrite":[
+           {"capture_as":"replaced","replacement":"456","pattern":"123","type":"replace"},
+           {"show_trim_markers":false,"end_offset":-1,"start_offset":1,"end":"END","start":"START","type":"keep_between"},
+           {"end_pattern":"END.*","start_pattern":"START.*","type":"keep_between"},
+           {"show_trim_marker":false,"last":2,"first":3,"type":"limit_lines"},
+           {"capture_as":"shifted","custom_format":"%Y-%m-%d","id":"timeline","base":"2020-01-01T00:00:00Z","pattern":"[0-9]{4}-[0-9]{2}-[0-9]{2}","type":"datetime_shift"},
+           {"use":"timeline","format":"rfc3339","type":"datetime_shift"}
+         ],"trim_trailing_whitespace":false,"trim_empty_lines":"none","content_type":"text","stream":"stdout","caption":"Numbers"}},
+        {"type":"DisplayFile","path":"Main.java","transform":{"operations":[
+          {"replacement":"...","name":"zMethod","type":"collapse_method_body"},
+          {"name":"aMethod","type":"collapse_method_body"}
+        ],"language":"java"}},
+        {"type":"Heading","title":"Extra fields","level":"H1",
+         "z_extra":{"output":{"stream":"stdout","caption":"Leave order"},"entries":[{"commands":"echo extra","type":"Command"}]},
+         "a_extra":{"equals":"linux","fact":"os"}},
+        {"type":"Command","commands":"echo minimal"}
+      ],
+      "secrets":{"z_secret":{"generate":{"length":16}},"a_secret":{"generate":{}}}
+    }"#).unwrap();
+    let expected_orders: &[(&str, &[&str])] = &[
+        ("", &["secrets", "entries"]),
+        ("/secrets", &["z_secret", "a_secret"]),
+        ("/secrets/z_secret", &["generate"]),
+        ("/secrets/z_secret/generate", &["length"]),
+        ("/secrets/a_secret/generate", &[]),
+        (
+            "/entries/0/checks/0",
+            &[
+                "kind",
+                "name",
+                "version",
+                "distribution",
+                "java_home",
+                "contents",
+                "help",
+            ],
+        ),
+        (
+            "/entries/0/checks/1",
+            &["kind", "name", "version", "java_home_env", "contents"],
+        ),
+        (
+            "/entries/0/checks/2",
+            &[
+                "kind", "name", "commands", "assert", "timeout", "contents", "help",
+            ],
+        ),
+        ("/entries/0/checks/2/assert", &["exit_code", "checks"]),
+        (
+            "/entries/0/checks/2/assert/checks/0",
+            &["source", "contains"],
+        ),
+        ("/entries/1/execute_when", &["fact", "equals"]),
+        ("/entries/1/environment", &["Z_VAR", "A_VAR"]),
+        ("/entries/1/environment/Z_VAR", &["secret"]),
+        ("/entries/1/assert", &["exit_code", "checks"]),
+        ("/entries/1/assert/checks/0", &["source", "contains"]),
+        ("/entries/1/assert/checks/1", &["source", "path", "exists"]),
+        ("/entries/1/assert/checks/2", &["source", "path", "sha256"]),
+        (
+            "/entries/1/capture/0",
+            &["name", "source", "stage", "pattern", "parse_as"],
+        ),
+        (
+            "/entries/1/capture/1",
+            &["name", "source", "stage", "pattern", "parse_as"],
+        ),
+        (
+            "/entries/1/capture/0/parse_as",
+            &["type", "decimal_separator", "grouping_separator"],
+        ),
+        ("/entries/1/capture/1/parse_as", &["type", "locale"]),
+        (
+            "/entries/1/output",
+            &[
+                "caption",
+                "stream",
+                "content_type",
+                "trim_empty_lines",
+                "trim_trailing_whitespace",
+                "rewrite",
+            ],
+        ),
+        (
+            "/entries/1/output/rewrite/0",
+            &["type", "pattern", "replacement", "capture_as"],
+        ),
+        (
+            "/entries/1/output/rewrite/1",
+            &[
+                "type",
+                "start",
+                "end",
+                "start_offset",
+                "end_offset",
+                "show_trim_markers",
+            ],
+        ),
+        (
+            "/entries/1/output/rewrite/2",
+            &["type", "start_pattern", "end_pattern"],
+        ),
+        (
+            "/entries/1/output/rewrite/3",
+            &["type", "first", "last", "show_trim_marker"],
+        ),
+        (
+            "/entries/1/output/rewrite/4",
+            &[
+                "type",
+                "pattern",
+                "base",
+                "id",
+                "custom_format",
+                "capture_as",
+            ],
+        ),
+        ("/entries/1/output/rewrite/5", &["type", "format", "use"]),
+        ("/entries/2/transform", &["language", "operations"]),
+        (
+            "/entries/2/transform/operations/0",
+            &["type", "name", "replacement"],
+        ),
+        ("/entries/2/transform/operations/1", &["type", "name"]),
+        (
+            "/entries/3",
+            &["type", "level", "title", "z_extra", "a_extra"],
+        ),
+        ("/entries/4", &["type", "commands"]),
+    ];
+    for extension in ["json", "yaml", "yml"] {
+        let dir = prepare_workspace();
+        let input = if extension == "json" {
+            serde_json::to_string(&original).unwrap()
+        } else {
+            serde_norway::to_string(&original).unwrap()
+        };
+        let path = write_file(&dir, &format!("sw-runbook.{extension}"), &input);
+        let output = run_in_dir(&["format"], &dir);
+        assert!(
+            output.status.success(),
+            "{extension}: {} {}",
+            String::from_utf8_lossy(&output.stdout),
+            String::from_utf8_lossy(&output.stderr)
+        );
+        let formatted = fs::read_to_string(&path).unwrap();
+        let parsed: serde_json::Value = if extension == "json" {
+            serde_json::from_str(&formatted).unwrap()
+        } else {
+            serde_norway::from_str(&formatted).unwrap()
+        };
+        // Value equality includes array order and absent fields, but ignores map order.
+        assert_eq!(parsed, original, "{extension}: semantic values");
+        for (pointer, expected) in expected_orders {
+            let keys: Vec<_> = parsed
+                .pointer(pointer)
+                .unwrap()
+                .as_object()
+                .unwrap()
+                .keys()
+                .map(String::as_str)
+                .collect();
+            assert_eq!(keys, *expected, "{extension}: {pointer}");
+        }
+        for field in ["z_extra", "a_extra"] {
+            assert_eq!(
+                serde_json::to_string(&parsed["entries"][3][field]).unwrap(),
+                serde_json::to_string(&original["entries"][3][field]).unwrap(),
+                "{extension}: accepted extra {field} retains nested order"
+            );
+        }
+        assert!(run_in_dir(&["validate"], &dir).status.success());
+        assert!(run_in_dir(&["format"], &dir).status.success());
+        assert_eq!(fs::read_to_string(path).unwrap(), formatted);
+        fs::remove_dir_all(dir).unwrap();
+    }
+}
+
+#[test]
+fn format_rejects_invalid_nested_fields_without_writing() {
+    for extension in ["json", "yaml", "yml"] {
+        for invalid in [
+            r#"{"entries":[{"type":"Command","commands":"echo hi","output":{"rewrite":[{"replacement":"x","pattern":"hi","type":"replace","unknown":true}]}}]}"#,
+            r#"{"entries":[{"type":"Prerequisite","checks":[{"version":"25","name":"Java","kind":"java","contents":"Needed","java_home":"jdk","java_home_env":"JAVA_HOME"}]}]}"#,
+        ] {
+            let dir = prepare_workspace();
+            let value: serde_json::Value = serde_json::from_str(invalid).unwrap();
+            let input = if extension == "json" {
+                invalid.to_string()
+            } else {
+                serde_norway::to_string(&value).unwrap()
+            };
+            let path = write_file(&dir, &format!("sw-runbook.{extension}"), &input);
+            assert_eq!(run_in_dir(&["validate"], &dir).status.code(), Some(2));
+            assert_eq!(run_in_dir(&["format"], &dir).status.code(), Some(2));
+            assert_eq!(fs::read_to_string(path).unwrap(), input);
+            fs::remove_dir_all(dir).unwrap();
+        }
+    }
 }
