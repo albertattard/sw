@@ -71,6 +71,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-206: Order Nested Schema Fields During Formatting](format/TASK-206-order-nested-schema-fields.md)
 - [x] [TASK-204: Support Generated Run Secrets](run/TASK-204-support-generated-run-secrets.md)
 - [x] [TASK-203: Place DisplayFile Content Type After Path](format/TASK-203-place-display-file-content-type-after-path.md)
 - [x] [TASK-202: Place Output Before Capture](format/TASK-202-place-output-before-capture.md)

@@ -28,10 +28,11 @@ sw format --input-file ./sw-runbook.yaml
   `execute_when`, `working_directory`, `working_dir` (legacy), `environment`,
   `commands`, `assert`, `output`, `capture`, `cleanup`, `timeout`, `indent`.
 - `DisplayFile` places `content_type` immediately after `path` when present.
-- All entry types use the canonical field orders listed in SPEC-010.
-- Absent fields remain absent. Nested objects retain their field order, and
-  arrays retain their item order. Accepted extra fields follow known fields
-  in their original relative order.
+- The document, all entry types, and schema-defined nested objects (including
+  prerequisite checks) use the canonical field orders listed in SPEC-010.
+- Absent fields remain absent. User-defined map keys, including secret names
+  and environment variables, and array items retain their input order.
+  Accepted extra fields follow known fields in their original relative order.
 - YAML formatting keeps runbooks editing-friendly, including blank lines
   between entries and indented sequences under keys.
 - Stdin formatting is not supported; format works on files.

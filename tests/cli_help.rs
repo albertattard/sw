@@ -195,7 +195,7 @@ fn format_help_prints_help() {
     assert!(stdout.contains("type, debug, execute_when, working_directory, working_dir (legacy), environment, commands, assert, output, capture, cleanup, timeout, indent."));
     assert!(
         stdout.contains(
-            "All entry types use canonical field order; nested fields and array items retain their input order."
+            "All entry types and schema-defined nested objects use canonical field order; user-defined map keys and array items retain their input order."
         )
     );
     assert!(stdout.contains("Default input candidates are `./sw-runbook.json`, `./sw-runbook.yaml`, and `./sw-runbook.yml`."));

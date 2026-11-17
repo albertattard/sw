@@ -4,7 +4,7 @@ title: Format Runbook Files
 status: implemented
 priority: medium
 owner: albertattard
-last_updated: 2026-10-13
+last_updated: 2026-11-17
 ---
 
 ## Problem
@@ -99,8 +99,9 @@ Output:
 - YAML output may normalize fields whose documented input contract accepts
   either a string or an array of strings into literal block scalars, matching
   the JSON-to-YAML conversion contract for those fields.
-- Property order is preserved exactly as it appears in the input file, except
-  for direct fields of all entries, which use the canonical orders below.
+- Schema-defined objects use the canonical field orders below. User-defined
+  names in maps, including secrets and environment variables, retain their
+  input order. Array items retain their input order.
 - String contents are preserved semantically, aside from format-specific
   escaping or block-scalar representation required by serialization.
 - The formatted file ends with a trailing newline.
@@ -111,7 +112,7 @@ Output:
 ### Entry Field Orders (TASK-201)
 
 Direct fields of every supported entry type use the following order, omitting
-absent fields. Nested objects retain their input field order. Any extra fields
+absent fields. Any extra fields
 accepted by validation are retained after the listed fields in their original
 relative order.
 
@@ -147,8 +148,7 @@ entry as follows, omitting fields that are absent:
 12. `timeout`
 13. `indent`
 
-Formatting does not rename `working_dir`, add defaults, or reorder fields
-inside nested objects.
+Formatting does not rename `working_dir` or add defaults.
 Every array retains its original item order. Repeated formatting produces
 identical file contents. TASK-200 introduced Command ordering; TASK-202
 places `output` before `capture`. Field order does not control execution:
@@ -157,6 +157,38 @@ after rewriting.
 
 TASK-204 places `environment` immediately before `commands` for generated
 run secret bindings.
+
+### Nested Object Field Orders (TASK-206)
+
+Canonical ordering applies to schema-defined nested objects in JSON and YAML.
+Only fields present are emitted, and any accepted unlisted fields retain their
+relative order after listed fields. These orders apply at
+the indicated schema paths, not to arbitrary objects with matching names.
+
+| Object | Field order |
+|---|---|
+| Document | `secrets`, `entries` |
+| Secret declaration | `generate` |
+| Secret generator | `length` |
+| Environment secret binding | `secret` |
+| Prerequisite Java check | `kind`, `name`, `version`, `distribution`, `java_home`, `java_home_env`, `contents`, `help` |
+| Prerequisite command check | `kind`, `name`, `commands`, `assert`, `timeout`, `contents`, `help` |
+| Command `execute_when` | `fact`, `equals` |
+| Assertion | `exit_code`, `checks` |
+| Assertion check | `source`, `path`, `exists`, `sha256`, `contains` |
+| Command `output` | `caption`, `stream`, `content_type`, `trim_empty_lines`, `trim_trailing_whitespace`, `rewrite` |
+| Capture | `name`, `source`, `stage`, `pattern`, `parse_as` |
+| Numeric `parse_as` | `type`, `locale`, `decimal_separator`, `grouping_separator` |
+| Replace rewrite | `type`, `pattern`, `replacement`, `capture_as` |
+| Keep-between rewrite | `type`, `start`, `start_pattern`, `end`, `end_pattern`, `start_offset`, `end_offset`, `show_trim_markers` |
+| Line-trimming rewrite | `type`, `first`, `last`, `show_trim_marker` |
+| Datetime-shift rewrite | `type`, `pattern`, `base`, `format`, `id`, `use`, `custom_format`, `capture_as` |
+| DisplayFile `transform` | `language`, `operations` |
+| DisplayFile transform operation | `type`, `name`, `replacement` |
+
+User-defined map keys, including secret names and environment variable names,
+retain their original relative order. Values, array item order, omitted fields,
+and existing validation behavior remain unchanged. Formatting is idempotent.
 
 ## Acceptance Criteria
 
@@ -186,10 +218,8 @@ run secret bindings.
 - [x] Given a file that is already formatted canonically, running `sw format`
       keeps the semantic content unchanged and leaves the file in the same
       canonical layout.
-- [x] Formatting preserves object property order from the input file, except
-      for direct entry fields, which use their canonical order.
-- [x] Formatting preserves mapping property order from the input YAML file,
-      except for direct entry fields, which use their canonical order.
+- [x] The original formatter preserved non-entry property order; the nested
+      ordering increment supersedes this behavior for schema-defined objects.
 - [x] Given a YAML runbook with two or more adjacent top-level `entries`,
       `sw format` rewrites the file so those adjacent entry items are
       separated by a single blank line.
@@ -208,7 +238,8 @@ run secret bindings.
       `commands` when present (TASK-204).
 - [x] Absent fields remain absent and the legacy `working_dir` spelling is
       retained in its specified position.
-- [x] Nested object fields and array items retain their input order.
+- [x] Array items retain their input order. Nested object ordering is extended
+      by the nested ordering increment below.
 - [x] Formatting an already ordered runbook produces identical file contents.
 - [x] CLI help and help-focused tests describe canonical `Command` field order.
 
@@ -217,13 +248,22 @@ run secret bindings.
 - [x] JSON and YAML direct fields of every supported entry type follow the
       specified order, with absent fields omitted.
 - [x] Accepted extra fields are retained after known fields in input order.
-- [x] Nested objects, arrays, and semantic values are preserved, and repeated
-      formatting is byte-identical.
+- [x] Arrays and semantic values are preserved, and repeated formatting is
+      byte-identical. TASK-206 extends nested object ordering.
 - [x] Help and formatter guidance describe ordering for all entry types.
+
+### Nested Ordering Increment
+
+- [x] Schema-defined nested objects and the document use the specified field
+      orders in JSON, YAML, and YML, including both prerequisite check kinds.
+- [x] User-defined map keys and array item order are preserved; values and
+      absent fields are unchanged and a second formatting run is byte-identical.
+- [x] CLI help and help-focused tests describe nested object ordering.
+- [x] Integration tests cover each nested object family and both formats.
 
 ## Non-goals
 
-- Reordering properties outside the direct fields of entries.
+- Sorting user-defined map keys or array items.
 - Repairing invalid JSON or invalid runbook structure.
 - Converting YAML to JSON or JSON to YAML.
 - Applying semantic runbook upgrades or migrations.
