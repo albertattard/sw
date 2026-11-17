@@ -3,6 +3,12 @@ all-features = true
 
 [advisories]
 yanked = "deny"
+# Temporary maintenance-risk acceptance for v0.1.13; owner: albertattard.
+# Review/remove by 2026-12-17 (manual deadline; cargo-deny 0.20.2 has no expiry).
+# TASK-207 records the decision; TASK-208 replaces chrono and removes this entry.
+ignore = [
+  { id = "RUSTSEC-2026-0543", reason = "chrono is unmaintained with no patched version; temporarily retain datetime compatibility for v0.1.13 pending TASK-208; review by 2026-12-17" },
+]
 
 [bans]
 multiple-versions = "warn"

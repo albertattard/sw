@@ -61,6 +61,7 @@ Expected task directories:
 
 ## Pending
 
+- [ ] [TASK-208: Replace Unmaintained Chrono Dependency](repo-process/TASK-208-replace-chrono.md)
 - [ ] [TASK-199: Evaluate AI Agent Use Of SW](discovery/TASK-199-evaluate-ai-agent-use-of-sw.md)
 - [ ] [TASK-158: Publish And Validate Official Release Distribution](release/TASK-158-publish-first-official-release.md)
 - [ ] [TASK-121: Support Command Preconditions And Port Checks](run/TASK-121-support-command-preconditions-and-port-checks.md)
@@ -71,6 +72,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-207: Temporarily Except Chrono Maintenance Advisory](repo-process/TASK-207-temporarily-except-chrono-advisory.md)
 - [x] [TASK-206: Order Nested Schema Fields During Formatting](format/TASK-206-order-nested-schema-fields.md)
 - [x] [TASK-204: Support Generated Run Secrets](run/TASK-204-support-generated-run-secrets.md)
 - [x] [TASK-203: Place DisplayFile Content Type After Path](format/TASK-203-place-display-file-content-type-after-path.md)
