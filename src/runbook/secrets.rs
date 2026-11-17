@@ -10,7 +10,7 @@ pub(crate) struct Secrets(Vec<(String, String)>);
 impl Secrets {
     pub(crate) fn generate(runbook: &Value) -> Result<Self, RenderError> {
         Self::generate_with(runbook, |bytes| {
-            getrandom::getrandom(bytes).map_err(|error| error.to_string())
+            getrandom::fill(bytes).map_err(|error| error.to_string())
         })
     }
 

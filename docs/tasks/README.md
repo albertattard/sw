@@ -72,6 +72,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-209: Upgrade Getrandom Dependency](repo-process/TASK-209-upgrade-getrandom.md)
 - [x] [TASK-207: Temporarily Except Chrono Maintenance Advisory](repo-process/TASK-207-temporarily-except-chrono-advisory.md)
 - [x] [TASK-206: Order Nested Schema Fields During Formatting](format/TASK-206-order-nested-schema-fields.md)
 - [x] [TASK-204: Support Generated Run Secrets](run/TASK-204-support-generated-run-secrets.md)
