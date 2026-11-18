@@ -145,7 +145,7 @@ default omitted-content markers.
 Use `content_type` when the file extension is missing or should not control
 the generated fenced-code label. Explicit labels include `properties` for Java
 properties and manifest-style configuration. When `content_type` is omitted, `DisplayFile`
-recognizes common file extensions such as `.java`, `.md`, `.markdown`, `.sql`,
+recognizes common file extensions such as `.java`, `.json`, `.md`, `.markdown`, `.sql`,
 `.sh`, `.xml`, `.yaml`, and `.yml`, plus Dockerfile names such as `Dockerfile` and
 `Dockerfile-Java8`, which render as `dockerfile`. Unknown extensions render as
 text.

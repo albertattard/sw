@@ -3448,6 +3448,7 @@ fn display_file_content_type(path: &Path) -> &'static str {
 
     match path.extension().and_then(|extension| extension.to_str()) {
         Some("java") => "java",
+        Some("json") => "json",
         Some("md") | Some("markdown") => "markdown",
         Some("yaml") | Some("yml") => "yaml",
         Some("sh") => "shell",

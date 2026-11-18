@@ -71,6 +71,8 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-210: Recognize JSON DisplayFile Fences](display-file/TASK-210-recognize-json-display-file-fences.md)
+
 - [x] [TASK-205: Add Secrets Example](example/TASK-205-add-secrets-example.md)
 - [x] [TASK-208: Replace Unmaintained Chrono Dependency](repo-process/TASK-208-replace-chrono.md)
 - [x] [TASK-209: Upgrade Getrandom Dependency](repo-process/TASK-209-upgrade-getrandom.md)
