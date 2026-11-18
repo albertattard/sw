@@ -4011,6 +4011,25 @@ fn display_file_shell_script_uses_shell_fenced_block() {
 }
 
 #[test]
+fn display_file_json_detection_preserves_contents_indent_and_explicit_override() {
+    let dir = prepare_workspace();
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        "entries:\n  - type: DisplayFile\n    path: ./data.json\n    indent: 3\n  - type: DisplayFile\n    path: ./data.json\n    content_type: text\n",
+    )
+    .expect("failed to write runbook");
+    fs::write(dir.join("data.json"), "{\n  \"name\": \"Albert\"\n}\n")
+        .expect("failed to write JSON file");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("   ```json\n   {\n     \"name\": \"Albert\"\n   }\n   ```"));
+    assert!(readme.contains("```text\n{\n  \"name\": \"Albert\"\n}\n```"));
+}
+
+#[test]
 fn display_file_yaml_extensions_use_yaml_fenced_blocks() {
     let dir = prepare_workspace();
     fs::write(
@@ -4492,6 +4511,25 @@ fn display_url_shell_script_uses_shell_fenced_block() {
     assert!(output.status.success());
     let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
     assert!(readme.contains("```shell\n#!/usr/bin/env sh\necho ready\n```"));
+}
+
+#[test]
+fn display_url_json_path_with_query_and_explicit_override() {
+    let dir = prepare_workspace();
+    let json_url = serve_one_http_response("/data.json?format=raw", "200 OK", "{\"value\": 1}\n");
+    let text_url = serve_one_http_response("/data.json?format=text", "200 OK", "{\"value\": 2}\n");
+    fs::write(
+        dir.join("sw-runbook.yaml"),
+        format!("entries:\n  - type: DisplayUrl\n    url: {json_url}\n  - type: DisplayUrl\n    url: {text_url}\n    content_type: text\n"),
+    )
+    .expect("failed to write runbook");
+
+    let output = run_in_dir(&["run"], &dir);
+
+    assert!(output.status.success());
+    let readme = fs::read_to_string(dir.join("README.md")).expect("missing readme output");
+    assert!(readme.contains("```json\n{\"value\": 1}\n```"));
+    assert!(readme.contains("```text\n{\"value\": 2}\n```"));
 }
 
 #[test]

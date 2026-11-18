@@ -4,7 +4,7 @@ title: Run Runbook to Markdown
 status: in_progress
 priority: high
 owner: albertattard
-last_updated: 2026-10-08
+last_updated: 2026-11-18
 ---
 
 ## Problem
@@ -387,7 +387,8 @@ in the runbook.
 - In this increment, recognized `DisplayFile` extensions include `.java`,
   which renders as `java`, `.md` and `.markdown`, which render as `markdown`,
   `.sh`, which renders as `shell`, `.sql`, which renders as `sql`, `.xml`,
-  which renders as `xml`, and `.yaml` and `.yml`, which render as `yaml`.
+  which renders as `xml`, `.json`, which renders as `json`, and `.yaml`
+  and `.yml`, which render as `yaml`.
 - Recognized `DisplayFile` file names include `Dockerfile` and
   `Dockerfile-*`, which render as `dockerfile`.
 - If the `DisplayFile` extension is not recognized, the generated Markdown
@@ -450,7 +451,7 @@ in the runbook.
 - If `DisplayUrl.content_type` is omitted, fenced blocks use a detected
   content type when the URL path extension is recognized.
 - Recognized `DisplayUrl` path extensions and file names match `DisplayFile`:
-  `.java`, `.md`, `.markdown`, `.sh`, `.sql`, `.xml`, `.yaml`, `.yml`,
+  `.java`, `.md`, `.markdown`, `.sh`, `.sql`, `.xml`, `.json`, `.yaml`, `.yml`,
   `Dockerfile`, and `Dockerfile-*`.
 - If the `DisplayUrl` extension is not recognized, the generated Markdown uses
   a `text` fenced block.
@@ -1202,6 +1203,11 @@ in the runbook.
 
 - [x] Given a runbook with `DisplayFile` entries, the generated Markdown
       includes the referenced file contents in a fenced block.
+- [x] Given a `DisplayFile` entry that references a `.json` file without
+      `content_type`, the generated Markdown uses a `json` fenced block,
+      preserving the file contents and any configured `indent`.
+- [x] Given a `.json` display entry with `content_type: text`, the generated
+      Markdown uses a `text` fenced block instead of the detected `json` label.
 - [x] Given a `DisplayFile` entry that references a `.java` file, the
       generated Markdown uses a `java` fenced block.
 - [x] Given a `DisplayFile` entry that references a `.sql` file, the
@@ -1259,6 +1265,9 @@ in the runbook.
       uses that fenced block language instead of the URL extension.
 - [x] Given a `DisplayUrl` entry without `content_type`, the generated
       Markdown uses URL path extension-based fence detection.
+- [x] Given a `DisplayUrl` entry whose URL path ends in `.json` without
+      `content_type`, the generated Markdown uses a `json` fenced block,
+      including when the URL has a query string.
 - [x] Given a `DisplayUrl` entry whose URL path ends in `.sh`, the generated
       Markdown uses a `shell` fenced block.
 - [x] Given a `DisplayUrl` entry whose URL path ends in `.yaml` or `.yml`, the
