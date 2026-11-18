@@ -1,13 +1,13 @@
 ---
 id: TASK-182
 title: Publish Homebrew Tap Formula
-status: in_progress
+status: done
 category: release
 related_features:
   - SPEC-007
 owner: albertattard
 created: 2026-08-24
-updated: 2026-08-24
+updated: 2026-11-18
 ---
 
 ## Summary
@@ -27,8 +27,8 @@ Homebrew tap without requiring users to install the Rust toolchain.
 ## Acceptance Criteria
 
 - [x] `brew install albertattard/tap/sw` installs `sw` on Apple Silicon macOS.
-- [ ] `brew install albertattard/tap/sw` installs `sw` on x86_64 Oracle Linux.
-- [ ] `sw version` runs after installation on both supported platforms.
+- [x] `brew install albertattard/tap/sw` installs `sw` on x86_64 Oracle Linux.
+- [x] `sw version` runs after installation on both supported platforms.
 - [x] The formula URLs and checksums match the verified GitHub Release assets.
 - [x] The formula does not invoke Cargo or require a Rust toolchain.
 - [x] Unsupported target combinations do not select a mismatched archive.
@@ -51,5 +51,6 @@ Homebrew tap without requiring users to install the Rust toolchain.
 - On Apple Silicon macOS, `brew install albertattard/tap/sw`,
   `brew audit --strict --formula albertattard/tap/sw`, and
   `brew test albertattard/tap/sw` succeeded.
-- Oracle Linux Homebrew installation remains to be verified before completing
-  this task.
+- On 2026-11-18, Albert confirmed successful Homebrew installation and operation
+  on x86_64 Oracle Linux and Apple Silicon macOS, completing verification on
+  both supported platforms.
