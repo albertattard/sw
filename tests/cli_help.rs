@@ -375,3 +375,15 @@ fn explain_run_describes_secret_bindings_and_lifetime() {
         assert!(text.contains(expected), "missing {expected}");
     }
 }
+
+#[test]
+fn datetime_help_describes_supported_range_and_errors() {
+    let output = std::process::Command::new(env!("CARGO_BIN_EXE_sw"))
+        .args(["run", "--help"])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    assert!(String::from_utf8_lossy(&output.stdout).contains(
+        "`datetime_shift` supports years -9999..9999, rejects leap seconds, and reports invalid formats or range overflow as operational errors."
+    ));
+}

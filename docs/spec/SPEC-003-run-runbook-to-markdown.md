@@ -1021,12 +1021,38 @@ in the runbook.
 - If `pattern` and `custom_format` are used together, the matched output is
   parsed and rewritten using that custom format while preserving the same
   textual style.
-- A custom format that includes a numeric UTC offset such as `%z` preserves
-  and renders that offset in the rewritten output.
+- A custom format that includes a numeric UTC offset such as `%z` renders
+  the configured or inherited base offset in the rewritten output.
 - If `pattern` and `custom_format` describe a time-only value without a date,
   `datetime_shift` borrows the date and offset from the configured or inherited
   base timestamp, applies the shared shift, and then renders only the original
   time-only textual format.
+- Custom formats retain Chrono-style semantics: `%f` is an integer count of
+  nanoseconds (nine digits on output), `%3f`/`%6f`/`%9f` and their dotted
+  counterparts require their stated input widths when present (dotted forms
+  are optional), and `%.f` emits 0, 3, 6, or 9 fractional digits. `%+` denotes RFC 3339; `%c`, `%x`, `%X`, and `%r` use
+  the English/POSIX composite formats, independent of the host locale.
+- Custom numeric offsets are validated but do not replace the configured or
+  inherited base offset when interpreting a local date/time. Rewritten values
+  use that base offset. Built-in RFC 3339 values instead contribute their
+  actual instants to relative distances; numeric output uses the base offset,
+  while `Z` output converts to UTC.
+- Built-in RFC 1123 matching remains limited to the documented English GMT
+  shape, validates its weekday, and renders the base's local clock with the
+  literal `GMT` suffix (it does not convert the base to UTC).
+- Custom parsing first attempts a full local datetime, then a time-only
+  interpretation with the same format. This historical fallback can ignore
+  inconsistent date fields if the time fields are valid. At least hour and
+  minute are required (except for epoch-seconds `%s`). Built-in RFC parsing
+  validates dates and weekdays without this fallback. RFC 3339 bases retain
+  their strict four-digit year and two-digit numeric fields.
+- Datetime input and shifted results must be representable with years
+  -9999 through 9999 and offsets strictly within 24 hours. Leap seconds
+  (`:60`) are rejected. Invalid input, unsupported custom directives, and
+  arithmetic/range overflow produce operational errors (exit code `1`), with
+  entry/rewrite context, rather than panics or silently clamped timestamps.
+  TASK-208 deliberately narrows Chrono's wider year range and leap-second
+  representation: maintained replacements do not preserve its leap arithmetic.
 - Time-only shifting must use `pattern` together with `custom_format`; it does
   not use any special built-in time-only format name.
 - If `base` is omitted, `datetime_shift` uses the default base timestamp

@@ -260,10 +260,9 @@ cargo install cargo-deny --locked
 cargo deny check advisories bans
 ```
 
-RUSTSEC-2026-0543 (chrono unmaintained) has a temporary advisory-specific
-exception for v0.1.13, owned by albertattard, with a manual review/removal
-deadline of 2026-12-17. All other dependency checks remain active. See the
-[decision, risks, and migration task](docs/guides/dependency-hygiene.md).
+Datetime rewriting uses Jiff with a compatibility adapter for existing formats.
+The Chrono maintenance-advisory exception has been removed. See the
+[dependency decisions and verification guidance](docs/guides/dependency-hygiene.md).
 
 ## License
 
