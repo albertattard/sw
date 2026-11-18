@@ -379,6 +379,7 @@ fn explanations() -> Vec<Explanation<'static>> {
                 "Command output can render `stdout`, `stderr`, or `combined` with `output.stream`; if omitted, rendered output defaults to `combined`.",
                 "Command output content types are Markdown fence labels: use `text` for an unlabeled fence, or a non-empty label containing letters, digits, `_`, `+`, `-`, or `.` such as `json`, `diff`, or `toml`.",
                 "`output.stream` changes rendered output only and does not change explicit capture or assertion sources.",
+                "`datetime_shift` supports years -9999..9999, rejects leap seconds, and reports invalid formats or range overflow as operational errors.",
                 "`datetime_shift.id` establishes a shared shift anchor, and `datetime_shift.use` reuses an earlier anchor so later rewrite rules follow the same synthetic timeline.",
                 "`datetime_shift.id` is reserved once per executed rule, even with no matches; skipped commands reserve nothing. `use` requires an anchor established earlier in the current run.",
                 "Repeated `datetime_shift.id` declarations are valid; uniqueness is enforced among executed rules at runtime. `use` must reference an ID declared earlier in the runbook.",
