@@ -67,10 +67,11 @@ Expected task directories:
 
 ## In Progress
 
-- [ ] [TASK-182: Publish Homebrew Tap Formula](release/TASK-182-publish-homebrew-tap-formula.md)
+- (none)
 
 ## Done
 
+- [x] [TASK-182: Publish Homebrew Tap Formula](release/TASK-182-publish-homebrew-tap-formula.md)
 - [x] [TASK-210: Recognize JSON DisplayFile Fences](display-file/TASK-210-recognize-json-display-file-fences.md)
 
 - [x] [TASK-205: Add Secrets Example](example/TASK-205-add-secrets-example.md)
