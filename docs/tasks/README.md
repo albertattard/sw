@@ -71,6 +71,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-205: Add Secrets Example](example/TASK-205-add-secrets-example.md)
 - [x] [TASK-208: Replace Unmaintained Chrono Dependency](repo-process/TASK-208-replace-chrono.md)
 - [x] [TASK-209: Upgrade Getrandom Dependency](repo-process/TASK-209-upgrade-getrandom.md)
 - [x] [TASK-207: Temporarily Except Chrono Maintenance Advisory](repo-process/TASK-207-temporarily-except-chrono-advisory.md)

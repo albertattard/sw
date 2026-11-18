@@ -75,6 +75,10 @@ fn example_for_topic(topic: &str) -> Option<ExampleSnippet> {
             json: PREREQUISITE_EXAMPLE_JSON,
             yaml: PREREQUISITE_EXAMPLE_YAML,
         }),
+        "secrets" => Some(ExampleSnippet {
+            json: SECRETS_EXAMPLE_JSON,
+            yaml: SECRETS_EXAMPLE_YAML,
+        }),
         _ => None,
     }
 }
@@ -316,3 +320,78 @@ checks:
     contents:
       - '- [Java 25 downloads](https://www.oracle.com/java/technologies/downloads/#java25)'
     help: Install Java 25 or newer and make sure `java` is available on the PATH before running this example."#;
+
+const SECRETS_EXAMPLE_JSON: &str = r#"{
+  "secrets": {
+    "session_token": {
+      "generate": {}
+    },
+    "signing_key": {
+      "generate": {
+        "length": 48
+      }
+    }
+  },
+  "entries": [
+    {
+      "type": "Command",
+      "environment": {
+        "SESSION_TOKEN": {
+          "secret": "session_token"
+        },
+        "SIGNING_KEY": {
+          "secret": "signing_key"
+        }
+      },
+      "commands": "test \"${#SESSION_TOKEN}\" -eq 32 &&\ntest \"${#SIGNING_KEY}\" -eq 48 &&\nprintf 'Secret bindings are ready.\\n'\n",
+      "assert": {
+        "exit_code": 0
+      },
+      "output": {}
+    },
+    {
+      "type": "Command",
+      "environment": {
+        "SESSION_TOKEN": {
+          "secret": "session_token"
+        }
+      },
+      "commands": "test \"${#SESSION_TOKEN}\" -eq 32 &&\nprintf 'Shared secret binding is ready.\\n'\n",
+      "assert": {
+        "exit_code": 0
+      },
+      "output": {}
+    }
+  ]
+}"#;
+
+const SECRETS_EXAMPLE_YAML: &str = r#"secrets:
+  session_token:
+    generate: {}
+  signing_key:
+    generate:
+      length: 48
+entries:
+  - type: Command
+    environment:
+      SESSION_TOKEN:
+        secret: session_token
+      SIGNING_KEY:
+        secret: signing_key
+    commands: |
+      test "${#SESSION_TOKEN}" -eq 32 &&
+      test "${#SIGNING_KEY}" -eq 48 &&
+      printf 'Secret bindings are ready.\n'
+    assert:
+      exit_code: 0
+    output: {}
+  - type: Command
+    environment:
+      SESSION_TOKEN:
+        secret: session_token
+    commands: |
+      test "${#SESSION_TOKEN}" -eq 32 &&
+      printf 'Shared secret binding is ready.\n'
+    assert:
+      exit_code: 0
+    output: {}"#;
