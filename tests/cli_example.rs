@@ -353,3 +353,141 @@ fn nested_rewrite_topic_returns_operational_error() {
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(stderr.contains("Unknown example topic"));
 }
+
+#[test]
+fn secrets_example_formats_describe_equivalent_complete_runbooks() {
+    let yaml = run(&["example", "Secrets"]);
+    let explicit_yaml = run(&["example", "Secrets", "--output-format", "yaml"]);
+    let mixed_case = run(&["example", "sEcReTs"]);
+    let json = run(&["example", "secrets", "--output-format", "json"]);
+    for output in [&yaml, &explicit_yaml, &mixed_case, &json] {
+        assert!(output.status.success());
+    }
+    assert_eq!(yaml.stdout, explicit_yaml.stdout);
+    assert_eq!(yaml.stdout, mixed_case.stdout);
+    let yaml_value: serde_json::Value = serde_norway::from_slice(&yaml.stdout).unwrap();
+    let json_value: serde_json::Value = serde_json::from_slice(&json.stdout).unwrap();
+    assert_eq!(yaml_value, json_value);
+    assert_eq!(yaml_value["secrets"].as_object().unwrap().len(), 2);
+    assert_eq!(
+        yaml_value["secrets"]["session_token"]["generate"],
+        serde_json::json!({})
+    );
+    assert_eq!(
+        yaml_value["secrets"]["signing_key"]["generate"]["length"],
+        48
+    );
+    let entries = yaml_value["entries"].as_array().unwrap();
+    assert_eq!(entries.len(), 2);
+    for entry in entries {
+        assert_eq!(entry["type"], "Command");
+        assert_eq!(
+            entry["environment"]["SESSION_TOKEN"]["secret"],
+            "session_token"
+        );
+        assert!(
+            entry["commands"]
+                .as_str()
+                .unwrap()
+                .contains("${#SESSION_TOKEN}")
+        );
+        assert_eq!(entry["assert"]["exit_code"], 0);
+    }
+    assert_eq!(
+        entries[0]["environment"]["SIGNING_KEY"]["secret"],
+        "signing_key"
+    );
+    assert!(
+        entries[0]["commands"]
+            .as_str()
+            .unwrap()
+            .contains("${#SIGNING_KEY}")
+    );
+}
+
+#[test]
+fn secrets_examples_validate_and_run_without_exposing_values_or_leaving_command_files() {
+    struct Workspace(std::path::PathBuf);
+    impl Drop for Workspace {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+
+    for format in ["yaml", "json"] {
+        let workspace = Workspace(std::env::temp_dir().join(format!(
+            "sw-example-secrets-{}-{format}",
+            std::process::id()
+        )));
+        std::fs::create_dir(&workspace.0).unwrap();
+        let example = run(&["example", "Secrets", "--output-format", format]);
+        assert!(example.status.success());
+        let input_name = format!("secrets.{format}");
+        std::fs::write(workspace.0.join(&input_name), &example.stdout).unwrap();
+        let invoke = |args: &[&str]| {
+            Command::new(env!("CARGO_BIN_EXE_sw"))
+                .args(args)
+                .current_dir(&workspace.0)
+                .env("SESSION_TOKEN", "inherited")
+                .env("SIGNING_KEY", "inherited")
+                .output()
+                .unwrap()
+        };
+        let validation = invoke(&["validate", "--input-file", &input_name]);
+        assert!(
+            validation.status.success(),
+            "{}",
+            String::from_utf8_lossy(&validation.stderr)
+        );
+        let normal = invoke(&["run", "--input-file", &input_name]);
+        assert!(
+            normal.status.success(),
+            "{}",
+            String::from_utf8_lossy(&normal.stderr)
+        );
+        assert!(!String::from_utf8_lossy(&normal.stderr).contains("Generated secrets:"));
+        let markdown = std::fs::read_to_string(workspace.0.join("README.md")).unwrap();
+        for message in [
+            "Secret bindings are ready.",
+            "Shared secret binding is ready.",
+        ] {
+            assert!(markdown.contains(message));
+        }
+
+        // Obtain this invocation's values only through the intentional reveal list.
+        let revealed = invoke(&[
+            "run",
+            "--input-file",
+            &input_name,
+            "--reveal-secrets",
+            "--verbose",
+            "--debug",
+        ]);
+        assert!(revealed.status.success());
+        let stderr = String::from_utf8_lossy(&revealed.stderr);
+        let mut lines = stderr.lines();
+        assert_eq!(lines.next(), Some("Generated secrets:"));
+        let mut values = Vec::new();
+        for (name, length) in [("session_token", 32), ("signing_key", 48)] {
+            let line = lines.next().unwrap();
+            let value = line.strip_prefix(&format!("  {name}: ")).unwrap();
+            assert_eq!(value.len(), length);
+            assert!(value.bytes().all(|c| c.is_ascii_alphanumeric()));
+            values.push(value);
+        }
+        let remaining_stderr = lines.collect::<Vec<_>>().join("\n");
+        let stdout = String::from_utf8_lossy(&revealed.stdout);
+        let markdown = std::fs::read_to_string(workspace.0.join("README.md")).unwrap();
+        for value in values {
+            assert!(!stdout.contains(value));
+            assert!(!remaining_stderr.contains(value));
+            assert!(!markdown.contains(value));
+        }
+        let mut files: Vec<_> = std::fs::read_dir(&workspace.0)
+            .unwrap()
+            .map(|entry| entry.unwrap().file_name().into_string().unwrap())
+            .collect();
+        files.sort();
+        assert_eq!(files, ["README.md".to_string(), input_name]);
+    }
+}

@@ -4,7 +4,7 @@ title: Example Snippets Contract
 status: implemented
 priority: high
 owner: albertattard
-last_updated: 2026-06-15
+last_updated: 2026-11-18
 ---
 
 ## Goal
@@ -35,10 +35,13 @@ The snippet is intended as a copyable starting point.
 
 In this increment, supported entity types include:
 - `Breakpoint`
+- `ChangeDirectory`
 - `Command`
 - `DisplayFile`
+- `DisplayUrl`
 - `Patch`
 - `Prerequisite`
+- `Secrets`
 
 ## Outputs
 
@@ -61,6 +64,16 @@ In this increment, supported entity types include:
 - Entry-type examples should print a single runbook entry representing that
   entry and should include the commonly used nested properties for that entry
   type so users can remove what they do not need.
+- The `Secrets` example is a complete, valid runbook, rather than a single
+  entry. It demonstrates multiple document-level generated secrets, default and
+  explicit lengths, and explicit environment bindings to commands in multiple
+  entries, including reuse of one secret. Commands use the bound environment
+  variables without printing secret values or passing them as process
+  arguments. The example is self-contained and runnable without external
+  services, credentials, or persistent side effects.
+- The `Secrets` example follows the same case-insensitive topic matching and
+  YAML and JSON output-format rules as other examples. Its two formats must
+  describe equivalent runbooks and pass `sw validate`.
 - YAML example output should remain hand-editable and should prefer the same
   editing-oriented conventions used elsewhere in this repository, including
   YAML mappings and sequences that read naturally in a runbook file.
@@ -100,11 +113,16 @@ In this increment, supported entity types include:
   including `debug` when patch-scoped debug diagnostics are supported.
 - The `Breakpoint` example should show the minimal debug-stop shape and the
   optional `message` field.
-- Example output is documentation-oriented and does not need to be executable
-  without further user editing.
+- Other example output is documentation-oriented and does not need to be
+  executable without further user editing.
 
 ## Acceptance Criteria
 
+- [x] Given `sw example Secrets`, the CLI prints a valid YAML runbook showing
+      multiple generated secrets and reuse through command environment bindings.
+- [x] Given `sw example secrets --output-format json`, the CLI prints an
+      equivalent valid JSON runbook. Explicit YAML matches the default output.
+- [x] Example help and the example guide make the `Secrets` topic discoverable.
 - [x] Given `sw example Command`, the CLI prints a valid YAML example of a
       `Command` entry with its commonly used nested properties.
 - [x] Given `sw example Command`, the example includes the implemented
@@ -163,8 +181,8 @@ In this increment, supported entity types include:
 
 ## Non-goals
 
-- Generating a full `sw-runbook.json`; that remains the responsibility of
-  `sw init`.
+- Generating a general-purpose starter runbook remains the responsibility of
+  `sw init`; the `Secrets` example is a focused, complete runbook.
 - Supporting output formats other than YAML and JSON in this increment.
 - Detecting project context to personalize examples.
 - Accepting multiple entity types in one invocation in this increment.
