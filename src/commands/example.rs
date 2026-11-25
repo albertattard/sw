@@ -110,6 +110,11 @@ const COMMAND_EXAMPLE_JSON: &str = r#"{
     "fact": "os",
     "equals": "linux"
   },
+  "environment": {
+    "SESSION_TOKEN": {
+      "secret": "session_token"
+    }
+  },
   "commands": [
     "echo 'Hello there'"
   ],
@@ -182,6 +187,9 @@ working_directory: demo
 execute_when:
   fact: os
   equals: linux
+environment:
+  SESSION_TOKEN:
+    secret: session_token
 commands:
   - "echo 'Hello there'"
 timeout: 30 seconds

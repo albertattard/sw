@@ -176,7 +176,7 @@ impl RunbookInputArgs {
 
 #[derive(Debug, clap::Args)]
 #[command(
-    after_help = "Defaults to YAML output for file-based authoring.\nUse `--output-format yaml|json` to choose the example format explicitly.\nUse `sw example Breakpoint` for the debugging stop entry shape.\nThe `Command` example includes current nested output fields such as `trim_empty_lines` and `stream`, along with rewrite, capture, and cleanup examples.\nUse `sw example DisplayFile` when you need the Java `collapse_method_body` transform for collapsing method bodies.\nUse `sw example DisplayUrl` when you need to render a remote raw text URL.\nUse `sw example Secrets` for a complete runnable runbook with generated secrets and shared environment bindings."
+    after_help = "Defaults to YAML output for file-based authoring.\nUse `--output-format yaml|json` to choose the example format explicitly.\nUse `sw example Breakpoint` for the debugging stop entry shape.\nThe `Command` example includes current nested output fields such as `trim_empty_lines` and `stream`, along with rewrite, capture, and cleanup examples.\nIts environment binding references a secret that needs a runbook-level declaration.\nUse `sw example DisplayFile` when you need the Java `collapse_method_body` transform for collapsing method bodies.\nUse `sw example DisplayUrl` when you need to render a remote raw text URL.\nUse `sw example Secrets` for a complete runnable runbook with generated secrets and shared environment bindings."
 )]
 pub struct ExampleArgs {
     /// Example topic such as `Breakpoint`, `Command`, `DisplayFile`, `DisplayUrl`, `Prerequisite`, or `Secrets`.

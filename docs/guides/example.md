@@ -17,6 +17,10 @@ Print a command entry example:
 sw example Command
 ```
 
+The Command entry's environment binding references `session_token`, which must
+be declared as a generated secret at runbook level. Use `sw example Secrets` for
+a complete runnable runbook with secret declarations and bindings.
+
 Print a display-file entry example:
 
 ```shell

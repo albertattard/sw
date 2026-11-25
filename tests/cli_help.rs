@@ -152,6 +152,7 @@ fn example_help_prints_help() {
     assert!(stdout.contains("sw example DisplayFile"));
     assert!(stdout.contains("sw example DisplayUrl"));
     assert!(stdout.contains("sw example Secrets"));
+    assert!(stdout.contains("secret that needs a runbook-level declaration"));
     assert!(stdout.contains("complete runnable runbook with generated secrets"));
     assert!(stdout.contains("collapse_method_body"));
 }
