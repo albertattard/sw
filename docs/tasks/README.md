@@ -71,6 +71,7 @@ Expected task directories:
 
 ## Done
 
+- [x] [TASK-211: Show Command Environment Bindings In Examples](example/TASK-211-show-command-environment-bindings.md)
 - [x] [TASK-182: Publish Homebrew Tap Formula](release/TASK-182-publish-homebrew-tap-formula.md)
 - [x] [TASK-210: Recognize JSON DisplayFile Fences](display-file/TASK-210-recognize-json-display-file-fences.md)
 

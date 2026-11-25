@@ -1205,11 +1205,7 @@ fn terminate_process_group(process_group_id: u32) -> Result<bool, RenderError> {
     }
 
     let error = std::io::Error::last_os_error();
-    if error.raw_os_error() == Some(libc::ESRCH) {
-        return Ok(true);
-    }
-
-    Ok(false)
+    Ok(error.raw_os_error() == Some(libc::ESRCH))
 }
 
 #[cfg(test)]

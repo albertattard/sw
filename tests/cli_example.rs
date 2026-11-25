@@ -22,6 +22,10 @@ fn command_example_defaults_to_valid_yaml_entry() {
     assert!(value.get("working_dir").is_none());
     assert_eq!(value["execute_when"]["fact"], "os");
     assert_eq!(value["execute_when"]["equals"], "linux");
+    assert_eq!(
+        value["environment"]["SESSION_TOKEN"]["secret"],
+        "session_token"
+    );
     assert!(value["commands"].is_array());
     assert!(value["assert"].is_object());
     assert_eq!(value["output"]["stream"], "combined");
@@ -82,6 +86,10 @@ fn command_example_prints_valid_json_entry_when_requested() {
     assert!(value.get("working_dir").is_none());
     assert_eq!(value["execute_when"]["fact"], "os");
     assert_eq!(value["execute_when"]["equals"], "linux");
+    assert_eq!(
+        value["environment"]["SESSION_TOKEN"]["secret"],
+        "session_token"
+    );
     assert!(value["commands"].is_array());
     assert!(value["assert"].is_object());
     assert_eq!(value["output"]["stream"], "combined");
@@ -111,6 +119,17 @@ fn command_example_prints_valid_json_entry_when_requested() {
     assert_eq!(value["output"]["trim_trailing_whitespace"], true);
     assert!(value["capture"].is_array());
     assert!(value["cleanup"].is_array());
+}
+
+#[test]
+fn command_example_formats_describe_the_same_entry() {
+    let yaml = run(&["example", "Command"]);
+    let json = run(&["example", "Command", "--output-format", "json"]);
+    assert!(yaml.status.success());
+    assert!(json.status.success());
+    let yaml_value: serde_json::Value = serde_norway::from_slice(&yaml.stdout).unwrap();
+    let json_value: serde_json::Value = serde_json::from_slice(&json.stdout).unwrap();
+    assert_eq!(yaml_value, json_value);
 }
 
 #[test]

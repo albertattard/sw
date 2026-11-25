@@ -4,7 +4,7 @@ title: Example Snippets Contract
 status: implemented
 priority: high
 owner: albertattard
-last_updated: 2026-11-18
+last_updated: 2026-11-25
 ---
 
 ## Goal
@@ -82,6 +82,10 @@ In this increment, supported entity types include:
   available.
 - The `Command` example should reflect the current troubleshooting contract by
   including `debug` when command-scoped debug diagnostics are supported.
+- The `Command` example includes an `environment` binding to a named generated
+  secret in both YAML and JSON. It remains a single entry; the referenced
+  secret must be declared at runbook level when the snippet is used. The example
+  guide directs users to `sw example Secrets` for a complete runnable runbook.
 - The `Command` example should make rewrite value capture discoverable by
   including `capture_as` on a rewrite rule when rewrite-generated captures are
   supported.
@@ -118,6 +122,15 @@ In this increment, supported entity types include:
 
 ## Acceptance Criteria
 
+- [x] Given `sw example Command`, the YAML entry includes an environment
+      binding referencing a named generated secret.
+- [x] The JSON Command example includes the equivalent binding and describes
+      the same entry as the YAML example.
+- [x] Example help and the example guide explain that the referenced secret
+      needs a runbook-level declaration and direct users to `sw example Secrets`
+      for a complete runnable runbook.
+- [x] Automated CLI and help tests cover the binding, format equivalence, and
+      discovery guidance.
 - [x] Given `sw example Secrets`, the CLI prints a valid YAML runbook showing
       multiple generated secrets and reuse through command environment bindings.
 - [x] Given `sw example secrets --output-format json`, the CLI prints an
